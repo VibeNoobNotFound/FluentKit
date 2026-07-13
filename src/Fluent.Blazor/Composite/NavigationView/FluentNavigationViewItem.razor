@@ -1,0 +1,20 @@
+@namespace Fluent.Blazor.Composite
+
+<button type="button"
+        @ref="_element"
+        class="fluent-nav-view-item @(IsSelected ? "fluent-nav-view-item--selected" : "")"
+        disabled="@Disabled"
+        aria-current="@(IsSelected ? "page" : null)"
+        @onclick="SelectAsync"
+        @onkeydown="HandleKeyDownAsync"
+        @attributes="AdditionalAttributes">
+    <span class="fluent-nav-view-item-indicator" aria-hidden="true"></span>
+    @if (Icon is not null)
+    {
+        <span class="fluent-nav-view-item-icon">@Icon</span>
+    }
+    @if (Nav is null || Nav.IsLabelVisible)
+    {
+        <span class="fluent-nav-view-item-text">@Text</span>
+    }
+</button>

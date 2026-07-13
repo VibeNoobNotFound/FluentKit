@@ -1,0 +1,89 @@
+/*
+ * Selection indicator: WinUI's NavigationViewItem shows a short accent-colored pill on the leading
+ * edge of the selected item, growing in from the middle — the subtle fill on the row itself is
+ * secondary to that. Kept as a real element (not a pseudo-element) so its own transition is simple.
+ */
+
+.fluent-nav-view-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    inline-size: 100%;
+    block-size: 40px;
+    padding-inline: 12px;
+    box-sizing: border-box;
+
+    border: none;
+    border-radius: var(--control-corner-radius);
+    background-color: transparent;
+    color: var(--nav-view-item-foreground);
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-nav-view-item:hover:not(:disabled) {
+    background-color: var(--nav-view-item-background-hover);
+}
+
+.fluent-nav-view-item:active:not(:disabled) {
+    background-color: var(--nav-view-item-background-pressed);
+}
+
+.fluent-nav-view-item:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-nav-view-item:disabled {
+    color: var(--text-fill-color-disabled);
+    cursor: not-allowed;
+}
+
+.fluent-nav-view-item--selected {
+    background-color: var(--nav-view-item-background-selected);
+}
+
+.fluent-nav-view-item--selected:hover:not(:disabled) {
+    background-color: var(--nav-view-item-background-selected-hover);
+}
+
+.fluent-nav-view-item-indicator {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 50%;
+    translate: 0 -50%;
+    inline-size: 3px;
+    block-size: 0;
+    border-radius: var(--control-corner-radius);
+    background-color: var(--nav-view-selection-indicator);
+    transition: block-size var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-nav-view-item--selected .fluent-nav-view-item-indicator {
+    block-size: 16px;
+}
+
+.fluent-nav-view-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    inline-size: 16px;
+    block-size: 16px;
+    color: var(--nav-view-item-icon-foreground);
+}
+
+.fluent-nav-view-item-text {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

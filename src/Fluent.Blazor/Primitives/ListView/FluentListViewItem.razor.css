@@ -1,0 +1,73 @@
+/*
+ * Selection indicator: same accent pill pattern as FluentNavigationViewItem (and fluent-svelte's
+ * ListItem before it) — a real element instead of a pseudo-element so its own transition is simple.
+ */
+
+.fluent-list-view-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    inline-size: 100%;
+    block-size: 34px;
+    padding-inline: 12px;
+    box-sizing: border-box;
+
+    border: none;
+    border-radius: var(--control-corner-radius);
+    background-color: transparent;
+    color: var(--list-view-item-foreground);
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-list-view-item:hover:not(:disabled) {
+    background-color: var(--list-view-item-background-hover);
+}
+
+.fluent-list-view-item:active:not(:disabled) {
+    background-color: var(--list-view-item-background-pressed);
+}
+
+.fluent-list-view-item:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-list-view-item:disabled {
+    color: var(--text-fill-color-disabled);
+    cursor: not-allowed;
+}
+
+.fluent-list-view-item--selected {
+    background-color: var(--list-view-item-background-selected);
+}
+
+.fluent-list-view-item--selected:hover:not(:disabled) {
+    background-color: var(--list-view-item-background-selected-hover);
+}
+
+.fluent-list-view-item-indicator {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 50%;
+    translate: 0 -50%;
+    inline-size: 3px;
+    block-size: 0;
+    border-radius: var(--control-corner-radius);
+    background-color: var(--list-view-selection-indicator);
+    transition: block-size var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-list-view-item--selected .fluent-list-view-item-indicator {
+    block-size: 16px;
+}

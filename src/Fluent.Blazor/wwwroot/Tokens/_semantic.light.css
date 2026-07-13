@@ -49,6 +49,11 @@
   --flyout-background: rgba(255, 255, 255, 0.702);
   --flyout-border: rgba(0, 0, 0, 0.0588);
 
+  /* layer/card surfaces — mirrors dark file structure, see that file for the sourcing caveat. */
+  --layer-background-default: rgba(255, 255, 255, 0.5);
+  --card-background-default: rgba(255, 255, 255, 0.7);
+  --card-stroke-default: rgba(0, 0, 0, 0.0578);
+
   /* control alt fill — used by CheckBox/RadioButton/ToggleSwitch (ControlAltFillColor*) */
   --control-alt-fill-color-transparent: rgba(255, 255, 255, 0);
   --control-alt-fill-color-secondary: rgba(0, 0, 0, 0.0241);
@@ -139,4 +144,24 @@
   --textbox-foreground-disabled: var(--text-fill-color-disabled);
   --textbox-placeholder: var(--text-fill-color-secondary);
   --textbox-placeholder-focus: var(--text-fill-color-tertiary);
+
+  /* NavigationView — mirrors dark file structure. */
+  --nav-view-pane-background: var(--layer-background-default);
+  --nav-view-content-background: var(--layer-background-default);
+  --nav-view-item-foreground: var(--text-fill-color-primary);
+  --nav-view-item-icon-foreground: var(--text-fill-color-secondary);
+  --nav-view-item-background-hover: var(--subtle-fill-color-secondary);
+  --nav-view-item-background-pressed: var(--subtle-fill-color-tertiary);
+  --nav-view-item-background-selected: var(--subtle-fill-color-secondary);
+  --nav-view-item-background-selected-hover: var(--subtle-fill-color-tertiary);
+  --nav-view-selection-indicator: var(--accent-fill-color-default);
+
+  /* ListView — mirrors dark file structure. */
+  --list-view-item-foreground: var(--text-fill-color-primary);
+  --list-view-item-icon-foreground: var(--text-fill-color-secondary);
+  --list-view-item-background-hover: var(--subtle-fill-color-secondary);
+  --list-view-item-background-pressed: var(--subtle-fill-color-tertiary);
+  --list-view-item-background-selected: var(--subtle-fill-color-secondary);
+  --list-view-item-background-selected-hover: var(--subtle-fill-color-tertiary);
+  --list-view-selection-indicator: var(--accent-fill-color-default);
 }

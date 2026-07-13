@@ -124,6 +124,76 @@
         and swap the BackgroundImageUrl reference above to "wallpaper.jpg".
     </FluentTextBlock>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">NavigationView</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Expanded docks the pane in flow and pushes content. Compact keeps an icon-only rail always
+        docked and opens the full pane as a floating overlay (via IOverlayService — try clicking
+        outside the open pane, that's light-dismiss). Minimal hides the pane entirely until opened,
+        the mobile/narrow-window pattern. The item list itself is a FluentListView now (arrow keys
+        move focus between rows once one is focused), and icons come from FluentIcon wrapping the
+        MIT-licensed Fluent System Icons webfont (no managed dependency, no CSS leak risk).
+    </FluentTextBlock>
+
+    <FluentRadioGroup @bind-Value="_navModeString">
+        <div style="display:flex; gap:16px;">
+            <FluentRadioButton Value="@("expanded")">Expanded</FluentRadioButton>
+            <FluentRadioButton Value="@("compact")">Compact</FluentRadioButton>
+            <FluentRadioButton Value="@("minimal")">Minimal</FluentRadioButton>
+        </div>
+    </FluentRadioGroup>
+
+    <div style="width:100%; max-width:720px; height:420px; border-radius:8px; overflow:hidden; border:1px solid var(--card-stroke-default);">
+        <FluentNavigationView PaneDisplayMode="_navMode"
+                               @bind-IsPaneOpen="_navPaneOpen"
+                               @bind-SelectedValue="_navSelected">
+            <MenuItems>
+                <FluentNavigationViewItem Value="@("home")" Text="Home">
+                    <Icon><FluentIcon Name="@FluentIconNames.Home" /></Icon>
+                </FluentNavigationViewItem>
+                <FluentNavigationViewItem Value="@("docs")" Text="Documentation">
+                    <Icon><FluentIcon Name="@FluentIconNames.Document" /></Icon>
+                </FluentNavigationViewItem>
+                <FluentNavigationViewItem Value="@("components")" Text="Components">
+                    <Icon><FluentIcon Name="@FluentIconNames.Apps" /></Icon>
+                </FluentNavigationViewItem>
+                <FluentNavigationViewItem Value="@("settings")" Text="Settings">
+                    <Icon><FluentIcon Name="@FluentIconNames.Settings" /></Icon>
+                </FluentNavigationViewItem>
+                <FluentNavigationViewItem Value="@("disabled")" Text="Disabled item" Disabled="true">
+                    <Icon><FluentIcon Name="@FluentIconNames.Dismiss" /></Icon>
+                </FluentNavigationViewItem>
+            </MenuItems>
+            <ChildContent>
+                <FluentTextBlock Variant="TextBlockVariant.Title">@_navSelected</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Body">
+                    This is FluentNavigationView's content area — whatever page you'd route to goes here.
+                </FluentTextBlock>
+            </ChildContent>
+        </FluentNavigationView>
+    </div>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">ListView / ListBox</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        FluentListView used standalone (outside NavigationView) as a single-select listbox — same
+        primitive that backs the NavigationView pane above, but here it owns Selected/OnSelect
+        itself instead of deferring to NavigationViewContext. Arrow keys/Home/End move focus,
+        Space/Enter (native button) selects.
+    </FluentTextBlock>
+    <FluentListView Role="listbox" style="width:280px; border:1px solid var(--card-stroke-default); border-radius:8px; overflow:hidden;">
+        @foreach (var fruit in _fruits)
+        {
+            <FluentListViewItem Selected="@(_selectedFruit == fruit)"
+                                 OnSelect="@(() => _selectedFruit = fruit)">
+                @fruit
+            </FluentListViewItem>
+        }
+    </FluentListView>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_selectedFruit</FluentTextBlock>
+
 </div>
 
 @code {
@@ -133,6 +203,29 @@
     private object? _flavor = "vanilla";
     private bool _wifiEnabled = true;
     private string? _name;
+
+    private readonly string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
+    private string? _selectedFruit = "Apple";
+
+    private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Expanded;
+    private bool _navPaneOpen = true;
+    private object? _navSelected = "home";
+    private object? _navModeString
+    {
+        get => _navMode.ToString().ToLowerInvariant();
+        set
+        {
+            _navMode = (value as string) switch
+            {
+                "compact" => NavigationViewPaneDisplayMode.Compact,
+                "minimal" => NavigationViewPaneDisplayMode.Minimal,
+                _ => NavigationViewPaneDisplayMode.Expanded
+            };
+            // Switching modes starts from a clean, closed-pane state — avoids e.g. landing on
+            // Minimal with an overlay that was never actually opened through TogglePaneAsync.
+            _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Expanded;
+        }
+    }
 
     private MicaVariant _mainMicaVariant = MicaVariant.Base;
     private string _mainMicaMode = "base";

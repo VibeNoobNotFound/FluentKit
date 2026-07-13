@@ -5,6 +5,10 @@
     <title>Fluent.Blazor sample — WASM</title>
     <base href="/" />
     <link rel="stylesheet" href="_content/Fluent.Blazor/Tokens/tokens.css" />
+    <!-- Fluent System Icons webfont (MIT, github.com/microsoft/fluentui-system-icons) — no managed
+         dependency, so unlike the old Icons NuGet package it can't leak component CSS into this
+         bundle. Any Fluent.Blazor consumer using FluentIcon must link this once. -->
+    <link rel="stylesheet" href="_content/Fluent.Blazor/Icons/FluentSystemIcons-Regular.css" />
     <!-- CORRECTED: the bundled CSS-isolation stylesheet is generated for the HOST APP, not the
          RCL, and is served from the app's own output root (no _content/ prefix). It's named after
          this project's assembly name (Fluent.Blazor.Sample.Wasm, since no <AssemblyName> override

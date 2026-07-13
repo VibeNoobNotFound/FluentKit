@@ -8,6 +8,13 @@
 @import url("./_semantic.dark.css");
 @import url("./_semantic.light.css");
 
+/*
+ * FluentIcon primitive (Primitives/Icon) renders SVG icons from the official
+ * Microsoft.FluentUI.AspNetCore.Components.Icons package now — no font/@font-face needed. The old
+ * Segoe Fluent Icons webfont approach (and its licensing question, see git history of
+ * THIRD_PARTY_NOTICES.md) is gone; wwwroot/Fonts/SegoeFluentIcons.ttf is unused and safe to delete.
+ */
+
 /* Sensible default until ThemeProvider sets data-theme explicitly (see Theming/ThemeProvider.razor.cs) */
 :root:not([data-theme]) {
   color-scheme: dark;

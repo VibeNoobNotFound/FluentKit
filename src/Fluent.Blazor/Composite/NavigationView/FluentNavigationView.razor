@@ -1,0 +1,60 @@
+@namespace Fluent.Blazor.Composite
+@implements IDisposable
+
+<CascadingValue Value="_context" IsFixed="false">
+    <div class="fluent-nav-view fluent-nav-view--@PaneDisplayModeClass" @attributes="AdditionalAttributes">
+
+        @if (!UsesOverlayPane)
+        {
+            <aside class="fluent-nav-view-pane @(IsPaneOpen ? "fluent-nav-view-pane--open" : "")">
+                @PaneBody
+            </aside>
+        }
+        else
+        {
+            <aside @ref="_railAnchor" class="fluent-nav-view-pane fluent-nav-view-pane--rail">
+                @RailBody
+            </aside>
+        }
+
+        <div class="fluent-nav-view-content">
+            @ChildContent
+        </div>
+    </div>
+</CascadingValue>
+
+@code {
+    // Declared here, not the .cs code-behind, so CSS isolation actually scopes these — same reason
+    // as FluentTooltip: a RenderFragment built via RenderTreeBuilder in plain C# never gets the
+    // scope attribute, so classes referenced only from these fragments would silently go unstyled.
+
+    private RenderFragment PaneBody => @<text>
+        <header class="fluent-nav-view-pane-header">
+            @if (ShowBackButton)
+            {
+                <button type="button" class="fluent-nav-view-nav-button" @onclick="BackAsync" aria-label="Back">&lt;-</button>
+            }
+            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">-</button>
+            @PaneHeader
+        </header>
+        <FluentListView Role="list" Class="fluent-nav-view-pane-items">
+            @MenuItems
+        </FluentListView>
+        <footer class="fluent-nav-view-pane-footer">
+            @PaneFooter
+        </footer>
+    </text>;
+
+    private RenderFragment RailBody => @<text>
+        <header class="fluent-nav-view-pane-header">
+            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">-</button>
+        </header>
+        <FluentListView Role="list" Class="fluent-nav-view-pane-items">
+            @MenuItems
+        </FluentListView>
+    </text>;
+
+    private RenderFragment PaneOverlayContent => @<div class="fluent-nav-view-pane-overlay">
+        @PaneBody
+    </div>;
+}

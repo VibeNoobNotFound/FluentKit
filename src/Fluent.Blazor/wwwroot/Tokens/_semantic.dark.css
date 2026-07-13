@@ -51,6 +51,13 @@
   --flyout-background: rgba(255, 255, 255, 0.0510);
   --flyout-border: rgba(0, 0, 0, 0.2);
 
+  /* layer/card surfaces — LayerFillColorDefault / CardStrokeColorDefault. Approximate transcription
+     (same caveat as Acrylic: WinUI doesn't publish these as cleanly as Button's ramp) — used by
+     NavigationView's content pane and any future Card/Border surface component. */
+  --layer-background-default: rgba(255, 255, 255, 0.0538);
+  --card-background-default: rgba(255, 255, 255, 0.0512);
+  --card-stroke-default: rgba(255, 255, 255, 0.0578);
+
   /* control alt fill — used by CheckBox/RadioButton/ToggleSwitch (ControlAltFillColor*) */
   --control-alt-fill-color-transparent: rgba(0, 0, 0, 0);
   --control-alt-fill-color-secondary: rgba(0, 0, 0, 0.1);
@@ -153,4 +160,27 @@
   --textbox-foreground-disabled: var(--text-fill-color-disabled);
   --textbox-placeholder: var(--text-fill-color-secondary);
   --textbox-placeholder-focus: var(--text-fill-color-tertiary);
+
+  /* NavigationView — item states follow WinUI's NavigationViewItem, which rides the same
+     SubtleFillColor ramp as SubtleButton (not its own dedicated token family). */
+  --nav-view-pane-background: var(--layer-background-default);
+  --nav-view-content-background: var(--layer-background-default);
+  --nav-view-item-foreground: var(--text-fill-color-primary);
+  --nav-view-item-icon-foreground: var(--text-fill-color-secondary);
+  --nav-view-item-background-hover: var(--subtle-fill-color-secondary);
+  --nav-view-item-background-pressed: var(--subtle-fill-color-tertiary);
+  --nav-view-item-background-selected: var(--subtle-fill-color-secondary);
+  --nav-view-item-background-selected-hover: var(--subtle-fill-color-tertiary);
+  --nav-view-selection-indicator: var(--accent-fill-color-default);
+
+  /* ListView — generic selectable-list primitive. NavigationView's pane list rides these same
+     tokens (it composes FluentListView internally), same subtle-fill ramp as ListItem in
+     fluent-svelte and as SubtleButton/NavigationViewItem above. */
+  --list-view-item-foreground: var(--text-fill-color-primary);
+  --list-view-item-icon-foreground: var(--text-fill-color-secondary);
+  --list-view-item-background-hover: var(--subtle-fill-color-secondary);
+  --list-view-item-background-pressed: var(--subtle-fill-color-tertiary);
+  --list-view-item-background-selected: var(--subtle-fill-color-secondary);
+  --list-view-item-background-selected-hover: var(--subtle-fill-color-tertiary);
+  --list-view-selection-indicator: var(--accent-fill-color-default);
 }

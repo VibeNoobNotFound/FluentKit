@@ -1,0 +1,9 @@
+.fluent-list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}

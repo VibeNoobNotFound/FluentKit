@@ -1,0 +1,22 @@
+.fluent-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+
+    /* current color by default so an icon inside e.g. FluentButton inherits the button's state
+       colors without extra wiring; NavigationViewItem overrides via --nav-view-item-icon-foreground. */
+    color: currentColor;
+    user-select: none;
+    font-style: normal;
+    line-height: 1;
+}
+
+.fluent-icon:before {
+    /* the font's own CSS (FluentSystemIcons-Regular.css) sets font-family/weight/smoothing via
+       i[class^="icon-"]:before — this just makes sure the glyph fills the box we sized above. */
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
