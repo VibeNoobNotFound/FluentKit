@@ -5,6 +5,10 @@ Design token structure and visual-state conventions (light/dark alias naming, Ac
 were informed by [fluent-svelte](https://github.com/tropix126/fluent-svelte) (MIT License,
 © tropix126 / Fluent Svelte contributors). No source code was copied verbatim; token *values*
 below were independently re-derived from Microsoft's own `microsoft-ui-xaml` repository.
+Component markup/CSS *structure* (not literal source) for Expander (clip+slide collapse
+technique), ProgressBar (indeterminate keyframe timing), and InfoBar (icon/title/message/action/
+close-button layout, default-icon-is-an-InfoBadge simplification) was ported from the equivalent
+fluent-svelte components and adapted to Razor + CSS isolation and this project's own token names.
 
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from

@@ -1,0 +1,117 @@
+.fluent-info-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-block-size: 48px;
+    padding-inline-start: 15px;
+    user-select: none;
+    font-family: var(--font-family-base);
+    background-clip: padding-box;
+    border: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-radius: var(--control-corner-radius);
+}
+
+.fluent-info-bar--informational {
+    background-color: var(--system-fill-color-neutral-background);
+}
+
+.fluent-info-bar--success {
+    background-color: var(--system-fill-color-success-background);
+}
+
+.fluent-info-bar--caution {
+    background-color: var(--system-fill-color-caution-background);
+}
+
+.fluent-info-bar--critical {
+    background-color: var(--system-fill-color-critical-background);
+}
+
+.fluent-info-bar--attention {
+    background-color: var(--system-fill-color-attention-background);
+}
+
+.fluent-info-bar-icon {
+    align-self: flex-start;
+    flex: 0 0 auto;
+    display: flex;
+    margin-block-start: 16px;
+}
+
+.fluent-info-bar-content {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    margin-inline-start: 13px;
+    margin-block: 7px;
+}
+
+.fluent-info-bar-title {
+    margin: 0;
+    margin-inline-end: 12px;
+    color: var(--text-fill-color-primary);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
+    line-height: 20px;
+}
+
+.fluent-info-bar-message {
+    flex: 1 1 auto;
+    margin: 0;
+    margin-inline-end: 15px;
+    color: var(--text-fill-color-primary);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-normal);
+    line-height: 20px;
+}
+
+.fluent-info-bar-action {
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+    margin-inline-end: 4px;
+}
+
+.fluent-info-bar-close-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    inline-size: 38px;
+    block-size: 38px;
+    margin: 4px;
+    border: none;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+    color: var(--text-fill-color-primary);
+    background-color: var(--subtle-fill-color-transparent);
+    border-radius: var(--control-corner-radius);
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-info-bar-close-button:hover {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-info-bar-close-button:active {
+    color: var(--text-fill-color-secondary);
+    background-color: var(--subtle-fill-color-tertiary);
+}
+
+.fluent-info-bar-close-button:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -1px;
+}
+
+.fluent-info-bar-close-button svg {
+    inline-size: 12px;
+    block-size: 12px;
+    fill: currentColor;
+}

@@ -308,6 +308,34 @@
         </FluentExpander>
     </div>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">InfoBar</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        App-wide status banner. Default icon slot is a FluentInfoBadge matching the bar's own
+        severity (same simplification fluent-svelte makes) — pass <code>Icon</code> to override it.
+        The dismissible one below is closable and bindable; the others are pinned open with
+        Closable="false".
+    </FluentTextBlock>
+    <div style="display:flex; flex-direction:column; gap:12px; max-width:640px;">
+        <FluentInfoBar @bind-IsOpen="_infoBarOpen" Severity="InfoBadgeSeverity.Informational"
+                        Title="Update available" Message="A new version is ready to install.">
+            <Action>
+                <FluentButton Variant="ButtonVariant.Standard">Restart now</FluentButton>
+            </Action>
+        </FluentInfoBar>
+        @if (!_infoBarOpen)
+        {
+            <FluentButton Variant="ButtonVariant.Subtle" OnClick="@(() => _infoBarOpen = true)">Reopen it</FluentButton>
+        }
+        <FluentInfoBar Severity="InfoBadgeSeverity.Success" Closable="false"
+                        Title="Saved" Message="Your changes have been saved successfully." />
+        <FluentInfoBar Severity="InfoBadgeSeverity.Caution" Closable="false"
+                        Title="Low disk space" Message="You're running low on storage — consider freeing up space." />
+        <FluentInfoBar Severity="InfoBadgeSeverity.Critical" Closable="false"
+                        Title="Sync failed" Message="Couldn't reach the server. Check your connection and try again." />
+    </div>
+
 </div>
 
 @code {
@@ -325,6 +353,7 @@
 
     private double _progressValue = 40;
     private bool _expanderOpen;
+    private bool _infoBarOpen = true;
 
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;
