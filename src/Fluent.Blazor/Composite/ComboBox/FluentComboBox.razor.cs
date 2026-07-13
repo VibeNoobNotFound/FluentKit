@@ -94,13 +94,22 @@ public partial class FluentComboBox<TValue> : ComponentBase
         }
     }
 
+    private bool _searchValueInitialized;
+
     protected override void OnParametersSet()
     {
-        // Mirrors the svelte onMount: keep the search box showing the current selection's label
-        // the first time it has content to show, without clobbering user typing on later renders.
-        if (Editable && string.IsNullOrEmpty(SearchValue) && Selection is not null)
+        // Mirrors the svelte onMount exactly: seed the search box from the current selection ONCE,
+        // on first render only. The old version re-checked IsNullOrEmpty(SearchValue) on every
+        // render, so backspacing the box to empty (a perfectly valid "no match" state) would get
+        // silently overwritten back to the selected item's name on the next render — this is the
+        // bug where clearing the editable box snaps back to the current selection.
+        if (Editable && !_searchValueInitialized)
         {
-            SearchValue = Selection.Name;
+            _searchValueInitialized = true;
+            if (string.IsNullOrEmpty(SearchValue) && Selection is not null)
+            {
+                SearchValue = Selection.Name;
+            }
         }
     }
 
