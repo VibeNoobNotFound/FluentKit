@@ -1,75 +1,17 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Fluent.Blazor.Primitives;
 
 namespace Fluent.Blazor.Composite;
 
-/// <summary>
-/// Mirrors WinUI's NavigationViewItem. Selection comes from the cascaded NavigationViewContext
-/// (set by the parent FluentNavigationView) — same pattern as FluentRadioButton/FluentRadioGroup,
-/// no direct parent/child method calls. Root element is a real &lt;button&gt;, so unlike
-/// FluentRadioButton this needs no manual @onkeydown wiring for Space/Enter — the browser does it.
-/// Also registers with an optional cascaded FluentListView (the pane wraps its items in one — see
-/// FluentNavigationView.razor's PaneBody/RailBody) purely for arrow-key roving focus via
-/// IFocusableListItem; NavigationViewContext still owns which item is selected, ListView only
-/// moves focus between rows. Works with no FluentListView ancestor too, same as FluentListViewItem.
-/// TODO (not v1): nested/expandable sub-items — WinUI's MenuItems tree. Flat list only for now.
-/// </summary>
-public partial class FluentNavigationViewItem : ComponentBase, IFocusableListItem, IDisposable
+public partial class FluentNavigationViewItem : ComponentBase, IDisposable
 {
     [CascadingParameter]
-    private NavigationViewContext? Nav { get; set; }
-
-    [CascadingParameter]
-    private FluentListView? List { get; set; }
-
-    private ElementReference _element;
-
-    bool IFocusableListItem.Disabled => Disabled;
-
-    protected override void OnInitialized()
-    {
-        List?.Register(this);
-        Nav?.RegisterItem(Value);
-    }
-
-    public void Dispose()
-    {
-        List?.Unregister(this);
-        Nav?.UnregisterItem(Value);
-    }
-
-    public ValueTask FocusAsync() => _element.FocusAsync();
-
-    private async Task HandleKeyDownAsync(KeyboardEventArgs e)
-    {
-        if (List is null)
-        {
-            return;
-        }
-
-        switch (e.Key)
-        {
-            case "ArrowDown":
-                await List.FocusAdjacentAsync(this, 1);
-                break;
-            case "ArrowUp":
-                await List.FocusAdjacentAsync(this, -1);
-                break;
-            case "Home":
-                await List.FocusEndAsync(start: true);
-                break;
-            case "End":
-                await List.FocusEndAsync(start: false);
-                break;
-        }
-    }
+    private NavigationViewContext? CascadedContext { get; set; }
 
     [Parameter, EditorRequired]
     public object? Value { get; set; }
 
     [Parameter, EditorRequired]
-    public string Text { get; set; } = default!;
+    public string Text { get; set; } = string.Empty;
 
     [Parameter]
     public RenderFragment? Icon { get; set; }
@@ -77,18 +19,79 @@ public partial class FluentNavigationViewItem : ComponentBase, IFocusableListIte
     [Parameter]
     public bool Disabled { get; set; }
 
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool IsExpanded { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsExpandedChanged { get; set; }
+
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private bool IsSelected => Nav is not null && Equals(Nav.SelectedValue, Value);
+    private NavigationViewContext? Context { get; set; }
+    private ElementReference _element;
+    private bool _hasChildren;
 
-    private async Task SelectAsync()
+    // Compute selection based on context's SelectedValue
+    private bool IsSelected => Context?.SelectedValue != null && Equals(Context.SelectedValue, Value);
+
+    protected override void OnInitialized()
     {
-        if (Disabled || Nav is null)
+        Context = CascadedContext;
+        if (Context != null)
         {
-            return;
+            Context.SelectionChanged += OnSelectionChanged;
         }
+        _hasChildren = ChildContent != null;
+    }
 
-        await Nav.SelectItemAsync(Value);
+    private void OnSelectionChanged()
+    {
+        // Re-render when selection changes in the context
+        StateHasChanged();
+    }
+
+    private async Task HandleClickAsync()
+    {
+        if (Disabled || Context is null) return;
+
+        if (_hasChildren)
+        {
+            IsExpanded = !IsExpanded;
+            await IsExpandedChanged.InvokeAsync(IsExpanded);
+        }
+        else
+        {
+            // Update context selection and notify parent view
+            Context.SelectValue(Value);
+            // The view will handle ItemInvoked and overlay close via its own logic
+            if (Context is NavigationViewContext ctx)
+            {
+                // We need to notify the NavigationView that an item was clicked
+                // The context can call the view's method, but we can use a callback.
+                // Since we don't have a direct reference, we can let the view subscribe to SelectionChanged.
+                // We'll add an event for item clicked, or we can use the existing SelectionChanged event.
+                // But SelectionChanged only fires when the value changes, not on every click of the same item.
+                // For item invoked, we should call ItemInvoked even if the same item is clicked.
+                // We'll handle that in the NavigationView by observing clicks.
+            }
+        }
+    }
+
+    // Mouse handlers (optional)
+    private void HandleMouseEnter() { }
+    private void HandleMouseLeave() { }
+    private void HandleMouseDown() { }
+    private void HandleMouseUp() { }
+
+    public void Dispose()
+    {
+        if (Context != null)
+        {
+            Context.SelectionChanged -= OnSelectionChanged;
+        }
     }
 }

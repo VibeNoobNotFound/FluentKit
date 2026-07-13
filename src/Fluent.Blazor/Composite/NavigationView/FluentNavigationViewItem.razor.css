@@ -1,42 +1,33 @@
-/*
- * Selection indicator: now a single shared element owned by FluentNavigationView (see its .razor.css
- * for .fluent-nav-view-indicator) that slides between rows via translateY, instead of each item
- * growing/shrinking its own pill in place — that per-item version made the indicator visually
- * teleport (disappear on the old row, appear on the new one) rather than slide. This file no longer
- * needs its own indicator rule.
- */
-
 .fluent-nav-view-item {
     position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
-
     inline-size: 100%;
-    block-size: 40px;
+    min-height: 36px;
     padding-inline: 12px;
+    padding-block: 6px;
     box-sizing: border-box;
-
     border: none;
     border-radius: var(--control-corner-radius);
     background-color: transparent;
     color: var(--nav-view-item-foreground);
-
     font-family: var(--font-family-base);
     font-size: var(--font-size-body);
     text-align: start;
     white-space: nowrap;
     overflow: hidden;
-
     cursor: pointer;
     transition: background-color var(--duration-fast) var(--easing-standard);
+    user-select: none;
+    width: 100%;
 }
 
-.fluent-nav-view-item:hover:not(:disabled) {
+.fluent-nav-view-item:hover:not(.fluent-nav-view-item--disabled) {
     background-color: var(--nav-view-item-background-hover);
 }
 
-.fluent-nav-view-item:active:not(:disabled) {
+.fluent-nav-view-item:active:not(.fluent-nav-view-item--disabled) {
     background-color: var(--nav-view-item-background-pressed);
 }
 
@@ -45,17 +36,35 @@
     outline-offset: -2px;
 }
 
-.fluent-nav-view-item:disabled {
-    color: var(--text-fill-color-disabled);
-    cursor: not-allowed;
-}
-
 .fluent-nav-view-item--selected {
     background-color: var(--nav-view-item-background-selected);
+    font-weight: var(--font-weight-semibold);
 }
 
-.fluent-nav-view-item--selected:hover:not(:disabled) {
+.fluent-nav-view-item--selected:hover:not(.fluent-nav-view-item--disabled) {
     background-color: var(--nav-view-item-background-selected-hover);
+}
+
+.fluent-nav-view-item--disabled {
+    color: var(--text-fill-color-disabled);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.fluent-nav-view-item-indicator {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    inline-size: 3px;
+    block-size: 0;
+    border-radius: var(--control-corner-radius);
+    background-color: var(--nav-view-selection-indicator);
+    transition: block-size var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-nav-view-item--selected .fluent-nav-view-item-indicator {
+    block-size: 16px;
 }
 
 .fluent-nav-view-item-icon {
@@ -72,4 +81,66 @@
     flex: 1 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.fluent-nav-view-item-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: var(--text-fill-color-secondary);
+    transition: transform var(--duration-fast) var(--easing-standard);
+    margin-left: auto;
+}
+
+.fluent-nav-view-item--expanded .fluent-nav-view-item-chevron {
+    transform: rotate(90deg);
+}
+
+.fluent-nav-view-item-children {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding-left: 12px;
+    animation: slideDown var(--duration-normal) var(--easing-standard);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Closed compact state - hide text */
+.fluent-nav-view--compact .fluent-nav-view-item-text {
+    display: none;
+}
+
+.fluent-nav-view--compact .fluent-nav-view-item {
+    padding-inline: 8px;
+    justify-content: center;
+}
+
+.fluent-nav-view--compact .fluent-nav-view-item-icon {
+    inline-size: 20px;
+    block-size: 20px;
+}
+
+.fluent-nav-view--compact .fluent-nav-view-item-chevron {
+    display: none;
+}
+
+/* Minimal state - completely hidden until overlay opens */
+.fluent-nav-view--minimal .fluent-nav-view-pane-items {
+    display: none;
+}
+
+.fluent-nav-view--minimal .fluent-nav-view-pane--open .fluent-nav-view-pane-items {
+    display: flex;
 }

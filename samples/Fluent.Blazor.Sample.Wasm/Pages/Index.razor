@@ -136,6 +136,7 @@
         MIT-licensed Fluent System Icons webfont (no managed dependency, no CSS leak risk).
     </FluentTextBlock>
 
+    <!-- Mode selector using RadioGroup with strings mapped to NavigationViewPaneDisplayMode -->
     <FluentRadioGroup @bind-Value="_navModeString">
         <div style="display:flex; gap:16px;">
             <FluentRadioButton Value="@("expanded")">Expanded</FluentRadioButton>
@@ -154,6 +155,7 @@
     </FluentTextBlock>
 
     <div style="width:100%; max-width:720px; height:420px; border-radius:8px; overflow:hidden; border:1px solid var(--card-stroke-default);">
+        <!-- New NavigationView with improved implementation -->
         <FluentNavigationView PaneDisplayMode="_navMode"
                                @bind-IsPaneOpen="_navPaneOpen"
                                @bind-SelectedValue="_navSelected"
@@ -227,7 +229,7 @@
     private readonly string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
     private string? _selectedFruit = "Apple";
 
-    private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Expanded;
+    private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;
     private object? _navSelected = "home";
     private string? _navSearch;
@@ -236,20 +238,28 @@
     private void OnNavBack() => _navLastAction = "Back pressed";
 
     private void OnNavSettings() => _navLastAction = "Settings requested";
+
+    // Map radio button string values to NavigationViewPaneDisplayMode
     private object? _navModeString
     {
-        get => _navMode.ToString().ToLowerInvariant();
+        get => _navMode switch
+        {
+            NavigationViewPaneDisplayMode.Left => "expanded",      // Left is the "expanded" mode in our mapping
+            NavigationViewPaneDisplayMode.LeftCompact => "compact",
+            NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
+            _ => "expanded"
+        };
         set
         {
             _navMode = (value as string) switch
             {
-                "compact" => NavigationViewPaneDisplayMode.Compact,
-                "minimal" => NavigationViewPaneDisplayMode.Minimal,
-                _ => NavigationViewPaneDisplayMode.Expanded
+                "compact" => NavigationViewPaneDisplayMode.LeftCompact,
+                "minimal" => NavigationViewPaneDisplayMode.LeftMinimal,
+                _ => NavigationViewPaneDisplayMode.Left
             };
-            // Switching modes starts from a clean, closed-pane state — avoids e.g. landing on
-            // Minimal with an overlay that was never actually opened through TogglePaneAsync.
-            _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Expanded;
+            // When switching modes, we start with a clean slate.
+            // For Left (expanded), we open the pane; for Compact/Minimal we close it.
+            _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Left;
         }
     }
 

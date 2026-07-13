@@ -1,42 +1,30 @@
 using Microsoft.AspNetCore.Components;
-using Fluent.Blazor.Overlay;
+using Microsoft.JSInterop;
 
 namespace Fluent.Blazor.Composite;
 
-/// <summary>
-/// Mirrors WinUI's PaneDisplayMode. Only the three modes that matter for a web-first port —
-/// WinUI's fourth mode, Top, is a different layout entirely (horizontal tab strip, not a pane)
-/// and is out of scope here; add it as its own variant later if needed, don't bolt it onto this enum.
-/// </summary>
 public enum NavigationViewPaneDisplayMode
 {
-    /// <summary>Pane is always docked in the layout; toggling slides it between rail and full width.</summary>
-    Expanded,
-
-    /// <summary>Icon-only rail always docked; opening it shows the full pane as a floating overlay
-    /// on top of content (doesn't reflow it) — WinUI's LeftCompact.</summary>
-    Compact,
-
-    /// <summary>Pane fully hidden; opening it shows the full pane as a floating overlay — WinUI's
-    /// LeftMinimal, the mobile/narrow-window pattern.</summary>
-    Minimal
+    Auto,
+    Left,
+    Top,
+    LeftCompact,
+    LeftMinimal
 }
 
-/// <summary>
-/// Mirrors WinUI's NavigationView. Built on top of FluentOverlayHost/IOverlayService (Compact and
-/// Minimal float their pane rather than pushing content) — the second real consumer of the overlay
-/// infra after FluentTooltip, this time exercising light-dismiss for real.
-/// No CSS reference to port from: fluent-svelte's own NavigationView.scss is an empty stub upstream,
-/// so the pane/header/footer slot shape below is original, informed by its NavigationView.svelte
-/// markup skeleton and by real WinUI 3 structure/behavior.
-/// TODO (not v1): nested/expandable items, WinUI's Top pane mode, keyboard pane-width resize.
-/// </summary>
+public enum NavigationViewDisplayMode
+{
+    Minimal,
+    Compact,
+    Expanded
+}
+
 public partial class FluentNavigationView : ComponentBase, IDisposable
 {
-    [Inject] private IOverlayService OverlayService { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 
     [Parameter]
-    public NavigationViewPaneDisplayMode PaneDisplayMode { get; set; } = NavigationViewPaneDisplayMode.Expanded;
+    public NavigationViewPaneDisplayMode PaneDisplayMode { get; set; } = NavigationViewPaneDisplayMode.Auto;
 
     [Parameter]
     public bool IsPaneOpen { get; set; } = true;
@@ -50,8 +38,6 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     [Parameter]
     public EventCallback<object?> SelectedValueChanged { get; set; }
 
-    /// <summary>Fires on every item click, selected or not — matches WinUI's ItemInvoked, which
-    /// (unlike SelectionChanged) also fires for e.g. a "Settings" item you don't want to select.</summary>
     [Parameter]
     public EventCallback<object?> ItemInvoked { get; set; }
 
@@ -64,147 +50,181 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     [Parameter]
     public RenderFragment? PaneHeader { get; set; }
 
-    /// <summary>The nav items themselves — put FluentNavigationViewItem children here.</summary>
     [Parameter]
     public RenderFragment? MenuItems { get; set; }
 
     [Parameter]
     public RenderFragment? PaneFooter { get; set; }
 
-    /// <summary>Shows a built-in Settings row pinned to the footer (rail and full pane alike),
-    /// matching WinUI's NavigationView.IsSettingsVisible.</summary>
     [Parameter]
     public bool ShowSettingsButton { get; set; }
 
     [Parameter]
     public EventCallback SettingsRequested { get; set; }
 
-    /// <summary>The page content shown next to (or under) the pane.</summary>
+    [Parameter]
+    public RenderFragment? HeaderContent { get; set; }
+
+    [Parameter]
+    public bool AlwaysShowHeader { get; set; } = true;
+
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private ElementReference _railAnchor;
-    private Guid? _overlayId;
+    private ElementReference _rootElement;
     private NavigationViewContext? _context;
-    private int _indicatorIndex = -1;
+    private IJSObjectReference? _module;
 
-    private bool UsesOverlayPane =>
-        PaneDisplayMode is NavigationViewPaneDisplayMode.Compact or NavigationViewPaneDisplayMode.Minimal;
+    public NavigationViewDisplayMode DisplayMode { get; private set; } = NavigationViewDisplayMode.Expanded;
 
-    private bool IsLabelVisible => IsPaneOpen;
+    private bool IsCompactOrMinimal =>
+        PaneDisplayMode is NavigationViewPaneDisplayMode.LeftCompact or NavigationViewPaneDisplayMode.LeftMinimal;
 
     private string PaneDisplayModeClass => PaneDisplayMode switch
     {
-        NavigationViewPaneDisplayMode.Compact => "compact",
-        NavigationViewPaneDisplayMode.Minimal => "minimal",
+        NavigationViewPaneDisplayMode.LeftCompact => "compact",
+        NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
+        NavigationViewPaneDisplayMode.Top => "top",
+        NavigationViewPaneDisplayMode.Auto => "auto",
         _ => "expanded"
     };
 
     protected override void OnInitialized()
     {
-        OverlayService.Changed += HandleOverlayChanged;
-        _context = new NavigationViewContext(SelectItemAsync);
-        _context.ItemsChanged += HandleItemsChanged;
+        _context = new NavigationViewContext(this);
+        _context.SelectionChanged += OnContextSelectionChanged;
+        _context.ItemClicked += (object? sender1) => OnItemClicked(sender1);
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Fluent.Blazor/js/navview-interop.js");
+            await UpdateDisplayModeAsync();
+        }
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     protected override void OnParametersSet()
     {
-        if (_context is null)
+        if (_context != null && _context.SelectedValue != SelectedValue)
         {
-            return;
+            _context.SelectedValue = SelectedValue;
         }
-
-        _context.SelectedValue = SelectedValue;
-        _context.IsLabelVisible = IsLabelVisible;
-        _indicatorIndex = _context.IndexOf(SelectedValue);
+        base.OnParametersSet();
     }
 
-    private void HandleItemsChanged()
+    private void OnContextSelectionChanged()
     {
-        if (_context is null)
+        var newValue = _context?.SelectedValue;
+        if (!Equals(SelectedValue, newValue))
         {
-            return;
+            SelectedValue = newValue;
+            _ = SelectedValueChanged.InvokeAsync(SelectedValue);
+            StateHasChanged();
         }
+    }
 
-        _indicatorIndex = _context.IndexOf(SelectedValue);
-        InvokeAsync(StateHasChanged);
+    internal void NotifyContextSelectionChanged(object? newValue)
+    {
+        OnContextSelectionChanged();
+    }
+
+    private async Task OnItemClicked(object? value)
+    {
+        await ItemInvoked.InvokeAsync(value);
+        // Close overlay if in compact/minimal and pane is open
+        if (IsCompactOrMinimal && IsPaneOpen)
+        {
+            await TogglePaneAsync();
+        }
     }
 
     private async Task TogglePaneAsync()
     {
         IsPaneOpen = !IsPaneOpen;
         await IsPaneOpenChanged.InvokeAsync(IsPaneOpen);
-
-        if (!UsesOverlayPane)
-        {
-            return;
-        }
-
-        if (IsPaneOpen)
-        {
-            // Anchor is only guaranteed rendered post-first-render, which is fine here — toggling
-            // is always a response to a user click, never something that can happen before that.
-            // bare: true — PaneOverlayContent now wraps itself in FluentAcrylicBrush, so
-            // OverlaySurface must not stack its own default blur/background underneath it.
-            _overlayId ??= OverlayService.Show(PaneOverlayContent, _railAnchor, OverlayPlacement.Right, bare: true);
-        }
-        else if (_overlayId is { } id)
-        {
-            OverlayService.Close(id);
-            _overlayId = null;
-        }
-    }
-
-    private async Task SelectItemAsync(object? value)
-    {
-        SelectedValue = value;
-        await SelectedValueChanged.InvokeAsync(value);
-        await ItemInvoked.InvokeAsync(value);
-
-        if (UsesOverlayPane && IsPaneOpen)
-        {
-            // Picking an item closes the floating pane — matches WinUI's Compact/Minimal overlay UX.
-            await TogglePaneAsync();
-        }
-
         StateHasChanged();
     }
 
-    private async Task BackAsync() => await BackRequested.InvokeAsync();
-
-    private async Task OpenSettingsAsync() => await SettingsRequested.InvokeAsync();
-
-    private void HandleOverlayChanged()
+    private async Task UpdateDisplayModeAsync()
     {
-        if (_overlayId is not { } id || OverlayService.Active.Any(e => e.Id == id))
+        var width = await GetWidthAsync();
+        var paneDisplayMode = PaneDisplayMode;
+
+        NavigationViewDisplayMode displayMode;
+        if (paneDisplayMode == NavigationViewPaneDisplayMode.Top)
         {
-            return;
+            displayMode = NavigationViewDisplayMode.Minimal;
+        }
+        else if (paneDisplayMode == NavigationViewPaneDisplayMode.LeftCompact)
+        {
+            displayMode = NavigationViewDisplayMode.Compact;
+        }
+        else if (paneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal)
+        {
+            displayMode = NavigationViewDisplayMode.Minimal;
+        }
+        else if (paneDisplayMode == NavigationViewPaneDisplayMode.Left)
+        {
+            displayMode = NavigationViewDisplayMode.Expanded;
+        }
+        else // Auto
+        {
+            var expandedThreshold = 1008.0;
+            var compactThreshold = 641.0;
+
+            if (width >= expandedThreshold)
+                displayMode = NavigationViewDisplayMode.Expanded;
+            else if (width >= compactThreshold)
+                displayMode = NavigationViewDisplayMode.Compact;
+            else
+                displayMode = NavigationViewDisplayMode.Minimal;
         }
 
-        // Our overlay closed without going through TogglePaneAsync — a light-dismiss click outside
-        // the pane. Resync local state so the rail's toggle button reflects reality.
-        _overlayId = null;
-        IsPaneOpen = false;
-        InvokeAsync(async () =>
+        if (DisplayMode != displayMode)
         {
-            await IsPaneOpenChanged.InvokeAsync(false);
+            DisplayMode = displayMode;
             StateHasChanged();
-        });
+        }
+
+        // Auto close pane when switching to compact/minimal
+        if (IsCompactOrMinimal && IsPaneOpen)
+        {
+            await TogglePaneAsync();
+        }
     }
+
+    private async Task<double> GetWidthAsync()
+    {
+        if (!string.IsNullOrEmpty(_rootElement.Id) && _module != null)
+        {
+            try
+            {
+                return await _module.InvokeAsync<double>("getElementWidth", _rootElement);
+            }
+            catch
+            {
+                return 800;
+            }
+        }
+        return 800;
+    }
+
+    private async Task OnBackClick() => await BackRequested.InvokeAsync();
+    private async Task OnSettingsClick() => await SettingsRequested.InvokeAsync();
 
     public void Dispose()
     {
-        OverlayService.Changed -= HandleOverlayChanged;
-        if (_context is not null)
+        _context?.Dispose();
+        if (_module is not null)
         {
-            _context.ItemsChanged -= HandleItemsChanged;
-        }
-        if (_overlayId is { } id)
-        {
-            OverlayService.Close(id);
+            try { _module.DisposeAsync().AsTask().Wait(); } catch { }
         }
     }
 }

@@ -1,42 +1,103 @@
-/*
- * Layout note: the Expanded variant docks the pane in normal flow (width transitions between rail
- * and full — content reflows, matching WinUI's default push behavior). Compact/Minimal dock only the
- * icon rail (or nothing, for Minimal) and render the full pane as a floating overlay via
- * FluentOverlayHost — .fluent-nav-view-pane-overlay below only sets internal layout; the actual
- * surface chrome (background, blur, border, shadow) comes from .fluent-overlay-surface, which wraps
- * it — see Overlay/OverlaySurface.razor.css. Don't duplicate that here.
- */
-
 .fluent-nav-view {
     display: flex;
     inline-size: 100%;
     block-size: 100%;
     font-family: var(--font-family-base);
     font-size: var(--font-size-body);
+    background-color: var(--nav-view-background);
+    position: relative;
+    overflow: hidden;
 }
 
+/* --- Pane (expanded mode) --- */
 .fluent-nav-view-pane {
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
     block-size: 100%;
-    inline-size: 48px;
-    background-color: var(--card-background-default);
+    inline-size: var(--nav-view-compact-width, 48px);
+    background-color: var(--nav-view-pane-background);
     border-inline-end: var(--control-stroke-thickness) solid var(--card-stroke-default);
     overflow: hidden;
     transition: inline-size var(--duration-normal) var(--easing-standard);
+    position: relative;
+    z-index: 1;
 }
 
-.fluent-nav-view--expanded .fluent-nav-view-pane--open {
-    inline-size: 320px;
+.fluent-nav-view-pane--open {
+    inline-size: var(--nav-view-open-width, 320px);
 }
 
-/* Compact/Minimal rail: Minimal collapses to zero width (fully hidden) until opened as an overlay;
-   Compact keeps the icon-only rail always visible. */
-.fluent-nav-view--minimal .fluent-nav-view-pane--rail {
+/* --- Rail (compact/minimal) --- */
+.fluent-nav-view-pane--rail {
+    inline-size: var(--nav-view-compact-width, 48px);
+    flex-shrink: 0;
+    z-index: 2;
+}
+
+.fluent-nav-view-pane--rail-minimal {
     inline-size: 0;
+    overflow: hidden;
+    border: none;
 }
 
+/* --- Overlay pane (compact/minimal when open) --- */
+.fluent-nav-view-pane-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--nav-view-open-width, 320px);
+    height: 100%;
+    background-color: var(--flyout-background);
+    backdrop-filter: blur(60px);
+    -webkit-backdrop-filter: blur(60px);
+    border-inline-end: var(--control-stroke-thickness) solid var(--flyout-border);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.14);
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: transform var(--duration-normal) var(--easing-decelerate),
+    opacity var(--duration-fast) var(--easing-standard);
+    will-change: transform, opacity;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    pointer-events: none; /* prevent interaction when hidden */
+}
+
+.fluent-nav-view-pane-overlay--open {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ============================================================
+   OVERRIDE COMPACT/MINIMAL STYLES FOR OVERLAY
+   Using ::deep to pierce child component boundaries.
+   ============================================================ */
+.fluent-nav-view--compact .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item-text,
+.fluent-nav-view--minimal .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item-text {
+    display: block !important;
+}
+
+.fluent-nav-view--compact .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item,
+.fluent-nav-view--minimal .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item {
+    justify-content: flex-start !important;
+    padding-inline: 12px !important;
+}
+
+.fluent-nav-view--compact .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item-icon,
+.fluent-nav-view--minimal .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item-icon {
+    inline-size: 16px !important;
+    block-size: 16px !important;
+}
+
+.fluent-nav-view--compact .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item-chevron,
+.fluent-nav-view--minimal .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item-chevron {
+    display: flex !important;
+}
+
+/* --- Common header/footer styles --- */
 .fluent-nav-view-pane-header {
     display: flex;
     align-items: center;
@@ -44,6 +105,19 @@
     flex: 0 0 auto;
     padding-block-start: 4px;
     padding-inline: 8px;
+    min-height: 44px;
+    border-bottom: 1px solid var(--card-stroke-default);
+}
+
+.fluent-nav-view-pane-header:empty {
+    display: none;
+}
+
+.fluent-nav-view-pane-header--rail {
+    gap: 0;
+    padding-inline: 4px;
+    min-height: 36px;
+    justify-content: center;
 }
 
 .fluent-nav-view-nav-button {
@@ -59,6 +133,8 @@
     color: var(--text-fill-color-primary);
     cursor: pointer;
     font-size: var(--font-size-body);
+    padding: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .fluent-nav-view-nav-button:hover {
@@ -70,11 +146,14 @@
     outline-offset: 2px;
 }
 
-/* ::deep required: this class now lands on FluentListView's own root <div> (Class parameter), a
-   child component's markup, not an element authored directly in this file — plain scoped selectors
-   don't reach across that boundary in Blazor CSS isolation, ::deep does. FluentListView.razor.css
-   already gives it flex/column/gap; this rule only adds the flex-sizing/scroll/padding NavigationView
-   itself needs, so no duplication of the base layout. */
+/* Rail buttons: fit in 48px */
+.fluent-nav-view-nav-button--rail {
+    inline-size: 28px;
+    block-size: 28px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
 .fluent-nav-view-pane-items-wrapper {
     position: relative;
     display: flex;
@@ -82,29 +161,14 @@
     overflow: hidden;
 }
 
-::deep .fluent-nav-view-pane-items {
+.fluent-nav-view-pane-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     flex: 1 1 auto;
     overflow-y: auto;
-    padding: 4px 8px;
-}
-
-/* Single shared indicator (see FluentNavigationViewItem.razor.css for why the old per-item version
-   was removed) — slides between rows via translateY instead of appearing/disappearing on each
-   selection change. Row height is fixed (40px + 2px gap = 42px), so position is purely index-driven,
-   no JS measurement needed. Left offset matches the 8px pane-items padding + item's own edge.
-   top must stay 0 — the vertical centering (row-height 40px, indicator 16px tall => (40-16)/2 = 12px)
-   is already baked into the translateY() calc in FluentNavigationView.razor (index * 42px + 12px).
-   Adding any top offset here double-counts that and knocks the indicator low in its row. */
-.fluent-nav-view-indicator {
-    position: absolute;
-    inset-inline-start: 8px;
-    top: 0;
-    inline-size: 3px;
-    block-size: 16px;
-    border-radius: var(--control-corner-radius);
-    background-color: var(--nav-view-selection-indicator);
-    pointer-events: none;
-    transition: transform var(--duration-normal) var(--easing-standard), opacity var(--duration-fast) var(--easing-standard);
+    padding: 8px 8px;
+    width: 100%;
 }
 
 .fluent-nav-view-pane-footer {
@@ -113,6 +177,7 @@
     gap: 2px;
     flex: 0 0 auto;
     padding: 4px 8px 8px;
+    border-top: 1px solid var(--card-stroke-default);
 }
 
 .fluent-nav-view-settings-button {
@@ -122,25 +187,7 @@
     padding-inline: 12px;
 }
 
-/* Overlay variant: same internal structure as the docked pane, fixed width, no background of its
-   own — .fluent-overlay-surface (the wrapping div) already supplies that. */
-.fluent-nav-view-pane-overlay {
-    display: flex;
-    flex-direction: column;
-    inline-size: 272px;
-    block-size: 480px;
-    max-block-size: 80vh;
-}
-
-/* Stretch the acrylic brush (a child component, hence ::deep) to fill the overlay and let its own
-   content (PaneBody's header/list/footer) lay out in a column inside it. */
-::deep .fluent-nav-view-pane-overlay > .fluent-acrylic {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    block-size: 100%;
-}
-
+/* --- Content area --- */
 .fluent-nav-view-content {
     flex: 1 1 auto;
     block-size: 100%;
@@ -148,4 +195,75 @@
     background-color: var(--nav-view-content-background);
     padding-inline: 24px;
     padding-block: 24px;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.fluent-nav-view-content--minimal-closed {
+    padding-block-start: 8px;
+}
+
+.fluent-nav-view-content-top-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-block: 4px;
+    margin-bottom: 4px;
+    min-height: 44px;
+}
+
+.fluent-nav-view-content-title {
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-fill-color-primary);
+    margin-left: 4px;
+}
+
+.fluent-nav-view-header {
+    margin-bottom: 16px;
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-fill-color-primary);
+}
+
+.fluent-nav-view-main {
+    height: 100%;
+}
+
+/* --- Responsive Auto mode --- */
+.fluent-nav-view--auto .fluent-nav-view-pane {
+    inline-size: var(--nav-view-compact-width, 48px);
+}
+
+@media (max-width: 641px) {
+    .fluent-nav-view--auto .fluent-nav-view-pane {
+        inline-size: 0;
+        overflow: hidden;
+        border: none;
+    }
+    .fluent-nav-view--auto .fluent-nav-view-pane--open {
+        inline-size: var(--nav-view-open-width, 320px);
+        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.14);
+    }
+}
+
+@media (max-width: 1008px) and (min-width: 641px) {
+    .fluent-nav-view--auto .fluent-nav-view-pane--open {
+        inline-size: var(--nav-view-open-width, 320px);
+        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.14);
+    }
+}
+
+/* --- Top mode --- */
+.fluent-nav-view--top {
+    flex-direction: column;
+}
+
+.fluent-nav-view--top .fluent-nav-view-pane {
+    display: none;
+}
+
+.fluent-nav-view--top .fluent-nav-view-content {
+    padding-top: 12px;
 }

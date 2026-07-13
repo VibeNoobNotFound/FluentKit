@@ -16,3 +16,8 @@ export function watchSystemPreference(dotNetRef) {
 export function applyResolvedTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
 }
+
+export function getElementWidth(element) {
+    if (!element) return 0;
+    return element.getBoundingClientRect().width;
+}
