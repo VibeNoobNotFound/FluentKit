@@ -75,7 +75,12 @@
     outline-offset: -2px;
 }
 
+/* Combo box trigger label — when a custom SelectedTemplate/ItemTemplate renders multiple
+   elements (icon + text), lay them out inline the same as the item row above. */
 .fluent-combo-box-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex: 1 1 auto;
     text-align: start;
     min-block-size: 20px;
@@ -264,6 +269,7 @@
 .fluent-combo-box-item {
     display: flex;
     align-items: center;
+    gap: 8px;
     position: relative;
     box-sizing: border-box;
     flex: 0 0 auto;

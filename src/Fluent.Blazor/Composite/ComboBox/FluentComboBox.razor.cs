@@ -32,6 +32,25 @@ public partial class FluentComboBox<TValue> : ComponentBase
 
     [Parameter, EditorRequired] public IReadOnlyList<ComboBoxItem<TValue>> Items { get; set; } = [];
 
+    /// <summary>
+    /// Optional custom row content for each dropdown item. Falls back to a plain
+    /// <c>&lt;span&gt;@item.Name&lt;/span&gt;</c> when not supplied — same "text unless you say
+    /// otherwise" default as fluent-svelte's own ComboBoxItem (which likewise only exposes a
+    /// default slot, no separate templating concept). Wraps in the same .fluent-combo-box-item
+    /// &lt;li&gt; (selection bar, hover/active states, focus ring) regardless of what you render
+    /// inside — only the row's inner content is replaced, not its interaction chrome.
+    /// </summary>
+    [Parameter] public RenderFragment<ComboBoxItem<TValue>>? ItemTemplate { get; set; }
+
+    /// <summary>
+    /// Optional custom content for the closed/collapsed trigger label in non-editable
+    /// (<see cref="Editable"/> = false) mode, e.g. to show an icon + name instead of plain text
+    /// once something is selected. Only used when there IS a selection — the placeholder text
+    /// always renders plain regardless. Has no effect in Editable mode, since that trigger is a
+    /// real &lt;input&gt; and can only ever hold plain text.
+    /// </summary>
+    [Parameter] public RenderFragment<ComboBoxItem<TValue>>? SelectedTemplate { get; set; }
+
     [Parameter] public string? Placeholder { get; set; }
 
     /// <summary>Whether the ComboBox can be searched/typed into (fluent-svelte's `editable` prop).</summary>

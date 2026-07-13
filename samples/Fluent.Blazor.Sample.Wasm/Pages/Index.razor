@@ -456,6 +456,27 @@
     </div>
     <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_comboFruit — editable selection: @_comboFruitEditable — search text: @_comboFruitSearch</FluentTextBlock>
 
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px; margin-top:8px;">
+        <code>ItemTemplate</code> replaces each dropdown row's inner content (the surrounding
+        selection bar/hover/focus chrome stays the same); <code>SelectedTemplate</code> does the
+        same for the closed trigger's label in non-editable mode. Both are optional — leave them
+        out and you get the plain-text row/label from the examples above.
+    </FluentTextBlock>
+    <div style="display:flex; flex-direction:column; gap:4px;">
+        <FluentTextBlock Variant="TextBlockVariant.Caption">With ItemTemplate + SelectedTemplate (color swatch)</FluentTextBlock>
+        <FluentComboBox TValue="string" Items="@_comboColorItems" @bind-Value="_comboColor" Placeholder="Choose a color">
+            <ItemTemplate Context="item">
+                <span style="display:inline-block; width:14px; height:14px; border-radius:3px; background:@ColorHexFor(item.Value); border:1px solid var(--card-stroke-default); flex:0 0 auto;"></span>
+                <span>@item.Name</span>
+            </ItemTemplate>
+            <SelectedTemplate Context="item">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:@ColorHexFor(item.Value); border:1px solid var(--card-stroke-default); flex:0 0 auto;"></span>
+                <span>@item.Name</span>
+            </SelectedTemplate>
+        </FluentComboBox>
+    </div>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected color: @_comboColor</FluentTextBlock>
+
 </div>
 
 @code {
@@ -493,6 +514,24 @@
     private string? _comboFruit = "apple";
     private string? _comboFruitEditable = "apple";
     private string? _comboFruitSearch;
+
+    private readonly IReadOnlyList<Fluent.Blazor.Composite.ComboBoxItem<string>> _comboColorItems = new List<Fluent.Blazor.Composite.ComboBoxItem<string>>
+    {
+        new("Red", "red"),
+        new("Green", "green"),
+        new("Blue", "blue"),
+        new("Purple", "purple"),
+    };
+    private string? _comboColor = "blue";
+
+    private static string ColorHexFor(string? value) => value switch
+    {
+        "red" => "#c42b1c",
+        "green" => "#0f7b0f",
+        "blue" => "#005fb8",
+        "purple" => "#744da9",
+        _ => "transparent"
+    };
 
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;
