@@ -13,6 +13,13 @@ Slider (thumb offset/clamp formula, rail click-to-jump + drag behavior, tick pla
 /reverse handling) was likewise ported from fluent-svelte's `Slider.svelte`, reimplemented as a
 Razor component with a small JS interop module (`wwwroot/Primitives/Slider/slider-interop.js`) for
 pointer/touch tracking instead of Svelte's reactive bindings.
+MenuFlyout/MenuFlyoutItem/MenuFlyoutDivider and ContextMenu port fluent-svelte's `MenuFlyout*` and
+`ContextMenu` components (item variants — standard/radio/toggle/cascading — bullet/checkmark glyph
+conventions, hover-intent delay for cascading submenus, close-on-select semantics). Positioning was
+reimplemented rather than ported: both reuse this project's own IOverlayService/OverlaySurface
+infra (the same one FluentFlyout and FluentTooltip are built on) instead of fluent-svelte's bespoke
+mousePosition/menuPosition clamp math — ContextMenu in particular anchors to an invisible marker
+moved to the cursor position rather than reimplementing its own collision-avoidance.
 
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from

@@ -1,0 +1,7 @@
+.fluent-menu-flyout-divider {
+    inline-size: calc(100% - 8px);
+    margin: 2px 4px;
+    block-size: 1px;
+    border: none;
+    border-block-start: 1px solid var(--divider-stroke-color-default);
+}

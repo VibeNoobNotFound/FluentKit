@@ -1,0 +1,17 @@
+@namespace Fluent.Blazor.Composite
+
+<ul class="fluent-menu-flyout" @onkeydown="HandleKeyDown" @attributes="AdditionalAttributes">
+    @ChildContent
+</ul>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public EventCallback<Microsoft.AspNetCore.Components.Web.KeyboardEventArgs> OnKeyDown { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
+        => OnKeyDown.HasDelegate ? OnKeyDown.InvokeAsync(e) : Task.CompletedTask;
+}

@@ -362,6 +362,77 @@
         </div>
     </div>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">MenuFlyout</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Click-triggered command menu, built on the same overlay infra as Flyout above. Includes a
+        toggle item, a couple of radio-style items (mutual exclusion handled by the click handler
+        below, same as fluent-svelte leaves to the consumer), a disabled item, and a cascading item
+        that opens a submenu to the side (hover ~500ms or click/ArrowRight to open, ArrowLeft or
+        Escape to back out).
+    </FluentTextBlock>
+    <div style="display:flex; gap:8px; align-items:center;">
+        <FluentMenuFlyout Placement="OverlayPlacement.Bottom">
+            <ChildContent>
+                <FluentButton Variant="ButtonVariant.Standard">Open menu</FluentButton>
+            </ChildContent>
+            <MenuItems>
+                <FluentMenuFlyoutItem OnClick="@(() => _menuLastAction = "New")">
+                    <Icon><FluentIcon Name="@FluentIconNames.Add" /></Icon>
+                    <ChildContent>New</ChildContent>
+                </FluentMenuFlyoutItem>
+                <FluentMenuFlyoutItem OnClick="@(() => _menuLastAction = "Open")">Open</FluentMenuFlyoutItem>
+                <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Toggle" @bind-Checked="_menuShowHidden">
+                    Show hidden files
+                </FluentMenuFlyoutItem>
+                <FluentMenuFlyoutDivider />
+                <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Radio" Checked="@(_menuSortOrder == "name")"
+                                       OnClick="@(() => _menuSortOrder = "name")">
+                    Sort by name
+                </FluentMenuFlyoutItem>
+                <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Radio" Checked="@(_menuSortOrder == "date")"
+                                       OnClick="@(() => _menuSortOrder = "date")">
+                    Sort by date
+                </FluentMenuFlyoutItem>
+                <FluentMenuFlyoutDivider />
+                <FluentMenuFlyoutItem Cascading="true">
+                    <ChildContent>Share</ChildContent>
+                    <Flyout>
+                        <FluentMenuFlyoutItem OnClick="@(() => _menuLastAction = "Share via email")">Email</FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem OnClick="@(() => _menuLastAction = "Copy link")">Copy link</FluentMenuFlyoutItem>
+                    </Flyout>
+                </FluentMenuFlyoutItem>
+                <FluentMenuFlyoutItem Disabled="true">Delete (disabled)</FluentMenuFlyoutItem>
+            </MenuItems>
+        </FluentMenuFlyout>
+        <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_menuLastAction — sort: @_menuSortOrder — hidden files: @_menuShowHidden</FluentTextBlock>
+    </div>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">ContextMenu</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Right-click anywhere in the card below. Reuses the exact same overlay positioning as
+        MenuFlyout — the menu just anchors to an invisible marker moved to the cursor instead of to
+        a button.
+    </FluentTextBlock>
+    <FluentContextMenu>
+        <ChildContent>
+            <FluentCard style="width:320px; height:140px; display:flex; align-items:center; justify-content:center;">
+                <FluentTextBlock Variant="TextBlockVariant.Body">Right-click me</FluentTextBlock>
+            </FluentCard>
+        </ChildContent>
+        <MenuItems>
+            <FluentMenuFlyoutItem OnClick="@(() => _contextMenuLastAction = "Cut")">Cut</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem OnClick="@(() => _contextMenuLastAction = "Copy")">Copy</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem OnClick="@(() => _contextMenuLastAction = "Paste")">Paste</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutDivider />
+            <FluentMenuFlyoutItem OnClick="@(() => _contextMenuLastAction = "Properties")">Properties</FluentMenuFlyoutItem>
+        </MenuItems>
+    </FluentContextMenu>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_contextMenuLastAction</FluentTextBlock>
+
 </div>
 
 @code {
@@ -383,6 +454,10 @@
     private double _sliderTicksValue = 4;
     private double _sliderReverseValue = 30;
     private double _sliderVerticalValue = 60;
+    private string? _menuLastAction;
+    private bool _menuShowHidden;
+    private string _menuSortOrder = "name";
+    private string? _contextMenuLastAction;
 
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;

@@ -1,0 +1,137 @@
+.fluent-menu-flyout-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    inline-size: calc(100% - 8px);
+    margin: 2px 4px;
+    padding-inline: 12px;
+    border-radius: var(--control-corner-radius);
+    outline: none;
+    background-color: transparent;
+    color: var(--text-fill-color-primary);
+    cursor: default;
+    user-select: none;
+    block-size: 28px;
+    white-space: nowrap;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+}
+
+/* Selection indicator bar — same accent-bar-on-the-left convention as NavigationView/ListView. */
+.fluent-menu-flyout-item::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    inline-size: 3px;
+    block-size: 0;
+    border-radius: 3px;
+    background-color: var(--accent-fill-color-default);
+    opacity: 0;
+    transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-menu-flyout-item:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-menu-flyout-item:hover,
+.fluent-menu-flyout-item--cascading[aria-expanded="true"],
+.fluent-menu-flyout-item--selected {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-menu-flyout-item:active {
+    background-color: var(--subtle-fill-color-tertiary);
+}
+
+.fluent-menu-flyout-item--selected::before {
+    opacity: 1;
+    block-size: 16px;
+}
+
+.fluent-menu-flyout-item--disabled {
+    background-color: transparent;
+    color: var(--text-fill-color-disabled);
+    pointer-events: none;
+}
+
+.fluent-menu-flyout-item--disabled.fluent-menu-flyout-item--selected {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-menu-flyout-item--disabled.fluent-menu-flyout-item--selected::before {
+    background-color: var(--accent-fill-color-disabled);
+}
+
+.fluent-menu-flyout-item--indented {
+    padding-inline-start: 40px;
+}
+
+.fluent-menu-flyout-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 16px;
+    block-size: 16px;
+    margin-inline-end: 12px;
+    flex: 0 0 auto;
+}
+
+.fluent-menu-flyout-item-label {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fluent-menu-flyout-item-hint {
+    flex: 0 0 auto;
+    margin-inline-start: 24px;
+    font-size: var(--font-size-caption);
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-menu-flyout-item--disabled .fluent-menu-flyout-item-hint {
+    color: var(--text-fill-color-disabled);
+}
+
+.fluent-menu-flyout-item-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 12px;
+    block-size: 12px;
+    margin-inline-start: auto;
+    padding-inline-start: 24px;
+    flex: 0 0 auto;
+}
+
+/* Radio bullet / Toggle checkmark — small inline glyphs, not the full ToggleButton-style controls
+   FluentRadioButton/FluentCheckBox render, matching WinUI's own compact in-menu treatment. */
+.fluent-menu-flyout-item-bullet {
+    display: inline-block;
+    inline-size: 4px;
+    block-size: 4px;
+    border-radius: 4px;
+    margin-inline-start: 6px;
+    margin-inline-end: 18px;
+    background-color: transparent;
+    flex: 0 0 auto;
+}
+
+.fluent-menu-flyout-item--checked .fluent-menu-flyout-item-bullet {
+    background-color: currentColor;
+}
+
+.fluent-menu-flyout-item-checkmark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 12px;
+    block-size: 12px;
+    margin-inline-start: 2px;
+    margin-inline-end: 14px;
+    flex: 0 0 auto;
+}
