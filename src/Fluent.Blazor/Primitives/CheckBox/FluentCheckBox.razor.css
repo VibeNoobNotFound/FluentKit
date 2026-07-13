@@ -75,7 +75,8 @@
     stroke-linejoin: round;
     stroke-dasharray: 20.5;
     stroke-dashoffset: 20.5;
-    transition: stroke-dashoffset var(--duration-normal) var(--easing-decelerate);
+    /* Lengthened from --duration-normal so the draw-in reads a bit more deliberate. */
+    transition: stroke-dashoffset var(--duration-slow) var(--easing-decelerate);
 }
 
 .fluent-checkbox__dash {
@@ -87,7 +88,8 @@
     height: 2px;
     border-radius: 1px;
     background-color: currentColor;
-    transition: width var(--duration-normal) var(--easing-decelerate);
+    /* Lengthened from --duration-normal to match the checkmark's draw-in timing. */
+    transition: width var(--duration-slow) var(--easing-decelerate);
 }
 
 /* ---------- Checked / indeterminate ---------- */

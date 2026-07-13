@@ -115,5 +115,8 @@
 
 .fluent-expander-content-anchor--expanded .fluent-expander-content {
     transform: none;
-    transition: var(--duration-slow) var(--easing-standard) transform;
+    /* Opening slide-in — shortened from --duration-slow so the reveal feels snappier; the closing
+       side (content's default-state transition above, and the anchor's collapse delay) is left at
+       its existing timing since only the open direction was asked to move. */
+    transition: var(--duration-normal) var(--easing-standard) transform;
 }
