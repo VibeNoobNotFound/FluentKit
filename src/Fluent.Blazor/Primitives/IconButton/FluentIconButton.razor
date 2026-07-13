@@ -1,0 +1,22 @@
+@namespace Fluent.Blazor.Primitives
+
+@if (IsAnchor)
+{
+    <a role="button"
+       href="@Href"
+       class="fluent-icon-button"
+       @onclick="OnClick"
+       @attributes="AdditionalAttributes">
+        @ChildContent
+    </a>
+}
+else
+{
+    <button type="button"
+            class="fluent-icon-button @(Disabled ? "fluent-icon-button--disabled" : null)"
+            disabled="@Disabled"
+            @onclick="OnClick"
+            @attributes="AdditionalAttributes">
+        @ChildContent
+    </button>
+}

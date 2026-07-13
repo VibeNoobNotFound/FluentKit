@@ -1,0 +1,11 @@
+/* Ported from fluent-svelte MenuBar.scss, re-mapped onto our token names. */
+.fluent-menu-bar {
+    display: flex;
+    align-items: center;
+    cursor: default;
+    user-select: none;
+    block-size: 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}

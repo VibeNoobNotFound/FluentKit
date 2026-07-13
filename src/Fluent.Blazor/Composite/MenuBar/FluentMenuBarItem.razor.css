@@ -1,0 +1,44 @@
+/* Ported from fluent-svelte MenuBarItem.scss, re-mapped onto our token names. */
+.fluent-menu-bar-item {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    padding: 5px 11px;
+    margin: 4px;
+    cursor: default;
+    color: var(--text-fill-color-primary);
+    background-color: var(--subtle-fill-color-transparent);
+    border-radius: var(--control-corner-radius);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    outline: none;
+}
+
+.fluent-menu-bar-item:hover {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-menu-bar-item:active,
+.fluent-menu-bar-item[aria-expanded="true"] {
+    background-color: var(--subtle-fill-color-tertiary);
+}
+
+.fluent-menu-bar-item:active:hover,
+.fluent-menu-bar-item[aria-expanded="true"]:hover {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-menu-bar-item:active {
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-menu-bar-item:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-menu-bar-item--disabled {
+    color: var(--text-fill-color-disabled);
+    background-color: var(--subtle-fill-color-disabled) !important;
+    pointer-events: none;
+}

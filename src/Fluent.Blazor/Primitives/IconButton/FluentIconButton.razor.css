@@ -1,0 +1,43 @@
+/* Ported from fluent-svelte IconButton.scss, re-mapped onto our token names. */
+.fluent-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    border: none;
+    box-sizing: border-box;
+    min-inline-size: 30px;
+    min-block-size: 30px;
+    padding: 8px;
+    color: var(--text-fill-color-primary);
+    border-radius: var(--control-corner-radius);
+    background-color: var(--subtle-fill-color-transparent);
+    text-decoration: none;
+    cursor: default;
+    font-family: var(--font-family-base);
+}
+
+.fluent-icon-button:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-icon-button:hover {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-icon-button:active {
+    color: var(--text-fill-color-secondary);
+    background-color: var(--subtle-fill-color-tertiary);
+}
+
+.fluent-icon-button:disabled,
+.fluent-icon-button--disabled {
+    background-color: var(--subtle-fill-color-disabled);
+    color: var(--text-fill-color-disabled);
+    pointer-events: none;
+}
+
+.fluent-icon-button svg {
+    color: inherit;
+}

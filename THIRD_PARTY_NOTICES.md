@@ -57,6 +57,14 @@ NumberBox composes TextBox, ported from `CalendarDatePicker.svelte`, but self-co
 absolutely-positioned rather than wired into a generic Flyout — same IOverlayService-avoidance
 reasoning as ComboBox/NumberBox/AutoSuggestBox above.
 
+IconButton (bare icon-only button, no min-width/label padding) and PersonPicture (round avatar with
+Src-with-initials-fallback, live 404 fallback, Badge slot) port fluent-svelte's `IconButton.svelte`
+and `PersonPicture.svelte`. MenuBar/MenuBarItem (top-level app menu bar — File/Edit/View-style —
+click-or-Enter/Space open, hover-to-switch between open siblings, ArrowLeft/ArrowRight roving
+navigation with wraparound) ports fluent-svelte's `MenuBar.svelte`/`MenuBarItem.svelte`, reusing
+this project's existing MenuFlyoutItem/MenuFlyoutDivider for each item's dropdown content rather
+than reimplementing flyout rendering.
+
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from
 [microsoft/microsoft-ui-xaml](https://github.com/microsoft/microsoft-ui-xaml)

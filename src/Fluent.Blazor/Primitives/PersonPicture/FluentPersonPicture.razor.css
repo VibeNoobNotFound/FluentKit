@@ -1,0 +1,45 @@
+/* Ported from fluent-svelte PersonPicture.scss, re-mapped onto our token names. */
+.fluent-person-picture-container {
+    display: flex;
+    position: relative;
+    inline-size: var(--person-picture-size);
+    block-size: var(--person-picture-size);
+}
+
+.fluent-person-picture {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    text-align: center;
+    overflow: hidden;
+    inline-size: 100%;
+    block-size: 100%;
+    flex: 0 0 auto;
+    background-color: var(--control-alt-fill-color-quarternary);
+    border: 1px solid var(--card-stroke-default);
+    background-clip: padding-box;
+    box-sizing: border-box;
+    border-radius: 50%;
+    color: var(--text-fill-color-primary);
+    font-family: var(--font-family-display, var(--font-family-base));
+    font-weight: var(--font-weight-semibold);
+    font-size: calc(var(--person-picture-size) * 5 / 12);
+    object-fit: cover;
+}
+
+.fluent-person-picture-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: none;
+}
+
+.fluent-person-picture-badge > * {
+    pointer-events: auto;
+}

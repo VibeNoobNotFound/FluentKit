@@ -631,6 +631,94 @@
         </Footer>
     </FluentContentDialog>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">IconButton</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Bare icon-only button — no min-width/label padding, just a 30x30 box around whatever glyph
+        you give it. <code>Href</code> swaps the underlying element to an anchor.
+    </FluentTextBlock>
+    <div style="display:flex; gap:8px; align-items:center;">
+        <FluentIconButton OnClick="@(() => _iconButtonLastAction = "Settings")">
+            <FluentIcon Name="@FluentIconNames.Settings" />
+        </FluentIconButton>
+        <FluentIconButton OnClick="@(() => _iconButtonLastAction = "Delete")">
+            <FluentIcon Name="@FluentIconNames.Delete" />
+        </FluentIconButton>
+        <FluentIconButton Disabled="true">
+            <FluentIcon Name="@FluentIconNames.Dismiss" />
+        </FluentIconButton>
+        <FluentIconButton Href="https://github.com">
+            <FluentIcon Name="@FluentIconNames.Home" />
+        </FluentIconButton>
+    </div>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_iconButtonLastAction</FluentTextBlock>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">PersonPicture</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Round avatar — shows <code>Src</code> when it loads, falls back to initials derived from
+        <code>Alt</code> otherwise (also falls back live if the image 404s). <code>Badge</code>
+        slot renders in the top-right corner, e.g. a presence dot.
+    </FluentTextBlock>
+    <div style="display:flex; gap:16px; align-items:center;">
+        <FluentPersonPicture Alt="Ada Lovelace" />
+        <FluentPersonPicture Size="48" Src="https://this-domain-does-not-exist.example/avatar.jpg" Alt="Grace Hopper" />
+        <FluentPersonPicture Size="40" Alt="Alan Turing">
+            <Badge>
+                <span style="display:block; width:12px; height:12px; border-radius:50%; background:#0f7b0f; border:2px solid var(--card-background-default);"></span>
+            </Badge>
+        </FluentPersonPicture>
+    </div>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">MenuBar</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        App-style top-level menu bar (File/Edit/View…). Click or Enter/Space opens an item's dropdown
+        (reuses FluentMenuFlyoutItem/FluentMenuFlyoutDivider inside); once one is open, hovering a
+        sibling switches straight to its menu. ArrowLeft/ArrowRight walk between items with wraparound.
+    </FluentTextBlock>
+    <FluentMenuBar>
+        <FluentMenuBarItem>
+            <ChildContent>File</ChildContent>
+            <Flyout>
+                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "New")">New</FluentMenuFlyoutItem>
+                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Open")">Open</FluentMenuFlyoutItem>
+                <FluentMenuFlyoutDivider />
+                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Exit")">Exit</FluentMenuFlyoutItem>
+            </Flyout>
+        </FluentMenuBarItem>
+        <FluentMenuBarItem>
+            <ChildContent>Edit</ChildContent>
+            <Flyout>
+                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Cut")">Cut</FluentMenuFlyoutItem>
+                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Copy")">Copy</FluentMenuFlyoutItem>
+                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Paste")">Paste</FluentMenuFlyoutItem>
+            </Flyout>
+        </FluentMenuBarItem>
+        <FluentMenuBarItem>
+            <ChildContent>View</ChildContent>
+            <Flyout>
+                <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Toggle" @bind-Checked="_menuBarShowGrid">
+                    Show grid
+                </FluentMenuFlyoutItem>
+                <FluentMenuFlyoutItem Cascading="true">
+                    <ChildContent>Zoom</ChildContent>
+                    <Flyout>
+                        <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Zoom in")">Zoom in</FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Zoom out")">Zoom out</FluentMenuFlyoutItem>
+                    </Flyout>
+                </FluentMenuFlyoutItem>
+            </Flyout>
+        </FluentMenuBarItem>
+        <FluentMenuBarItem Disabled="true">
+            <ChildContent>Disabled</ChildContent>
+        </FluentMenuBarItem>
+    </FluentMenuBar>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_menuBarLastAction — show grid: @_menuBarShowGrid</FluentTextBlock>
+
 </div>
 
 @code {
@@ -740,6 +828,11 @@
     private bool _dialogConfirmOpen;
     private bool _dialogUnclosableOpen;
     private string? _dialogLastAction;
+
+    private string? _iconButtonLastAction;
+
+    private string? _menuBarLastAction;
+    private bool _menuBarShowGrid;
 
     private void CloseConfirmDialog(string action)
     {
