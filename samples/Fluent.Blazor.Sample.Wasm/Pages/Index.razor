@@ -477,6 +477,51 @@
     </div>
     <FluentTextBlock Variant="TextBlockVariant.Caption">Selected color: @_comboColor</FluentTextBlock>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">ContentDialog</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Modal, viewport-centered — deliberately NOT built on IOverlayService (no trigger-anchored
+        positioning makes sense for a modal). Escape and clicking the darkened scrim both close it
+        unless <code>Closable="false"</code>. Footer buttons lay out in an equal-width row; a single
+        footer button instead sits half-width and end-aligned (WinUI's own convention).
+    </FluentTextBlock>
+    <div style="display:flex; gap:8px;">
+        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _dialogBasicOpen = true)">Basic dialog</FluentButton>
+        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _dialogConfirmOpen = true)">Confirm (two buttons)</FluentButton>
+        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _dialogUnclosableOpen = true)">Not closable (Max size)</FluentButton>
+    </div>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Last dialog action: @_dialogLastAction</FluentTextBlock>
+
+    <FluentContentDialog @bind-IsOpen="_dialogBasicOpen" Title="About this app">
+        <FluentTextBlock Variant="TextBlockVariant.Body">
+            A single-button (no footer) dialog — just a title and body, dismissible via Escape or by
+            clicking the scrim.
+        </FluentTextBlock>
+    </FluentContentDialog>
+
+    <FluentContentDialog @bind-IsOpen="_dialogConfirmOpen" Title="Delete item?">
+        <ChildContent>
+            <FluentTextBlock Variant="TextBlockVariant.Body">This action can't be undone.</FluentTextBlock>
+        </ChildContent>
+        <Footer>
+            <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => CloseConfirmDialog("Cancelled"))">Cancel</FluentButton>
+            <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => CloseConfirmDialog("Deleted"))">Delete</FluentButton>
+        </Footer>
+    </FluentContentDialog>
+
+    <FluentContentDialog @bind-IsOpen="_dialogUnclosableOpen" Title="Processing…" Size="ContentDialogSize.Max" Closable="false">
+        <ChildContent>
+            <FluentTextBlock Variant="TextBlockVariant.Body">
+                Escape and scrim-click are disabled here (<code>Closable="false"</code>) — the only way
+                out is the explicit button below, same pattern as a real "can't cancel mid-operation" dialog.
+            </FluentTextBlock>
+        </ChildContent>
+        <Footer>
+            <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => CloseUnclosableDialog())">Done</FluentButton>
+        </Footer>
+    </FluentContentDialog>
+
 </div>
 
 @code {
@@ -532,6 +577,23 @@
         "purple" => "#744da9",
         _ => "transparent"
     };
+
+    private bool _dialogBasicOpen;
+    private bool _dialogConfirmOpen;
+    private bool _dialogUnclosableOpen;
+    private string? _dialogLastAction;
+
+    private void CloseConfirmDialog(string action)
+    {
+        _dialogLastAction = action;
+        _dialogConfirmOpen = false;
+    }
+
+    private void CloseUnclosableDialog()
+    {
+        _dialogLastAction = "Done clicked";
+        _dialogUnclosableOpen = false;
+    }
 
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;

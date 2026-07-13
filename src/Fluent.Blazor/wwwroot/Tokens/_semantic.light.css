@@ -49,6 +49,13 @@
   --flyout-background: rgba(255, 255, 255, 0.702);
   --flyout-border: rgba(0, 0, 0, 0.0588);
 
+  /* ContentDialog — mirrors dark file structure. SmokeFillColorDefault is the same Black @ 30%
+     regardless of theme per WinUI docs. */
+  --dialog-background: var(--mica-base-fill);
+  --dialog-border: var(--card-stroke-default);
+  --dialog-shadow: 0 32px 64px rgba(0, 0, 0, 0.24);
+  --smoke-background-default: rgba(0, 0, 0, 0.3);
+
   /* layer/card surfaces — mirrors dark file structure, see that file for the sourcing caveat. */
   --layer-background-default: rgba(255, 255, 255, 0.5);
   --card-background-default: rgba(255, 255, 255, 0.7);

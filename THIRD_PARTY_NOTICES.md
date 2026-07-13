@@ -26,6 +26,11 @@ fluent-svelte's `ComboBox.svelte`/`ComboBoxItem.svelte`. Unlike MenuFlyout/Conte
 deliberately does NOT go through IOverlayService — the dropdown needs to be exactly the trigger's
 width and grow from a specific list row, so it stays a plain absolutely-positioned child of the
 component's own root, same as fluent-svelte's own `.combo-box-dropdown { position: absolute }`.
+ContentDialog (Title/body/optional Footer, size presets min/standard/max, Escape + scrim-click
+dismissal, half-width end-aligned single-button footer convention) ports fluent-svelte's
+`ContentDialog.svelte`. Also self-contained rather than IOverlayService-based, for the same reason
+as ComboBox above — a modal dialog is always viewport-centered with its own full-screen scrim,
+regardless of what triggered it, which doesn't fit the anchor-relative overlay model at all.
 
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from

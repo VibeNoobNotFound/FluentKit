@@ -51,6 +51,14 @@
   --flyout-background: rgba(255, 255, 255, 0.0510);
   --flyout-border: rgba(0, 0, 0, 0.2);
 
+  /* ContentDialog — SolidBackgroundFillColorBase (same value Mica's base-fill fallback already
+     uses, so aliased rather than restated) / SmokeFillColorDefault (the modal scrim, WinUI's own
+     Black @ 30% regardless of theme) / dialog surface stroke + shadow. */
+  --dialog-background: var(--mica-base-fill);
+  --dialog-border: var(--card-stroke-default);
+  --dialog-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
+  --smoke-background-default: rgba(0, 0, 0, 0.3);
+
   /* layer/card surfaces — LayerFillColorDefault / CardStrokeColorDefault. Approximate transcription
      (same caveat as Acrylic: WinUI doesn't publish these as cleanly as Button's ramp) — used by
      NavigationView's content pane and any future Card/Border surface component. */
