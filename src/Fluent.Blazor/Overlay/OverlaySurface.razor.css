@@ -6,3 +6,15 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
     padding: 8px;
 }
+
+/* Bare variant: content supplies its own surface material (e.g. FluentAcrylicBrush wrapping
+   NavigationView's Compact/Minimal overlay pane) — strip all of OverlaySurface's own chrome so it
+   isn't stacked underneath (double blur, double background, an extra unwanted border/shadow). */
+.fluent-overlay-surface--bare {
+    background-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}

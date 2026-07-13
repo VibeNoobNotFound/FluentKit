@@ -71,6 +71,14 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     [Parameter]
     public RenderFragment? PaneFooter { get; set; }
 
+    /// <summary>Shows a built-in Settings row pinned to the footer (rail and full pane alike),
+    /// matching WinUI's NavigationView.IsSettingsVisible.</summary>
+    [Parameter]
+    public bool ShowSettingsButton { get; set; }
+
+    [Parameter]
+    public EventCallback SettingsRequested { get; set; }
+
     /// <summary>The page content shown next to (or under) the pane.</summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
@@ -81,6 +89,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     private ElementReference _railAnchor;
     private Guid? _overlayId;
     private NavigationViewContext? _context;
+    private int _indicatorIndex = -1;
 
     private bool UsesOverlayPane =>
         PaneDisplayMode is NavigationViewPaneDisplayMode.Compact or NavigationViewPaneDisplayMode.Minimal;
@@ -97,11 +106,31 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     protected override void OnInitialized()
     {
         OverlayService.Changed += HandleOverlayChanged;
+        _context = new NavigationViewContext(SelectItemAsync);
+        _context.ItemsChanged += HandleItemsChanged;
     }
 
     protected override void OnParametersSet()
     {
-        _context = new NavigationViewContext(SelectedValue, IsLabelVisible, SelectItemAsync);
+        if (_context is null)
+        {
+            return;
+        }
+
+        _context.SelectedValue = SelectedValue;
+        _context.IsLabelVisible = IsLabelVisible;
+        _indicatorIndex = _context.IndexOf(SelectedValue);
+    }
+
+    private void HandleItemsChanged()
+    {
+        if (_context is null)
+        {
+            return;
+        }
+
+        _indicatorIndex = _context.IndexOf(SelectedValue);
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task TogglePaneAsync()
@@ -118,7 +147,9 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         {
             // Anchor is only guaranteed rendered post-first-render, which is fine here — toggling
             // is always a response to a user click, never something that can happen before that.
-            _overlayId ??= OverlayService.Show(PaneOverlayContent, _railAnchor, OverlayPlacement.Right);
+            // bare: true — PaneOverlayContent now wraps itself in FluentAcrylicBrush, so
+            // OverlaySurface must not stack its own default blur/background underneath it.
+            _overlayId ??= OverlayService.Show(PaneOverlayContent, _railAnchor, OverlayPlacement.Right, bare: true);
         }
         else if (_overlayId is { } id)
         {
@@ -144,6 +175,8 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     private async Task BackAsync() => await BackRequested.InvokeAsync();
 
+    private async Task OpenSettingsAsync() => await SettingsRequested.InvokeAsync();
+
     private void HandleOverlayChanged()
     {
         if (_overlayId is not { } id || OverlayService.Active.Any(e => e.Id == id))
@@ -165,6 +198,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     public void Dispose()
     {
         OverlayService.Changed -= HandleOverlayChanged;
+        if (_context is not null)
+        {
+            _context.ItemsChanged -= HandleItemsChanged;
+        }
         if (_overlayId is { } id)
         {
             OverlayService.Close(id);

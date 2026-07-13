@@ -21,7 +21,8 @@
     flex: 0 0 auto;
     block-size: 100%;
     inline-size: 48px;
-    background-color: var(--nav-view-pane-background);
+    background-color: var(--card-background-default);
+    border-inline-end: var(--control-stroke-thickness) solid var(--card-stroke-default);
     overflow: hidden;
     transition: inline-size var(--duration-normal) var(--easing-standard);
 }
@@ -74,10 +75,36 @@
    don't reach across that boundary in Blazor CSS isolation, ::deep does. FluentListView.razor.css
    already gives it flex/column/gap; this rule only adds the flex-sizing/scroll/padding NavigationView
    itself needs, so no duplication of the base layout. */
+.fluent-nav-view-pane-items-wrapper {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
 ::deep .fluent-nav-view-pane-items {
     flex: 1 1 auto;
     overflow-y: auto;
     padding: 4px 8px;
+}
+
+/* Single shared indicator (see FluentNavigationViewItem.razor.css for why the old per-item version
+   was removed) — slides between rows via translateY instead of appearing/disappearing on each
+   selection change. Row height is fixed (40px + 2px gap = 42px), so position is purely index-driven,
+   no JS measurement needed. Left offset matches the 8px pane-items padding + item's own edge.
+   top must stay 0 — the vertical centering (row-height 40px, indicator 16px tall => (40-16)/2 = 12px)
+   is already baked into the translateY() calc in FluentNavigationView.razor (index * 42px + 12px).
+   Adding any top offset here double-counts that and knocks the indicator low in its row. */
+.fluent-nav-view-indicator {
+    position: absolute;
+    inset-inline-start: 8px;
+    top: 0;
+    inline-size: 3px;
+    block-size: 16px;
+    border-radius: var(--control-corner-radius);
+    background-color: var(--nav-view-selection-indicator);
+    pointer-events: none;
+    transition: transform var(--duration-normal) var(--easing-standard), opacity var(--duration-fast) var(--easing-standard);
 }
 
 .fluent-nav-view-pane-footer {
@@ -88,6 +115,13 @@
     padding: 4px 8px 8px;
 }
 
+.fluent-nav-view-settings-button {
+    inline-size: 100%;
+    justify-content: flex-start;
+    gap: 12px;
+    padding-inline: 12px;
+}
+
 /* Overlay variant: same internal structure as the docked pane, fixed width, no background of its
    own — .fluent-overlay-surface (the wrapping div) already supplies that. */
 .fluent-nav-view-pane-overlay {
@@ -96,6 +130,15 @@
     inline-size: 272px;
     block-size: 480px;
     max-block-size: 80vh;
+}
+
+/* Stretch the acrylic brush (a child component, hence ::deep) to fill the overlay and let its own
+   content (PaneBody's header/list/footer) lay out in a column inside it. */
+::deep .fluent-nav-view-pane-overlay > .fluent-acrylic {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    block-size: 100%;
 }
 
 .fluent-nav-view-content {

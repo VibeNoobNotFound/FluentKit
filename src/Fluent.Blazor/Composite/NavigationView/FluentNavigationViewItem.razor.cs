@@ -27,9 +27,17 @@ public partial class FluentNavigationViewItem : ComponentBase, IFocusableListIte
 
     bool IFocusableListItem.Disabled => Disabled;
 
-    protected override void OnInitialized() => List?.Register(this);
+    protected override void OnInitialized()
+    {
+        List?.Register(this);
+        Nav?.RegisterItem(Value);
+    }
 
-    public void Dispose() => List?.Unregister(this);
+    public void Dispose()
+    {
+        List?.Unregister(this);
+        Nav?.UnregisterItem(Value);
+    }
 
     public ValueTask FocusAsync() => _element.FocusAsync();
 

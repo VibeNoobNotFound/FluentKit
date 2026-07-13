@@ -1,6 +1,5 @@
-// v1 scope: flips vertically (bottom<->top) and clamps horizontally so the popup never runs off
-// the left/right edge. Left/Right placements and full 4-direction flip are a follow-up —
-// this is enough for ToolTip/Flyout to prove the FluentOverlayHost pattern end to end.
+// Flips on the placement's own axis when there isn't room (bottom<->top, right<->left) and clamps
+// on the cross axis so the popup never runs off the opposite edge.
 
 const lightDismissHandlers = new Map();
 
@@ -12,6 +11,31 @@ export function computePosition(anchorEl, popupEl, placement) {
 
     let resolvedPlacement = placement;
     let top;
+    let left;
+
+    if (placement === "left" || placement === "right") {
+        // Horizontal placement: position along the anchor's left/right edge, align top edges,
+        // then clamp vertically so the popup stays on-screen (e.g. a full-height nav rail anchor).
+        if (placement === "left") {
+            left = anchorRect.left - popupRect.width - gap;
+            if (left < viewportPadding) {
+                left = anchorRect.right + gap;
+                resolvedPlacement = "right";
+            }
+        } else {
+            left = anchorRect.right + gap;
+            if (left + popupRect.width > window.innerWidth - viewportPadding) {
+                left = anchorRect.left - popupRect.width - gap;
+                resolvedPlacement = "left";
+            }
+        }
+
+        top = anchorRect.top;
+        const maxTop = window.innerHeight - popupRect.height - viewportPadding;
+        top = Math.min(Math.max(top, viewportPadding), Math.max(maxTop, viewportPadding));
+
+        return { top, left, placement: resolvedPlacement };
+    }
 
     if (placement === "top") {
         top = anchorRect.top - popupRect.height - gap;
@@ -28,7 +52,7 @@ export function computePosition(anchorEl, popupEl, placement) {
         }
     }
 
-    let left = anchorRect.left;
+    left = anchorRect.left;
     const maxLeft = window.innerWidth - popupRect.width - viewportPadding;
     left = Math.min(Math.max(left, viewportPadding), Math.max(maxLeft, viewportPadding));
 

@@ -1,4 +1,6 @@
 @namespace Fluent.Blazor.Composite
+@using Fluent.Blazor.Effects
+@using Fluent.Blazor.Primitives
 @implements IDisposable
 
 <CascadingValue Value="_context" IsFixed="false">
@@ -32,29 +34,73 @@
         <header class="fluent-nav-view-pane-header">
             @if (ShowBackButton)
             {
-                <button type="button" class="fluent-nav-view-nav-button" @onclick="BackAsync" aria-label="Back">&lt;-</button>
+                <button type="button" class="fluent-nav-view-nav-button" @onclick="BackAsync" aria-label="Back">
+                    <FluentIcon Name="@FluentIconNames.ArrowLeft" Size="16" />
+                </button>
             }
-            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">-</button>
+            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
+                <FluentIcon Name="@FluentIconNames.Navigation" Size="16" />
+            </button>
             @PaneHeader
         </header>
-        <FluentListView Role="list" Class="fluent-nav-view-pane-items">
-            @MenuItems
-        </FluentListView>
+        <div class="fluent-nav-view-pane-items-wrapper">
+            <FluentListView Role="list" Class="fluent-nav-view-pane-items">
+                @MenuItems
+            </FluentListView>
+            @Indicator
+        </div>
         <footer class="fluent-nav-view-pane-footer">
             @PaneFooter
+            @if (ShowSettingsButton)
+            {
+                <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-settings-button" @onclick="OpenSettingsAsync" aria-label="Settings">
+                    <FluentIcon Name="@FluentIconNames.Settings" Size="16" />
+                    @if (IsLabelVisible)
+                    {
+                        <span>Settings</span>
+                    }
+                </button>
+            }
         </footer>
     </text>;
 
     private RenderFragment RailBody => @<text>
         <header class="fluent-nav-view-pane-header">
-            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">-</button>
+            @if (ShowBackButton)
+            {
+                <button type="button" class="fluent-nav-view-nav-button" @onclick="BackAsync" aria-label="Back">
+                    <FluentIcon Name="@FluentIconNames.ArrowLeft" Size="16" />
+                </button>
+            }
+            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
+                <FluentIcon Name="@FluentIconNames.Navigation" Size="16" />
+            </button>
+            @PaneHeader
         </header>
-        <FluentListView Role="list" Class="fluent-nav-view-pane-items">
-            @MenuItems
-        </FluentListView>
+        <div class="fluent-nav-view-pane-items-wrapper">
+            <FluentListView Role="list" Class="fluent-nav-view-pane-items">
+                @MenuItems
+            </FluentListView>
+            @Indicator
+        </div>
+        <footer class="fluent-nav-view-pane-footer">
+            @PaneFooter
+            @if (ShowSettingsButton)
+            {
+                <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-settings-button" @onclick="OpenSettingsAsync" aria-label="Settings">
+                    <FluentIcon Name="@FluentIconNames.Settings" Size="16" />
+                </button>
+            }
+        </footer>
     </text>;
 
+    private RenderFragment Indicator => @<span class="fluent-nav-view-indicator"
+        style="@(_indicatorIndex >= 0 ? $"opacity:1;transform:translateY(calc({_indicatorIndex} * 42px + 12px));" : "opacity:0;")"
+        aria-hidden="true"></span>;
+
     private RenderFragment PaneOverlayContent => @<div class="fluent-nav-view-pane-overlay">
-        @PaneBody
+        <FluentAcrylicBrush Kind="AcrylicKind.Base">
+            @PaneBody
+        </FluentAcrylicBrush>
     </div>;
 }

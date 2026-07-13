@@ -144,10 +144,26 @@
         </div>
     </FluentRadioGroup>
 
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        This instance also shows the rest of the shell chrome: a custom <code>PaneHeader</code> (a
+        search box, rendered in both the full pane and the icon-only rail), a <code>PaneFooter</code>
+        item, the built-in Settings row (<code>ShowSettingsButton</code> — separate from ItemInvoked,
+        fires its own <code>SettingsRequested</code>), and a back button (<code>ShowBackButton</code> /
+        <code>BackRequested</code>). The blue selection indicator slides between rows instead of
+        appearing/disappearing.
+    </FluentTextBlock>
+
     <div style="width:100%; max-width:720px; height:420px; border-radius:8px; overflow:hidden; border:1px solid var(--card-stroke-default);">
         <FluentNavigationView PaneDisplayMode="_navMode"
                                @bind-IsPaneOpen="_navPaneOpen"
-                               @bind-SelectedValue="_navSelected">
+                               @bind-SelectedValue="_navSelected"
+                               ShowBackButton="true"
+                               BackRequested="OnNavBack"
+                               ShowSettingsButton="true"
+                               SettingsRequested="OnNavSettings">
+            <PaneHeader>
+                <FluentTextBox @bind-Value="_navSearch" Placeholder="Search" />
+            </PaneHeader>
             <MenuItems>
                 <FluentNavigationViewItem Value="@("home")" Text="Home">
                     <Icon><FluentIcon Name="@FluentIconNames.Home" /></Icon>
@@ -158,18 +174,22 @@
                 <FluentNavigationViewItem Value="@("components")" Text="Components">
                     <Icon><FluentIcon Name="@FluentIconNames.Apps" /></Icon>
                 </FluentNavigationViewItem>
-                <FluentNavigationViewItem Value="@("settings")" Text="Settings">
-                    <Icon><FluentIcon Name="@FluentIconNames.Settings" /></Icon>
-                </FluentNavigationViewItem>
                 <FluentNavigationViewItem Value="@("disabled")" Text="Disabled item" Disabled="true">
                     <Icon><FluentIcon Name="@FluentIconNames.Dismiss" /></Icon>
                 </FluentNavigationViewItem>
             </MenuItems>
+            <PaneFooter>
+                <FluentTextBlock Variant="TextBlockVariant.Caption" style="padding-inline:12px;">v1.0.0</FluentTextBlock>
+            </PaneFooter>
             <ChildContent>
                 <FluentTextBlock Variant="TextBlockVariant.Title">@_navSelected</FluentTextBlock>
                 <FluentTextBlock Variant="TextBlockVariant.Body">
                     This is FluentNavigationView's content area — whatever page you'd route to goes here.
                 </FluentTextBlock>
+                @if (!string.IsNullOrEmpty(_navLastAction))
+                {
+                    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_navLastAction</FluentTextBlock>
+                }
             </ChildContent>
         </FluentNavigationView>
     </div>
@@ -210,6 +230,12 @@
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Expanded;
     private bool _navPaneOpen = true;
     private object? _navSelected = "home";
+    private string? _navSearch;
+    private string? _navLastAction;
+
+    private void OnNavBack() => _navLastAction = "Back pressed";
+
+    private void OnNavSettings() => _navLastAction = "Settings requested";
     private object? _navModeString
     {
         get => _navMode.ToString().ToLowerInvariant();

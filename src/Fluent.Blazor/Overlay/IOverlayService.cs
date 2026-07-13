@@ -15,7 +15,7 @@ public interface IOverlayService
     event Action? Changed;
 
     Guid Show(RenderFragment content, ElementReference anchor,
-        OverlayPlacement placement = OverlayPlacement.Bottom, bool lightDismiss = true);
+        OverlayPlacement placement = OverlayPlacement.Bottom, bool lightDismiss = true, bool bare = false);
 
     void Close(Guid id);
 

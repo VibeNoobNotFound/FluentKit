@@ -1,7 +1,9 @@
 /*
- * Selection indicator: WinUI's NavigationViewItem shows a short accent-colored pill on the leading
- * edge of the selected item, growing in from the middle — the subtle fill on the row itself is
- * secondary to that. Kept as a real element (not a pseudo-element) so its own transition is simple.
+ * Selection indicator: now a single shared element owned by FluentNavigationView (see its .razor.css
+ * for .fluent-nav-view-indicator) that slides between rows via translateY, instead of each item
+ * growing/shrinking its own pill in place — that per-item version made the indicator visually
+ * teleport (disappear on the old row, appear on the new one) rather than slide. This file no longer
+ * needs its own indicator rule.
  */
 
 .fluent-nav-view-item {
@@ -54,22 +56,6 @@
 
 .fluent-nav-view-item--selected:hover:not(:disabled) {
     background-color: var(--nav-view-item-background-selected-hover);
-}
-
-.fluent-nav-view-item-indicator {
-    position: absolute;
-    inset-inline-start: 0;
-    top: 50%;
-    translate: 0 -50%;
-    inline-size: 3px;
-    block-size: 0;
-    border-radius: var(--control-corner-radius);
-    background-color: var(--nav-view-selection-indicator);
-    transition: block-size var(--duration-fast) var(--easing-standard);
-}
-
-.fluent-nav-view-item--selected .fluent-nav-view-item-indicator {
-    block-size: 16px;
 }
 
 .fluent-nav-view-item-icon {
