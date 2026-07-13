@@ -283,9 +283,7 @@
     <div style="display:flex; flex-direction:column; gap:12px; max-width:360px;">
         <FluentProgressBar Value="@_progressValue" />
         <FluentProgressBar IsIndeterminate="true" />
-        <!-- FluentSlider isn't built yet (Phase 3) -- plain range input drives the demo values below -->
-        <input type="range" min="0" max="100" value="@_progressValue"
-               @oninput="@((ChangeEventArgs e) => _progressValue = double.Parse((string)e.Value!))" />
+        <FluentSlider @bind-Value="_progressValue" Min="0" Max="100" Step="1" />
     </div>
     <div style="display:flex; gap:24px; align-items:center;">
         <FluentProgressRing IsIndeterminate="true" />
@@ -336,6 +334,34 @@
                         Title="Sync failed" Message="Couldn't reach the server. Check your connection and try again." />
     </div>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">Slider</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Drag the thumb, click/tap the rail to jump, or focus it and use arrow keys / Home / End /
+        Page Up / Page Down. Ticks below use TickFrequency + TickPlacement; the vertical and
+        reversed sliders share the same drag-interop module keyed per-instance.
+    </FluentTextBlock>
+    <div style="display:flex; gap:32px; align-items:flex-start; flex-wrap:wrap;">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Horizontal, ticks</FluentTextBlock>
+            <FluentSlider @bind-Value="_sliderTicksValue" Min="0" Max="10" Step="1"
+                          TickFrequency="1" TickPlacement="FluentSliderTickPlacement.Outside" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Reversed</FluentTextBlock>
+            <FluentSlider @bind-Value="_sliderReverseValue" Min="0" Max="100" Reverse="true" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Disabled</FluentTextBlock>
+            <FluentSlider Value="35" Min="0" Max="100" Disabled="true" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; align-items:center;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Vertical</FluentTextBlock>
+            <FluentSlider @bind-Value="_sliderVerticalValue" Min="0" Max="100" Orientation="FluentSliderOrientation.Vertical" />
+        </div>
+    </div>
+
 </div>
 
 @code {
@@ -354,6 +380,9 @@
     private double _progressValue = 40;
     private bool _expanderOpen;
     private bool _infoBarOpen = true;
+    private double _sliderTicksValue = 4;
+    private double _sliderReverseValue = 30;
+    private double _sliderVerticalValue = 60;
 
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;

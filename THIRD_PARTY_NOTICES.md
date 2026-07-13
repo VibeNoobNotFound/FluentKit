@@ -9,6 +9,10 @@ Component markup/CSS *structure* (not literal source) for Expander (clip+slide c
 technique), ProgressBar (indeterminate keyframe timing), and InfoBar (icon/title/message/action/
 close-button layout, default-icon-is-an-InfoBadge simplification) was ported from the equivalent
 fluent-svelte components and adapted to Razor + CSS isolation and this project's own token names.
+Slider (thumb offset/clamp formula, rail click-to-jump + drag behavior, tick placement, orientation
+/reverse handling) was likewise ported from fluent-svelte's `Slider.svelte`, reimplemented as a
+Razor component with a small JS interop module (`wwwroot/Primitives/Slider/slider-interop.js`) for
+pointer/touch tracking instead of Svelte's reactive bindings.
 
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from

@@ -1,0 +1,197 @@
+/* Slider — Slider_themeresources.xaml / fluent-svelte's Slider.svelte. Thumb is a fixed 20px
+   circle; --slider-thumb-offset-x/y (computed in code-behind as halfWidth*(1-2*pct/100)) keeps it
+   from overflowing the rail ends at 0%/100% the same way fluent-svelte's own clamp math does. */
+
+.fluent-slider {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    touch-action: none;
+}
+
+.fluent-slider--horizontal {
+    inline-size: 200px;
+    block-size: 32px;
+}
+
+.fluent-slider--vertical {
+    inline-size: 32px;
+    block-size: 200px;
+}
+
+.fluent-slider-rail {
+    position: relative;
+    cursor: pointer;
+}
+
+.fluent-slider--horizontal .fluent-slider-rail {
+    inline-size: 100%;
+    block-size: 4px;
+    border-radius: 2px;
+    background-color: var(--slider-rail-fill);
+}
+
+.fluent-slider--vertical .fluent-slider-rail {
+    inline-size: 4px;
+    block-size: 100%;
+    border-radius: 2px;
+    background-color: var(--slider-rail-fill);
+}
+
+.fluent-slider--disabled .fluent-slider-rail {
+    background-color: var(--slider-disabled-fill);
+    cursor: default;
+}
+
+/* Filled portion between the rail's zero-end and the thumb. */
+.fluent-slider-track-fill {
+    position: absolute;
+    background-color: var(--slider-track-fill);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.fluent-slider--horizontal .fluent-slider-track-fill {
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--slider-percent);
+}
+
+.fluent-slider--vertical .fluent-slider-track-fill {
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: var(--slider-percent);
+}
+
+.fluent-slider--disabled .fluent-slider-track-fill {
+    background-color: var(--slider-disabled-fill);
+}
+
+/* Ticks */
+.fluent-slider-ticks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.fluent-slider-tick {
+    position: absolute;
+    background-color: var(--slider-tick-fill);
+}
+
+.fluent-slider--horizontal .fluent-slider-tick {
+    inset-inline-start: var(--slider-tick-percent);
+    inline-size: 2px;
+    transform: translateX(-1px);
+}
+
+.fluent-slider--vertical .fluent-slider-tick {
+    inset-block-end: var(--slider-tick-percent);
+    block-size: 2px;
+    transform: translateY(1px);
+}
+
+.fluent-slider-ticks--outside .fluent-slider-tick {
+    block-size: 4px;
+}
+
+.fluent-slider--vertical .fluent-slider-ticks--outside .fluent-slider-tick {
+    inline-size: 4px;
+    block-size: 2px;
+}
+
+.fluent-slider-ticks--outside.fluent-slider-ticks--outside {
+    inset-block-start: 100%;
+    margin-block-start: 4px;
+}
+
+/* Thumb: outer ring is the one genuinely-new opaque base color (ControlSolidFillColorDefault);
+   inner dot is the accent color, matching WinUI's two-tone thumb. */
+.fluent-slider-thumb {
+    position: absolute;
+    inline-size: 20px;
+    block-size: 20px;
+    border-radius: 50%;
+    background-color: var(--slider-thumb-background);
+    border: 1px solid var(--slider-thumb-border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    cursor: grab;
+    transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-slider-thumb::after {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background-color: var(--slider-thumb-inner);
+    transition: inset var(--duration-fast) var(--easing-standard), background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-slider--horizontal .fluent-slider-thumb {
+    inset-inline-start: var(--slider-percent);
+    inset-block-start: 50%;
+    transform: translate(calc(-50% + var(--slider-thumb-offset-x, 0px)), -50%);
+}
+
+.fluent-slider--vertical .fluent-slider-thumb {
+    inset-block-end: var(--slider-percent);
+    inset-inline-start: 50%;
+    transform: translate(-50%, calc(50% - var(--slider-thumb-offset-y, 0px)));
+}
+
+.fluent-slider-thumb:hover::after {
+    inset: 4px;
+}
+
+.fluent-slider-thumb:active,
+.fluent-slider-thumb:focus-visible {
+    cursor: grabbing;
+}
+
+.fluent-slider-thumb:active::after {
+    inset: 6px;
+    background-color: var(--slider-thumb-inner-pressed);
+}
+
+.fluent-slider-thumb:focus-visible {
+    outline: 2px solid var(--focus-stroke-color-outer);
+    outline-offset: 2px;
+}
+
+.fluent-slider--disabled .fluent-slider-thumb {
+    background-color: var(--slider-disabled-fill);
+    border-color: var(--slider-disabled-fill);
+    cursor: default;
+}
+
+.fluent-slider--disabled .fluent-slider-thumb::after {
+    background-color: var(--text-fill-color-disabled);
+}
+
+/* Tooltip callout — lighter-weight sibling of OverlaySurface's portal tooltip (see
+   OverlaySurface.razor.css): same blur/background material, no anchoring/positioning JS needed
+   since it's just centered above a fixed-size thumb. */
+.fluent-slider-tooltip {
+    position: absolute;
+    inset-block-end: calc(100% + 8px);
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    background-color: var(--flyout-background);
+    backdrop-filter: blur(60px);
+    border: var(--control-stroke-thickness) solid var(--flyout-border);
+    border-radius: var(--overlay-corner-radius);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+    padding: 2px 8px;
+    font-size: var(--font-size-caption);
+    color: var(--text-fill-color-primary);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.fluent-slider--vertical .fluent-slider-tooltip {
+    inset-block-end: 50%;
+    inset-inline-start: calc(100% + 8px);
+    transform: translateY(50%);
+}

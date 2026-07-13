@@ -202,4 +202,20 @@
   /* Progress — ProgressBar/ProgressRing track vs. fill, ProgressBar_themeresources.xaml */
   --progress-track: var(--control-fill-color-secondary);
   --progress-fill: var(--accent-fill-color-default);
+
+  /* Slider — Slider_themeresources.xaml. SliderTrackFill/SliderThumbBackgroundFillColor aren't
+     published as cleanly as Button's ramp (same caveat as Acrylic/layer surfaces above), so the
+     rail reuses --control-strong-stroke-color-default (same "strong neutral outline" family WinUI
+     itself draws SliderTrackFill from) rather than inventing a new base color. The thumb's outer
+     ring IS meant to be a fully opaque solid regardless of theme (ControlSolidFillColorDefault) —
+     that's the one genuinely new base value here: #454545 dark / #ffffff light, hand-transcribed
+     from the same MUXC dump as everything else. */
+  --slider-rail-fill: var(--control-strong-stroke-color-default);
+  --slider-track-fill: var(--accent-fill-color-default);
+  --slider-thumb-background: #454545;
+  --slider-thumb-border: var(--control-stroke-color-default);
+  --slider-thumb-inner: var(--accent-fill-color-default);
+  --slider-thumb-inner-pressed: var(--accent-fill-color-tertiary);
+  --slider-tick-fill: var(--control-strong-stroke-color-default);
+  --slider-disabled-fill: var(--control-fill-color-disabled);
 }
