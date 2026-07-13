@@ -19,8 +19,9 @@
  *                                 above) — this is what preserves the wallpaper's light/dark shape
  *                                 through to the very end (the "gradient blur from the image" look),
  *                                 while still reading as the theme's tint color overall.
- *   .fluent-mica__noise           fine grain, flat low opacity, no blend mode.
  *   .fluent-mica__content         your ChildContent, always on top.
+ *
+ * No noise layer here — real Mica doesn't grain, that's Acrylic's texture (see FluentAcrylicBrush).
  *
  * `isolation: isolate` on the root is intentional here (unlike Acrylic, which must NOT isolate,
  * since it needs backdrop-filter to reach real content outside the box) — it keeps these two
@@ -37,6 +38,8 @@
     overflow: hidden;
     border-radius: var(--overlay-corner-radius);
     background-color: var(--mica-base-fill);
+    contain: layout paint style; /* wall off from page layout/paint, stop it repainting on unrelated scroll/resize */
+    transform: translateZ(0); /* force own compositor layer, own raster cache */
 }
 
 .fluent-mica--alt {
@@ -45,10 +48,11 @@
 
 .fluent-mica__wallpaper {
     position: absolute;
-    inset: -25%;
+    inset: -12%; /* just enough overscan for the blur kernel, not a big fixed-viewport area to blur */
     background-size: cover;
     background-position: center;
     filter: blur(var(--mica-blur-amount)) saturate(1.15);
+    transform: translateZ(0); /* own layer, GPU-composited, not re-rasterized by unrelated page repaints */
     will-change: filter;
 }
 
@@ -72,16 +76,6 @@
 
 .fluent-mica--alt .fluent-mica__tint-pass {
     background-color: rgba(var(--mica-alt-tint-color), var(--mica-alt-tint-opacity));
-}
-
-.fluent-mica__noise {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: var(--noise-asset);
-    background-repeat: repeat;
-    background-size: 256px 256px;
-    opacity: 0.02;
 }
 
 .fluent-mica__content {

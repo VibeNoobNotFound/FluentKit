@@ -62,5 +62,5 @@ public partial class FluentMicaPanel : ComponentBase
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string VariantClass => Variant == MicaVariant.BaseAlt ? "fluent-mica--alt" : "fluent-mica--base";
+    private string VariantClass => Variant == MicaVariant.Base ? "fluent-mica--alt" : "fluent-mica--base";
 }

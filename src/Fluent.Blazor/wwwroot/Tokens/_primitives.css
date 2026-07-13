@@ -31,7 +31,7 @@
      exact layer breakdown and why. --mica-blur-amount is theme-independent (heavy, since real Mica
      blurs the wallpaper very aggressively); the tint color/opacities are theme-dependent, see
      _semantic.*.css. */
-  --mica-blur-amount: 72px;
+  --mica-blur-amount: 56px;
 
   /* Acrylic — separate, lighter, LIVE backdrop-filter blur (see FluentAcrylicBrush.razor.css). Not
      the same material or recipe as Mica; kept independent on purpose. */
