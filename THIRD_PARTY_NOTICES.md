@@ -20,6 +20,12 @@ reimplemented rather than ported: both reuse this project's own IOverlayService/
 infra (the same one FluentFlyout and FluentTooltip are built on) instead of fluent-svelte's bespoke
 mousePosition/menuPosition clamp math — ContextMenu in particular anchors to an invisible marker
 moved to the cursor position rather than reimplementing its own collision-avoidance.
+ComboBox/ComboBoxItem (button vs. editable/searchable text-box trigger modes, starts-with search
+matching, keyboard navigation, selected-row menu-grow-direction/offset choreography) port
+fluent-svelte's `ComboBox.svelte`/`ComboBoxItem.svelte`. Unlike MenuFlyout/ContextMenu above, this
+deliberately does NOT go through IOverlayService — the dropdown needs to be exactly the trigger's
+width and grow from a specific list row, so it stays a plain absolutely-positioned child of the
+component's own root, same as fluent-svelte's own `.combo-box-dropdown { position: absolute }`.
 
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from

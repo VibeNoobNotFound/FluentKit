@@ -23,12 +23,15 @@
         <span class="fluent-menu-flyout-item-checkmark">
             @if (Checked)
             {
-                <FluentIcon Name="@FluentIconNames.Checkmark" />
+                <FluentIcon Name="@FluentIconNames.Checkmark" Size="12" />
             }
         </span>
     }
-    else if (Icon is not null)
+    else
     {
+        @* Always reserve the leading gutter, even with no Icon supplied, so labels line up with
+           sibling items that DO have one (or with radio/toggle bullets/checkmarks) instead of each
+           item's label starting at a different x-offset depending on its own icon state. *@
         <span class="fluent-menu-flyout-item-icon">@Icon</span>
     }
 
@@ -42,7 +45,7 @@
     @if (Cascading)
     {
         <span class="fluent-menu-flyout-item-arrow">
-            <FluentIcon Name="@FluentIconNames.ChevronRight" />
+            <FluentIcon Name="@FluentIconNames.ChevronRight" Size="12" />
         </span>
     }
 </li>

@@ -1,0 +1,341 @@
+/* Ported from fluent-svelte ComboBox.scss / ComboBoxItem.scss, re-mapped onto our token names
+   (--subtle-fill-color-*, --textbox-*, --control-*, --flyout-*) instead of fluent-svelte's own
+   --fds-* custom properties. Grow/shadow-in keyframes kept as-is since they're purely presentational. */
+
+@keyframes fluent-combo-box-menu-in {
+    0% {
+        clip-path: var(--fluent-combo-box-grow-clip-path);
+    }
+    100% {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+}
+
+@keyframes fluent-combo-box-shadow-in {
+    0% {
+        box-shadow: none;
+    }
+    100% {
+        box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
+    }
+}
+
+.fluent-combo-box {
+    position: relative;
+    display: inline-flex;
+    user-select: none;
+    min-inline-size: 150px;
+}
+
+.fluent-combo-box--disabled .fluent-combo-box-label--placeholder {
+    color: var(--text-fill-color-disabled);
+}
+
+/* ===== non-editable trigger (button) ===== */
+
+.fluent-combo-box-button {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    inline-size: 100%;
+    min-block-size: 30px;
+    padding-inline: 11px;
+    gap: 8px;
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: var(--button-border-brush);
+    background-color: var(--button-background);
+    color: var(--button-foreground);
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    cursor: default;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-combo-box-button:hover {
+    background-color: var(--button-background-pointer-over);
+}
+
+.fluent-combo-box-button:active {
+    background-color: var(--button-background-pressed);
+}
+
+.fluent-combo-box-button:disabled {
+    background-color: var(--button-background-disabled);
+    color: var(--button-foreground-disabled);
+    cursor: not-allowed;
+}
+
+.fluent-combo-box-button:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-combo-box-label {
+    flex: 1 1 auto;
+    text-align: start;
+    min-block-size: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fluent-combo-box-label--placeholder {
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-combo-box-button svg,
+.fluent-combo-box-dropdown-button svg {
+    flex: 0 0 auto;
+    color: var(--text-fill-color-secondary);
+}
+
+/* ===== editable trigger (textbox) ===== */
+
+.fluent-combo-box-textbox-container {
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    inline-size: 100%;
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: var(--textbox-border);
+    background-color: var(--textbox-background);
+    background-clip: padding-box;
+    cursor: default;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-combo-box-textbox-container:focus-within {
+    cursor: text;
+    background-color: var(--textbox-background-focus);
+}
+
+.fluent-combo-box--open .fluent-combo-box-textbox-container {
+    background-color: var(--textbox-background-focus);
+}
+
+.fluent-combo-box--open .fluent-combo-box-textbox-container .fluent-combo-box-textbox-underline::after {
+    border-bottom-width: 2px;
+    border-bottom-color: var(--textbox-underline-focus);
+}
+
+.fluent-combo-box--open .fluent-combo-box-textbox-container .fluent-combo-box-textbox-underline {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+}
+
+.fluent-combo-box-textbox-container--disabled {
+    cursor: not-allowed;
+    background-color: var(--textbox-background-disabled);
+}
+
+.fluent-combo-box-textbox {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    inline-size: 100%;
+    min-block-size: 30px;
+    padding-inline-start: 10px;
+    padding-inline-end: 4px;
+
+    border: none;
+    outline: none;
+    background-color: transparent;
+    margin: 0;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    color: var(--textbox-foreground);
+}
+
+.fluent-combo-box-textbox::placeholder {
+    color: var(--textbox-placeholder);
+}
+
+.fluent-combo-box-textbox:disabled {
+    color: var(--textbox-foreground-disabled);
+}
+
+.fluent-combo-box-textbox-underline {
+    position: absolute;
+    inset-inline-start: -1px;
+    inset-block-start: -1px;
+    inline-size: calc(100% + 2px);
+    block-size: calc(100% + 2px);
+    pointer-events: none;
+    border-radius: var(--control-corner-radius);
+    overflow: hidden;
+}
+
+.fluent-combo-box-textbox-underline::after {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    border-bottom: 1px solid var(--textbox-underline);
+}
+
+.fluent-combo-box-dropdown-button {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    inline-size: 30px;
+    block-size: 30px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-fill-color-secondary);
+    cursor: default;
+}
+
+.fluent-combo-box-dropdown-button:disabled {
+    color: var(--text-fill-color-disabled);
+    cursor: not-allowed;
+}
+
+/* ===== dropdown list ===== */
+
+.fluent-combo-box-dropdown {
+    z-index: 100;
+    position: absolute;
+    box-sizing: border-box;
+    margin: 0;
+    margin-block-start: -6px;
+    margin-inline-start: -1px;
+    padding: 1px;
+    list-style: none;
+
+    border: 1px solid var(--flyout-border);
+    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
+    background-color: var(--flyout-background);
+    backdrop-filter: blur(40px);
+    background-clip: padding-box;
+    box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
+
+    animation:
+        fluent-combo-box-menu-in var(--duration-normal, 250ms) var(--easing-standard),
+        fluent-combo-box-shadow-in var(--duration-normal, 250ms) var(--easing-standard) var(--duration-normal, 250ms);
+
+    overflow: auto;
+    inline-size: 100%;
+    max-block-size: 504px;
+    inset-block-start: var(--fluent-combo-box-menu-offset, 0);
+    inset-inline-start: 0;
+}
+
+.fluent-combo-box--editable .fluent-combo-box-dropdown {
+    margin: 0;
+    inset-inline-start: 0;
+    inset-block-start: 100%;
+    inline-size: 100%;
+    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+}
+
+.fluent-combo-box-dropdown--top {
+    --fluent-combo-box-grow-clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%);
+}
+
+.fluent-combo-box-dropdown--center {
+    --fluent-combo-box-grow-clip-path: polygon(0 25%, 100% 24%, 100% 75%, 0 75%);
+}
+
+.fluent-combo-box-dropdown--bottom {
+    --fluent-combo-box-grow-clip-path: polygon(0 75%, 100% 75%, 100% 100%, 0 100%);
+}
+
+/* ===== dropdown item ===== */
+
+.fluent-combo-box-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    margin: 4px;
+    padding-inline: 11px;
+    border-radius: var(--control-corner-radius);
+    outline: none;
+    background-color: transparent;
+    color: var(--text-fill-color-primary);
+    text-decoration: none;
+    cursor: default;
+    user-select: none;
+    block-size: 32px;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+}
+
+.fluent-combo-box-item::before {
+    content: "";
+    position: absolute;
+    border-radius: 3px;
+    background-color: var(--accent-fill-color-default);
+    transition: transform var(--duration-fast) var(--easing-standard);
+    opacity: 0;
+    inset-inline-start: 0;
+    inline-size: 3px;
+    block-size: 0;
+}
+
+.fluent-combo-box-item:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-combo-box-item:hover,
+.fluent-combo-box-item--selected {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-combo-box-item:active {
+    background-color: var(--subtle-fill-color-tertiary);
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-combo-box-item:active::before {
+    transform: scaleY(0.625);
+}
+
+.fluent-combo-box-item--disabled {
+    background-color: transparent;
+    color: var(--text-fill-color-disabled);
+    pointer-events: none;
+}
+
+.fluent-combo-box-item--disabled.fluent-combo-box-item--selected {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-combo-box-item--disabled.fluent-combo-box-item--selected::before {
+    background-color: var(--accent-fill-color-disabled);
+}
+
+.fluent-combo-box-item--selected::before {
+    opacity: 1;
+    block-size: 16px;
+}
+
+.fluent-combo-box-item span {
+    flex: 1 1 auto;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-inline-size: 100%;
+}

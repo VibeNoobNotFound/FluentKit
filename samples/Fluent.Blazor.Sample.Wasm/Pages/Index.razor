@@ -433,6 +433,29 @@
     </FluentContextMenu>
     <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_contextMenuLastAction</FluentTextBlock>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">ComboBox</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Standard (button-trigger) mode, editable (searchable text-box) mode, and a disabled instance.
+    </FluentTextBlock>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Standard</FluentTextBlock>
+            <FluentComboBox TValue="string" Items="@_comboFruitItems" @bind-Value="_comboFruit" Placeholder="Choose a fruit" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Editable / searchable</FluentTextBlock>
+            <FluentComboBox TValue="string" Items="@_comboFruitItems" @bind-Value="_comboFruitEditable"
+                            @bind-SearchValue="_comboFruitSearch" Editable="true" Placeholder="Type or pick a fruit" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Disabled</FluentTextBlock>
+            <FluentComboBox TValue="string" Items="@_comboFruitItems" Value="@_comboFruit" Disabled="true" Placeholder="Choose a fruit" />
+        </div>
+    </div>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_comboFruit — editable selection: @_comboFruitEditable — search text: @_comboFruitSearch</FluentTextBlock>
+
 </div>
 
 @code {
@@ -458,6 +481,18 @@
     private bool _menuShowHidden;
     private string _menuSortOrder = "name";
     private string? _contextMenuLastAction;
+
+    private readonly IReadOnlyList<Fluent.Blazor.Composite.ComboBoxItem<string>> _comboFruitItems = new List<Fluent.Blazor.Composite.ComboBoxItem<string>>
+    {
+        new("Apple", "apple"),
+        new("Banana", "banana"),
+        new("Cherry", "cherry"),
+        new("Durian", "durian"),
+        new("Elderberry (out of stock)", "elderberry", Disabled: true),
+    };
+    private string? _comboFruit = "apple";
+    private string? _comboFruitEditable = "apple";
+    private string? _comboFruitSearch;
 
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;
