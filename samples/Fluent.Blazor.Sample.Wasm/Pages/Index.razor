@@ -115,6 +115,41 @@
 
     <FluentDivider />
 
+    <FluentTextBlock Variant="TextBlockVariant.Title">AutoSuggestBox</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Free-typing search-as-you-type — unlike ComboBox's editable mode, <code>Text</code> is
+        never forced to match an item. <code>QuerySubmitted</code> fires on Enter with the raw
+        typed text when nothing's highlighted; <code>SuggestionChosen</code> fires separately when
+        you click a row or arrow-key to one and press Enter. Default filter is a case-insensitive
+        substring match (not prefix-only), so typing "ing" matches "Singapore".
+    </FluentTextBlock>
+    <FluentAutoSuggestBox TValue="string" Items="@_citySuggestions" @bind-Text="_citySearchText"
+                          Placeholder="Search for a city…"
+                          SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _citySuggestionChosen = item.Value)"
+                          QuerySubmitted="@((string? q) => _citySuggestionChosen = $"searched: {q}")" />
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Typed: @_citySearchText — Last result: @_citySuggestionChosen</FluentTextBlock>
+
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px; margin-top:8px;">
+        <code>EnableSearchIcon</code> shows a search glyph in the box's <code>Buttons</code> slot
+        (same slot TextBox/NumberBox use) at rest; once there's text it swaps to a clear/dismiss
+        icon that empties <code>Text</code> on click. <code>ItemTemplate</code> replaces each
+        dropdown row's inner content — same pattern as ComboBox's own ItemTemplate — so rows can
+        show more than plain text (here: a flag emoji + name + country code).
+    </FluentTextBlock>
+    <FluentAutoSuggestBox TValue="string" Items="@_countrySuggestions" @bind-Text="_countrySearchText"
+                          Placeholder="Search countries…"
+                          EnableSearchIcon="true"
+                          SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _countrySuggestionChosen = item.Value)">
+        <ItemTemplate Context="item">
+            <span>@FlagFor(item.Value)</span>
+            <span>@item.Name</span>
+            <span style="opacity:0.6; margin-left:auto;">@item.Value</span>
+        </ItemTemplate>
+    </FluentAutoSuggestBox>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Typed: @_countrySearchText — Last chosen: @_countrySuggestionChosen</FluentTextBlock>
+
+    <FluentDivider />
+
     <FluentTextBlock Variant="TextBlockVariant.Title">Materials: Mica vs. Acrylic</FluentTextBlock>
     <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
         The page background behind all of this is FluentMicaPanel, pinned with <code>position:fixed</code>
@@ -575,6 +610,45 @@
     private string _searchText = "";
     private double _numberValueCompact = 5;
     private double _numberValueExpanded = 5;
+
+    private readonly IReadOnlyList<Fluent.Blazor.Composite.AutoSuggestBoxItem<string>> _citySuggestions = new List<Fluent.Blazor.Composite.AutoSuggestBoxItem<string>>
+    {
+        new("Singapore", "SG"),
+        new("Seattle", "US-SEA"),
+        new("Seoul", "KR"),
+        new("Stockholm", "SE"),
+        new("Sydney", "AU"),
+        new("Berlin", "DE"),
+        new("London", "UK"),
+        new("Tokyo (temporarily unavailable)", "JP", Disabled: true),
+    };
+    private string? _citySearchText;
+    private string? _citySuggestionChosen;
+
+    private readonly IReadOnlyList<Fluent.Blazor.Composite.AutoSuggestBoxItem<string>> _countrySuggestions = new List<Fluent.Blazor.Composite.AutoSuggestBoxItem<string>>
+    {
+        new("Singapore", "SG"),
+        new("Sweden", "SE"),
+        new("Switzerland", "CH"),
+        new("United States", "US"),
+        new("United Kingdom", "UK"),
+        new("Japan", "JP"),
+        new("Germany (unavailable)", "DE", Disabled: true),
+    };
+    private string? _countrySearchText;
+    private string? _countrySuggestionChosen;
+
+    private static string FlagFor(string? value) => value switch
+    {
+        "SG" => "\U0001F1F8\U0001F1EC",
+        "SE" => "\U0001F1F8\U0001F1EA",
+        "CH" => "\U0001F1E8\U0001F1ED",
+        "US" => "\U0001F1FA\U0001F1F8",
+        "UK" => "\U0001F1EC\U0001F1E7",
+        "JP" => "\U0001F1EF\U0001F1F5",
+        "DE" => "\U0001F1E9\U0001F1EA",
+        _ => "\U0001F3F3\uFE0F"
+    };
 
     private readonly string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
     private string? _selectedFruit = "Apple";

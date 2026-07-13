@@ -40,6 +40,12 @@ always inside the box; Expanded: no buttons at rest, a bigger stacked up/down co
 focus via CSS `:focus-within`) is not a fluent-svelte concept — it's this project's own addition,
 self-contained/absolute-positioned rather than IOverlayService-based for the same reason as
 ComboBox/ContentDialog above.
+AutoSuggestBox (free-typing search-as-you-type, live-filtered dropdown, QuerySubmitted vs.
+SuggestionChosen split) is conceptually ported from fluent-svelte's `AutoSuggestBox.svelte`, though
+reimplemented against this project's own TextBox/dropdown primitives rather than the svelte source
+directly — composes FluentTextBox the same way NumberBox/ComboBox's editable mode do, and reuses
+ComboBox's self-contained absolutely-positioned dropdown approach (own root, not IOverlayService)
+for the same width/anchoring reasons.
 
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from

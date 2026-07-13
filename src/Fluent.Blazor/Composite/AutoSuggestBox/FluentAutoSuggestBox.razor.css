@@ -1,0 +1,74 @@
+/* Ported from fluent-svelte AutoSuggestBox's flyout list, reusing the same dropdown/item recipe
+   ComboBox's editable dropdown already established (--flyout-*, --subtle-fill-color-*, --control-*),
+   with a "highlighted" state (keyboard arrow position) standing in for ComboBox's "selected". */
+
+.fluent-autosuggest-root {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 300px;
+}
+
+.fluent-autosuggest-dropdown {
+    z-index: 100;
+    position: absolute;
+    box-sizing: border-box;
+    margin: 0;
+    margin-block-start: 4px;
+    padding: 4px;
+    list-style: none;
+
+    border: 1px solid var(--flyout-border);
+    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
+    background-color: var(--flyout-background);
+    backdrop-filter: blur(40px);
+    background-clip: padding-box;
+    box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
+
+    overflow: auto;
+    width: 100%;
+    max-height: 320px;
+    inset-inline-start: 0;
+    inset-block-start: 100%;
+}
+
+.fluent-autosuggest-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    box-sizing: border-box;
+    margin: 2px 0;
+    padding-inline: 11px;
+    border-radius: var(--control-corner-radius);
+    background-color: transparent;
+    color: var(--text-fill-color-primary);
+    cursor: default;
+    user-select: none;
+    height: 32px;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+}
+
+.fluent-autosuggest-item:hover,
+.fluent-autosuggest-item--highlighted {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-autosuggest-item:active {
+    background-color: var(--subtle-fill-color-tertiary);
+}
+
+.fluent-autosuggest-item--disabled {
+    color: var(--text-fill-color-disabled);
+    pointer-events: none;
+}
+
+.fluent-autosuggest-item span {
+    flex: 1 1 auto;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
+}
