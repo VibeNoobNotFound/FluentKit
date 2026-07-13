@@ -1,0 +1,21 @@
+@namespace Fluent.Blazor.Primitives
+
+<label class="fluent-radio-container">
+    <span class="fluent-radio @(IsSelected ? "fluent-radio--checked" : null)"
+          role="radio"
+          aria-checked="@(IsSelected ? "true" : "false")"
+          aria-disabled="@Disabled"
+          tabindex="@(Disabled ? "-1" : "0")"
+          @onclick="SelectAsync"
+          @onkeydown="OnKeyDownAsync"
+          @attributes="AdditionalAttributes">
+        @if (IsSelected)
+        {
+            <span class="fluent-radio__dot" aria-hidden="true"></span>
+        }
+    </span>
+    @if (ChildContent is not null)
+    {
+        <span class="fluent-radio-label">@ChildContent</span>
+    }
+</label>

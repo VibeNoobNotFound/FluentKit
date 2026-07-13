@@ -1,0 +1,18 @@
+@namespace Fluent.Blazor.Primitives
+
+<div class="fluent-textbox-root">
+    @if (!string.IsNullOrEmpty(Header))
+    {
+        <span class="fluent-textbox-header">@Header</span>
+    }
+    <div class="fluent-textbox-container @(Disabled ? "fluent-textbox-container--disabled" : null)">
+        <input class="fluent-textbox"
+               type="@Type"
+               value="@Value"
+               placeholder="@Placeholder"
+               disabled="@Disabled"
+               @oninput="OnInputAsync"
+               @attributes="AdditionalAttributes" />
+        <span class="fluent-textbox-underline" aria-hidden="true"></span>
+    </div>
+</div>

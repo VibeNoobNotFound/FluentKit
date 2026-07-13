@@ -1,0 +1,80 @@
+@page "/"
+@inject IThemeService ThemeService
+
+<div style="padding: 40px; display: flex; flex-direction: column; gap: 24px; align-items: flex-start;">
+
+    <div style="display:flex; gap:8px;">
+        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Light))">Light</FluentButton>
+        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Dark))">Dark</FluentButton>
+        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.System))">System</FluentButton>
+    </div>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+        <FluentButton Variant="ButtonVariant.Standard">Standard</FluentButton>
+        <FluentButton Variant="ButtonVariant.Accent">Accent</FluentButton>
+        <FluentButton Variant="ButtonVariant.Subtle">Subtle</FluentButton>
+        <FluentButton Variant="ButtonVariant.Hyperlink">Hyperlink</FluentButton>
+        <FluentButton Variant="ButtonVariant.Standard" Disabled="true">Disabled</FluentButton>
+    </div>
+
+    <div>
+        <FluentTooltip Text="This popup is rendered by FluentOverlayHost, not by the button itself.">
+            <FluentButton Variant="ButtonVariant.Standard">Hover me — proves the overlay infra</FluentButton>
+        </FluentTooltip>
+    </div>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">Fluent.Blazor primitives</FluentTextBlock>
+
+    <div style="display:flex; flex-direction:column; gap:6px;">
+        <FluentTextBlock Variant="TextBlockVariant.Display">Display</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.TitleLarge">Title large</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.Title">Title</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.Subtitle">Subtitle</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.BodyLarge">Body large</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Body strong</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.Body">Body</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.Caption">Caption</FluentTextBlock>
+    </div>
+
+    <FluentDivider />
+
+    <div style="display:flex; flex-direction:column; gap:12px;">
+        <FluentCheckBox @bind-Checked="_checkbox1">Wi-Fi</FluentCheckBox>
+        <FluentCheckBox @bind-Checked="_checkbox2" ThreeState="true" @bind-Indeterminate="_checkboxIndeterminate">Select all (three-state)</FluentCheckBox>
+        <FluentCheckBox Checked="true" Disabled="true">Disabled, checked</FluentCheckBox>
+    </div>
+
+    <FluentDivider />
+
+    <FluentRadioGroup @bind-Value="_flavor">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <FluentRadioButton Value="@("chocolate")">Chocolate</FluentRadioButton>
+            <FluentRadioButton Value="@("vanilla")">Vanilla</FluentRadioButton>
+            <FluentRadioButton Value="@("strawberry")">Strawberry</FluentRadioButton>
+        </div>
+    </FluentRadioGroup>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_flavor</FluentTextBlock>
+
+    <FluentDivider />
+
+    <FluentToggleSwitch @bind-Checked="_wifiEnabled" Header="Wi-Fi" />
+    <FluentToggleSwitch Checked="true" Disabled="true" Header="Airplane mode (disabled)" />
+
+    <FluentDivider />
+
+    <FluentTextBox @bind-Value="_name" Header="Name" Placeholder="Enter your name" />
+    <FluentTextBlock Variant="TextBlockVariant.Caption">You typed: @_name</FluentTextBlock>
+
+</div>
+
+@code {
+    private bool _checkbox1;
+    private bool _checkbox2;
+    private bool _checkboxIndeterminate = true;
+    private object? _flavor = "vanilla";
+    private bool _wifiEnabled = true;
+    private string? _name;
+}
+

@@ -1,0 +1,123 @@
+.fluent-toggleswitch-root {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fluent-toggleswitch-header {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    color: var(--toggle-foreground);
+}
+
+.fluent-toggleswitch-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.fluent-toggleswitch {
+    box-sizing: border-box;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+
+    width: 40px;
+    height: 20px;
+    border-radius: 999px;
+
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: var(--toggle-border);
+    background-color: var(--toggle-background);
+
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-toggleswitch:hover {
+    background-color: var(--toggle-background-hover);
+}
+
+.fluent-toggleswitch:active {
+    background-color: var(--toggle-background-pressed);
+}
+
+.fluent-toggleswitch:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: 2px;
+}
+
+.fluent-toggleswitch__thumb {
+    position: absolute;
+    inset-inline-start: 3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background-color: var(--toggle-foreground);
+    transition: transform var(--duration-fast) var(--easing-standard),
+                width var(--duration-fast) var(--easing-standard),
+                height var(--duration-fast) var(--easing-standard),
+                background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-toggleswitch:hover .fluent-toggleswitch__thumb {
+    width: 14px;
+    height: 14px;
+}
+
+.fluent-toggleswitch:active .fluent-toggleswitch__thumb {
+    width: 17px;
+    height: 14px;
+}
+
+/* ---------- Checked ---------- */
+.fluent-toggleswitch--checked {
+    border-color: transparent;
+    background-color: var(--toggle-checked-background);
+}
+.fluent-toggleswitch--checked .fluent-toggleswitch__thumb {
+    background-color: var(--toggle-checked-glyph);
+    transform: translateX(20px);
+}
+.fluent-toggleswitch--checked:hover {
+    background-color: var(--toggle-checked-background-hover);
+}
+.fluent-toggleswitch--checked:active {
+    background-color: var(--toggle-checked-background-pressed);
+}
+
+/* ---------- Disabled ---------- */
+.fluent-toggleswitch[aria-disabled="true"] {
+    cursor: not-allowed;
+    border-color: var(--toggle-border-disabled);
+    background-color: var(--toggle-background-disabled);
+}
+.fluent-toggleswitch[aria-disabled="true"] .fluent-toggleswitch__thumb {
+    background-color: var(--toggle-foreground-disabled);
+}
+.fluent-toggleswitch--checked[aria-disabled="true"] {
+    border-color: transparent;
+    background-color: var(--toggle-checked-background-disabled);
+}
+.fluent-toggleswitch--checked[aria-disabled="true"] .fluent-toggleswitch__thumb {
+    background-color: var(--toggle-checked-glyph-disabled);
+}
+
+.fluent-toggleswitch-label {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    color: var(--toggle-foreground);
+    min-width: 28px;
+}
+
+.fluent-toggleswitch-container:has(.fluent-toggleswitch[aria-disabled="true"]) {
+    cursor: not-allowed;
+}
+.fluent-toggleswitch-container:has(.fluent-toggleswitch[aria-disabled="true"]) .fluent-toggleswitch-label {
+    color: var(--toggle-foreground-disabled);
+}

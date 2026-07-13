@@ -1,0 +1,131 @@
+/*
+ * Dark theme semantic tokens.
+ * Source: microsoft-ui-xaml/controls/dev/CommonStyles/Common_themeresources_any.xaml,
+ * the ResourceDictionary keyed x:Key="Default" (WinUI's "Default" dictionary IS the dark theme).
+ * Hex ARGB values converted to rgba() by hand-verified script, not eyeballed.
+ * TODO: AccentFillColor* below is a placeholder (Windows default blue). Real WinUI aliases these to
+ * SystemAccentColorLight2/Light3 which come from the user's OS accent color — wire that up in
+ * ThemeService once you build the accent-color pipeline (not needed for v1 Button).
+ */
+
+:root[data-theme="dark"] {
+  /* text */
+  --text-fill-color-primary: #ffffff;
+  --text-fill-color-secondary: rgba(255, 255, 255, 0.7725);
+  --text-fill-color-tertiary: rgba(255, 255, 255, 0.5294);
+  --text-fill-color-disabled: rgba(255, 255, 255, 0.3647);
+
+  --text-on-accent-fill-color-primary: #000000;
+  --text-on-accent-fill-color-secondary: rgba(0, 0, 0, 0.502);
+  --text-on-accent-fill-color-disabled: rgba(255, 255, 255, 0.5294);
+
+  /* control fill */
+  --control-fill-color-default: rgba(255, 255, 255, 0.0588);
+  --control-fill-color-secondary: rgba(255, 255, 255, 0.0824);
+  --control-fill-color-tertiary: rgba(255, 255, 255, 0.0314);
+  --control-fill-color-disabled: rgba(255, 255, 255, 0.0431);
+  --control-fill-color-transparent: rgba(255, 255, 255, 0);
+
+  /* control stroke */
+  --control-stroke-color-default: rgba(255, 255, 255, 0.0706);
+  --control-stroke-color-secondary: rgba(255, 255, 255, 0.0941);
+
+  /* subtle fill (used by subtle/text buttons) */
+  --subtle-fill-color-transparent: rgba(255, 255, 255, 0);
+  --subtle-fill-color-secondary: rgba(255, 255, 255, 0.0588);
+  --subtle-fill-color-tertiary: rgba(255, 255, 255, 0.0392);
+  --subtle-fill-color-disabled: rgba(255, 255, 255, 0);
+
+  /* accent fill — PLACEHOLDER, see TODO above */
+  --accent-fill-color-default: #60cdff;
+  --accent-fill-color-secondary: rgba(96, 205, 255, 0.9);
+  --accent-fill-color-tertiary: rgba(96, 205, 255, 0.8);
+  --accent-fill-color-disabled: rgba(255, 255, 255, 0.1569);
+
+  /* focus + dividers */
+  --focus-stroke-color-outer: #ffffff;
+  --focus-stroke-color-inner: rgba(0, 0, 0, 0.702);
+  --divider-stroke-color-default: rgba(255, 255, 255, 0.0824);
+
+  /* flyout/overlay surfaces — CardBackgroundFillColorDefault / SurfaceStrokeColorFlyout */
+  --flyout-background: rgba(255, 255, 255, 0.0510);
+  --flyout-border: rgba(0, 0, 0, 0.2);
+
+  /* control alt fill — used by CheckBox/RadioButton/ToggleSwitch (ControlAltFillColor*) */
+  --control-alt-fill-color-transparent: rgba(0, 0, 0, 0);
+  --control-alt-fill-color-secondary: rgba(0, 0, 0, 0.1);
+  --control-alt-fill-color-tertiary: rgba(255, 255, 255, 0.042);
+  --control-alt-fill-color-quarternary: rgba(255, 255, 255, 0.07);
+  --control-alt-fill-color-disabled: rgba(0, 0, 0, 0);
+
+  /* control strong stroke — the darker/bolder outline ring used by unchecked toggle-style controls */
+  --control-strong-stroke-color-default: rgba(255, 255, 255, 0.5442);
+  --control-strong-stroke-color-disabled: rgba(255, 255, 255, 0.1581);
+
+  /* input-active fill — TextBox background once focused (ControlFillColorInputActive) */
+  --control-fill-color-input-active: rgba(31, 31, 31, 0.7);
+
+  /* ===== component aliases ===== */
+
+  /* Button (standard) — Button_themeresources.xaml */
+  --button-background: var(--control-fill-color-default);
+  --button-background-pointer-over: var(--control-fill-color-secondary);
+  --button-background-pressed: var(--control-fill-color-tertiary);
+  --button-background-disabled: var(--control-fill-color-disabled);
+  --button-foreground: var(--text-fill-color-primary);
+  --button-foreground-pointer-over: var(--text-fill-color-primary);
+  --button-foreground-pressed: var(--text-fill-color-secondary);
+  --button-foreground-disabled: var(--text-fill-color-disabled);
+  --button-border-brush: var(--control-stroke-color-default);
+  --button-border-brush-pointer-over: var(--control-stroke-color-default);
+  --button-border-brush-pressed: var(--control-stroke-color-default);
+  --button-border-brush-disabled: var(--control-stroke-color-default);
+
+  /* AccentButton */
+  --accent-button-background: var(--accent-fill-color-default);
+  --accent-button-background-pointer-over: var(--accent-fill-color-secondary);
+  --accent-button-background-pressed: var(--accent-fill-color-tertiary);
+  --accent-button-background-disabled: var(--control-fill-color-disabled);
+  --accent-button-foreground: var(--text-on-accent-fill-color-primary);
+  --accent-button-foreground-pointer-over: var(--text-on-accent-fill-color-primary);
+  --accent-button-foreground-pressed: var(--text-on-accent-fill-color-secondary);
+  --accent-button-foreground-disabled: var(--text-fill-color-disabled);
+
+  /* SubtleButton */
+  --subtle-button-background: var(--subtle-fill-color-transparent);
+  --subtle-button-background-pointer-over: var(--subtle-fill-color-secondary);
+  --subtle-button-background-pressed: var(--subtle-fill-color-tertiary);
+  --subtle-button-background-disabled: var(--subtle-fill-color-disabled);
+  --subtle-button-foreground: var(--text-fill-color-primary);
+  --subtle-button-foreground-disabled: var(--text-fill-color-disabled);
+
+  /* CheckBox / RadioButton / ToggleSwitch share WinUI's ToggleButton-family ramp */
+  --toggle-background: var(--control-alt-fill-color-secondary);
+  --toggle-background-hover: var(--control-alt-fill-color-tertiary);
+  --toggle-background-pressed: var(--control-alt-fill-color-quarternary);
+  --toggle-background-disabled: var(--control-alt-fill-color-disabled);
+  --toggle-border: var(--control-strong-stroke-color-default);
+  --toggle-border-disabled: var(--control-strong-stroke-color-disabled);
+  --toggle-foreground: var(--text-fill-color-primary);
+  --toggle-foreground-disabled: var(--text-fill-color-disabled);
+
+  --toggle-checked-background: var(--accent-fill-color-default);
+  --toggle-checked-background-hover: var(--accent-fill-color-secondary);
+  --toggle-checked-background-pressed: var(--accent-fill-color-tertiary);
+  --toggle-checked-background-disabled: var(--accent-fill-color-disabled);
+  --toggle-checked-glyph: var(--text-on-accent-fill-color-primary);
+  --toggle-checked-glyph-disabled: var(--text-on-accent-fill-color-disabled);
+
+  /* TextBox — TextControlBackground / TextControlBorderBrush */
+  --textbox-background: var(--control-fill-color-default);
+  --textbox-background-hover: var(--control-fill-color-secondary);
+  --textbox-background-focus: var(--control-fill-color-input-active);
+  --textbox-background-disabled: var(--control-fill-color-disabled);
+  --textbox-border: var(--control-stroke-color-default);
+  --textbox-underline: var(--control-strong-stroke-color-default);
+  --textbox-underline-focus: var(--accent-fill-color-default);
+  --textbox-foreground: var(--text-fill-color-primary);
+  --textbox-foreground-disabled: var(--text-fill-color-disabled);
+  --textbox-placeholder: var(--text-fill-color-secondary);
+  --textbox-placeholder-focus: var(--text-fill-color-tertiary);
+}

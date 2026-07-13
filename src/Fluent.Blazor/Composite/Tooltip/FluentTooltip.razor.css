@@ -1,0 +1,5 @@
+.fluent-tooltip-text {
+    font-size: var(--font-size-caption);
+    color: var(--text-fill-color-primary);
+    white-space: nowrap;
+}

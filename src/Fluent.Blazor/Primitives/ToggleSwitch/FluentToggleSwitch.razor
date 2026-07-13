@@ -1,0 +1,21 @@
+@namespace Fluent.Blazor.Primitives
+
+<div class="fluent-toggleswitch-root">
+    @if (!string.IsNullOrEmpty(Header))
+    {
+        <span class="fluent-toggleswitch-header">@Header</span>
+    }
+    <label class="fluent-toggleswitch-container">
+        <span class="fluent-toggleswitch @(Checked ? "fluent-toggleswitch--checked" : null)"
+              role="switch"
+              aria-checked="@(Checked ? "true" : "false")"
+              aria-disabled="@Disabled"
+              tabindex="@(Disabled ? "-1" : "0")"
+              @onclick="ToggleAsync"
+              @onkeydown="OnKeyDownAsync"
+              @attributes="AdditionalAttributes">
+            <span class="fluent-toggleswitch__thumb" aria-hidden="true"></span>
+        </span>
+        <span class="fluent-toggleswitch-label">@(Checked ? OnContent : OffContent)</span>
+    </label>
+</div>

@@ -1,0 +1,6 @@
+@namespace Fluent.Blazor.Theming
+@implements IAsyncDisposable
+
+<CascadingValue Value="this" IsFixed="true">
+    @ChildContent
+</CascadingValue>

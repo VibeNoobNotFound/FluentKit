@@ -1,0 +1,8 @@
+@inherits LayoutComponentBase
+
+<ThemeProvider>
+    @Body
+    @* Mounted once, here, near the root — every Flyout/Tooltip/ComboBox anywhere in the app tree
+       shares this single host instead of each component managing its own overlay. *@
+    <FluentOverlayHost />
+</ThemeProvider>

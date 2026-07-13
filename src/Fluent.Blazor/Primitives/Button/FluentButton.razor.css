@@ -1,0 +1,116 @@
+/*
+ * State mapping note: WinUI's VisualStateManager has explicit Normal/PointerOver/Pressed/Disabled
+ * states because XAML has no native hover/active pseudo-classes. The web does, so :hover/:active/
+ * [disabled] replace the VSM states 1:1 — no JS state tracking needed for a plain button.
+ */
+
+.fluent-button {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-width: 120px;
+    height: 32px;
+    padding: 0 12px;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-normal);
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-button:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: 2px;
+}
+
+/* ---------- Standard ---------- */
+.fluent-button--standard {
+    background-color: var(--button-background);
+    color: var(--button-foreground);
+    border-color: var(--button-border-brush);
+}
+.fluent-button--standard:hover:not(:disabled) {
+    background-color: var(--button-background-pointer-over);
+    color: var(--button-foreground-pointer-over);
+    border-color: var(--button-border-brush-pointer-over);
+}
+.fluent-button--standard:active:not(:disabled) {
+    background-color: var(--button-background-pressed);
+    color: var(--button-foreground-pressed);
+    border-color: var(--button-border-brush-pressed);
+}
+.fluent-button--standard:disabled {
+    background-color: var(--button-background-disabled);
+    color: var(--button-foreground-disabled);
+    border-color: var(--button-border-brush-disabled);
+    cursor: not-allowed;
+}
+
+/* ---------- Accent ---------- */
+.fluent-button--accent {
+    background-color: var(--accent-button-background);
+    color: var(--accent-button-foreground);
+    border-color: transparent;
+}
+.fluent-button--accent:hover:not(:disabled) {
+    background-color: var(--accent-button-background-pointer-over);
+    color: var(--accent-button-foreground-pointer-over);
+}
+.fluent-button--accent:active:not(:disabled) {
+    background-color: var(--accent-button-background-pressed);
+    color: var(--accent-button-foreground-pressed);
+}
+.fluent-button--accent:disabled {
+    background-color: var(--accent-button-background-disabled);
+    color: var(--accent-button-foreground-disabled);
+    cursor: not-allowed;
+}
+
+/* ---------- Subtle ---------- */
+.fluent-button--subtle {
+    background-color: var(--subtle-button-background);
+    color: var(--subtle-button-foreground);
+    border-color: transparent;
+    min-width: unset;
+}
+.fluent-button--subtle:hover:not(:disabled) {
+    background-color: var(--subtle-button-background-pointer-over);
+}
+.fluent-button--subtle:active:not(:disabled) {
+    background-color: var(--subtle-button-background-pressed);
+}
+.fluent-button--subtle:disabled {
+    background-color: var(--subtle-button-background-disabled);
+    color: var(--subtle-button-foreground-disabled);
+    cursor: not-allowed;
+}
+
+/* ---------- Hyperlink ---------- */
+.fluent-button--hyperlink {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--accent-fill-color-default);
+    min-width: unset;
+    height: auto;
+    padding: 0;
+    text-decoration: none;
+}
+.fluent-button--hyperlink:hover:not(:disabled) {
+    text-decoration: underline;
+}
+.fluent-button--hyperlink:disabled {
+    color: var(--text-fill-color-disabled);
+    cursor: not-allowed;
+}

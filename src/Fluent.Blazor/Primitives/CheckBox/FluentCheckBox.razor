@@ -1,0 +1,27 @@
+@namespace Fluent.Blazor.Primitives
+
+<label class="fluent-checkbox-container">
+    <span class="fluent-checkbox @(Checked ? "fluent-checkbox--checked" : null) @(Indeterminate ? "fluent-checkbox--indeterminate" : null)"
+          role="checkbox"
+          aria-checked="@AriaChecked"
+          aria-disabled="@Disabled"
+          tabindex="@(Disabled ? "-1" : "0")"
+          @onclick="ToggleAsync"
+          @onkeydown="OnKeyDownAsync"
+          @attributes="AdditionalAttributes">
+        @if (Checked && !Indeterminate)
+        {
+            <svg class="fluent-checkbox__glyph" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                <path fill="currentColor" d="M14.28 2.28a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06L6.25 9.31l6.97-6.97a.75.75 0 0 1 1.06 0Z" />
+            </svg>
+        }
+        else if (Indeterminate)
+        {
+            <span class="fluent-checkbox__dash" aria-hidden="true"></span>
+        }
+    </span>
+    @if (ChildContent is not null)
+    {
+        <span class="fluent-checkbox-label">@ChildContent</span>
+    }
+</label>

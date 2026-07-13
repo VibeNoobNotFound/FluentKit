@@ -1,0 +1,103 @@
+/*
+ * State mapping note: same VSM -> CSS pseudo-class replacement as FluentButton, plus a synthetic
+ * "checked" state driven by a CSS class instead of :checked, since this is a role="checkbox" span
+ * (not a native input) — see FluentCheckBox.razor.cs for why.
+ */
+
+.fluent-checkbox-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.fluent-checkbox {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    width: 20px;
+    height: 20px;
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: var(--toggle-border);
+    background-color: var(--toggle-background);
+    color: var(--toggle-checked-glyph);
+
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-checkbox:hover {
+    background-color: var(--toggle-background-hover);
+}
+
+.fluent-checkbox:active {
+    background-color: var(--toggle-background-pressed);
+}
+
+.fluent-checkbox:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: 2px;
+}
+
+.fluent-checkbox__glyph {
+    display: block;
+}
+
+.fluent-checkbox__dash {
+    display: block;
+    width: 10px;
+    height: 2px;
+    border-radius: 1px;
+    background-color: currentColor;
+}
+
+/* ---------- Checked / indeterminate ---------- */
+.fluent-checkbox--checked,
+.fluent-checkbox--indeterminate {
+    border-color: transparent;
+    background-color: var(--toggle-checked-background);
+    color: var(--toggle-checked-glyph);
+}
+.fluent-checkbox--checked:hover,
+.fluent-checkbox--indeterminate:hover {
+    background-color: var(--toggle-checked-background-hover);
+}
+.fluent-checkbox--checked:active,
+.fluent-checkbox--indeterminate:active {
+    background-color: var(--toggle-checked-background-pressed);
+}
+
+/* ---------- Disabled ---------- */
+.fluent-checkbox[aria-disabled="true"] {
+    cursor: not-allowed;
+    border-color: var(--toggle-border-disabled);
+    background-color: var(--toggle-background-disabled);
+}
+.fluent-checkbox--checked[aria-disabled="true"],
+.fluent-checkbox--indeterminate[aria-disabled="true"] {
+    border-color: transparent;
+    background-color: var(--toggle-checked-background-disabled);
+    color: var(--toggle-checked-glyph-disabled);
+}
+
+.fluent-checkbox-label {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    color: var(--toggle-foreground);
+}
+
+.fluent-checkbox-container:has(.fluent-checkbox[aria-disabled="true"]) {
+    cursor: not-allowed;
+}
+.fluent-checkbox-container:has(.fluent-checkbox[aria-disabled="true"]) .fluent-checkbox-label {
+    color: var(--toggle-foreground-disabled);
+}

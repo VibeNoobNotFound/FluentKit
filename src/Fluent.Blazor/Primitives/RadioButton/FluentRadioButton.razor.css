@@ -1,0 +1,99 @@
+.fluent-radio-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.fluent-radio {
+    box-sizing: border-box;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: var(--toggle-border);
+    background-color: var(--toggle-background);
+
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-radio:hover {
+    background-color: var(--toggle-background-hover);
+}
+
+.fluent-radio:active {
+    background-color: var(--toggle-background-pressed);
+}
+
+.fluent-radio:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: 2px;
+}
+
+.fluent-radio__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background-color: var(--toggle-checked-glyph);
+    transition: width var(--duration-fast) var(--easing-standard),
+                height var(--duration-fast) var(--easing-standard);
+}
+
+/* ---------- Checked ---------- */
+.fluent-radio--checked {
+    border-color: transparent;
+    background-color: var(--toggle-checked-background);
+}
+.fluent-radio--checked:hover {
+    background-color: var(--toggle-checked-background-hover);
+}
+.fluent-radio--checked:hover .fluent-radio__dot {
+    width: 12px;
+    height: 12px;
+}
+.fluent-radio--checked:active {
+    background-color: var(--toggle-checked-background-pressed);
+}
+.fluent-radio--checked:active .fluent-radio__dot {
+    width: 8px;
+    height: 8px;
+}
+
+/* ---------- Disabled ---------- */
+.fluent-radio[aria-disabled="true"] {
+    cursor: not-allowed;
+    border-color: var(--toggle-border-disabled);
+    background-color: var(--toggle-background-disabled);
+}
+.fluent-radio--checked[aria-disabled="true"] {
+    border-color: transparent;
+    background-color: var(--toggle-checked-background-disabled);
+}
+.fluent-radio--checked[aria-disabled="true"] .fluent-radio__dot {
+    background-color: var(--toggle-checked-glyph-disabled);
+}
+
+.fluent-radio-label {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    color: var(--toggle-foreground);
+}
+
+.fluent-radio-container:has(.fluent-radio[aria-disabled="true"]) {
+    cursor: not-allowed;
+}
+.fluent-radio-container:has(.fluent-radio[aria-disabled="true"]) .fluent-radio-label {
+    color: var(--toggle-foreground-disabled);
+}

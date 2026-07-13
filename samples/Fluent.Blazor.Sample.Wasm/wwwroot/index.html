@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Fluent.Blazor sample — WASM</title>
+    <base href="/" />
+    <link rel="stylesheet" href="_content/Fluent.Blazor/Tokens/tokens.css" />
+    <!-- CORRECTED: the bundled CSS-isolation stylesheet is generated for the HOST APP, not the
+         RCL, and is served from the app's own output root (no _content/ prefix). It's named after
+         this project's assembly name (Fluent.Blazor.Sample.Wasm, since no <AssemblyName> override
+         exists in the .csproj) and automatically @import's every referenced RCL's own bundle
+         (_content/Fluent.Blazor/Fluent.Blazor.bundle.scp.css) internally -- that inner file is never
+         linked directly, which is why the previous _content/Fluent.Blazor/Fluent.Blazor.styles.css
+         link 404'd. Source: https://learn.microsoft.com/aspnet/core/blazor/components/css-isolation -->
+    <link href="Fluent.Blazor.Sample.Wasm.styles.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="app">Loading…</div>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+</body>
+</html>

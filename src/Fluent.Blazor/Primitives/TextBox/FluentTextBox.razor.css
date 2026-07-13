@@ -1,0 +1,111 @@
+.fluent-textbox-root {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.fluent-textbox-header {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    color: var(--textbox-foreground);
+}
+
+.fluent-textbox-container {
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: var(--textbox-border);
+    background-color: var(--textbox-background);
+    background-clip: padding-box;
+
+    cursor: text;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-textbox-container:hover {
+    background-color: var(--textbox-background-hover);
+}
+
+.fluent-textbox-container:focus-within {
+    background-color: var(--textbox-background-focus);
+}
+
+.fluent-textbox-container:focus-within .fluent-textbox::placeholder {
+    color: var(--textbox-placeholder-focus);
+}
+
+.fluent-textbox-container:focus-within .fluent-textbox-underline::after {
+    border-bottom-width: 2px;
+    border-bottom-color: var(--textbox-underline-focus);
+}
+
+.fluent-textbox-container--disabled {
+    cursor: not-allowed;
+    background-color: var(--textbox-background-disabled);
+}
+
+.fluent-textbox-container--disabled .fluent-textbox-underline {
+    display: none;
+}
+
+.fluent-textbox {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 30px;
+    padding-inline: 10px;
+
+    border: none;
+    outline: none;
+    background-color: transparent;
+    margin: 0;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    color: var(--textbox-foreground);
+}
+
+.fluent-textbox::placeholder {
+    color: var(--textbox-placeholder);
+    user-select: none;
+}
+
+.fluent-textbox:disabled {
+    color: var(--textbox-foreground-disabled);
+}
+
+.fluent-textbox:disabled::placeholder {
+    color: var(--textbox-foreground-disabled);
+}
+
+/* The bottom-edge accent underline — sits just inside the container border, invisible until the
+   1px default line thickens/recolors to the accent color on focus (see :focus-within above). */
+.fluent-textbox-underline {
+    position: absolute;
+    inset-inline-start: -1px;
+    inset-block-start: -1px;
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+    pointer-events: none;
+    border-radius: var(--control-corner-radius);
+    overflow: hidden;
+}
+
+.fluent-textbox-underline::after {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    width: 100%;
+    height: 100%;
+    border-bottom: 1px solid var(--textbox-underline);
+}

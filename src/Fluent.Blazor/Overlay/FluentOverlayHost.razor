@@ -1,0 +1,7 @@
+@namespace Fluent.Blazor.Overlay
+@implements IDisposable
+
+@foreach (var entry in OverlayService.Active)
+{
+    <OverlaySurface @key="entry.Id" Entry="entry" />
+}

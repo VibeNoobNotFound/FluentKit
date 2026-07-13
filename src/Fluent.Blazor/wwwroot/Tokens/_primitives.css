@@ -1,0 +1,46 @@
+/*
+ * Theme-independent primitives.
+ * Values traced from microsoft-ui-xaml/controls/dev/CommonStyles/CornerRadius_themeresources.xaml
+ * and the motion conventions used across WinUI's *_themeresources.xaml files.
+ * These do NOT change between light/dark — only the semantic layer (_semantic.*.css) does.
+ */
+
+:root {
+  /* corner radius */
+  --control-corner-radius: 4px;
+  --overlay-corner-radius: 8px;
+
+  /* stroke thickness */
+  --control-stroke-thickness: 1px;
+  --focus-stroke-thickness: 2px;
+
+  /* motion */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --easing-standard: cubic-bezier(0.33, 0, 0.67, 1);
+  --easing-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --easing-accelerate: cubic-bezier(0.7, 0, 1, 0.5);
+
+  /* type ramp (Segoe UI Variable stack, with web-safe fallbacks) */
+  --font-family-base: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-size-caption: 12px;
+  --font-size-body: 14px;
+  --font-size-body-strong: 14px;
+  --font-size-body-large: 18px;
+  --font-size-subtitle: 20px;
+  --font-size-title: 28px;
+  --font-size-title-large: 40px;
+  --font-size-display: 68px;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+}
+
+/* Respect the OS-level reduced motion preference everywhere, not per-component */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+  }
+}

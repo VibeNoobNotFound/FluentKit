@@ -1,0 +1,55 @@
+.fluent-textblock {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    color: currentColor;
+    font-family: var(--font-family-base);
+}
+
+.fluent-textblock--caption {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-normal);
+    line-height: 16px;
+}
+
+.fluent-textblock--body {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-normal);
+    line-height: 20px;
+}
+
+.fluent-textblock--body-strong {
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-semibold);
+    line-height: 20px;
+}
+
+.fluent-textblock--body-large {
+    font-size: var(--font-size-body-large);
+    font-weight: var(--font-weight-normal);
+    line-height: 24px;
+}
+
+.fluent-textblock--subtitle {
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-semibold);
+    line-height: 28px;
+}
+
+.fluent-textblock--title {
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-semibold);
+    line-height: 36px;
+}
+
+.fluent-textblock--title-large {
+    font-size: var(--font-size-title-large);
+    font-weight: var(--font-weight-semibold);
+    line-height: 52px;
+}
+
+.fluent-textblock--display {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-semibold);
+    line-height: 92px;
+}
