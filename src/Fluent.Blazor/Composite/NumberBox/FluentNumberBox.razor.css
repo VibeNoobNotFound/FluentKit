@@ -1,0 +1,59 @@
+.fluent-numberbox-root {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 300px;
+}
+
+/* ---------- Compact: side-by-side minus/plus inside the box ---------- */
+.fluent-numberbox-compact {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    height: 100%;
+    gap: 2px;
+}
+
+.fluent-numberbox-compact ::deep .fluent-textbox-button {
+    width: 24px;
+}
+
+/* ---------- Expanded: bigger stacked up/down control that pops out on focus ---------- */
+.fluent-numberbox-popout {
+    box-sizing: border-box;
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 100%;
+    margin-inline-start: 4px;
+    width: 36px;
+    height: 52px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 3px;
+
+    border-radius: var(--overlay-corner-radius);
+    border: 1px solid var(--flyout-border);
+    background-color: var(--flyout-background);
+    background-clip: padding-box;
+    box-shadow: var(--dialog-shadow);
+
+    opacity: 0;
+    transform: translateY(-50%) translateX(-6px);
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--easing-standard),
+                transform var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-numberbox-root:focus-within .fluent-numberbox-popout {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+    pointer-events: auto;
+}
+
+.fluent-numberbox-popout ::deep .fluent-textbox-button {
+    flex: 1 1 0;
+    height: unset;
+    width: 100%;
+}

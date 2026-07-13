@@ -109,3 +109,17 @@
     height: 100%;
     border-bottom: 1px solid var(--textbox-underline);
 }
+
+.fluent-textbox-buttons {
+    box-sizing: border-box;
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    padding: 3px;
+    gap: 2px;
+    flex: 0 0 auto;
+}
+
+.fluent-textbox-buttons:empty {
+    display: none;
+}

@@ -31,6 +31,15 @@ dismissal, half-width end-aligned single-button footer convention) ports fluent-
 `ContentDialog.svelte`. Also self-contained rather than IOverlayService-based, for the same reason
 as ComboBox above — a modal dialog is always viewport-centered with its own full-screen scrim,
 regardless of what triggered it, which doesn't fit the anchor-relative overlay model at all.
+TextBox gained a `Buttons` slot (right-aligned button row, mirrors fluent-svelte's TextBox
+`slot="buttons"`) plus a new `TextBoxButton` primitive to fill it — subtle-fill icon-only button,
+ported from `TextBoxButton.svelte`. NumberBox composes TextBox + TextBoxButton the same way
+fluent-svelte's own `NumberBox.svelte` composes its `TextBox`/`TextBoxButton`, rather than
+reimplementing input chrome from scratch. `NumberBoxSpinButtonMode` (Compact: side-by-side +/-
+always inside the box; Expanded: no buttons at rest, a bigger stacked up/down control pops out on
+focus via CSS `:focus-within`) is not a fluent-svelte concept — it's this project's own addition,
+self-contained/absolute-positioned rather than IOverlayService-based for the same reason as
+ComboBox/ContentDialog above.
 
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from

@@ -14,5 +14,11 @@
                @oninput="OnInputAsync"
                @attributes="AdditionalAttributes" />
         <span class="fluent-textbox-underline" aria-hidden="true"></span>
+        @if (Buttons is not null)
+        {
+            <div class="fluent-textbox-buttons">
+                @Buttons
+            </div>
+        }
     </div>
 </div>

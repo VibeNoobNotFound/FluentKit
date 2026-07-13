@@ -17,6 +17,8 @@ public static class FluentIconNames
     public const string Add = "ic_fluent_add_20_regular";
     public const string Search = "ic_fluent_search_20_regular";
     public const string ChevronDown = "ic_fluent_chevron_down_20_regular";
+    public const string ChevronUp = "ic_fluent_chevron_up_20_regular";
+    public const string Subtract = "ic_fluent_subtract_20_regular";
     public const string ChevronRight = "ic_fluent_chevron_right_20_regular";
     public const string Checkmark = "ic_fluent_checkmark_20_regular";
     public const string ArrowLeft = "ic_fluent_arrow_left_20_regular";

@@ -72,6 +72,47 @@
     <FluentTextBlock Variant="TextBlockVariant.Caption">You typed: @_name</FluentTextBlock>
     <FluentTextBox Value="Can't touch this" Header="Disabled" Disabled="true" />
 
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        TextBox's <code>Buttons</code> slot for arbitrary right-aligned buttons (search/clear/custom
+        icon) — same slot NumberBox's spin buttons below are built on.
+    </FluentTextBlock>
+    <FluentTextBox @bind-Value="_searchText" Header="Custom icon button" Placeholder="Search…">
+        <Buttons>
+            <FluentTextBoxButton OnClick="@(() => _searchText = string.Empty)">
+                <FluentIcon Name="@FluentIconNames.Dismiss" Size="16" />
+            </FluentTextBoxButton>
+        </Buttons>
+    </FluentTextBox>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">NumberBox</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Wraps FluentTextBox (composes it, doesn't reimplement input chrome — same relationship
+        fluent-svelte's own NumberBox has to its TextBox) with spin buttons. Typing an
+        invalid/in-progress value (e.g. a lone "-") is kept on screen without touching
+        <code>Value</code> until it parses; spin buttons clamp to Min/Max and disable at the bounds.
+        Two <code>Mode</code>s: <b>Compact</b> keeps small +/- buttons side by side inside the box
+        at all times; <b>Expanded</b> (default) keeps the box clean at rest and pops a bigger
+        stacked up/down control out from its right edge once you click/tab into it — try focusing
+        the second one below.
+    </FluentTextBlock>
+    <div style="display:flex; gap:48px; align-items:flex-start; flex-wrap:wrap;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Compact</FluentTextBlock>
+            <FluentNumberBox @bind-Value="_numberValueCompact" Mode="NumberBoxSpinButtonMode.Compact" Min="0" Max="10" Step="1" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Expanded (focus to see the popout)</FluentTextBlock>
+            <FluentNumberBox @bind-Value="_numberValueExpanded" Mode="NumberBoxSpinButtonMode.Expanded" Min="0" Max="10" Step="1" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Disabled</FluentTextBlock>
+            <FluentNumberBox Value="3.5" Disabled="true" />
+        </div>
+    </div>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Compact: @_numberValueCompact — Expanded: @_numberValueExpanded</FluentTextBlock>
+
     <FluentDivider />
 
     <FluentTextBlock Variant="TextBlockVariant.Title">Materials: Mica vs. Acrylic</FluentTextBlock>
@@ -531,6 +572,9 @@
     private object? _flavor = "vanilla";
     private bool _wifiEnabled = true;
     private string? _name;
+    private string _searchText = "";
+    private double _numberValueCompact = 5;
+    private double _numberValueExpanded = 5;
 
     private readonly string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
     private string? _selectedFruit = "Apple";
