@@ -1,45 +1,31 @@
 /*
  * Real Mica — see FluentMicaPanel.razor.cs for the full derivation against WinUI's actual
- * BuildMicaEffectBrush effect graph. This is NOT Acrylic (see FluentAcrylicBrush.razor.css) — no
- * backdrop-filter anywhere in this file, because real Mica isn't a live blur of what's behind it;
- * it's a static blur of a wallpaper image, tinted in two chained passes.
+ * BuildMicaEffectBrush effect graph, and wwwroot/Effects/mica-interop.js for how it's produced.
  *
- * Layer order (back to front), each an absolutely-positioned div stacked in DOM order:
+ * This is NOT Acrylic (see FluentAcrylicBrush.razor.css) — no backdrop-filter, because real Mica
+ * isn't a live blur of what's behind it; it's a static blur of a wallpaper image, tinted in two
+ * chained passes.
  *
- *   .fluent-mica__wallpaper       the supplied image, heavily blurred + oversized (so the blur's
- *                                 own soft edges land outside the visible box, not inside it)
- *   .fluent-mica__luminosity-pass mix-blend-mode: luminosity, alpha = --mica-luminosity-opacity.
- *                                 True "luminosity" blend keeps the BACKDROP's (wallpaper's) hue and
- *                                 saturation but replaces its luminosity with the tint color's. With
- *                                 --mica-luminosity-opacity at WinUI's own default of 1.0, this pass
- *                                 ends up governing almost the whole final look.
- *   .fluent-mica__tint-pass       mix-blend-mode: color, alpha = --mica-tint-opacity. True "color"
- *                                 blend keeps the FOREGROUND's (tint's) hue/saturation but takes
- *                                 luminosity from whatever's under it (the luminosity-pass result
- *                                 above) — this is what preserves the wallpaper's light/dark shape
- *                                 through to the very end (the "gradient blur from the image" look),
- *                                 while still reading as the theme's tint color overall.
- *   .fluent-mica__content         your ChildContent, always on top.
+ * Unlike the first version of this file, none of that (blur, luminosity blend, color blend) happens
+ * here in CSS anymore. It's baked ONCE into a static raster by mica-interop.js's canvas render, and
+ * this file just displays the result as a plain background-image — no `filter`, no
+ * `mix-blend-mode`, no `isolation`. That's the whole performance fix: a static photo is cheap to
+ * composite regardless of how expensive it was to produce; a live filter+blend stack on a large
+ * element is not.
  *
- * No noise layer here — real Mica doesn't grain, that's Acrylic's texture (see FluentAcrylicBrush).
- *
- * `isolation: isolate` on the root is intentional here (unlike Acrylic, which must NOT isolate,
- * since it needs backdrop-filter to reach real content outside the box) — it keeps these two
- * mix-blend-mode passes contained to this panel instead of blending into the rest of the page.
- *
- * With no image supplied, .fluent-mica's own background-color (WinUI's documented
- * SolidBackgroundFillColorBase(Alt) fallback) is all that shows through — same graceful degrade
- * WinUI itself uses under RDP/Battery Saver/no compositor.
+ * With no image supplied (or still loading, or the browser can't decode it — e.g. HEIC outside
+ * Safari), .fluent-mica's own background-color (WinUI's documented SolidBackgroundFillColorBase(Alt)
+ * fallback) is all that shows — same graceful degrade WinUI itself uses under RDP/Battery Saver/no
+ * compositor.
  */
 
 .fluent-mica {
     position: relative;
-    isolation: isolate;
     overflow: hidden;
     border-radius: var(--overlay-corner-radius);
     background-color: var(--mica-base-fill);
     contain: layout paint style; /* wall off from page layout/paint, stop it repainting on unrelated scroll/resize */
-    transform: translateZ(0); /* force own compositor layer, own raster cache */
+    transform: translateZ(0); /* own compositor layer */
 }
 
 .fluent-mica--alt {
@@ -48,42 +34,11 @@
 
 .fluent-mica__wallpaper {
     position: absolute;
-    inset: -12%; /* just enough overscan for the blur kernel, not a big fixed-viewport area to blur */
+    inset: 0;
     background-size: cover;
     background-position: center;
-    filter: blur(var(--mica-blur-amount)) saturate(1.15);
-    transform: translateZ(0); /* own layer, GPU-composited, not re-rasterized by unrelated page repaints */
-    will-change: filter;
-}
-
-.fluent-mica__luminosity-pass {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(var(--mica-tint-color), var(--mica-luminosity-opacity));
-    mix-blend-mode: luminosity;
-}
-
-.fluent-mica__tint-pass {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(var(--mica-tint-color), var(--mica-tint-opacity));
-    mix-blend-mode: color;
-}
-
-.fluent-mica--alt .fluent-mica__luminosity-pass {
-    background-color: rgba(var(--mica-alt-tint-color), var(--mica-luminosity-opacity));
-}
-
-.fluent-mica--alt .fluent-mica__tint-pass {
-    background-color: rgba(var(--mica-alt-tint-color), var(--mica-alt-tint-opacity));
 }
 
 .fluent-mica__content {
     position: relative;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .fluent-mica__wallpaper {
-        filter: blur(var(--mica-blur-amount)); /* keep the blur, just drop the saturation boost */
-    }
 }
