@@ -216,6 +216,44 @@
     </FluentListView>
     <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_selectedFruit</FluentTextBlock>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">Flyout</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Generic positioned content flyout — click the trigger to open, click outside or press Escape
+        to close. Built on the same IOverlayService/FluentOverlayHost infra as the Tooltip above, but
+        click-triggered instead of hover-triggered, and its open state is bindable from code.
+    </FluentTextBlock>
+
+    <div style="display:flex; gap:24px; align-items:flex-start;">
+        <FluentFlyout Placement="OverlayPlacement.Bottom">
+            <ChildContent>
+                <FluentButton Variant="ButtonVariant.Standard">Open flyout</FluentButton>
+            </ChildContent>
+            <FlyoutContent>
+                <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Delete item?</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Body" style="margin-top:4px;">
+                    This action can't be undone.
+                </FluentTextBlock>
+            </FlyoutContent>
+        </FluentFlyout>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+            <FluentFlyout @bind-IsOpen="_flyoutOpen" Placement="OverlayPlacement.Right">
+                <ChildContent>
+                    <FluentButton Variant="ButtonVariant.Standard">Externally controlled</FluentButton>
+                </ChildContent>
+                <FlyoutContent>
+                    <FluentTextBlock Variant="TextBlockVariant.Body">Opened from the button on the right.</FluentTextBlock>
+                    <div style="margin-top:12px;">
+                        <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _flyoutOpen = false)">Close</FluentButton>
+                    </div>
+                </FlyoutContent>
+            </FluentFlyout>
+            <FluentButton Variant="ButtonVariant.Subtle" OnClick="@(() => _flyoutOpen = true)">Open from here</FluentButton>
+        </div>
+    </div>
+
 </div>
 
 @code {
@@ -228,6 +266,8 @@
 
     private readonly string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
     private string? _selectedFruit = "Apple";
+
+    private bool _flyoutOpen;
 
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;
