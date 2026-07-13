@@ -1,0 +1,44 @@
+.fluent-info-badge {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 16px;
+    min-block-size: 16px;
+    padding: 2px 4px;
+    border-radius: 16px;
+    color: var(--text-on-accent-fill-color-primary);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-caption);
+    line-height: var(--font-size-caption);
+    user-select: none;
+}
+
+/* Empty badge (no ChildContent) collapses to a plain dot — same 16px min-size but no padding needed
+   since there's no text to pad around; the min-inline/block-size alone keeps it circular. */
+.fluent-info-badge:empty {
+    padding: 0;
+    min-inline-size: 8px;
+    min-block-size: 8px;
+}
+
+.fluent-info-badge--attention {
+    background-color: var(--system-fill-color-attention);
+}
+
+.fluent-info-badge--success {
+    background-color: var(--system-fill-color-success);
+}
+
+.fluent-info-badge--caution {
+    background-color: var(--system-fill-color-caution);
+    color: #000000; /* caution yellow is too light for white text at any theme */
+}
+
+.fluent-info-badge--critical {
+    background-color: var(--system-fill-color-critical);
+}
+
+.fluent-info-badge--informational {
+    background-color: var(--system-fill-color-neutral);
+}

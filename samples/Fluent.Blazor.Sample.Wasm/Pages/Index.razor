@@ -254,6 +254,60 @@
         </div>
     </div>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">Card</FluentTextBlock>
+    <FluentCard style="max-width:360px;">
+        <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Plain surface primitive</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.Body" style="margin-top:4px;">
+            CardBackgroundFillColorDefault + CardStrokeColorDefault — the same surface Expander's
+            header/content and NavigationView's content pane are built on.
+        </FluentTextBlock>
+    </FluentCard>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">InfoBadge</FluentTextBlock>
+    <div style="display:flex; gap:16px; align-items:center;">
+        <FluentInfoBadge Severity="InfoBadgeSeverity.Attention" />
+        <FluentInfoBadge Severity="InfoBadgeSeverity.Success" />
+        <FluentInfoBadge Severity="InfoBadgeSeverity.Caution" />
+        <FluentInfoBadge Severity="InfoBadgeSeverity.Critical" />
+        <FluentInfoBadge Severity="InfoBadgeSeverity.Informational" />
+        <FluentInfoBadge Severity="InfoBadgeSeverity.Critical">99+</FluentInfoBadge>
+    </div>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">ProgressBar / ProgressRing</FluentTextBlock>
+    <div style="display:flex; flex-direction:column; gap:12px; max-width:360px;">
+        <FluentProgressBar Value="@_progressValue" />
+        <FluentProgressBar IsIndeterminate="true" />
+        <!-- FluentSlider isn't built yet (Phase 3) -- plain range input drives the demo values below -->
+        <input type="range" min="0" max="100" value="@_progressValue"
+               @oninput="@((ChangeEventArgs e) => _progressValue = double.Parse((string)e.Value!))" />
+    </div>
+    <div style="display:flex; gap:24px; align-items:center;">
+        <FluentProgressRing IsIndeterminate="true" />
+        <FluentProgressRing IsIndeterminate="false" Value="@_progressValue" />
+        <FluentProgressRing IsIndeterminate="false" Value="@_progressValue" Size="56" />
+    </div>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">Expander</FluentTextBlock>
+    <div style="max-width:480px;">
+        <FluentExpander @bind-IsExpanded="_expanderOpen">
+            <ChildContent>Advanced settings</ChildContent>
+            <Content>
+                <FluentTextBlock Variant="TextBlockVariant.Body">
+                    Collapsible content area — header click, Enter, or Space toggles it. Animated with
+                    grid-template-rows (0fr/1fr), not max-height.
+                </FluentTextBlock>
+            </Content>
+        </FluentExpander>
+    </div>
+
 </div>
 
 @code {
@@ -268,6 +322,9 @@
     private string? _selectedFruit = "Apple";
 
     private bool _flyoutOpen;
+
+    private double _progressValue = 40;
+    private bool _expanderOpen;
 
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;

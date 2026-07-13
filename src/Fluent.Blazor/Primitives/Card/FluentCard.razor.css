@@ -1,0 +1,9 @@
+.fluent-card {
+    box-sizing: border-box;
+    padding: 16px;
+    color: var(--text-fill-color-primary);
+    background-color: var(--card-background-default);
+    background-clip: padding-box;
+    border: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-radius: var(--control-corner-radius);
+}

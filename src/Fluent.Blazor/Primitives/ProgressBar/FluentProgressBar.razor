@@ -1,0 +1,19 @@
+@namespace Fluent.Blazor.Primitives
+
+<div class="fluent-progress-bar @(IsIndeterminate ? "fluent-progress-bar--indeterminate" : "")"
+     role="progressbar"
+     aria-valuemin="0"
+     aria-valuemax="100"
+     aria-valuenow="@(IsIndeterminate ? null : ClampedValue)"
+     @attributes="AdditionalAttributes">
+    <div class="fluent-progress-bar-track"></div>
+    @if (IsIndeterminate)
+    {
+        <div class="fluent-progress-bar-fill fluent-progress-bar-fill--indeterminate-1"></div>
+        <div class="fluent-progress-bar-fill fluent-progress-bar-fill--indeterminate-2"></div>
+    }
+    else
+    {
+        <div class="fluent-progress-bar-fill" style="inline-size:@(ClampedValue)%;"></div>
+    }
+</div>

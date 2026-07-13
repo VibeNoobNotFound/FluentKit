@@ -1,0 +1,56 @@
+.fluent-progress-ring {
+    --fluent-progress-ring-thickness: 3px;
+    position: relative;
+    border-radius: 50%;
+    /* Track: a full circle at --progress-track, always visible underneath the fill arc. */
+    background-image: conic-gradient(var(--progress-track) 0deg 360deg);
+    /* Punch the middle out so only a ring of --fluent-progress-ring-thickness remains — works over
+       any background behind it, unlike layering a solid circle to "hide" the center. */
+    -webkit-mask-image: radial-gradient(
+        farthest-side,
+        transparent calc(100% - var(--fluent-progress-ring-thickness)),
+        #000 calc(100% - var(--fluent-progress-ring-thickness))
+    );
+    mask-image: radial-gradient(
+        farthest-side,
+        transparent calc(100% - var(--fluent-progress-ring-thickness)),
+        #000 calc(100% - var(--fluent-progress-ring-thickness))
+    );
+}
+
+.fluent-progress-ring-mask {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    /* Determinate fill arc, drawn from 12 o'clock, clockwise, up to --fluent-progress-ring-angle;
+       the rest of the circle stays transparent so the track conic-gradient shows through. */
+    background-image: conic-gradient(
+        from 0deg,
+        var(--progress-fill) 0deg var(--fluent-progress-ring-angle, 0deg),
+        transparent var(--fluent-progress-ring-angle, 0deg) 360deg
+    );
+    transition: background-image var(--duration-normal) var(--easing-standard);
+}
+
+/* Indeterminate: fixed 270deg arc, continuously rotating — a deliberate simplification of WinUI's
+   real multi-easing indeterminate curve (see code-behind doc comment). */
+.fluent-progress-ring--indeterminate .fluent-progress-ring-mask {
+    background-image: conic-gradient(
+        from 0deg,
+        transparent 0deg 20deg,
+        var(--progress-fill) 20deg 290deg,
+        transparent 290deg 360deg
+    );
+    animation: fluent-progress-ring-spin 1.4s linear infinite;
+    transition: none;
+}
+
+@keyframes fluent-progress-ring-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fluent-progress-ring--indeterminate .fluent-progress-ring-mask {
+        animation-duration: 3.5s;
+    }
+}

@@ -1,0 +1,79 @@
+.fluent-progress-bar {
+    position: relative;
+    inline-size: 100%;
+    block-size: 3px;
+    overflow: hidden;
+    border-radius: 3px;
+}
+
+.fluent-progress-bar-track {
+    position: absolute;
+    inset: 0;
+    background-color: var(--progress-track);
+}
+
+.fluent-progress-bar-fill {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    background-color: var(--progress-fill);
+    border-radius: 3px;
+    transition: inline-size var(--duration-normal) var(--easing-standard);
+}
+
+/* Matches fluent-svelte's actual indeterminate curve: the old two-transform version had both bars
+   visible the whole time on mismatched loop lengths, which is what read as "clunky" — bar 1 pops
+   out and fades near the end of its run instead of just snapping back to start, and bar 2 stays
+   invisible until bar 1 is most of the way across, so only one bar is ever prominent at a time. */
+.fluent-progress-bar--indeterminate .fluent-progress-bar-fill--indeterminate-1 {
+    inline-size: 40%;
+    animation: fluent-progress-indeterminate-1 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.fluent-progress-bar--indeterminate .fluent-progress-bar-fill--indeterminate-2 {
+    inline-size: 60%;
+    animation: fluent-progress-indeterminate-2 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes fluent-progress-indeterminate-1 {
+    0% {
+        opacity: 1;
+        transform: translateX(-100%);
+    }
+    75% {
+        opacity: 1;
+        transform: translateX(300%);
+    }
+    75.01% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(300%);
+    }
+}
+
+@keyframes fluent-progress-indeterminate-2 {
+    0% {
+        opacity: 0;
+        transform: translateX(-150%);
+    }
+    37.49% {
+        opacity: 0;
+    }
+    37.5% {
+        opacity: 1;
+        transform: translateX(-150%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(166.66%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fluent-progress-bar-fill--indeterminate-1,
+    .fluent-progress-bar-fill--indeterminate-2 {
+        animation: none;
+    }
+}

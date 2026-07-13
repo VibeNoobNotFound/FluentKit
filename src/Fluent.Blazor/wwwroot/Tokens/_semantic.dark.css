@@ -183,4 +183,23 @@
   --list-view-item-background-selected: var(--subtle-fill-color-secondary);
   --list-view-item-background-selected-hover: var(--subtle-fill-color-tertiary);
   --list-view-selection-indicator: var(--accent-fill-color-default);
+
+  /* System fill (status) colors — SystemFillColorSuccess/Caution/Critical/Neutral, dark theme.
+     Used by InfoBadge, InfoBar, and any future validation/status UI (TextBox error state, etc).
+     *Background variants are the low-opacity tint WinUI uses behind status surfaces (InfoBar body). */
+  --system-fill-color-success: #6ccb5f;
+  --system-fill-color-caution: #fce100;
+  --system-fill-color-critical: #ff99a4;
+  --system-fill-color-neutral: rgba(255, 255, 255, 0.5442);
+  --system-fill-color-attention: var(--accent-fill-color-default);
+
+  --system-fill-color-success-background: rgba(108, 203, 95, 0.15);
+  --system-fill-color-caution-background: rgba(252, 225, 0, 0.15);
+  --system-fill-color-critical-background: rgba(255, 153, 164, 0.15);
+  --system-fill-color-neutral-background: var(--card-background-default);
+  --system-fill-color-attention-background: rgba(96, 205, 255, 0.15);
+
+  /* Progress — ProgressBar/ProgressRing track vs. fill, ProgressBar_themeresources.xaml */
+  --progress-track: var(--control-fill-color-secondary);
+  --progress-fill: var(--accent-fill-color-default);
 }

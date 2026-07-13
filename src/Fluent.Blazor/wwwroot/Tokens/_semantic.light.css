@@ -164,4 +164,22 @@
   --list-view-item-background-selected: var(--subtle-fill-color-secondary);
   --list-view-item-background-selected-hover: var(--subtle-fill-color-tertiary);
   --list-view-selection-indicator: var(--accent-fill-color-default);
+
+  /* System fill (status) colors — mirrors dark file structure, SystemFillColorSuccess/Caution/
+     Critical/Neutral light-theme values. */
+  --system-fill-color-success: #0f7b0f;
+  --system-fill-color-caution: #9d5d00;
+  --system-fill-color-critical: #c42b1c;
+  --system-fill-color-neutral: rgba(0, 0, 0, 0.4458);
+  --system-fill-color-attention: var(--accent-fill-color-default);
+
+  --system-fill-color-success-background: rgba(15, 123, 15, 0.1);
+  --system-fill-color-caution-background: rgba(157, 93, 0, 0.1);
+  --system-fill-color-critical-background: rgba(196, 43, 28, 0.1);
+  --system-fill-color-neutral-background: var(--card-background-default);
+  --system-fill-color-attention-background: rgba(0, 95, 184, 0.1);
+
+  /* Progress — mirrors dark file structure. */
+  --progress-track: var(--control-fill-color-secondary);
+  --progress-fill: var(--accent-fill-color-default);
 }

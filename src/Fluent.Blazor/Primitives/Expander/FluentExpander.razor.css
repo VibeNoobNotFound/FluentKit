@@ -1,0 +1,119 @@
+.fluent-expander {
+    display: flex;
+    flex-direction: column;
+    inline-size: 100%;
+    color: var(--text-fill-color-primary);
+    border-radius: var(--control-corner-radius);
+    user-select: none;
+}
+
+.fluent-expander-header {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 8px;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    text-align: start;
+    outline: none;
+    cursor: pointer;
+    background-color: var(--card-background-default);
+    background-clip: padding-box;
+    border: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-radius: var(--control-corner-radius);
+}
+
+/* Flatten the header's bottom corners while expanded, so it reads as one continuous surface with
+   the content area directly beneath it instead of two separately-rounded rectangles. */
+.fluent-expander:has(.fluent-expander-content-anchor--expanded) .fluent-expander-header {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+}
+
+.fluent-expander-header:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -1px;
+}
+
+.fluent-expander-icon {
+    flex: 0 0 auto;
+    display: flex;
+    inline-size: 16px;
+    block-size: 16px;
+    margin-inline-end: 16px;
+    color: var(--text-fill-color-primary);
+}
+
+.fluent-expander-header-title {
+    flex: 1 1 auto;
+}
+
+.fluent-expander-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    inline-size: 32px;
+    block-size: 32px;
+    margin-inline-start: 20px;
+    border-radius: var(--control-corner-radius);
+    color: var(--text-fill-color-primary);
+}
+
+.fluent-expander-chevron svg {
+    transition: transform calc(var(--duration-fast) * 1.2) linear;
+}
+
+.fluent-expander-chevron--expanded svg {
+    transform: rotate(180deg);
+}
+
+.fluent-expander-header:hover .fluent-expander-chevron {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-expander-header:active .fluent-expander-chevron {
+    background-color: var(--subtle-fill-color-tertiary);
+}
+
+/* fluent-svelte's real technique (not the CSS-grid 0fr/1fr trick) — that trick relies on the
+   track's "auto" minimum resolving to 0 via automatic-minimum-size rules, which is inconsistently
+   implemented (notably Safari), so the row could stall at a non-zero height and leave content
+   peeking out. This is bulletproof instead: the anchor just clips (overflow:hidden) and its
+   max-block-size jumps to a huge value INSTANTLY on expand (no transition) so content is never
+   clipped while it's visually present, and only snaps back to 0 AFTER a delay equal to the slide
+   animation's own duration on collapse — so the height never changes mid-animation, only at the
+   very end once the content has already finished sliding out of view. */
+.fluent-expander-content-anchor {
+    position: relative;
+    overflow: hidden;
+    max-block-size: 0;
+    transition: 0ms linear var(--duration-slow) max-block-size;
+}
+
+.fluent-expander-content-anchor--expanded {
+    max-block-size: 6.02e23vmax;
+    transition: none;
+}
+
+.fluent-expander-content {
+    box-sizing: border-box;
+    padding: 16px;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    background-color: var(--card-background-default);
+    background-clip: padding-box;
+    border-inline: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-block-end: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-end-start-radius: var(--control-corner-radius);
+    border-end-end-radius: var(--control-corner-radius);
+    /* Collapsed rest state: shifted fully out of view above its own box, so the anchor's clip
+       hides it completely regardless of the anchor's own height at that instant. */
+    transform: translateY(-100%);
+    transition: var(--duration-fast) cubic-bezier(1, 1, 0, 1) transform;
+}
+
+.fluent-expander-content-anchor--expanded .fluent-expander-content {
+    transform: none;
+    transition: var(--duration-slow) var(--easing-standard) transform;
+}
