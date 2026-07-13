@@ -80,7 +80,7 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
     private string? _renderedImageUrl;
     private string? _lastKey;
 
-    private string VariantClass => Variant == MicaVariant.Base ? "fluent-mica--alt" : "fluent-mica--base";
+    private string VariantClass => Variant == MicaVariant.BaseAlt ? "fluent-mica--alt" : "fluent-mica--base";
 
     protected override async Task OnInitializedAsync()
     {
