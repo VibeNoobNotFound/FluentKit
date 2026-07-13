@@ -1,0 +1,146 @@
+@namespace Fluent.Blazor.Composite
+
+<div class="fluent-calendar-view @(Floating ? "fluent-calendar-view--floating" : null)" @attributes="AdditionalAttributes">
+    <header class="fluent-calendar-view-header">
+        <div class="fluent-calendar-view-header-text" role="heading" aria-live="polite">
+            <button type="button"
+                    disabled="@(View == CalendarViewMode.Years)"
+                    @onclick="HeaderClicked"
+                    @onmousedown:preventDefault="true">
+                @HeaderText
+            </button>
+        </div>
+        <div class="fluent-calendar-view-pagination-controls">
+            <button type="button" disabled="@PrevDisabled" aria-label="Previous" @onclick="() => GoPage(-1)" @onmousedown:preventDefault="true">
+                <FluentIcon Name="@FluentIconNames.ChevronUp" Size="16" />
+            </button>
+            <button type="button" disabled="@NextDisabled" aria-label="Next" @onclick="() => GoPage(1)" @onmousedown:preventDefault="true">
+                <FluentIcon Name="@FluentIconNames.ChevronDown" Size="16" />
+            </button>
+        </div>
+    </header>
+
+    <div class="fluent-calendar-view-table-wrapper">
+        @{
+            var viewAnimClass = _viewAnimDirection == "up" ? "fluent-calendar-view-table--anim-up"
+                : _viewAnimDirection == "down" ? "fluent-calendar-view-table--anim-down" : null;
+            var pageAnimClass = _pageAnimDirection == "up" ? "fluent-calendar-view-body--anim-up"
+                : _pageAnimDirection == "down" ? "fluent-calendar-view-body--anim-down" : null;
+        }
+        <table @key="@($"view-{View}-{_renderGeneration}")"
+               class="fluent-calendar-view-table fluent-calendar-view-table--@(View == CalendarViewMode.Days ? "days" : View == CalendarViewMode.Months ? "months" : "years") @viewAnimClass"
+               role="grid">
+            @if (View == CalendarViewMode.Days)
+            {
+                <thead>
+                    <tr>
+                        @for (var d = 0; d < 7; d++)
+                        {
+                            var dow = (DayOfWeek)((d + WeekStart) % 7);
+                            <th scope="col">@Culture.DateTimeFormat.AbbreviatedDayNames[(int)dow]</th>
+                        }
+                    </tr>
+                </thead>
+
+                var days = GetCalendarDays(Page);
+                <tbody @key="@($"page-{Page:yyyyMM}-{_renderGeneration}")" class="@pageAnimClass">
+                    @for (var week = 0; week < 6; week++)
+                    {
+                        <tr>
+                            @for (var col = 0; col < 7; col++)
+                            {
+                                var index = week * 7 + col;
+                                var day = days[index];
+                                var capturedIndex = index;
+                                var inMonth = SameMonth(day, Page);
+                                var disabled = (Min.HasValue && Min.Value > day) || (Max.HasValue && Max.Value < day);
+                                var blackout = IsBlackout(day);
+                                var headerLabel = Headers && day.Day == 1 ? day.ToString("MMM", Culture) : null;
+                                <td role="gridcell">
+                                    <FluentCalendarViewItem @ref="_dayItemRefs[capturedIndex]"
+                                                             Selected="@IsSelectedDay(day)"
+                                                             Current="@SameDay(day, Today)"
+                                                             Disabled="@disabled"
+                                                             Blackout="@blackout"
+                                                             OutOfRange="@(!inMonth)"
+                                                             Header="@headerLabel"
+                                                             TabIndex="@(inMonth && day.Day == 1 ? 0 : -1)"
+                                                             OnClick="@(() => SelectDayAsync(day))"
+                                                             OnKeyDown="@((KeyboardEventArgs e) => OnGridKeyDownAsync(e, capturedIndex, 7, days.Count, _dayItemRefs))">
+                                        @day.Day
+                                    </FluentCalendarViewItem>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            }
+            else if (View == CalendarViewMode.Months)
+            {
+                var months = GetCalendarMonths(Page);
+                <tbody @key="@($"page-{Page:yyyy}-months-{_renderGeneration}")" class="@pageAnimClass">
+                    @for (var row = 0; row < 4; row++)
+                    {
+                        <tr>
+                            @for (var col = 0; col < 4; col++)
+                            {
+                                var index = row * 4 + col;
+                                var month = months[index];
+                                var capturedIndex = index;
+                                var inYear = month.Year == Page.Year;
+                                var disabled = (Min.HasValue && Min.Value.Year == month.Year && Min.Value.Month > month.Month) || (Max.HasValue && Max.Value < month);
+                                var headerLabel = Headers && month.Month == 1 ? month.Year.ToString() : null;
+                                <td role="gridcell">
+                                    <FluentCalendarViewItem @ref="_monthItemRefs[capturedIndex]"
+                                                             Variant="CalendarViewItemVariant.MonthYear"
+                                                             Selected="@(Multiple ? Values.Any(v => SameMonth(v, month)) : Value.HasValue && SameMonth(Value.Value, month))"
+                                                             Current="@SameMonth(month, Today)"
+                                                             Disabled="@disabled"
+                                                             OutOfRange="@(!inYear)"
+                                                             Header="@headerLabel"
+                                                             TabIndex="@(inYear && month.Month == 1 ? 0 : -1)"
+                                                             OnClick="@(() => SelectMonth(month))"
+                                                             OnKeyDown="@((KeyboardEventArgs e) => OnGridKeyDownAsync(e, capturedIndex, 4, months.Count, _monthItemRefs))">
+                                        @month.ToString("MMM", Culture)
+                                    </FluentCalendarViewItem>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            }
+            else
+            {
+                var years = GetCalendarYears(Page);
+                <tbody @key="@($"page-{Page.Year / 10}-years-{_renderGeneration}")" class="@pageAnimClass">
+                    @for (var row = 0; row < 4; row++)
+                    {
+                        <tr>
+                            @for (var col = 0; col < 4; col++)
+                            {
+                                var index = row * 4 + col;
+                                var year = years[index];
+                                var capturedIndex = index;
+                                var inDecade = SameDecade(year, Page);
+                                var disabled = (Min.HasValue && Min.Value.Year > year.Year) || (Max.HasValue && Max.Value < year);
+                                <td role="gridcell">
+                                    <FluentCalendarViewItem @ref="_yearItemRefs[capturedIndex]"
+                                                             Variant="CalendarViewItemVariant.MonthYear"
+                                                             Selected="@(Multiple ? Values.Any(v => SameYear(v, year)) : Value.HasValue && SameYear(Value.Value, year))"
+                                                             Current="@SameYear(year, Today)"
+                                                             Disabled="@disabled"
+                                                             OutOfRange="@(!inDecade)"
+                                                             TabIndex="@(inDecade ? 0 : -1)"
+                                                             OnClick="@(() => SelectYear(year))"
+                                                             OnKeyDown="@((KeyboardEventArgs e) => OnGridKeyDownAsync(e, capturedIndex, 4, years.Count, _yearItemRefs))">
+                                        @year.Year
+                                    </FluentCalendarViewItem>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            }
+        </table>
+    </div>
+</div>

@@ -1,0 +1,212 @@
+/* Ported from fluent-svelte CalendarView.scss, re-mapped onto our token names. Grid layout kept
+   verbatim (CSS grid rows/cols). Page-turn and view-switch transitions (originally Svelte's
+   fly/fadeScale directives) are reproduced below as plain CSS keyframe animations, restarted each
+   time by the code-behind bumping @key on the table/tbody (see FluentCalendarView.razor.cs). */
+
+.fluent-calendar-view {
+    display: inline-flex;
+    flex-direction: column;
+    text-align: start;
+    inline-size: 300px;
+    block-size: 347px;
+    position: relative;
+    user-select: none;
+    color: var(--text-fill-color-primary);
+    background-clip: padding-box;
+    background-color: var(--card-background-default);
+    border-radius: var(--control-corner-radius);
+    border: 1px solid var(--card-stroke-default);
+    font-family: var(--font-family-base);
+}
+
+.fluent-calendar-view--floating {
+    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
+    border-color: var(--flyout-border);
+    background-color: var(--flyout-background);
+    backdrop-filter: blur(40px);
+    box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
+}
+
+.fluent-calendar-view-header,
+.fluent-calendar-view-pagination-controls {
+    display: flex;
+    align-items: center;
+}
+
+.fluent-calendar-view-pagination-controls button {
+    padding: 0;
+    inline-size: 30px;
+    margin-inline-start: 4px;
+}
+
+.fluent-calendar-view-header {
+    box-sizing: border-box;
+    border-block-end: 1px solid var(--card-stroke-default);
+    inline-size: 100%;
+    padding: 7px;
+}
+
+.fluent-calendar-view-header button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    outline: none;
+    padding: 0;
+    min-block-size: 32px;
+    color: var(--text-fill-color-primary);
+    background-color: transparent;
+    border-radius: var(--control-corner-radius);
+    line-height: 20px;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-semibold);
+    cursor: default;
+}
+
+.fluent-calendar-view-header button:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-calendar-view-header button:hover {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-calendar-view-header button:active {
+    background-color: var(--subtle-fill-color-tertiary);
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-calendar-view-header button:disabled {
+    background-color: var(--subtle-fill-color-disabled);
+    color: var(--text-fill-color-disabled);
+}
+
+.fluent-calendar-view-header button svg {
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-calendar-view-header-text {
+    flex: 1 1 auto;
+}
+
+.fluent-calendar-view-header-text button {
+    inline-size: 100%;
+    padding-inline: 9px;
+    justify-content: flex-start;
+    flex: 1 1 auto;
+}
+
+.fluent-calendar-view-table-wrapper {
+    inline-size: 298px;
+    block-size: 298px;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--card-background-default);
+}
+
+.fluent-calendar-view-table {
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    position: absolute;
+    box-sizing: border-box;
+    inline-size: calc(100% - 6px);
+    block-size: calc(100% - 6px);
+    margin: 3px;
+    font-size: var(--font-size-caption);
+    border-collapse: collapse;
+}
+
+.fluent-calendar-view-table--months,
+.fluent-calendar-view-table--years {
+    margin: 11px;
+    inline-size: calc(100% - 22px);
+    block-size: calc(100% - 22px);
+}
+
+.fluent-calendar-view-table td,
+.fluent-calendar-view-table th {
+    padding: 0;
+}
+
+.fluent-calendar-view-table th {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    block-size: 40px;
+    text-align: center;
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+}
+
+.fluent-calendar-view-table thead,
+.fluent-calendar-view-table tbody {
+    inline-size: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.fluent-calendar-view-table tr {
+    display: grid;
+    inline-size: 100%;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 2px;
+    margin-block-end: 2px;
+}
+
+.fluent-calendar-view-table--months tr,
+.fluent-calendar-view-table--years tr {
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: calc(52px / 3);
+    margin-block-end: calc(52px / 3);
+}
+
+/* View switch (days <-> months <-> years): fadeScale in svelte — opacity + scale from an origin
+   point, direction-dependent (drilling in from 0.84, zooming out from 1.29). */
+@keyframes fluent-calendar-view-fade-scale-up {
+    from { opacity: 0; transform: scale(0.84); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fluent-calendar-view-fade-scale-down {
+    from { opacity: 0; transform: scale(1.29); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.fluent-calendar-view-table--anim-up {
+    animation: fluent-calendar-view-fade-scale-up 220ms cubic-bezier(0, 0.55, 0.45, 1) both;
+}
+
+.fluent-calendar-view-table--anim-down {
+    animation: fluent-calendar-view-fade-scale-down 220ms cubic-bezier(0, 0.55, 0.45, 1) both;
+}
+
+/* Page turn (prev/next month, year, or decade): fly in svelte — vertical slide, direction-dependent. */
+@keyframes fluent-calendar-view-body-slide-up {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fluent-calendar-view-body-slide-down {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.fluent-calendar-view-body--anim-up {
+    animation: fluent-calendar-view-body-slide-up 220ms cubic-bezier(0, 0.55, 0.45, 1) both;
+}
+
+.fluent-calendar-view-body--anim-down {
+    animation: fluent-calendar-view-body-slide-down 220ms cubic-bezier(0, 0.55, 0.45, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fluent-calendar-view-table--anim-up,
+    .fluent-calendar-view-table--anim-down,
+    .fluent-calendar-view-body--anim-up,
+    .fluent-calendar-view-body--anim-down {
+        animation: none;
+    }
+}

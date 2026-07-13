@@ -150,6 +150,39 @@
 
     <FluentDivider />
 
+    <FluentTextBlock Variant="TextBlockVariant.Title">CalendarView / CalendarDatePicker</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        FluentCalendarView is the standalone browsable calendar — header click cycles Days → Months →
+        Years (Years is a dead end); arrow keys move focus within the current page/grid. Blackout
+        dates get a diagonal strike and can't be picked; Min/Max clamp both selection and paging.
+        FluentCalendarDatePicker composes it as a self-contained popout under a trigger button — same
+        "not routed through IOverlayService" convention as NumberBox's Expanded mode and ComboBox's
+        dropdown — and closes itself automatically once a date is picked.
+    </FluentTextBlock>
+    <div style="display:flex; gap:48px; align-items:flex-start; flex-wrap:wrap;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <FluentTextBlock Variant="TextBlockVariant.Caption">CalendarView (standalone, with a blackout date)</FluentTextBlock>
+            <FluentCalendarView @bind-Value="_calendarValue" Blackout="@_calendarBlackout" Headers="true" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <FluentTextBlock Variant="TextBlockVariant.Caption">CalendarDatePicker</FluentTextBlock>
+                <FluentCalendarDatePicker @bind-Value="_datePickerValue" />
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <FluentTextBlock Variant="TextBlockVariant.Caption">With Min/Max (this month only)</FluentTextBlock>
+                <FluentCalendarDatePicker @bind-Value="_datePickerRangedValue" Min="@_datePickerMin" Max="@_datePickerMax" />
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <FluentTextBlock Variant="TextBlockVariant.Caption">Disabled</FluentTextBlock>
+                <FluentCalendarDatePicker Value="@DateTime.Today" Disabled="true" />
+            </div>
+        </div>
+    </div>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">CalendarView value: @_calendarValue?.ToShortDateString() — DatePicker: @_datePickerValue?.ToShortDateString() — Ranged: @_datePickerRangedValue?.ToShortDateString()</FluentTextBlock>
+
+    <FluentDivider />
+
     <FluentTextBlock Variant="TextBlockVariant.Title">Materials: Mica vs. Acrylic</FluentTextBlock>
     <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
         The page background behind all of this is FluentMicaPanel, pinned with <code>position:fixed</code>
@@ -649,6 +682,13 @@
         "DE" => "\U0001F1E9\U0001F1EA",
         _ => "\U0001F3F3\uFE0F"
     };
+
+    private DateTime? _calendarValue = DateTime.Today;
+    private readonly IReadOnlyList<DateTime> _calendarBlackout = new List<DateTime> { DateTime.Today.AddDays(3), DateTime.Today.AddDays(4) };
+    private DateTime? _datePickerValue;
+    private DateTime? _datePickerRangedValue;
+    private readonly DateTime _datePickerMin = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private readonly DateTime _datePickerMax = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(1).AddDays(-1);
 
     private readonly string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
     private string? _selectedFruit = "Apple";

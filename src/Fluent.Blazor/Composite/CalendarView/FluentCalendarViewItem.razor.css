@@ -1,0 +1,134 @@
+/* Ported from fluent-svelte CalendarViewItem.scss, re-mapped onto our token names. */
+
+.fluent-calendar-view-item {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    user-select: none;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 0;
+    border: 1px solid transparent;
+    outline: none;
+    background-color: transparent;
+    color: var(--text-fill-color-primary);
+    border-radius: 50%;
+    line-height: 20px;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    cursor: default;
+}
+
+.fluent-calendar-view-item:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-calendar-view-item:hover {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-calendar-view-item:active {
+    background-color: var(--subtle-fill-color-tertiary);
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-calendar-view-item--out-of-range {
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-calendar-view-item--disabled {
+    background-color: var(--subtle-fill-color-disabled);
+    color: var(--text-fill-color-disabled);
+}
+
+.fluent-calendar-view-item--blackout {
+    pointer-events: none;
+}
+
+.fluent-calendar-view-item--blackout::after {
+    content: "";
+    position: absolute;
+    inline-size: 26px;
+    block-size: 1px;
+    transform: rotate(-45deg);
+    border-block-start: 1px solid var(--text-fill-color-secondary);
+}
+
+.fluent-calendar-view-item--day {
+    inline-size: 40px;
+    block-size: 40px;
+}
+
+.fluent-calendar-view-item--day small {
+    inset-block-start: 2px;
+}
+
+.fluent-calendar-view-item--month-year {
+    inline-size: 56px;
+    block-size: 56px;
+}
+
+.fluent-calendar-view-item--month-year small {
+    inset-block-start: 9.58px;
+}
+
+.fluent-calendar-view-item--selected {
+    color: var(--accent-fill-color-default);
+    border: 1px solid var(--accent-fill-color-default);
+}
+
+.fluent-calendar-view-item--selected:hover {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-calendar-view-item--selected:active {
+    background-color: var(--subtle-fill-color-tertiary);
+}
+
+.fluent-calendar-view-item--selected.fluent-calendar-view-item--disabled {
+    color: var(--accent-fill-color-disabled);
+    background-color: var(--subtle-fill-color-disabled);
+    border-color: var(--accent-fill-color-disabled);
+}
+
+.fluent-calendar-view-item--selected.fluent-calendar-view-item--current {
+    box-shadow: inset 0 0 0 1px var(--text-on-accent-fill-color-primary);
+}
+
+.fluent-calendar-view-item--selected.fluent-calendar-view-item--current:focus-visible {
+    box-shadow: inset 0 0 0 1px var(--text-on-accent-fill-color-primary), 0 0 0 var(--focus-stroke-thickness) var(--focus-stroke-color-outer);
+}
+
+.fluent-calendar-view-item--current {
+    color: var(--text-on-accent-fill-color-primary);
+    background-color: var(--accent-fill-color-default);
+}
+
+.fluent-calendar-view-item--current:hover {
+    background-color: var(--accent-fill-color-secondary);
+}
+
+.fluent-calendar-view-item--current:active {
+    background-color: var(--accent-fill-color-tertiary);
+    color: var(--text-on-accent-fill-color-secondary);
+}
+
+.fluent-calendar-view-item--current.fluent-calendar-view-item--disabled {
+    background-color: var(--accent-fill-color-disabled);
+}
+
+.fluent-calendar-view-item small {
+    pointer-events: none;
+    position: absolute;
+    inline-size: 100%;
+    padding-inline: 1px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: inherit;
+    line-height: 12px;
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-normal);
+    font-size: 8px;
+}

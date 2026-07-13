@@ -46,6 +46,16 @@ reimplemented against this project's own TextBox/dropdown primitives rather than
 directly — composes FluentTextBox the same way NumberBox/ComboBox's editable mode do, and reuses
 ComboBox's self-contained absolutely-positioned dropdown approach (own root, not IOverlayService)
 for the same width/anchoring reasons.
+CalendarView/CalendarViewItem (day/month/year drill-down grid, header-click view cycling, Min/Max/
+Blackout, roving-tabindex arrow-key navigation that walks across page boundaries, `multiple`
+array-selection) ports fluent-svelte's `CalendarView.svelte` and `CalendarViewItem.svelte`. Svelte's
+`fly`/`fadeScale` transition directives (page-turn slide, view-switch zoom) have no direct Blazor
+equivalent, so they're reproduced as CSS `@keyframes` animations re-triggered via `@key` on the
+table/tbody each time the page or view changes (see FluentCalendarView.razor.cs doc comment).
+CalendarDatePicker composes CalendarView the same way
+NumberBox composes TextBox, ported from `CalendarDatePicker.svelte`, but self-contained/
+absolutely-positioned rather than wired into a generic Flyout — same IOverlayService-avoidance
+reasoning as ComboBox/NumberBox/AutoSuggestBox above.
 
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from
