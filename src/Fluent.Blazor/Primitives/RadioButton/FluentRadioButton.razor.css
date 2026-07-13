@@ -1,3 +1,8 @@
+/*
+ * Hover/active are driven off the container label, not the radio span itself — see the equivalent
+ * comment in FluentCheckBox.razor.css for why (the whole label is the clickable/hoverable area).
+ */
+
 .fluent-radio-container {
     display: inline-flex;
     align-items: center;
@@ -29,11 +34,11 @@
                 border-color var(--duration-fast) var(--easing-standard);
 }
 
-.fluent-radio:hover {
+.fluent-radio-container:hover .fluent-radio:not([aria-disabled="true"]) {
     background-color: var(--toggle-background-hover);
 }
 
-.fluent-radio:active {
+.fluent-radio-container:active .fluent-radio:not([aria-disabled="true"]) {
     background-color: var(--toggle-background-pressed);
 }
 
@@ -56,17 +61,17 @@
     border-color: transparent;
     background-color: var(--toggle-checked-background);
 }
-.fluent-radio--checked:hover {
+.fluent-radio-container:hover .fluent-radio--checked:not([aria-disabled="true"]) {
     background-color: var(--toggle-checked-background-hover);
 }
-.fluent-radio--checked:hover .fluent-radio__dot {
+.fluent-radio-container:hover .fluent-radio--checked:not([aria-disabled="true"]) .fluent-radio__dot {
     width: 12px;
     height: 12px;
 }
-.fluent-radio--checked:active {
+.fluent-radio-container:active .fluent-radio--checked:not([aria-disabled="true"]) {
     background-color: var(--toggle-checked-background-pressed);
 }
-.fluent-radio--checked:active .fluent-radio__dot {
+.fluent-radio-container:active .fluent-radio--checked:not([aria-disabled="true"]) .fluent-radio__dot {
     width: 8px;
     height: 8px;
 }

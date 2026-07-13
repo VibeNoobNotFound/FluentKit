@@ -1,0 +1,68 @@
+/*
+ * Real (in-app) Acrylic: translucent, LIVE backdrop-filter blur of whatever's actually behind the
+ * element in the page — the correct analog for XAML AcrylicBrush, which blurs live in-app content,
+ * not the desktop wallpaper (that's Mica's job — see FluentMicaPanel.razor.css for why that's a
+ * completely different, static, image-based recipe).
+ *
+ * Layer order (back to front): live page content behind the panel -> backdrop-filter blur (only
+ * works because this element's own background goes transparent, and nothing here uses `isolation`,
+ * which would wall the blur off from reaching content behind it) -> translucent tint wash living on
+ * the SAME layer as the blur -> fine noise grain on its own flat layer.
+ */
+
+.fluent-acrylic {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--overlay-corner-radius);
+    background-color: var(--acrylic-fallback-fill); /* no backdrop-filter support / reduced-transparency */
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .fluent-acrylic {
+        background-color: transparent;
+    }
+}
+
+.fluent-acrylic::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    backdrop-filter: blur(var(--acrylic-blur-amount));
+    -webkit-backdrop-filter: blur(var(--acrylic-blur-amount));
+    background-color: rgba(var(--acrylic-tint-color), var(--acrylic-tint-opacity));
+}
+
+.fluent-acrylic--thin::before {
+    backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+    -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+    background-color: rgba(var(--acrylic-tint-color), var(--acrylic-thin-tint-opacity));
+}
+
+.fluent-acrylic::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: var(--noise-asset);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.02;
+}
+
+.fluent-acrylic > * {
+    position: relative;
+    z-index: 2;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .fluent-acrylic {
+        background-color: var(--acrylic-fallback-fill) !important;
+    }
+    .fluent-acrylic::before {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background-color: transparent;
+    }
+}

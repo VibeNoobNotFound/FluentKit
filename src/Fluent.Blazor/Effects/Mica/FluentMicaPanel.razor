@@ -1,0 +1,14 @@
+@namespace Fluent.Blazor.Effects
+
+<div class="fluent-mica @VariantClass" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(BackgroundImageUrl))
+    {
+        <div class="fluent-mica__wallpaper" style="background-image:url('@BackgroundImageUrl')" aria-hidden="true"></div>
+    }
+    <div class="fluent-mica__luminosity-pass" aria-hidden="true"></div>
+    <div class="fluent-mica__tint-pass" aria-hidden="true"></div>
+    <div class="fluent-mica__noise" aria-hidden="true"></div>
+    <div class="fluent-mica__content">
+        @ChildContent
+    </div>
+</div>

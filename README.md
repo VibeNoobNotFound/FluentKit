@@ -1,19 +1,39 @@
 # Fluent.Blazor — starter scaffold
 
-This is the Phase 0 + Phase 1 + first Phase 2 component + Phase 3 skeleton from the project plan,
-hand-authored file by file. **Important caveat:** this sandbox has no .NET SDK installed and no
-access to nuget.org, so none of this has actually been run through `dotnet build`. Treat it as a
-carefully-written first draft, not a verified-working build — the very first thing to do is open it
-in Rider and let the compiler find anything I got wrong.
+A Fluent 2 / WinUI 3 design system for Blazor, built as pure Razor + CSS. See `fluent-blazor-plan.md`
+for the full roadmap this follows.
 
 ## What's here
 
-- `src/Fluent.Blazor/` — the RCL. Tokens (light+dark, transcribed from real WinUI XAML), theming
-  service, `FluentButton` (all 4 variants × 4 states), and the overlay/portal infrastructure
-  (`IOverlayService` + `FluentOverlayHost` + `OverlaySurface`) with `FluentTooltip` as the
-  proof-of-concept consumer.
-- `samples/Fluent.Blazor.Sample.Wasm/` — a Blazor WASM host wiring it all together, with a demo
-  page exercising every variant, theme switching, and the tooltip/overlay flow.
+- `src/Fluent.Blazor/` — the RCL.
+  - `Theming/` — light/dark/system theme, resolved via `IThemeService` + `theme-interop.js`
+    (`prefers-color-scheme`, live-updating), applied as `data-theme` on `<html>`.
+  - `wwwroot/Tokens/` — the token layer (`tokens.css` is the single entry point consumers link).
+    Primitives (`_primitives.css`) are theme-independent; semantics (`_semantic.{light,dark}.css`)
+    are transcribed from real WinUI XAML resource dictionaries, structured to mirror each other 1:1.
+  - `Primitives/` — `FluentButton` (4 variants × 4 states), `FluentCheckBox` (incl. three-state/
+    indeterminate), `FluentRadioButton` + `FluentRadioGroup`, `FluentToggleSwitch`, `FluentTextBox`,
+    `FluentTextBlock` (full type ramp), `FluentDivider`.
+  - `Composite/FluentTooltip` — the proof-of-concept consumer of the overlay infra.
+  - `Overlay/` — `IOverlayService` + `FluentOverlayHost` + `OverlaySurface`, Blazor's answer to
+    portal/teleportation for anything that needs to render outside its parent's layout flow
+    (tooltips today; flyouts/combo boxes/context menus next).
+  - `Effects/Mica/FluentMicaPanel` — approximates WinUI's real Mica material, rebuilt against the
+    actual effect graph in `SystemBackdropBrushFactory.cpp` (`BuildMicaEffectBrush`): a heavily
+    blurred wallpaper image, run through a luminosity-blend pass then a color-blend tint pass
+    (both real WinUI defaults: `TintOpacity`/`LuminosityOpacity`), plus noise. Opaque, static —
+    does NOT use `backdrop-filter`. Web content can't sample the desktop directly, so
+    `BackgroundImageUrl` lets the host app supply a stand-in image; with none supplied it falls
+    back to WinUI's own documented `SolidBackgroundFillColorBase(Alt)` fill. See the doc comment
+    on `FluentMicaPanel` for the full derivation.
+  - `Effects/Acrylic/FluentAcrylicBrush` — approximates WinUI's in-app Acrylic. Translucent, and a
+    different mechanism from Mica: it live-blurs whatever's actually rendered behind it via CSS
+    `backdrop-filter`, the same way in-app Acrylic blurs live content behind a flyout/nav pane.
+    `Kind.Base` (more opaque) / `Kind.Thin` (more see-through), matching `DesktopAcrylicKind`.
+- `samples/Fluent.Blazor.Sample.Wasm/` — a Blazor WASM host demoing all of the above: theme
+  switching, the whole page background running through `FluentMicaPanel` over a real wallpaper
+  image, Mica Base vs. Base Alt side by side, and `FluentAcrylicBrush` cards live-blurring that
+  Mica background behind them.
 
 ## To run it
 
@@ -23,31 +43,29 @@ dotnet restore
 dotnet run --project samples/Fluent.Blazor.Sample.Wasm
 ```
 
-Or just open `Fluent.Blazor.sln` in Rider and hit run on the WASM sample's run configuration.
+## CSS isolation gotcha (already hit once, worth remembering)
 
-## Things to double-check on first build (likely rough edges)
+A Razor Class Library's own component-scoped stylesheet (`_content/Fluent.Blazor/Fluent.Blazor.bundle.scp.css`)
+is **not** meant to be linked directly and 404s if you try. The *host app's* build generates its own
+bundle (`{HostAssemblyName}.styles.css`, served flat from the app's own root) which internally
+`@import`s every referenced RCL's bundle. Only link the host app's own generated stylesheet —
+see `samples/Fluent.Blazor.Sample.Wasm/wwwroot/index.html` for the working example.
 
-1. **Package versions.** I pinned `8.0.10` for the ASP.NET Core Components packages — bump these to
-   whatever's actually latest in the 8.x line when you restore; NuGet wasn't reachable from here to
-   confirm the current patch version.
-2. **The accent color tokens are placeholders.** `--accent-fill-color-default` in both theme files
-   is a fixed hex (Windows' default blue), not derived from the user's actual system accent — that's
-   flagged with a `TODO` comment in both `_semantic.*.css` files and is explicitly out of scope until
-   you build the accent pipeline mentioned in the original plan.
-3. **`overlay-interop.js` only flips vertically (top↔bottom).** Left/right placement and full
-   4-direction collision handling is the obvious next increment once ComboBox/ContextMenu need it.
-4. **`FluentTooltip` has no show/hide delay.** It's intentionally the simplest possible consumer of
-   the overlay infra, not a finished Tooltip — see the comment at the top of `FluentTooltip.razor.cs`.
-5. **CSS isolation + RenderFragments gotcha, already fixed once, worth remembering:** any markup you
-   build via `RenderTreeBuilder` in a `.cs` file does *not* get a component's scope attribute, so its
-   `.razor.css` styles silently won't apply. Always define dynamically-shown marks as Razor template
-   fields (`RenderFragment x = @<span>...</span>;`) inside the `.razor` file's `@code` block instead —
-   `FluentTooltip` is set up this way on purpose, as a pattern to copy for every future overlay
-   consumer (Flyout, ComboBox, ContextMenu, etc.).
+Related: any markup built via `RenderTreeBuilder` in a `.cs` file does *not* get a component's CSS
+isolation scope attribute, so `.razor.css` styles silently won't apply to it. Always define
+dynamically-shown markup as Razor template fields (`RenderFragment x = @<span>...</span>;`) inside
+the `.razor` file's `@code` block instead — `FluentTooltip` is set up this way on purpose.
 
-## Next up (not built yet)
+## Known gaps / next up
 
-Per the plan: `FluentCheckBox` and `FluentToggleSwitch` next (same pattern as Button, fastest
-components to add), then the first real Playwright screenshot test pinned against an actual WinUI 3
-screenshot, then start on `FluentFlyout` using the same `IOverlayService` pattern `FluentTooltip`
-already proved out.
+Per the plan's Phase 3/4 priority table, in roughly this order:
+1. `FluentFlyout` and `FluentComboBox`, using the same `IOverlayService` pattern `FluentTooltip`
+   already proved out (`overlay-interop.js` currently only flips vertically — left/right placement
+   and full 4-direction collision handling is needed before ComboBox can rely on it).
+2. `FluentProgressBar` / `FluentProgressRing`.
+3. Reveal (pointer-tracked gradient highlight) — same effects layer as Mica/Acrylic.
+4. The accent color tokens (`--accent-fill-color-default` etc.) are still placeholders (Windows'
+   default blue), not derived from the user's actual system accent — flagged with `TODO` in both
+   `_semantic.*.css` files.
+5. No automated tests yet (Phase 6 in the plan calls for Playwright screenshot tests pinned against
+   real WinUI 3 screenshots).

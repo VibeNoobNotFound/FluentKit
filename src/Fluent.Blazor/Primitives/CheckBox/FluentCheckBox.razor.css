@@ -2,6 +2,15 @@
  * State mapping note: same VSM -> CSS pseudo-class replacement as FluentButton, plus a synthetic
  * "checked" state driven by a CSS class instead of :checked, since this is a role="checkbox" span
  * (not a native input) — see FluentCheckBox.razor.cs for why.
+ *
+ * Hover/active/pressed are driven off the *container* label, not the checkbox span itself — the
+ * whole label (box + text) is the clickable/hoverable area (see FluentCheckBox.razor, where the
+ * click handler lives on the label for the same reason), so hovering the label text needs to show
+ * the same feedback as hovering the box.
+ *
+ * Checkmark animation: ported from fluent-svelte's Checkbox.scss. The glyph and dash are always in
+ * the DOM (not conditionally rendered) so the stroke-dashoffset / width transitions have something
+ * to animate from — a conditionally-rendered SVG has no "before" state to transition out of.
  */
 
 .fluent-checkbox-container {
@@ -15,6 +24,7 @@
 
 .fluent-checkbox {
     box-sizing: border-box;
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -35,11 +45,11 @@
                 border-color var(--duration-fast) var(--easing-standard);
 }
 
-.fluent-checkbox:hover {
+.fluent-checkbox-container:hover .fluent-checkbox:not([aria-disabled="true"]) {
     background-color: var(--toggle-background-hover);
 }
 
-.fluent-checkbox:active {
+.fluent-checkbox-container:active .fluent-checkbox:not([aria-disabled="true"]) {
     background-color: var(--toggle-background-pressed);
 }
 
@@ -49,15 +59,35 @@
 }
 
 .fluent-checkbox__glyph {
+    position: absolute;
+    inset: 0;
+    width: 12px;
+    height: 12px;
+    margin: auto;
     display: block;
+    pointer-events: none;
+}
+
+.fluent-checkbox__checkmark {
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 20.5;
+    stroke-dashoffset: 20.5;
+    transition: stroke-dashoffset var(--duration-normal) var(--easing-decelerate);
 }
 
 .fluent-checkbox__dash {
+    position: absolute;
+    inset: 0;
+    margin: auto;
     display: block;
-    width: 10px;
+    width: 0;
     height: 2px;
     border-radius: 1px;
     background-color: currentColor;
+    transition: width var(--duration-normal) var(--easing-decelerate);
 }
 
 /* ---------- Checked / indeterminate ---------- */
@@ -67,13 +97,23 @@
     background-color: var(--toggle-checked-background);
     color: var(--toggle-checked-glyph);
 }
-.fluent-checkbox--checked:hover,
-.fluent-checkbox--indeterminate:hover {
+.fluent-checkbox-container:hover .fluent-checkbox--checked:not([aria-disabled="true"]),
+.fluent-checkbox-container:hover .fluent-checkbox--indeterminate:not([aria-disabled="true"]) {
     background-color: var(--toggle-checked-background-hover);
 }
-.fluent-checkbox--checked:active,
-.fluent-checkbox--indeterminate:active {
+.fluent-checkbox-container:active .fluent-checkbox--checked:not([aria-disabled="true"]),
+.fluent-checkbox-container:active .fluent-checkbox--indeterminate:not([aria-disabled="true"]) {
     background-color: var(--toggle-checked-background-pressed);
+}
+
+/* Checked (not indeterminate): draw the checkmark in. */
+.fluent-checkbox--checked:not(.fluent-checkbox--indeterminate) .fluent-checkbox__checkmark {
+    stroke-dashoffset: 0;
+}
+
+/* Indeterminate: show the dash instead, no draw-in needed on it (it's a plain width transition). */
+.fluent-checkbox--indeterminate .fluent-checkbox__dash {
+    width: 10px;
 }
 
 /* ---------- Disabled ---------- */

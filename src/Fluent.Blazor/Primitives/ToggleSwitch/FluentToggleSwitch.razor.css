@@ -1,3 +1,9 @@
+/*
+ * Hover/active are driven off the container label, not the switch span itself — see the equivalent
+ * comment in FluentCheckBox.razor.css for why (the whole label, including the On/Off text, is the
+ * clickable/hoverable area).
+ */
+
 .fluent-toggleswitch-root {
     display: flex;
     flex-direction: column;
@@ -39,11 +45,11 @@
                 border-color var(--duration-fast) var(--easing-standard);
 }
 
-.fluent-toggleswitch:hover {
+.fluent-toggleswitch-container:hover .fluent-toggleswitch:not([aria-disabled="true"]) {
     background-color: var(--toggle-background-hover);
 }
 
-.fluent-toggleswitch:active {
+.fluent-toggleswitch-container:active .fluent-toggleswitch:not([aria-disabled="true"]) {
     background-color: var(--toggle-background-pressed);
 }
 
@@ -65,12 +71,12 @@
                 background-color var(--duration-fast) var(--easing-standard);
 }
 
-.fluent-toggleswitch:hover .fluent-toggleswitch__thumb {
+.fluent-toggleswitch-container:hover .fluent-toggleswitch:not([aria-disabled="true"]) .fluent-toggleswitch__thumb {
     width: 14px;
     height: 14px;
 }
 
-.fluent-toggleswitch:active .fluent-toggleswitch__thumb {
+.fluent-toggleswitch-container:active .fluent-toggleswitch:not([aria-disabled="true"]) .fluent-toggleswitch__thumb {
     width: 17px;
     height: 14px;
 }
@@ -84,10 +90,10 @@
     background-color: var(--toggle-checked-glyph);
     transform: translateX(20px);
 }
-.fluent-toggleswitch--checked:hover {
+.fluent-toggleswitch-container:hover .fluent-toggleswitch--checked:not([aria-disabled="true"]) {
     background-color: var(--toggle-checked-background-hover);
 }
-.fluent-toggleswitch--checked:active {
+.fluent-toggleswitch-container:active .fluent-toggleswitch--checked:not([aria-disabled="true"]) {
     background-color: var(--toggle-checked-background-pressed);
 }
 

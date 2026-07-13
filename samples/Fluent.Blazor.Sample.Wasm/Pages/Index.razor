@@ -1,73 +1,124 @@
 @page "/"
 @inject IThemeService ThemeService
 
-<div style="padding: 40px; display: flex; flex-direction: column; gap: 24px; align-items: flex-start;">
+<FluentMicaPanel Variant="MicaVariant.Base" BackgroundImageUrl="wallpaper.heic"
+                  style="min-height:100vh; width:100%;">
+    <div style="padding: 40px; display: flex; flex-direction: column; gap: 24px; align-items: flex-start;">
 
-    <div style="display:flex; gap:8px;">
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Light))">Light</FluentButton>
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Dark))">Dark</FluentButton>
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.System))">System</FluentButton>
-    </div>
-
-    <div style="display:flex; gap:8px; align-items:center;">
-        <FluentButton Variant="ButtonVariant.Standard">Standard</FluentButton>
-        <FluentButton Variant="ButtonVariant.Accent">Accent</FluentButton>
-        <FluentButton Variant="ButtonVariant.Subtle">Subtle</FluentButton>
-        <FluentButton Variant="ButtonVariant.Hyperlink">Hyperlink</FluentButton>
-        <FluentButton Variant="ButtonVariant.Standard" Disabled="true">Disabled</FluentButton>
-    </div>
-
-    <div>
-        <FluentTooltip Text="This popup is rendered by FluentOverlayHost, not by the button itself.">
-            <FluentButton Variant="ButtonVariant.Standard">Hover me — proves the overlay infra</FluentButton>
-        </FluentTooltip>
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Fluent.Blazor primitives</FluentTextBlock>
-
-    <div style="display:flex; flex-direction:column; gap:6px;">
-        <FluentTextBlock Variant="TextBlockVariant.Display">Display</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.TitleLarge">Title large</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Title">Title</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Subtitle">Subtitle</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.BodyLarge">Body large</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Body strong</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Body">Body</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Caption">Caption</FluentTextBlock>
-    </div>
-
-    <FluentDivider />
-
-    <div style="display:flex; flex-direction:column; gap:12px;">
-        <FluentCheckBox @bind-Checked="_checkbox1">Wi-Fi</FluentCheckBox>
-        <FluentCheckBox @bind-Checked="_checkbox2" ThreeState="true" @bind-Indeterminate="_checkboxIndeterminate">Select all (three-state)</FluentCheckBox>
-        <FluentCheckBox Checked="true" Disabled="true">Disabled, checked</FluentCheckBox>
-    </div>
-
-    <FluentDivider />
-
-    <FluentRadioGroup @bind-Value="_flavor">
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            <FluentRadioButton Value="@("chocolate")">Chocolate</FluentRadioButton>
-            <FluentRadioButton Value="@("vanilla")">Vanilla</FluentRadioButton>
-            <FluentRadioButton Value="@("strawberry")">Strawberry</FluentRadioButton>
+        <div style="display:flex; gap:8px;">
+            <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Light))">Light</FluentButton>
+            <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Dark))">Dark</FluentButton>
+            <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.System))">System</FluentButton>
         </div>
-    </FluentRadioGroup>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_flavor</FluentTextBlock>
 
-    <FluentDivider />
+        <div style="display:flex; gap:8px; align-items:center;">
+            <FluentButton Variant="ButtonVariant.Standard">Standard</FluentButton>
+            <FluentButton Variant="ButtonVariant.Accent">Accent</FluentButton>
+            <FluentButton Variant="ButtonVariant.Subtle">Subtle</FluentButton>
+            <FluentButton Variant="ButtonVariant.Hyperlink">Hyperlink</FluentButton>
+            <FluentButton Variant="ButtonVariant.Standard" Disabled="true">Disabled</FluentButton>
+        </div>
 
-    <FluentToggleSwitch @bind-Checked="_wifiEnabled" Header="Wi-Fi" />
-    <FluentToggleSwitch Checked="true" Disabled="true" Header="Airplane mode (disabled)" />
+        <div>
+            <FluentTooltip Text="This popup is rendered by FluentOverlayHost, not by the button itself.">
+                <FluentButton Variant="ButtonVariant.Standard">Hover me — proves the overlay infra</FluentButton>
+            </FluentTooltip>
+        </div>
 
-    <FluentDivider />
+        <FluentDivider />
 
-    <FluentTextBox @bind-Value="_name" Header="Name" Placeholder="Enter your name" />
-    <FluentTextBlock Variant="TextBlockVariant.Caption">You typed: @_name</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.Title">Fluent.Blazor primitives</FluentTextBlock>
 
-</div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+            <FluentTextBlock Variant="TextBlockVariant.Display">Display</FluentTextBlock>
+            <FluentTextBlock Variant="TextBlockVariant.TitleLarge">Title large</FluentTextBlock>
+            <FluentTextBlock Variant="TextBlockVariant.Title">Title</FluentTextBlock>
+            <FluentTextBlock Variant="TextBlockVariant.Subtitle">Subtitle</FluentTextBlock>
+            <FluentTextBlock Variant="TextBlockVariant.BodyLarge">Body large</FluentTextBlock>
+            <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Body strong</FluentTextBlock>
+            <FluentTextBlock Variant="TextBlockVariant.Body">Body</FluentTextBlock>
+            <FluentTextBlock Variant="TextBlockVariant.Caption">Caption</FluentTextBlock>
+        </div>
+
+        <FluentDivider />
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <FluentCheckBox @bind-Checked="_checkbox1">Wi-Fi</FluentCheckBox>
+            <FluentCheckBox @bind-Checked="_checkbox2" ThreeState="true" @bind-Indeterminate="_checkboxIndeterminate">Select all (three-state)</FluentCheckBox>
+            <FluentCheckBox Checked="true" Disabled="true">Disabled, checked</FluentCheckBox>
+        </div>
+
+        <FluentDivider />
+
+        <FluentRadioGroup @bind-Value="_flavor">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <FluentRadioButton Value="@("chocolate")">Chocolate</FluentRadioButton>
+                <FluentRadioButton Value="@("vanilla")">Vanilla</FluentRadioButton>
+                <FluentRadioButton Value="@("strawberry")">Strawberry</FluentRadioButton>
+                <FluentRadioButton Value="@("mint")" Disabled="true">Mint (disabled)</FluentRadioButton>
+            </div>
+        </FluentRadioGroup>
+        <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_flavor</FluentTextBlock>
+
+        <FluentDivider />
+
+        <FluentToggleSwitch @bind-Checked="_wifiEnabled" Header="Wi-Fi" />
+        <FluentToggleSwitch Checked="true" Disabled="true" Header="Airplane mode (disabled)" />
+
+        <FluentDivider />
+
+        <FluentTextBox @bind-Value="_name" Header="Name" Placeholder="Enter your name" />
+        <FluentTextBlock Variant="TextBlockVariant.Caption">You typed: @_name</FluentTextBlock>
+        <FluentTextBox Value="Can't touch this" Header="Disabled" Disabled="true" />
+
+        <FluentDivider />
+
+        <FluentTextBlock Variant="TextBlockVariant.Title">Materials: Mica vs. Acrylic</FluentTextBlock>
+        <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+            This whole page background is FluentMicaPanel — a static, opaque blur of wallpaper.heic
+            (Base variant), matching WinUI's real Mica recipe: a heavily blurred wallpaper, run through
+            a luminosity blend pass and then a color-tint blend pass. Browsers can't sample the desktop
+            directly, so BackgroundImageUrl stands in for it. The card below is FluentAcrylicBrush —
+            translucent, and a completely different mechanism: it live-blurs whatever's actually behind
+            it via backdrop-filter (right now, the Mica background you're looking at), the same way
+            in-app Acrylic blurs live content behind a flyout or nav pane in a real WinUI app.
+        </FluentTextBlock>
+
+        <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+            <FluentAcrylicBrush Kind="AcrylicKind.Base" style="width:280px; padding:20px;">
+                <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Acrylic — Base</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Caption">Live backdrop-filter blur of the Mica page background behind this card.</FluentTextBlock>
+            </FluentAcrylicBrush>
+            <FluentAcrylicBrush Kind="AcrylicKind.Thin" style="width:280px; padding:20px;">
+                <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Acrylic — Thin</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Caption">Lighter blur, lower tint opacity — more see-through, for transient surfaces.</FluentTextBlock>
+            </FluentAcrylicBrush>
+        </div>
+
+        <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Mica Base vs. Base Alt</FluentTextBlock>
+        <div style="position:relative; width:100%; max-width:640px; height:220px; border-radius:8px; overflow:hidden;">
+            <div style="position:absolute; inset:16px; display:flex; gap:16px;">
+                <FluentMicaPanel Variant="MicaVariant.Base" BackgroundImageUrl="wallpaper.heic" style="flex:1; padding:16px;">
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Base</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption">Main window surface</FluentTextBlock>
+                </FluentMicaPanel>
+                <FluentMicaPanel Variant="MicaVariant.BaseAlt" BackgroundImageUrl="wallpaper.heic" style="flex:1; padding:16px;">
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Base Alt</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption">Stronger tint — commanding/tabbed surfaces</FluentTextBlock>
+                </FluentMicaPanel>
+            </div>
+        </div>
+
+        <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+            wallpaper.heic only decodes in Safari (native OS decoder) — Chrome/Firefox/Edge will
+            silently fail to load it and every Mica panel above gracefully falls back to WinUI's own
+            documented solid fill instead, same as real Mica falling back under RDP or Battery Saver.
+            For cross-browser testing, convert it once (macOS): <code>sips -s format jpeg wallpaper.heic --out wallpaper.jpg</code>
+            and swap the two BackgroundImageUrl references above to "wallpaper.jpg".
+        </FluentTextBlock>
+
+    </div>
+</FluentMicaPanel>
 
 @code {
     private bool _checkbox1;
@@ -77,4 +128,3 @@
     private bool _wifiEnabled = true;
     private string? _name;
 }
-

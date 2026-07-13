@@ -116,6 +116,31 @@
   --toggle-checked-glyph: var(--text-on-accent-fill-color-primary);
   --toggle-checked-glyph-disabled: var(--text-on-accent-fill-color-disabled);
 
+  /* Mica — real recipe, values confirmed against WinUI's own SystemBackdropBrushFactory.cpp
+     (BuildMicaEffectBrush) and its default resource values: TintColor #202020, TintOpacity 0.8,
+     LuminosityOpacity 1.0 for the dark theme. See FluentMicaPanel.razor.css for how these three
+     numbers get composed into the two chained blend passes over the blurred wallpaper.
+     --mica-base-fill/--mica-alt-fill remain the WinUI-documented SolidBackgroundFillColorBase(Alt)
+     fallback, used when no BackgroundImageUrl is supplied (or the browser can't decode it). */
+  --mica-base-fill: #202020;
+  --mica-alt-fill: #2c2c2c;
+  --mica-tint-color: 32, 32, 32;
+  --mica-tint-opacity: 0.8;
+  --mica-luminosity-opacity: 1.0;
+  /* Mica Alt: same recipe, stronger tint — per docs, "stronger tinting of the user's desktop
+     background color" — so it keeps the same tint hue but a noticeably higher tint-opacity. */
+  --mica-alt-tint-color: 44, 44, 44;
+  --mica-alt-tint-opacity: 0.9;
+
+  /* Acrylic (in-app) — separate, translucent material, live backdrop-filter of whatever's actually
+     behind the panel. Approximate values (WinUI doesn't publish exact AcrylicInApp* numbers the way
+     it does for Mica's SystemBackdropBrushFactory defaults) — Base reads close to opaque, Thin is
+     noticeably more see-through, matching DesktopAcrylicKind.Base vs .Thin. */
+  --acrylic-fallback-fill: #2c2c2c;
+  --acrylic-tint-color: 44, 44, 44;
+  --acrylic-tint-opacity: 0.8;
+  --acrylic-thin-tint-opacity: 0.55;
+
   /* TextBox — TextControlBackground / TextControlBorderBrush */
   --textbox-background: var(--control-fill-color-default);
   --textbox-background-hover: var(--control-fill-color-secondary);

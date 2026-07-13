@@ -111,6 +111,22 @@
   --toggle-checked-glyph: var(--text-on-accent-fill-color-primary);
   --toggle-checked-glyph-disabled: var(--text-on-accent-fill-color-disabled);
 
+  /* Mica — real recipe, mirrors dark file structure. Values from WinUI's SystemBackdropBrushFactory
+     defaults: TintColor #F3F3F3, TintOpacity 0.5, LuminosityOpacity 1.0 for the light theme. */
+  --mica-base-fill: #f3f3f3;
+  --mica-alt-fill: #fafafa;
+  --mica-tint-color: 243, 243, 243;
+  --mica-tint-opacity: 0.5;
+  --mica-luminosity-opacity: 1.0;
+  --mica-alt-tint-color: 250, 250, 250;
+  --mica-alt-tint-opacity: 0.6;
+
+  /* Acrylic (in-app) — see dark file for the same caveat on exact numbers. */
+  --acrylic-fallback-fill: #fafafa;
+  --acrylic-tint-color: 252, 252, 252;
+  --acrylic-tint-opacity: 0.85;
+  --acrylic-thin-tint-opacity: 0.65;
+
   /* TextBox */
   --textbox-background: var(--control-fill-color-default);
   --textbox-background-hover: var(--control-fill-color-secondary);
