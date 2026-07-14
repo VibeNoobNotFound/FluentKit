@@ -6,9 +6,79 @@
          @attributes="AdditionalAttributes"
          @ref="_rootElement">
 
-        @if (!IsCompactOrMinimal)
+        @if (PaneDisplayMode == NavigationViewPaneDisplayMode.Left)
         {
-            <!-- Expanded mode: pane is always visible, toggles width -->
+            @* Left mode: single persistent aside that animates between rail (closed) and full
+               (open) by toggling --open / --rail CSS classes. Keeping the element in the DOM
+               across both states lets the inline-size CSS transition fire; if we swapped between
+               two @if branches the element would be destroyed and recreated, so there would be
+               nothing to transition from. *@
+            <aside class="fluent-nav-view-pane @(IsPaneOpen ? "fluent-nav-view-pane--open" : "fluent-nav-view-pane--rail")">
+                <header class="fluent-nav-view-pane-header @(!IsPaneOpen ? "fluent-nav-view-pane-header--rail" : "")">
+                    @if (IsPaneOpen)
+                    {
+                        @* Expanded header: buttons row on top, optional custom header below *@
+                        <div class="fluent-nav-view-pane-header-buttons">
+                            @if (ShowBackButton)
+                            {
+                                <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
+                                    <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                                </button>
+                            }
+                            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
+                                <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                            </button>
+                        </div>
+                        @if (PaneHeader is not null)
+                        {
+                            <div class="fluent-nav-view-pane-custom-header">
+                                @PaneHeader
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        @* Rail header: back button stacked above hamburger, same as compact rail *@
+                        @if (ShowBackButton)
+                        {
+                            <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="OnBackClick" aria-label="Back">
+                                <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                            </button>
+                        }
+                        <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
+                            <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                        </button>
+                    }
+                </header>
+                <div class="fluent-nav-view-pane-items-wrapper">
+                    <div class="fluent-nav-view-pane-items" role="list">
+                        @if (!IsPaneOpen && PaneHeaderIcon is not null)
+                        {
+                            @* Show PaneHeaderIcon as a tappable button in the rail — same as compact *@
+                            <button type="button" class="fluent-nav-view-pane-header-icon-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
+                                @PaneHeaderIcon
+                            </button>
+                        }
+                        @MenuItems
+                    </div>
+                </div>
+                <footer class="fluent-nav-view-pane-footer">
+                    @if (IsPaneOpen)
+                    {
+                        @PaneFooter
+                    }
+                    @if (ShowSettingsButton)
+                    {
+                        <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
+                            <Icon><FluentIcon Name="ic_fluent_settings_20_regular" Size="16" /></Icon>
+                        </FluentNavigationViewItem>
+                    }
+                </footer>
+            </aside>
+        }
+        else if (!IsCompactOrMinimal)
+        {
+            @* Auto / Top: pane is always visible, toggles width *@
             <aside class="fluent-nav-view-pane @(IsPaneOpen ? "fluent-nav-view-pane--open" : "")">
                 <header class="fluent-nav-view-pane-header">
                     <div class="fluent-nav-view-pane-header-buttons">
@@ -47,11 +117,10 @@
         }
         else
         {
-            <!-- Rail: icon-only, always mounted alongside the overlay below (not swapped for it) so
-                 the overlay's own CSS transition (see .fluent-nav-view-pane-overlay--open) actually
-                 has something to animate from -- an element that's freshly created via an @@if block
-                 already open has no "closed" frame to transition away from, so it used to just snap
-                 open. -->
+            @* Compact / Minimal: icon-only rail always mounted alongside the overlay.
+               The overlay is always kept in the DOM (never swapped via @if) so the
+               CSS translateX transition has a "closed" frame to animate from; an element
+               that's freshly created already open has no closed frame and snaps. *@
             <aside class="fluent-nav-view-pane fluent-nav-view-pane--rail @(PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal ? "fluent-nav-view-pane--rail-minimal" : "")">
                 <header class="fluent-nav-view-pane-header fluent-nav-view-pane-header--rail">
                     @if (ShowBackButton)
@@ -92,12 +161,9 @@
 
             <div class="fluent-nav-view-pane-overlay @(IsPaneOpen ? "fluent-nav-view-pane-overlay--open" : "")"
                  aria-hidden="@(!IsPaneOpen)">
-                @* Real DOM nesting instead of ::before/::after + cross-sibling z-index (same fix
-                   applied to OverlaySurface/AutoSuggestBox/ComboBox — a backdrop-filter element's
-                   compositing doesn't reliably honor z-index against later, higher-z-index siblings
-                   across engines). Material div paints first, then the real header/items/footer
-                   content paints after it in a dedicated wrapper, guaranteed on top by DOM order
-                   alone. *@
+                @* Material div painted first; real content wrapper painted after it in DOM order
+                   (guaranteed above it without cross-sibling z-index tricks — backdrop-filter
+                   compositing doesn't reliably honor z-index against later siblings). *@
                 <div class="fluent-nav-view-pane-overlay-material" aria-hidden="true"></div>
                 <div class="fluent-nav-view-pane-overlay-content">
                     <header class="fluent-nav-view-pane-header">
@@ -168,12 +234,10 @@
     {
         get
         {
-            // When in compact/minimal and pane is open, we switch to minimal mode
-            // so the overlay shows labels properly.
-            if (IsCompactOrMinimal && IsPaneOpen)
-            {
-                return "minimal";
-            }
+            // Compact/Minimal when open: restore full-label rendering inside the overlay
+            if (IsCompactOrMinimal && IsPaneOpen) return "minimal";
+            // Left mode when closed: apply compact CSS rules so items show icon-only (rail look)
+            if (PaneDisplayMode == NavigationViewPaneDisplayMode.Left && !IsPaneOpen) return "compact";
             return PaneDisplayModeClass;
         }
     }
