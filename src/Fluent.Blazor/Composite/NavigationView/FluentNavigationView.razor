@@ -31,76 +31,70 @@
                     @PaneFooter
                     @if (ShowSettingsButton)
                     {
-                        <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-settings-button" @onclick="OnSettingsClick" aria-label="Settings">
-                            <FluentIcon Name="ic_fluent_settings_20_regular" Size="16" />
-                            @if (IsPaneOpen)
-                            {
-                                <span>Settings</span>
-                            }
-                        </button>
+                        <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
+                            <Icon><FluentIcon Name="ic_fluent_settings_20_regular" Size="16" /></Icon>
+                        </FluentNavigationViewItem>
                     }
                 </footer>
             </aside>
         }
         else
         {
-            if (IsPaneOpen)
-            {
-                <!-- Overlay mode: full pane overlay (no rail) -->
-                <div class="fluent-nav-view-pane-overlay fluent-nav-view-pane-overlay--open">
-                    <header class="fluent-nav-view-pane-header">
-                        @if (ShowBackButton)
-                        {
-                            <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
-                                <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
-                            </button>
-                        }
-                        <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
-                            <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
-                        </button>
-                        @PaneHeader
-                    </header>
-                    <div class="fluent-nav-view-pane-items-wrapper">
-                        <div class="fluent-nav-view-pane-items" role="list">
-                            @MenuItems
-                        </div>
+            <!-- Rail: icon-only, always mounted alongside the overlay below (not swapped for it) so
+                 the overlay's own CSS transition (see .fluent-nav-view-pane-overlay--open) actually
+                 has something to animate from -- an element that's freshly created via an @@if block
+                 already open has no "closed" frame to transition away from, so it used to just snap
+                 open. -->
+            <aside class="fluent-nav-view-pane fluent-nav-view-pane--rail @(PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal ? "fluent-nav-view-pane--rail-minimal" : "")">
+                <header class="fluent-nav-view-pane-header fluent-nav-view-pane-header--rail">
+                    <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
+                        <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                    </button>
+                </header>
+                <div class="fluent-nav-view-pane-items-wrapper">
+                    <div class="fluent-nav-view-pane-items" role="list">
+                        @MenuItems
                     </div>
-                    <footer class="fluent-nav-view-pane-footer">
-                        @PaneFooter
-                        @if (ShowSettingsButton)
-                        {
-                            <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-settings-button" @onclick="OnSettingsClick" aria-label="Settings">
-                                <FluentIcon Name="ic_fluent_settings_20_regular" Size="16" />
-                                <span>Settings</span>
-                            </button>
-                        }
-                    </footer>
                 </div>
-            }
-            else
-            {
-                <!-- Rail mode: icon-only rail -->
-                <aside class="fluent-nav-view-pane fluent-nav-view-pane--rail @(PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal ? "fluent-nav-view-pane--rail-minimal" : "")">
-                    <header class="fluent-nav-view-pane-header fluent-nav-view-pane-header--rail">
-                        <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
-                            <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                <footer class="fluent-nav-view-pane-footer">
+                    @if (ShowSettingsButton)
+                    {
+                        <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
+                            <Icon><FluentIcon Name="ic_fluent_settings_20_regular" Size="16" /></Icon>
+                        </FluentNavigationViewItem>
+                    }
+                </footer>
+            </aside>
+
+            <div class="fluent-nav-view-pane-overlay @(IsPaneOpen ? "fluent-nav-view-pane-overlay--open" : "")"
+                 aria-hidden="@(!IsPaneOpen)">
+                <header class="fluent-nav-view-pane-header">
+                    @if (ShowBackButton)
+                    {
+                        <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
+                            <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
                         </button>
-                    </header>
-                    <div class="fluent-nav-view-pane-items-wrapper">
-                        <div class="fluent-nav-view-pane-items" role="list">
-                            @MenuItems
-                        </div>
+                    }
+                    <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
+                        <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                    </button>
+                    @PaneHeader
+                </header>
+                <div class="fluent-nav-view-pane-items-wrapper">
+                    <div class="fluent-nav-view-pane-items" role="list">
+                        @MenuItems
                     </div>
-                    <footer class="fluent-nav-view-pane-footer">
-                        @if (ShowSettingsButton)
-                        {
-                            <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail fluent-nav-view-settings-button" @onclick="OnSettingsClick" aria-label="Settings">
-                                <FluentIcon Name="ic_fluent_settings_20_regular" Size="16" />
-                            </button>
-                        }
-                    </footer>
-                </aside>
-            }
+                </div>
+                <footer class="fluent-nav-view-pane-footer">
+                    @PaneFooter
+                    @if (ShowSettingsButton)
+                    {
+                        <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
+                            <Icon><FluentIcon Name="ic_fluent_settings_20_regular" Size="16" /></Icon>
+                        </FluentNavigationViewItem>
+                    }
+                </footer>
+            </div>
         }
 
         <div class="fluent-nav-view-content @(PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal && !IsPaneOpen ? "fluent-nav-view-content--minimal-closed" : "")">

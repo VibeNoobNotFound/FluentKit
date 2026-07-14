@@ -21,6 +21,22 @@ public enum NavigationViewDisplayMode
 
 public partial class FluentNavigationView : ComponentBase, IDisposable
 {
+    /// <summary>Sentinel <see cref="FluentNavigationViewItem.Value"/> the built-in Settings row uses,
+    /// so it participates in normal single-selection like any other item (highlighted via
+    /// <see cref="SelectedValue"/>, arrow-key focus, etc.) instead of being a one-off button bolted
+    /// onto the footer. A private nested sentinel type (rather than e.g. a plain string like
+    /// "__settings__") so it can never collide with a real caller-supplied item Value by accident,
+    /// while still being a stable, comparable reference across renders (it's a static readonly
+    /// singleton, not re-allocated per render). Overrides ToString() purely so an app that naively
+    /// displays SelectedValue (see the sample page) shows something readable rather than the type
+    /// name.</summary>
+    public static readonly object SettingsItemValue = new SettingsSentinel();
+
+    private sealed class SettingsSentinel
+    {
+        public override string ToString() => "Settings";
+    }
+
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
     [Parameter]
@@ -150,7 +166,20 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     private async Task OnItemClicked(object? value)
     {
-        await ItemInvoked.InvokeAsync(value);
+        // Settings behaves like any other selectable item (see SettingsItemValue's own doc comment)
+        // right up until the "what happens on click" step, where it fires SettingsRequested instead
+        // of ItemInvoked — same split WinUI itself makes between its own SettingsInvoked and
+        // ItemInvoked events, so a consumer can route "open settings" differently from ordinary
+        // navigation without needing to special-case the Value on their own end.
+        if (Equals(value, SettingsItemValue))
+        {
+            await SettingsRequested.InvokeAsync();
+        }
+        else
+        {
+            await ItemInvoked.InvokeAsync(value);
+        }
+
         // Close overlay if in compact/minimal and pane is open
         if (IsCompactOrMinimal && IsPaneOpen)
         {
@@ -230,7 +259,6 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     }
 
     private async Task OnBackClick() => await BackRequested.InvokeAsync();
-    private async Task OnSettingsClick() => await SettingsRequested.InvokeAsync();
 
     public void Dispose()
     {
