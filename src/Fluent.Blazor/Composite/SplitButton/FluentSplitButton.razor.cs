@@ -12,6 +12,13 @@ namespace Fluent.Blazor.Composite;
 /// chevron side has rounded outer corners on its own edge — see .razor.css). Unlike
 /// <see cref="FluentDropDownButton"/>, which is nothing but a menu trigger, SplitButton's main
 /// region is a real independent action.
+///
+/// FluentMenuFlyout's trigger wraps the WHOLE two-button pill (not just the chevron) so its anchor
+/// width is the full control's width — needed for <c>MatchAnchorWidth</c> to stretch the menu to
+/// the button's own width rather than the chevron's ~32px. The action button stops its click from
+/// bubbling to that wrapping trigger (<c>@@onclick:stopPropagation</c>) so clicking it fires only
+/// <see cref="OnClick"/>; the chevron has no handler of its own and relies on the bubble to open
+/// the menu.
 /// </summary>
 public partial class FluentSplitButton : ComponentBase
 {

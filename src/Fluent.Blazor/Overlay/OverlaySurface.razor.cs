@@ -27,10 +27,11 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
         var placementArg = Entry.PreferredPlacement.ToString().ToLowerInvariant();
         var position = await _module.InvokeAsync<OverlayPosition>(
-            "computePosition", Entry.Anchor, _surfaceElement, placementArg);
+            "computePosition", Entry.Anchor, _surfaceElement, placementArg, Entry.MatchAnchorWidth);
 
+        var widthStyle = position.Width is { } width ? $"width: {width}px; " : "";
         Entry.ComputedStyle =
-            $"position: fixed; top: {position.Top}px; left: {position.Left}px; z-index: 1000;";
+            $"position: fixed; top: {position.Top}px; left: {position.Left}px; {widthStyle}z-index: 1000;";
         _positioned = true;
 
         if (Entry.LightDismiss)
@@ -68,5 +69,6 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
         public double Top { get; set; }
         public double Left { get; set; }
         public string Placement { get; set; } = "bottom";
+        public double? Width { get; set; }
     }
 }

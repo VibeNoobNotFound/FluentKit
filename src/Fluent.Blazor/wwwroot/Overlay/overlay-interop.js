@@ -3,8 +3,16 @@
 
 const lightDismissHandlers = new Map();
 
-export function computePosition(anchorEl, popupEl, placement) {
+export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth) {
     const anchorRect = anchorEl.getBoundingClientRect();
+
+    // Width has to be applied BEFORE popupRect is measured below — changing width can reflow the
+    // popup's height (e.g. text wrapping differently), and everything downstream (vertical flip
+    // decision, viewport clamping) needs that final, post-resize rect.
+    if (matchAnchorWidth) {
+        popupEl.style.width = `${anchorRect.width}px`;
+    }
+
     const popupRect = popupEl.getBoundingClientRect();
     const gap = 4;
     const viewportPadding = 8;
@@ -34,7 +42,7 @@ export function computePosition(anchorEl, popupEl, placement) {
         const maxTop = window.innerHeight - popupRect.height - viewportPadding;
         top = Math.min(Math.max(top, viewportPadding), Math.max(maxTop, viewportPadding));
 
-        return { top, left, placement: resolvedPlacement };
+        return { top, left, placement: resolvedPlacement, width: matchAnchorWidth ? anchorRect.width : null };
     }
 
     if (placement === "top") {
@@ -56,7 +64,14 @@ export function computePosition(anchorEl, popupEl, placement) {
     const maxLeft = window.innerWidth - popupRect.width - viewportPadding;
     left = Math.min(Math.max(left, viewportPadding), Math.max(maxLeft, viewportPadding));
 
-    return { top, left, placement: resolvedPlacement };
+    return {
+        top, left, placement: resolvedPlacement,
+        // Reported back so the C# side can bake it into the same Blazor-managed "style" string as
+        // top/left — the width set directly on popupEl.style above would otherwise get wiped out
+        // the moment OverlaySurface's next render re-applies its bound `style="@Entry.ComputedStyle"`
+        // attribute, since that overwrites the whole inline style, not just the properties it lists.
+        width: matchAnchorWidth ? anchorRect.width : null
+    };
 }
 
 export function registerLightDismiss(overlayId, popupEl, anchorEl, dotNetRef) {

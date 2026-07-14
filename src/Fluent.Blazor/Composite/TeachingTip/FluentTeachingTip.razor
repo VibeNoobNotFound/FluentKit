@@ -10,7 +10,9 @@
     // physically written in a .razor file. A RenderFragment built via RenderTreeBuilder in plain C#
     // never gets the scope attribute, so its styles in FluentTeachingTip.razor.css would silently
     // not apply.
-    private RenderFragment RenderTipContent => @<div class="fluent-teachingtip fluent-teachingtip--@PlacementClass">
+    private RenderFragment RenderTipContent => @<div>
+        <div class="fluent-teachingtip-backdrop" aria-hidden="true"></div>
+        <div class="fluent-teachingtip fluent-teachingtip--@PlacementClass">
         <div class="fluent-teachingtip-beak" aria-hidden="true"></div>
         <div class="fluent-teachingtip-body">
             <div class="fluent-teachingtip-text">
@@ -31,5 +33,6 @@
         {
             <div class="fluent-teachingtip-actions">@ActionContent</div>
         }
+        </div>
     </div>;
 }

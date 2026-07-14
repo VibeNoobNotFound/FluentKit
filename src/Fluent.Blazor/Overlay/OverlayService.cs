@@ -11,7 +11,8 @@ public sealed class OverlayService : IOverlayService
     public event Action? Changed;
 
     public Guid Show(RenderFragment content, ElementReference anchor,
-        OverlayPlacement placement = OverlayPlacement.Bottom, bool lightDismiss = true, bool bare = false)
+        OverlayPlacement placement = OverlayPlacement.Bottom, bool lightDismiss = true, bool bare = false,
+        bool matchAnchorWidth = false)
     {
         var entry = new OverlayEntry
         {
@@ -19,7 +20,8 @@ public sealed class OverlayService : IOverlayService
             Anchor = anchor,
             PreferredPlacement = placement,
             LightDismiss = lightDismiss,
-            Bare = bare
+            Bare = bare,
+            MatchAnchorWidth = matchAnchorWidth
         };
 
         _active.Add(entry);

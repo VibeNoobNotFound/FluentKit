@@ -27,6 +27,10 @@ public partial class FluentMenuFlyout : ComponentBase, IDisposable
 
     [Parameter] public OverlayPlacement Placement { get; set; } = OverlayPlacement.Bottom;
 
+    /// <summary>When true, the menu is resized to exactly match the trigger's width (e.g.
+    /// DropDownButton) instead of sizing to its own content.</summary>
+    [Parameter] public bool MatchAnchorWidth { get; set; }
+
     /// <summary>Whether the menu can be dismissed by conventional interaction at all.</summary>
     [Parameter] public bool Closable { get; set; } = true;
 
@@ -83,7 +87,7 @@ public partial class FluentMenuFlyout : ComponentBase, IDisposable
         _context = new MenuFlyoutCloseContext { Closable = Closable, CloseOnSelect = CloseOnSelect };
         _context.RequestCloseAll += () => _ = CloseAsync();
 
-        _overlayId = OverlayService.Show(RenderMenuContent, _anchor, Placement, Closable);
+        _overlayId = OverlayService.Show(RenderMenuContent, _anchor, Placement, Closable, matchAnchorWidth: MatchAnchorWidth);
     }
 
     private void HideInternal()

@@ -1,3 +1,32 @@
+/* Full-viewport blur, not the small `.fluent-overlay-surface`'s own backdrop-filter (that only
+   blurs directly behind the little popup box). Teaching tips are meant to draw focus the way a
+   spotlight tutorial step does, so this blurs the whole page behind it — pointer-events:none so it
+   doesn't block interacting with the rest of the app while the tip is up (LightDismiss defaults
+   false specifically so the tip doesn't disappear the moment you touch something else). Being
+   position:fixed makes it viewport-relative regardless of the small, anchor-positioned parent
+   OverlaySurface it actually lives inside (see OverlaySurface.razor.cs — no transformed ancestor
+   sits between here and the viewport, so `fixed` escapes that positioning normally). */
+@keyframes fluent-teachingtip-backdrop-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fluent-teachingtip-backdrop {
+    position: fixed;
+    inset: 0;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    background-color: rgba(0, 0, 0, 0.08);
+    pointer-events: none;
+    animation: fluent-teachingtip-backdrop-fade-in var(--duration-fast) var(--easing-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fluent-teachingtip-backdrop {
+        animation: none;
+    }
+}
+
 .fluent-teachingtip {
     position: relative;
     box-sizing: border-box;

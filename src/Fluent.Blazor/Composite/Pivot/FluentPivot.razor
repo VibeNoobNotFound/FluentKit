@@ -1,7 +1,7 @@
 @namespace Fluent.Blazor.Composite
 
 <div class="fluent-pivot" @attributes="AdditionalAttributes">
-    <div class="fluent-pivot-header" role="tablist">
+    <div class="fluent-pivot-header" role="tablist" @ref="_headerElement">
         @for (var i = 0; i < _context.Items.Count; i++)
         {
             var index = i;
@@ -16,6 +16,12 @@
                     @onkeydown="e => OnKeyDown(e, index)">
                 @item.RenderHeader
             </button>
+        }
+        @if (_hasIndicator)
+        {
+            <div class="fluent-pivot-indicator"
+                 style="transform: translateX(@(_indicatorLeft.ToString(System.Globalization.CultureInfo.InvariantCulture))px); width: @(_indicatorWidth.ToString(System.Globalization.CultureInfo.InvariantCulture))px;">
+            </div>
         }
     </div>
     <div class="fluent-pivot-content">

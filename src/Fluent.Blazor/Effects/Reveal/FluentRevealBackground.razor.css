@@ -4,6 +4,24 @@
     --reveal-opacity: 0;
     --reveal-x: 50%;
     --reveal-y: 50%;
+
+    cursor: pointer;
+    transform: translateY(0) scale(1);
+    transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+/* Pressed state — a real button/link inside gets its own :active feedback too, but this gives
+   the reveal surface itself the same "pressed into the screen" read WinUI's Reveal gets from
+   pairing the light with a depth change, not just a color swap. Kept subtle (1px + 3%) since this
+   fires for any click anywhere in a (possibly large) reveal area, not just a small button. */
+.fluent-reveal:active {
+    transform: translateY(1px) scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fluent-reveal {
+        transition: none;
+    }
 }
 
 /* Fill highlight — a soft light spot that fades in near the pointer, cut to the element's own
@@ -15,10 +33,19 @@
     pointer-events: none;
     border-radius: inherit;
     opacity: var(--reveal-opacity);
-    transition: opacity var(--duration-fast) var(--easing-standard);
+    transition: opacity var(--duration-fast) var(--easing-standard),
+                background var(--duration-fast) var(--easing-standard);
     background: radial-gradient(120px circle at var(--reveal-x) var(--reveal-y),
         rgba(255, 255, 255, 0.15), transparent 70%);
     z-index: 0;
+}
+
+/* Click flash — the spotlight briefly brightens/tightens at the press point on top of the
+   translateY/scale press above, so the click reads as light hitting the surface rather than just
+   the surface physically moving. */
+.fluent-reveal:active::before {
+    background: radial-gradient(90px circle at var(--reveal-x) var(--reveal-y),
+        rgba(255, 255, 255, 0.35), transparent 70%);
 }
 
 /* Border highlight — same spotlight, but masked down to a 1px ring instead of the whole fill,

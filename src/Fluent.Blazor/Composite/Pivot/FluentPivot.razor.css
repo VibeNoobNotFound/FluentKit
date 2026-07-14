@@ -4,6 +4,7 @@
 }
 
 .fluent-pivot-header {
+    position: relative;
     display: flex;
     gap: 4px;
     border-bottom: 1px solid var(--divider-stroke-color-default);
@@ -25,8 +26,7 @@
 
     cursor: pointer;
     user-select: none;
-    transition: color var(--duration-fast) var(--easing-standard),
-                border-color var(--duration-fast) var(--easing-standard);
+    transition: color var(--duration-fast) var(--easing-standard);
 }
 
 .fluent-pivot-tab:hover:not(:disabled):not(.fluent-pivot-tab--selected) {
@@ -45,7 +45,25 @@
 
 .fluent-pivot-tab--selected {
     color: var(--text-fill-color-primary);
-    border-bottom-color: var(--accent-fill-color-default);
+}
+
+/* The blue underline lives here instead of as a per-tab border — a border swaps instantly between
+   two different elements, it can't slide. This single div is repositioned via an inline transform/
+   width (computed in FluentPivot.razor.cs from pivot-interop.js's measurement of the selected
+   button) and the transition below is what actually animates the slide between two measurements. */
+.fluent-pivot-indicator {
+    position: absolute;
+    bottom: -1px;
+    height: 2px;
+    background-color: var(--accent-fill-color-default);
+    transition: transform var(--duration-normal) var(--easing-standard),
+                width var(--duration-normal) var(--easing-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fluent-pivot-indicator {
+        transition: none;
+    }
 }
 
 .fluent-pivot-content {
