@@ -61,6 +61,16 @@ function updateAll() {
         entry.element.style.setProperty('--reveal-x', `${lastX - rect.left}px`);
         entry.element.style.setProperty('--reveal-y', `${lastY - rect.top}px`);
 
+        // Unitless 0–100 position within the element's own box (clamped, since the pointer can be
+        // outside the box while still within PROXIMITY of it). Kept separate from --reveal-x/y
+        // above (which stay px, for the radial-gradient position) because the :active tilt below
+        // needs a plain number it can multiply by a deg value in calc() — you can't do that with a
+        // percentage. This is what makes the click-press tilt toward whichever side was clicked.
+        const px = rect.width === 0 ? 50 : Math.min(100, Math.max(0, ((lastX - rect.left) / rect.width) * 100));
+        const py = rect.height === 0 ? 50 : Math.min(100, Math.max(0, ((lastY - rect.top) / rect.height) * 100));
+        entry.element.style.setProperty('--reveal-px', px.toFixed(2));
+        entry.element.style.setProperty('--reveal-py', py.toFixed(2));
+
         // 1 while inside the element, tapering linearly to 0 at PROXIMITY px away, instead of a
         // hard on/off — the fade itself is what makes the approach read as "the light is
         // following the cursor" rather than a light that just switches on at the boundary.

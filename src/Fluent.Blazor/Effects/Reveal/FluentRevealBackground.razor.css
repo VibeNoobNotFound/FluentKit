@@ -4,18 +4,26 @@
     --reveal-opacity: 0;
     --reveal-x: 50%;
     --reveal-y: 50%;
+    --reveal-px: 50;
+    --reveal-py: 50;
 
     cursor: pointer;
-    transform: translateY(0) scale(1);
+    transform: perspective(600px) translateY(0) scale(1) rotateX(0) rotateY(0);
     transition: transform var(--duration-fast) var(--easing-standard);
 }
 
 /* Pressed state — a real button/link inside gets its own :active feedback too, but this gives
    the reveal surface itself the same "pressed into the screen" read WinUI's Reveal gets from
    pairing the light with a depth change, not just a color swap. Kept subtle (1px + 3%) since this
-   fires for any click anywhere in a (possibly large) reveal area, not just a small button. */
+   fires for any click anywhere in a (possibly large) reveal area, not just a small button.
+   The rotateX/rotateY terms use --reveal-px/py (unitless 0–100, set by reveal-interop.js from the
+   last pointer position) to tilt the surface away from whichever side was actually clicked, so
+   that side visually dips/pushes in harder than the opposite edge — a true directional 3D press
+   rather than a uniform flat squish. Capped at ±3deg so it reads as a tilt, not a flip. */
 .fluent-reveal:active {
-    transform: translateY(1px) scale(0.97);
+    transform: perspective(600px) translateY(1px) scale(0.97)
+        rotateX(calc((50 - var(--reveal-py, 50)) * 0.06deg))
+        rotateY(calc((var(--reveal-px, 50) - 50) * 0.06deg));
 }
 
 @media (prefers-reduced-motion: reduce) {
