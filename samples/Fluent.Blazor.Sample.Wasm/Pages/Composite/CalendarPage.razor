@@ -1,22 +1,35 @@
 @page "/controls/calendar"
+@using Fluent.Blazor.Composite
 
 <div class="gallery-page">
     <PageHeader Eyebrow="Composite Controls" Title="Calendar &amp; DatePicker" Description="CalendarView lets users browse and select dates. CalendarDatePicker displays this calendar in a popup." />
 
-    <ControlExample HeaderText="Standalone CalendarView" RazorCode="@_calRazor" CSharpCode="@_calCs">
+    <ControlExample HeaderText="Standalone CalendarView with Blackout Dates" RazorCode="@_calRazor" CSharpCode="@_calCs">
         <Example>
-            <div class="demo-col" style="align-items: flex-start;">
-                <FluentCalendarView @bind-Value="_selectedDate" Headers="true" />
-                <div class="demo-output">Selected Date: @_selectedDate?.ToShortDateString()</div>
+            <div class="demo-col" style="align-items: flex-start; gap: 8px;">
+                <FluentCalendarView @bind-Value="_selectedDate" Blackout="@_calendarBlackout" Headers="true" />
+                <div class="demo-output" style="font-size: 12px; opacity: 0.8;">Selected Date: @_selectedDate?.ToShortDateString() (Blackout dates: tomorrow + 3 &amp; tomorrow + 4)</div>
             </div>
         </Example>
     </ControlExample>
 
-    <ControlExample HeaderText="CalendarDatePicker Popout" RazorCode="@_pickerRazor" CSharpCode="@_pickerCs">
+    <ControlExample HeaderText="CalendarDatePicker Variants" RazorCode="@_pickerRazor" CSharpCode="@_pickerCs">
         <Example>
-            <div class="demo-col" style="max-width: 240px;">
-                <FluentCalendarDatePicker @bind-Value="_pickedDate" />
-                <div class="demo-output">Picked: @_pickedDate?.ToShortDateString()</div>
+            <div style="display:flex; gap:48px; align-items:flex-start; flex-wrap:wrap;">
+                <div class="demo-col" style="max-width: 240px; gap: 4px;">
+                    <span style="font-size: 11px; opacity: 0.7;">Standard</span>
+                    <FluentCalendarDatePicker @bind-Value="_pickedDate" />
+                    <div class="demo-output" style="font-size: 11px; opacity: 0.8;">Picked: @_pickedDate?.ToShortDateString()</div>
+                </div>
+                <div class="demo-col" style="max-width: 240px; gap: 4px;">
+                    <span style="font-size: 11px; opacity: 0.7;">With Min/Max (This Month Only)</span>
+                    <FluentCalendarDatePicker @bind-Value="_pickedRangedDate" Min="@_datePickerMin" Max="@_datePickerMax" />
+                    <div class="demo-output" style="font-size: 11px; opacity: 0.8;">Picked: @_pickedRangedDate?.ToShortDateString()</div>
+                </div>
+                <div class="demo-col" style="max-width: 240px; gap: 4px;">
+                    <span style="font-size: 11px; opacity: 0.7;">Disabled</span>
+                    <FluentCalendarDatePicker Value="@DateTime.Today" Disabled="true" />
+                </div>
             </div>
         </Example>
     </ControlExample>
@@ -24,11 +37,36 @@
 
 @code {
     private DateTime? _selectedDate = DateTime.Today;
+    private readonly IReadOnlyList<DateTime> _calendarBlackout = new List<DateTime> 
+    { 
+        DateTime.Today.AddDays(3), 
+        DateTime.Today.AddDays(4) 
+    };
+
     private DateTime? _pickedDate;
+    private DateTime? _pickedRangedDate;
+    private readonly DateTime _datePickerMin = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private readonly DateTime _datePickerMax = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(1).AddDays(-1);
 
-    private const string _calRazor = @"<FluentCalendarView @bind-Value=""_selectedDate"" Headers=""true"" />";
-    private const string _calCs = @"private DateTime? _selectedDate = DateTime.Today;";
+    private const string _calRazor = @"<FluentCalendarView @bind-Value=""_selectedDate"" Blackout=""@_calendarBlackout"" Headers=""true"" />";
+    private const string _calCs = @"private DateTime? _selectedDate = DateTime.Today;
+private readonly IReadOnlyList<DateTime> _calendarBlackout = new List<DateTime> 
+{ 
+    DateTime.Today.AddDays(3), 
+    DateTime.Today.AddDays(4) 
+};";
 
-    private const string _pickerRazor = @"<FluentCalendarDatePicker @bind-Value=""_pickedDate"" />";
-    private const string _pickerCs = @"private DateTime? _pickedDate;";
+    private const string _pickerRazor = @"<!-- Standard -->
+<FluentCalendarDatePicker @bind-Value=""_pickedDate"" />
+
+<!-- Min / Max (current month only) -->
+<FluentCalendarDatePicker @bind-Value=""_pickedRangedDate"" Min=""@_datePickerMin"" Max=""@_datePickerMax"" />
+
+<!-- Disabled -->
+<FluentCalendarDatePicker Value=""@DateTime.Today"" Disabled=""true"" />";
+
+    private const string _pickerCs = @"private DateTime? _pickedDate;
+private DateTime? _pickedRangedDate;
+private readonly DateTime _datePickerMin = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+private readonly DateTime _datePickerMax = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(1).AddDays(-1);";
 }

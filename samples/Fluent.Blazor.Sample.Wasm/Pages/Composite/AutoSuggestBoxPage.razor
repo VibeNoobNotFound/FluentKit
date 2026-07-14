@@ -1,14 +1,34 @@
 @page "/controls/autosuggestbox"
+@using Fluent.Blazor.Composite
 
 <div class="gallery-page">
     <PageHeader Eyebrow="Composite Controls" Title="AutoSuggestBox" Description="AutoSuggestBox provides search suggestions to select from as the user types." />
 
     <ControlExample HeaderText="Basic Autocomplete" RazorCode="@_suggestRazor" CSharpCode="@_suggestCs">
         <Example>
-            <div class="demo-col" style="max-width: 280px;">
+            <div class="demo-col" style="max-width: 280px; gap: 8px;">
                 <FluentAutoSuggestBox TValue="string" Items="@_suggestions" @bind-Text="_searchText" Placeholder="Search city..." 
-                                      SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _chosenVal = item.Value)" />
-                <div class="demo-output">Input Text: @_searchText | Chosen Value: @_chosenVal</div>
+                                      SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _chosenVal = item.Value)"
+                                      QuerySubmitted="@((string? q) => _chosenVal = $"searched: {q}")" />
+                <div class="demo-output" style="font-size: 12px; opacity: 0.8;">Input Text: @_searchText | Result: @_chosenVal</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Custom Item Template & Icon Toggle" RazorCode="@_customRazor" CSharpCode="@_customCs">
+        <Example>
+            <div class="demo-col" style="max-width: 280px; gap: 8px;">
+                <FluentAutoSuggestBox TValue="string" Items="@_countrySuggestions" @bind-Text="_countrySearchText"
+                                      Placeholder="Search countries..."
+                                      EnableSearchIcon="true"
+                                      SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _countryChosenVal = item.Value)">
+                    <ItemTemplate Context="item">
+                        <span>@FlagFor(item.Value)</span>
+                        <span style="margin-left: 6px;">@item.Name</span>
+                        <span style="opacity:0.6; margin-left:auto;">@item.Value</span>
+                    </ItemTemplate>
+                </FluentAutoSuggestBox>
+                <div class="demo-output" style="font-size: 12px; opacity: 0.8;">Input Text: @_countrySearchText | Chosen: @_countryChosenVal</div>
             </div>
         </Example>
     </ControlExample>
@@ -22,13 +42,72 @@
     {
         new("Singapore", "SG"),
         new("Seattle", "US-SEA"),
+        new("Seoul", "KR"),
         new("Stockholm", "SE"),
         new("Sydney", "AU"),
+        new("Berlin", "DE"),
+        new("London", "UK"),
+        new("Tokyo (temporarily unavailable)", "JP", Disabled: true)
+    };
+
+    private string? _countrySearchText;
+    private string? _countryChosenVal;
+
+    private List<AutoSuggestBoxItem<string>> _countrySuggestions = new()
+    {
+        new("Singapore", "SG"),
+        new("Sweden", "SE"),
+        new("Switzerland", "CH"),
+        new("United States", "US"),
+        new("United Kingdom", "UK"),
+        new("Japan", "JP"),
+        new("Germany (unavailable)", "DE", Disabled: true)
+    };
+
+    private static string FlagFor(string? value) => value switch
+    {
+        "SG" => "\U0001F1F8\U0001F1EC",
+        "SE" => "\U0001F1F8\U0001F1EA",
+        "CH" => "\U0001F1E8\U0001F1ED",
+        "US" => "\U0001F1FA\U0001F1F8",
+        "UK" => "\U0001F1EC\U0001F1E7",
+        "JP" => "\U0001F1EF\U0001F1F5",
+        "DE" => "\U0001F1E9\U0001F1EA",
+        _ => "\U0001F3F3\uFE0F"
     };
 
     private const string _suggestRazor = @"<FluentAutoSuggestBox TValue=""string"" Items=""@_suggestions"" @bind-Text=""_searchText"" Placeholder=""Search city..."" 
-                      SuggestionChosen=""@((AutoSuggestBoxItem<string> item) => _chosenVal = item.Value)"" />";
+                      SuggestionChosen=""@((AutoSuggestBoxItem<string> item) => _chosenVal = item.Value)""
+                      QuerySubmitted=""@((string? q) => _chosenVal = $""searched: {q}"")"" />";
+
     private const string _suggestCs = @"private string? _searchText;
 private string? _chosenVal;
 private List<AutoSuggestBoxItem<string>> _suggestions = new() { ... };";
+
+    private const string _customRazor = @"<FluentAutoSuggestBox TValue=""string"" Items=""@_countrySuggestions"" @bind-Text=""_countrySearchText""
+                      Placeholder=""Search countries...""
+                      EnableSearchIcon=""true""
+                      SuggestionChosen=""@((AutoSuggestBoxItem<string> item) => _countryChosenVal = item.Value)"">
+    <ItemTemplate Context=""item"">
+        <span>@FlagFor(item.Value)</span>
+        <span style=""margin-left: 6px;"">@item.Name</span>
+        <span style=""opacity:0.6; margin-left:auto;"">@item.Value</span>
+    </ItemTemplate>
+</FluentAutoSuggestBox>";
+
+    private const string _customCs = @"private string? _countrySearchText;
+private string? _countryChosenVal;
+private List<AutoSuggestBoxItem<string>> _countrySuggestions = new() { ... };
+
+private static string FlagFor(string? value) => value switch
+{
+    ""SG"" => ""🇸🇬"",
+    ""SE"" => ""🇸🇪"",
+    ""CH"" => ""🇨🇭"",
+    ""US"" => ""🇺🇸"",
+    ""UK"" => ""🇬🇧"",
+    ""JP"" => ""🇯🇵"",
+    ""DE"" => ""🇩🇪"",
+    _ => ""🏳️""
+};";
 }

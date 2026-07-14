@@ -1,4 +1,5 @@
 @page "/controls/menubar"
+@using Fluent.Blazor.Composite
 
 <div class="gallery-page">
     <PageHeader Eyebrow="Composite Controls" Title="MenuBar" Description="Use MenuBar to display a horizontal top-level navigation bar for applications." />
@@ -19,15 +20,29 @@
                     <FluentMenuBarItem>
                         <ChildContent>Edit</ChildContent>
                         <Flyout>
-                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Undo"))'>Undo</FluentMenuFlyoutItem>
-                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Redo"))'>Redo</FluentMenuFlyoutItem>
+                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Cut"))'>Cut</FluentMenuFlyoutItem>
+                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Copy"))'>Copy</FluentMenuFlyoutItem>
+                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Paste"))'>Paste</FluentMenuFlyoutItem>
+                        </Flyout>
+                    </FluentMenuBarItem>
+                    <FluentMenuBarItem>
+                        <ChildContent>View</ChildContent>
+                        <Flyout>
+                            <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Toggle" @bind-Checked="_showGrid">Show grid</FluentMenuFlyoutItem>
+                            <FluentMenuFlyoutItem Cascading="true">
+                                <ChildContent>Zoom</ChildContent>
+                                <Flyout>
+                                    <FluentMenuFlyoutItem OnClick='@(() => LogAction("Zoom In"))'>Zoom In</FluentMenuFlyoutItem>
+                                    <FluentMenuFlyoutItem OnClick='@(() => LogAction("Zoom Out"))'>Zoom Out</FluentMenuFlyoutItem>
+                                </Flyout>
+                            </FluentMenuFlyoutItem>
                         </Flyout>
                     </FluentMenuBarItem>
                     <FluentMenuBarItem Disabled="true">
-                        <ChildContent>Disabled View</ChildContent>
+                        <ChildContent>Disabled</ChildContent>
                     </FluentMenuBarItem>
                 </FluentMenuBar>
-                <div class="demo-output">Last Menu Action: @_menuAction</div>
+                <div class="demo-output" style="margin-top: 12px; font-size: 12px; opacity: 0.8;">Last Menu Action: @_menuAction | Show Grid: @_showGrid</div>
             </div>
         </Example>
     </ControlExample>
@@ -35,6 +50,7 @@
 
 @code {
     private string? _menuAction;
+    private bool _showGrid;
 
     private void LogAction(string act) => _menuAction = act;
 
@@ -48,8 +64,33 @@
             <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Exit""))'>Exit</FluentMenuFlyoutItem>
         </Flyout>
     </FluentMenuBarItem>
+    <FluentMenuBarItem>
+        <ChildContent>Edit</ChildContent>
+        <Flyout>
+            <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Cut""))'>Cut</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Copy""))'>Copy</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Paste""))'>Paste</FluentMenuFlyoutItem>
+        </Flyout>
+    </FluentMenuBarItem>
+    <FluentMenuBarItem>
+        <ChildContent>View</ChildContent>
+        <Flyout>
+            <FluentMenuFlyoutItem Variant=""MenuFlyoutItemVariant.Toggle"" @bind-Checked=""_showGrid"">Show grid</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem Cascading=""true"">
+                <ChildContent>Zoom</ChildContent>
+                <Flyout>
+                    <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Zoom In""))'>Zoom In</FluentMenuFlyoutItem>
+                    <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Zoom Out""))'>Zoom Out</FluentMenuFlyoutItem>
+                </Flyout>
+            </FluentMenuFlyoutItem>
+        </Flyout>
+    </FluentMenuBarItem>
+    <FluentMenuBarItem Disabled=""true"">
+        <ChildContent>Disabled</ChildContent>
+    </FluentMenuBarItem>
 </FluentMenuBar>";
 
     private const string _barCs = @"private string? _menuAction;
+private bool _showGrid;
 private void LogAction(string act) => _menuAction = act;";
 }

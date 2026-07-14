@@ -1,20 +1,28 @@
 @page "/controls/navigationview"
+@using Fluent.Blazor.Composite
 
 <div class="gallery-page">
     <PageHeader Eyebrow="Composite Controls" Title="NavigationView" Description="The NavigationView control provides top-level navigation layout structure for apps." />
 
-    <ControlExample HeaderText="Basic NavigationView Demo" RazorCode="@_navRazor" CSharpCode="@_navCs" Options="@_options">
+    <ControlExample HeaderText="Rich NavigationView Configuration" RazorCode="@_navRazor" CSharpCode="@_navCs" Options="@_options">
         <Example>
-            <div style="width:100%; height:320px; border-radius:8px; overflow:hidden; border:1px solid var(--card-stroke-default);">
+            <div style="width:100%; height:400px; border-radius:8px; overflow:hidden; border:1px solid var(--card-stroke-default);">
                 <FluentNavigationView PaneDisplayMode="_navMode"
                                        @bind-IsPaneOpen="_navPaneOpen"
                                        @bind-SelectedValue="_navSelected"
-                                       IsBackButtonVisible="true"
-                                       ShowSettingsButton="true">
+                                       IsBackButtonVisible="_navBackButtonVisible"
+                                       IsBackButtonEnabled="_navBackButtonEnabled"
+                                       BackRequested="OnNavBack"
+                                       ShowSettingsButton="_navShowSettingsButton"
+                                       SettingsRequested="OnNavSettings">
+                    <PaneHeaderIcon>
+                        <FluentIcon Name="@FluentIconNames.Search" Size="16" />
+                    </PaneHeaderIcon>
                     <PaneHeader>
-                        <div style="padding: 4px 12px; font-weight: 600;">Sample App</div>
+                        <FluentTextBox @bind-Value="_navSearch" Placeholder="Search" />
                     </PaneHeader>
                     <MenuItems>
+                        <FluentNavigationViewItemHeader Text="Main Section" />
                         <FluentNavigationViewItem Value='@("home")' Text="Home">
                             <Icon><FluentIcon Name="@FluentIconNames.Home" /></Icon>
                         </FluentNavigationViewItem>
@@ -22,11 +30,36 @@
                             <Icon><FluentIcon Name="@FluentIconNames.Document" /></Icon>
                         </FluentNavigationViewItem>
                         <FluentNavigationViewItemSeparator />
-                        <FluentNavigationViewItem Value='@("settings")' Text="Preferences" />
+                        <FluentNavigationViewItemHeader Text="Components" />
+                        <FluentNavigationViewItem Value='@("components")' Text="Components" IsSelectable="true">
+                            <Icon><FluentIcon Name="@FluentIconNames.Apps" /></Icon>
+                            <ChildContent>
+                                <FluentNavigationViewItem Value='@("button")' Text="Button" />
+                                <FluentNavigationViewItem Value='@("checkbox")' Text="Checkbox" />
+                            </ChildContent>
+                        </FluentNavigationViewItem>
+                        <FluentNavigationViewItem Value='@("disabled")' Text="Disabled item" Disabled="true">
+                            <Icon><FluentIcon Name="@FluentIconNames.Dismiss" /></Icon>
+                        </FluentNavigationViewItem>
                     </MenuItems>
+                    <PaneFooter>
+                        <FluentNavigationViewItem Value='@("feedback")' Text="Help & Feedback">
+                            <Icon><FluentIcon Name="ic_fluent_question_circle_20_regular" /></Icon>
+                        </FluentNavigationViewItem>
+                        <FluentTextBlock Variant="TextBlockVariant.Caption" style="padding-inline:12px; margin-top:4px;">v1.0.0</FluentTextBlock>
+                    </PaneFooter>
                     <ChildContent>
                         <div style="padding: 24px;">
-                            <FluentTextBlock Variant="TextBlockVariant.Title">Selected Page: @_navSelected</FluentTextBlock>
+                            <FluentTextBlock Variant="TextBlockVariant.Title">@_navSelected</FluentTextBlock>
+                            <FluentTextBlock Variant="TextBlockVariant.Body">
+                                This is FluentNavigationView's content area — whatever page you'd route to goes here.
+                            </FluentTextBlock>
+                            @if (!string.IsNullOrEmpty(_navLastAction))
+                            {
+                                <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:12px; display:block; opacity:0.8;">
+                                    Last action: @_navLastAction
+                                </FluentTextBlock>
+                            }
                         </div>
                     </ChildContent>
                 </FluentNavigationView>
@@ -39,16 +72,31 @@
     private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
     private bool _navPaneOpen = true;
     private object? _navSelected = "home";
+    private string? _navSearch;
+    private string? _navLastAction;
+    private bool _navBackButtonVisible = true;
+    private bool _navBackButtonEnabled = true;
+    private bool _navShowSettingsButton = true;
+
+    private void OnNavBack() => _navLastAction = "Back pressed";
+    private void OnNavSettings() => _navLastAction = "Settings requested";
 
     private const string _navRazor = @"<FluentNavigationView PaneDisplayMode=""_navMode""
-                      @bind-IsPaneOpen=""_navPaneOpen""
-                      @bind-SelectedValue=""_navSelected""
-                      IsBackButtonVisible=""true""
-                      ShowSettingsButton=""true"">
+                       @bind-IsPaneOpen=""_navPaneOpen""
+                       @bind-SelectedValue=""_navSelected""
+                       IsBackButtonVisible=""_navBackButtonVisible""
+                       IsBackButtonEnabled=""_navBackButtonEnabled""
+                       BackRequested=""OnNavBack""
+                       ShowSettingsButton=""_navShowSettingsButton""
+                       SettingsRequested=""OnNavSettings"">
+    <PaneHeaderIcon>
+        <FluentIcon Name=""@FluentIconNames.Search"" Size=""16"" />
+    </PaneHeaderIcon>
     <PaneHeader>
-        <div style=""padding: 4px 12px; font-weight: 600;"">Sample App</div>
+        <FluentTextBox @bind-Value=""_navSearch"" Placeholder=""Search"" />
     </PaneHeader>
     <MenuItems>
+        <FluentNavigationViewItemHeader Text=""Main Section"" />
         <FluentNavigationViewItem Value='@(""home"")' Text=""Home"">
             <Icon><FluentIcon Name=""@FluentIconNames.Home"" /></Icon>
         </FluentNavigationViewItem>
@@ -56,37 +104,77 @@
             <Icon><FluentIcon Name=""@FluentIconNames.Document"" /></Icon>
         </FluentNavigationViewItem>
         <FluentNavigationViewItemSeparator />
-        <FluentNavigationViewItem Value='@(""settings"")' Text=""Preferences"" />
+        <FluentNavigationViewItemHeader Text=""Components"" />
+        <FluentNavigationViewItem Value='@(""components"")' Text=""Components"" IsSelectable=""true"">
+            <Icon><FluentIcon Name=""@FluentIconNames.Apps"" /></Icon>
+            <ChildContent>
+                <FluentNavigationViewItem Value='@(""button"")' Text=""Button"" />
+                <FluentNavigationViewItem Value='@(""checkbox"")' Text=""Checkbox"" />
+            </ChildContent>
+        </FluentNavigationViewItem>
+        <FluentNavigationViewItem Value='@(""disabled"")' Text=""Disabled item"" Disabled=""true"">
+            <Icon><FluentIcon Name=""@FluentIconNames.Dismiss"" /></Icon>
+        </FluentNavigationViewItem>
     </MenuItems>
+    <PaneFooter>
+        <FluentNavigationViewItem Value='@(""feedback"")' Text=""Help & Feedback"">
+            <Icon><FluentIcon Name=""ic_fluent_question_circle_20_regular"" /></Icon>
+        </FluentNavigationViewItem>
+        <FluentTextBlock Variant=""TextBlockVariant.Caption"" style=""padding-inline:12px; margin-top:4px;"">v1.0.0</FluentTextBlock>
+    </PaneFooter>
     <ChildContent>
-        <div style=""padding: 24px;"">
-            <FluentTextBlock Variant=""TextBlockVariant.Title"">Selected Page: @_navSelected</FluentTextBlock>
-        </div>
+        <FluentTextBlock Variant=""TextBlockVariant.Title"">@_navSelected</FluentTextBlock>
+        <FluentTextBlock Variant=""TextBlockVariant.Body"">
+            This is FluentNavigationView's content area — whatever page you'd route to goes here.
+        </FluentTextBlock>
+        @if (!string.IsNullOrEmpty(_navLastAction))
+        {
+            <FluentTextBlock Variant=""TextBlockVariant.Caption"">Last action: @_navLastAction</FluentTextBlock>
+        }
     </ChildContent>
 </FluentNavigationView>";
 
     private const string _navCs = @"private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
 private bool _navPaneOpen = true;
-private object? _navSelected = ""home"";";
+private object? _navSelected = ""home"";
+private string? _navSearch;
+private string? _navLastAction;
+private bool _navBackButtonVisible = true;
+private bool _navBackButtonEnabled = true;
+private bool _navShowSettingsButton = true;
+
+private void OnNavBack() => _navLastAction = ""Back pressed"";
+private void OnNavSettings() => _navLastAction = ""Settings requested"";";
 
     private RenderFragment _options => __builder => {
-        <FluentRadioGroup @bind-Value="_navModeString">
-            <div class="demo-row">
-                <FluentRadioButton Value='@("left")'>Left (Expanded)</FluentRadioButton>
-                <FluentRadioButton Value='@("compact")'>Left Compact</FluentRadioButton>
-                <FluentRadioButton Value='@("minimal")'>Minimal</FluentRadioButton>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size: 11px; opacity: 0.7;">Pane Display Mode</span>
+                <FluentRadioGroup @bind-Value="_navModeString">
+                    <div class="demo-row">
+                        <FluentRadioButton Value='@("expanded")'>Expanded</FluentRadioButton>
+                        <FluentRadioButton Value='@("compact")'>Compact</FluentRadioButton>
+                        <FluentRadioButton Value='@("minimal")'>Minimal</FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
             </div>
-        </FluentRadioGroup>
+            
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                <FluentCheckBox @bind-Checked="_navBackButtonVisible">Back Button Visible</FluentCheckBox>
+                <FluentCheckBox @bind-Checked="_navBackButtonEnabled">Back Button Enabled</FluentCheckBox>
+                <FluentCheckBox @bind-Checked="_navShowSettingsButton">Settings Button Visible</FluentCheckBox>
+            </div>
+        </div>
     };
 
     private object? _navModeString
     {
         get => _navMode switch
         {
-            NavigationViewPaneDisplayMode.Left => "left",
+            NavigationViewPaneDisplayMode.Left => "expanded",
             NavigationViewPaneDisplayMode.LeftCompact => "compact",
             NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
-            _ => "left"
+            _ => "expanded"
         };
         set
         {
