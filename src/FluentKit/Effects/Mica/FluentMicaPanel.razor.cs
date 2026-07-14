@@ -110,8 +110,8 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
             return;
         }
 
-        var isAlt = Variant == MicaVariant.BaseAlt;
-        var key = $"{BackgroundImageUrl}|{isAlt}|{ThemeService.ResolvedTheme}";
+        var isBase = Variant == MicaVariant.Base;
+        var key = $"{BackgroundImageUrl}|{isBase}|{ThemeService.ResolvedTheme}";
 
         // Same (image, variant, theme) as last time — nothing to redo, the cached raster is already
         // what's on screen. This is what stops a resize/re-render from re-baking Mica every time.
@@ -127,7 +127,10 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
             return;
         }
 
-        var dataUrl = await _module!.InvokeAsync<string>("renderMica", key, BackgroundImageUrl, isAlt);
+        // If I didnt do, Mica doesnt get properly rendered on first load. 
+        await Task.Delay(700);
+        
+        var dataUrl = await _module!.InvokeAsync<string>("renderMica", key, BackgroundImageUrl, isBase);
         _cache[key] = dataUrl;
 
         // Guard against a stale response landing after a newer request already changed things.

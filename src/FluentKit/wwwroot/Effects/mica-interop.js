@@ -398,15 +398,15 @@ function blurredCoverCanvas(img, canvasWidth, canvasHeight, blurPx) {
 }
 
 // ---------- Main entry point ----------
-export async function renderMica(cacheKey, imageUrl, alt) {
+export async function renderMica(cacheKey, imageUrl, isBase) {
     const cachedFinal = finalCache.get(cacheKey);
     if (cachedFinal) return cachedFinal;
 
     const style = getComputedStyle(document.documentElement);
-    const tint = (!alt
+    const tint = (isBase
         ? style.getPropertyValue("--mica-alt-tint-color")
         : style.getPropertyValue("--mica-tint-color")).trim();
-    const tintOpacity       = cssNum(style, !alt ? "--mica-alt-tint-opacity" : "--mica-tint-opacity", 0.8);
+    const tintOpacity       = cssNum(style, isBase ? "--mica-alt-tint-opacity" : "--mica-tint-opacity", 0.8);
     const luminosityOpacity = cssNum(style, "--mica-luminosity-opacity", 1.0);
     const blurPx            = cssNum(style, "--mica-blur-amount", 56);
 
