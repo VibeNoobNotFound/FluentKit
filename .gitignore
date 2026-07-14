@@ -4,3 +4,4 @@ obj/
 .idea/
 *.user
 /fonts
+*.DS_Store
