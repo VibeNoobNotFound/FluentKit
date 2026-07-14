@@ -74,3 +74,12 @@
     inset-block-start: calc(100% + 4px);
     inset-inline-start: 0;
 }
+
+.fluent-calendar-date-picker-dismiss-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: transparent;
+    pointer-events: auto;
+    cursor: default;
+}

@@ -20,6 +20,7 @@
 
     @if (!Disabled && _open)
     {
+        <div class="fluent-calendar-date-picker-dismiss-backdrop" @onclick="() => _open = false"></div>
         <div class="fluent-calendar-date-picker-popout">
             <FluentCalendarView Value="@Value"
                                 ValueChanged="@OnDateChangedAsync"

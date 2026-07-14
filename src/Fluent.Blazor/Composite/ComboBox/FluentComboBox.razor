@@ -54,10 +54,7 @@
 
     @if (!Disabled && Items.Count > 0 && _open)
     {
-        @* .fluent-combo-box-dropdown is the outer, positioned/animated/clip-path-grown box (see
-           .razor.css); the material div paints first, then the actual scrolling <ul> paints after
-           it — content sits above the acrylic material by DOM/paint order, not cross-sibling
-           z-index (same restructure as FluentAutoSuggestBox, see that file's comments). *@
+        <div class="fluent-combo-box-dismiss-backdrop" @onclick="() => SetOpenAsync(false)"></div>
         <div class="fluent-combo-box-dropdown fluent-combo-box-dropdown--@GrowDirectionClass"
              style="--fluent-combo-box-menu-offset: @(MenuOffsetPx)px;">
             <div class="fluent-combo-box-dropdown-material" aria-hidden="true"></div>

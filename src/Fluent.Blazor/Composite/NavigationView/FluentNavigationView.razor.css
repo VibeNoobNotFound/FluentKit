@@ -329,3 +329,12 @@
 .fluent-nav-view--top .fluent-nav-view-content {
     padding-top: 12px;
 }
+
+.fluent-nav-view-dismiss-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    background: transparent;
+    pointer-events: auto;
+    cursor: default;
+}

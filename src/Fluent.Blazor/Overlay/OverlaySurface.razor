@@ -2,12 +2,10 @@
 @implements IAsyncDisposable
 
 <div class="fluent-overlay-surface @(Entry.Bare ? "fluent-overlay-surface--bare" : "") @(Entry.IsClosing ? "fluent-overlay-surface--closing" : "")" style="@Entry.ComputedStyle" @ref="_surfaceElement">
-    @* Real DOM nesting instead of z-index arithmetic across siblings: the material div paints
-       first (blur+tint+noise), the content div paints after it, so content is guaranteed above
-       the acrylic material by DOM/paint order alone -- no z-index needed, and no risk of engines
-       (some Chromium/Safari builds) compositing a backdrop-filter element's output above a
-       later, higher z-index sibling regardless of the declared z-index values. Skipped entirely
-       for --bare surfaces, which supply their own material (e.g. FluentAcrylicBrush). *@
+    @if (Entry.LightDismiss)
+    {
+        <div class="fluent-overlay-dismiss-backdrop" @onclick="() => OnLightDismiss(Entry.Id.ToString())"></div>
+    }
     @if (!Entry.Bare)
     {
         <div class="fluent-overlay-surface-material" aria-hidden="true"></div>

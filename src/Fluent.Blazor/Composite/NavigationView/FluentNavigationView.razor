@@ -66,6 +66,11 @@
                 </footer>
             </aside>
 
+            @if (IsPaneOpen)
+            {
+                <div class="fluent-nav-view-dismiss-backdrop" @onclick="TogglePaneAsync"></div>
+            }
+
             <div class="fluent-nav-view-pane-overlay @(IsPaneOpen ? "fluent-nav-view-pane-overlay--open" : "")"
                  aria-hidden="@(!IsPaneOpen)">
                 @* Real DOM nesting instead of ::before/::after + cross-sibling z-index (same fix

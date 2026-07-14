@@ -194,3 +194,12 @@
     overflow: hidden;
     max-width: 100%;
 }
+
+.fluent-autosuggest-dismiss-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: transparent;
+    pointer-events: auto;
+    cursor: default;
+}

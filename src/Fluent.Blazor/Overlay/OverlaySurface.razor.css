@@ -134,3 +134,12 @@
     box-shadow: none;
     padding: 0;
 }
+
+.fluent-overlay-dismiss-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background: transparent;
+    pointer-events: auto;
+    cursor: default;
+}
