@@ -8,11 +8,14 @@ namespace Fluent.Blazor.Composite;
 /// row of action buttons, and an explicit close button) used for contextual "here's what this does"
 /// UI, as opposed to Flyout's generic content or ToolTip's hover-only hint. Structurally close to
 /// Flyout: built directly on IOverlayService/FluentOverlayHost with the same
-/// programmatic-<see cref="IsOpen"/>-binding shape as <see cref="FluentFlyout"/>. Two real
-/// differences: it renders with <c>bare: true</c> since it supplies its own card chrome plus a
-/// pointer/"beak" toward the anchor (WinUI teaching tips always draw one), and it defaults
-/// <see cref="LightDismiss"/> to false — a teaching tip is meant to stay up until the person reads it
-/// and dismisses it via the explicit close button, not disappear the moment they click elsewhere.
+/// programmatic-<see cref="IsOpen"/>-binding shape as <see cref="FluentFlyout"/>, and — like every
+/// other flyout/menu/tooltip — relies entirely on OverlaySurface's own default chrome (background,
+/// <c>backdrop-filter: blur(60px)</c>, border, shadow) for its blur; it does NOT pass <c>bare</c>.
+/// Two real differences from Flyout: it adds its own pointer/"beak" toward the anchor (WinUI
+/// teaching tips always draw one — see the beak's own matching background/border in
+/// FluentTeachingTip.razor.css), and it defaults <see cref="LightDismiss"/> to false — a teaching
+/// tip is meant to stay up until the person reads it and dismisses it via the explicit close button,
+/// not disappear the moment they click elsewhere.
 /// <see cref="ChildContent"/> is the anchor/target element the tip points at; unlike Flyout/MenuFlyout
 /// it is NOT wrapped in a click handler — teaching tips are shown/hidden programmatically (e.g. after
 /// a first-run check), never by clicking their own target.
@@ -69,7 +72,7 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
             return;
         }
 
-        _overlayId = OverlayService.Show(RenderTipContent, _anchor, Placement, LightDismiss, bare: true);
+        _overlayId = OverlayService.Show(RenderTipContent, _anchor, Placement, LightDismiss);
     }
 
     private void HideInternal()

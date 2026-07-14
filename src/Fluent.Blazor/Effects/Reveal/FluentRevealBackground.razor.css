@@ -24,8 +24,11 @@
     }
 }
 
-/* Fill highlight — a soft light spot that fades in near the pointer, cut to the element's own
-   box via the pseudo-element so it never bleeds past rounded corners. */
+/* Fill highlight — a soft light spot that tracks the pointer, cut to the element's own box via
+   the pseudo-element so it never bleeds past rounded corners. No CSS transition on opacity/
+   background here on purpose — reveal-interop.js already computes a smooth proximity-based fade
+   every animation frame (see PROXIMITY there), so a CSS transition on top of that would just add a
+   second, fighting layer of lag between the cursor and the light instead of smoothing anything. */
 .fluent-reveal::before {
     content: "";
     position: absolute;
@@ -33,8 +36,6 @@
     pointer-events: none;
     border-radius: inherit;
     opacity: var(--reveal-opacity);
-    transition: opacity var(--duration-fast) var(--easing-standard),
-                background var(--duration-fast) var(--easing-standard);
     background: radial-gradient(120px circle at var(--reveal-x) var(--reveal-y),
         rgba(255, 255, 255, 0.15), transparent 70%);
     z-index: 0;
@@ -50,7 +51,7 @@
 
 /* Border highlight — same spotlight, but masked down to a 1px ring instead of the whole fill,
    matching WinUI's separate RevealBorderBrush behavior (border light is brighter/tighter than
-   the fill light). */
+   the fill light). Same no-CSS-transition reasoning as the fill highlight above. */
 .fluent-reveal--bordered::after {
     content: "";
     position: absolute;
@@ -58,7 +59,6 @@
     pointer-events: none;
     border-radius: inherit;
     opacity: var(--reveal-opacity);
-    transition: opacity var(--duration-fast) var(--easing-standard);
     padding: 1px;
     background: radial-gradient(80px circle at var(--reveal-x) var(--reveal-y),
         rgba(255, 255, 255, 0.6), transparent 70%);

@@ -1,35 +1,79 @@
-// Tracks pointer position over a Reveal-enabled element and pushes it in as CSS custom properties
-// (--reveal-x / --reveal-y, element-relative px) so the actual highlight rendering stays pure CSS
-// (a radial-gradient positioned via those two variables) — this module's only job is measurement.
-const state = new Map();
+// Reveal tracks pointer position via a SINGLE shared, rAF-throttled listener across every tracked
+// element, not a pointermove/pointerleave pair per element like the first version had. Two reasons:
+//
+// 1. Performance — the old version called getBoundingClientRect() (a layout-forcing call) on every
+//    raw 'pointermove' event, which fires far faster than the screen can repaint. That's what made
+//    it feel laggy: dozens of synchronous layout reflows per second, each one blocking the main
+//    thread right when it needed to be free to paint the next frame. This version measures at most
+//    once per animation frame, no matter how many mousemove events fired in between.
+//
+// 2. Real WinUI Reveal border light isn't "am I directly over this element" — nearby controls
+//    (e.g. list items) pick up a proximity glow on their border before the pointer actually enters
+//    them. PROXIMITY (px) lets the light fade in as the cursor approaches an element's edge, not
+//    just once it's literally inside the element's box — this is what answers "it should also
+//    follow the cursor even if it's not hovering it, when near it".
+const PROXIMITY = 48;
+
+const tracked = new Map();
+let rafHandle = null;
+let lastX = -Infinity;
+let lastY = -Infinity;
+let listenerInstalled = false;
+
+function ensureGlobalListener() {
+    if (listenerInstalled) {
+        return;
+    }
+    listenerInstalled = true;
+
+    document.addEventListener('pointermove', (e) => {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        scheduleUpdate();
+    }, { passive: true });
+}
+
+function scheduleUpdate() {
+    if (rafHandle !== null) {
+        return;
+    }
+    rafHandle = requestAnimationFrame(() => {
+        rafHandle = null;
+        updateAll();
+    });
+}
+
+function updateAll() {
+    for (const entry of tracked.values()) {
+        const rect = entry.element.getBoundingClientRect();
+
+        // Distance from the pointer to the nearest point on the element's own box — 0 once the
+        // pointer is inside it, growing as it moves away in any direction.
+        const dx = Math.max(rect.left - lastX, 0, lastX - rect.right);
+        const dy = Math.max(rect.top - lastY, 0, lastY - rect.bottom);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > PROXIMITY) {
+            entry.element.style.setProperty('--reveal-opacity', '0');
+            continue;
+        }
+
+        entry.element.style.setProperty('--reveal-x', `${lastX - rect.left}px`);
+        entry.element.style.setProperty('--reveal-y', `${lastY - rect.top}px`);
+
+        // 1 while inside the element, tapering linearly to 0 at PROXIMITY px away, instead of a
+        // hard on/off — the fade itself is what makes the approach read as "the light is
+        // following the cursor" rather than a light that just switches on at the boundary.
+        const opacity = distance === 0 ? 1 : Math.max(0, 1 - distance / PROXIMITY);
+        entry.element.style.setProperty('--reveal-opacity', opacity.toFixed(3));
+    }
+}
 
 export function startTracking(id, element) {
-    stopTracking(id);
-
-    const onMove = (e) => {
-        const rect = element.getBoundingClientRect();
-        element.style.setProperty('--reveal-x', `${e.clientX - rect.left}px`);
-        element.style.setProperty('--reveal-y', `${e.clientY - rect.top}px`);
-        element.style.setProperty('--reveal-opacity', '1');
-    };
-
-    const onLeave = () => {
-        element.style.setProperty('--reveal-opacity', '0');
-    };
-
-    element.addEventListener('pointermove', onMove);
-    element.addEventListener('pointerleave', onLeave);
-
-    state.set(id, { element, onMove, onLeave });
+    ensureGlobalListener();
+    tracked.set(id, { element });
 }
 
 export function stopTracking(id) {
-    const entry = state.get(id);
-    if (!entry) {
-        return;
-    }
-
-    entry.element.removeEventListener('pointermove', entry.onMove);
-    entry.element.removeEventListener('pointerleave', entry.onLeave);
-    state.delete(id);
+    tracked.delete(id);
 }
