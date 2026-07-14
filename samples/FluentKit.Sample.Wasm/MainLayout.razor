@@ -316,7 +316,11 @@
 
     private void OnItemInvoked(object? value)
     {
-        if (value is string route && !string.IsNullOrEmpty(route))
+        // `value is string` alone is the correct check here: RouteHome is
+        // legitimately "" (empty), and NavigateTo("") is valid — it goes to
+        // the base URI. Non-selectable group headers pass Value="@(null)",
+        // which correctly fails the `is string` pattern match and is ignored.
+        if (value is string route)
         {
             Navigation.NavigateTo(route);
         }
