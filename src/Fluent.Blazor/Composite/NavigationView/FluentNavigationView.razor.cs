@@ -104,7 +104,20 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     {
         if (firstRender)
         {
-            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Fluent.Blazor/js/navview-interop.js");
+            try
+            {
+                _module = await JS.InvokeAsync<IJSObjectReference>(
+                    "import", "./_content/Fluent.Blazor/Composite/NavigationView/navview-interop.js");
+            }
+            catch (JSException)
+            {
+                // GetWidthAsync() already tolerates _module being null (falls back to a fixed 800px
+                // assumed width for the Auto-mode breakpoint calc below) — better to keep
+                // NavigationView usable at a wrong breakpoint than crash the whole component tree if
+                // the interop module ever fails to load (e.g. static assets misconfigured).
+                _module = null;
+            }
+
             await UpdateDisplayModeAsync();
         }
         await base.OnAfterRenderAsync(firstRender);
