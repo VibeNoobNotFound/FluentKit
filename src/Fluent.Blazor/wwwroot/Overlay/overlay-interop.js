@@ -256,8 +256,21 @@ export function observeAutoHeight(el) {
 
     unobserveAutoHeight(el);
 
-    const applyHeight = (instant) => {
+    const measureTargetHeight = () => {
+        // Once height is pinned to a px value, scrollHeight can only report
+        // max(content, current pinned height) — there's no overflow to scroll, so it never reflects
+        // a *shrunk* content size. Briefly releasing the height constraint forces the browser to lay
+        // out the element at its true intrinsic size so scrollHeight reports the real target height,
+        // whether that's larger or smaller than the current pinned value.
+        const prevHeight = el.style.height;
+        el.style.height = "auto";
         const target = el.scrollHeight;
+        el.style.height = prevHeight;
+        return target;
+    };
+
+    const applyHeight = (instant) => {
+        const target = measureTargetHeight();
         if (instant) {
             // First measurement (element just mounted): snap straight to it, no transition —
             // otherwise the very first open would visibly grow from 0, on top of the separate
@@ -268,6 +281,11 @@ export function observeAutoHeight(el) {
             void el.offsetHeight; // force reflow so the transition below doesn't get batched with this
             el.style.transition = prevTransition;
         } else {
+            // Force a reflow at the temporarily-released height before re-pinning to `target` below,
+            // so the browser has a committed starting value to transition *from* — otherwise the
+            // auto -> target flip above and this assignment can get batched into a single style
+            // recalculation and the transition never has two distinct frames to interpolate between.
+            void el.offsetHeight;
             el.style.height = `${target}px`;
         }
     };
