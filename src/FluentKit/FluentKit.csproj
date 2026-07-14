@@ -7,9 +7,18 @@
     <RootNamespace>FluentKit</RootNamespace>
     <RazorLangVersion>Latest</RazorLangVersion>
 
+    <!-- Pins the static web asset route to "_content/FluentKit/..." regardless of PackageId.
+         Newer SDKs default this route to "_content/{PackageId}/...", which broke every
+         hardcoded "_content/FluentKit/..." JS-interop and stylesheet path in this project
+         once PackageId became "FluentKit.Blazor" below. NOTE: this value replaces the whole
+         prefix (SDK default is "_content/{name}" as a single computed string) — it is NOT
+         appended after an implicit "_content/", so the "_content/" segment must be included
+         here explicitly or asset routes lose it entirely. -->
+    <StaticWebAssetBasePath>_content/FluentKit</StaticWebAssetBasePath>
+
     <!-- NuGet metadata -->
     <PackageId>FluentKit.Blazor</PackageId>
-    <Version>0.1.1-alpha</Version>
+    <Version>0.1.2-alpha</Version>
     <Authors>NoobNotFound</Authors>
     <Description>A token-accurate Fluent Design (WinUI 3) component library for Blazor WASM, Server, and MAUI Blazor Hybrid.</Description>
 
