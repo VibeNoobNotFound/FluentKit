@@ -1,15 +1,19 @@
 /* Ported from fluent-svelte CalendarDatePicker.scss (trigger button chrome) plus a self-contained
    popout, same convention as NumberBox's Expanded popout / ComboBox's dropdown. */
 
-/* Enter/exit animations — identical shape to OverlaySurface's own fluent-overlay-enter/exit. */
+/* Enter/exit animations — scale-only (no opacity). Animating opacity on any ancestor of a
+   backdrop-filter element creates a flattening stacking context which causes the blur to sample
+   from within the (transparent) stacking context instead of from the real page behind it.
+   Scale does not create a stacking context for backdrop-filter purposes, so the CalendarView's
+   acrylic remains correct throughout the transition. */
 @keyframes fluent-calendar-picker-enter {
-    from { opacity: 0; scale: 0.92; }
-    to   { opacity: 1; scale: 1;    }
+    from { scale: 0.92; }
+    to   { scale: 1;    }
 }
 
 @keyframes fluent-calendar-picker-exit {
-    from { opacity: 1; scale: 1;    }
-    to   { opacity: 0; scale: 0.92; }
+    from { scale: 1;    }
+    to   { scale: 0.92; }
 }
 
 .fluent-calendar-date-picker {
@@ -79,11 +83,22 @@
     color: var(--text-fill-color-secondary);
 }
 
+/* Outer: pure position anchor — NO opacity/will-change/transform so it never creates a stacking
+   context. This is critical: FluentCalendarView--floating has backdrop-filter on itself; if the
+   parent creates a flattening stacking context (via opacity animation), the blur samples from the
+   transparent interior of that context instead of from the real page behind it, making the
+   acrylic look completely transparent during the transition. */
 .fluent-calendar-date-picker-popout {
     position: absolute;
     z-index: 100;
     inset-block-start: calc(100% + 4px);
     inset-inline-start: 0;
+}
+
+/* Inner: carries the enter/exit animation. Has no backdrop-filter child of its own (the
+   backdrop-filter is on the CalendarView which is a child, but the inner div itself has no
+   backdrop-filter), so opacity animation here does not break the CalendarView's blur. */
+.fluent-calendar-date-picker-popout-inner {
     transform-origin: top center;
     animation: fluent-calendar-picker-enter var(--duration-fast) var(--easing-decelerate) both;
 }

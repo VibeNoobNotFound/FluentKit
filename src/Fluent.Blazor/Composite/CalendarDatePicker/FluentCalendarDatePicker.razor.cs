@@ -1,7 +1,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.JSInterop;
 
 namespace Fluent.Blazor.Composite;
 
@@ -24,10 +23,8 @@ namespace Fluent.Blazor.Composite;
 /// would incorrectly bubble a focusout up to this root and close the popout mid-click, the same
 /// problem AutoSuggestBox's dropdown solved the same way.
 /// </summary>
-public partial class FluentCalendarDatePicker : ComponentBase, IAsyncDisposable
+public partial class FluentCalendarDatePicker : ComponentBase
 {
-    [Inject] private IJSRuntime JS { get; set; } = default!;
-
     [Parameter] public DateTime? Value { get; set; }
 
     [Parameter] public EventCallback<DateTime?> ValueChanged { get; set; }
@@ -50,13 +47,19 @@ public partial class FluentCalendarDatePicker : ComponentBase, IAsyncDisposable
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private ElementReference _root;
-    private ElementReference _popoutElement;
     private bool _open;
 
-    // Same enter/exit animation shape as AutoSuggestBox/_closing pattern.
+    // Exit-animation state — keeps the popout in the DOM while the CSS scale-out plays.
+    // Uses Task.Delay(150) matching --duration-fast rather than JS animationend, since:
+    //   a) The popout element is the non-animated outer wrapper (@ref is on it, not the inner
+    //      animated div), so waitForExitAnimation would listen on the wrong element and always
+    //      fall through to its 400ms safety-net timeout — causing visible lag on every close.
+    //   b) The calendar popout is a fixed-size widget; it needs no JS height measurement.
+    //   c) Task.Delay fires in Blazor's own sync context with no JS round-trip overhead.
     private bool _closing;
     private int _closeGeneration;
-    private IJSObjectReference? _module;
+
+    private const int ExitAnimationMs = 150; // matches --duration-fast
 
     private CultureInfo Culture => string.IsNullOrEmpty(Locale) ? CultureInfo.CurrentCulture : new CultureInfo(Locale);
 
@@ -70,7 +73,7 @@ public partial class FluentCalendarDatePicker : ComponentBase, IAsyncDisposable
 
     private void ClosePopout()
     {
-        if (!_open) return;
+        if (!_open && !_closing) return;
         _open = false;
         _closing = true;
         var generation = ++_closeGeneration;
@@ -79,14 +82,7 @@ public partial class FluentCalendarDatePicker : ComponentBase, IAsyncDisposable
 
     private async Task FinishClosingAsync(int generation)
     {
-        try
-        {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/Fluent.Blazor/Overlay/overlay-interop.js");
-            await _module.InvokeVoidAsync("waitForExitAnimation", _popoutElement);
-        }
-        catch (JSDisconnectedException) { return; }
-        catch (ObjectDisposedException) { return; }
+        await Task.Delay(ExitAnimationMs);
 
         if (generation == _closeGeneration && _closing)
         {
@@ -122,11 +118,5 @@ public partial class FluentCalendarDatePicker : ComponentBase, IAsyncDisposable
         if (e.Key == "Escape")
             ClosePopout();
         return Task.CompletedTask;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_module is not null)
-            await _module.DisposeAsync();
     }
 }

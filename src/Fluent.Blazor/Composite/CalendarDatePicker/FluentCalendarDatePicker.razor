@@ -21,16 +21,17 @@
     @if (!Disabled && (_open || _closing))
     {
         <div class="fluent-calendar-date-picker-dismiss-backdrop" @onclick="ClosePopout"></div>
-        <div class="fluent-calendar-date-picker-popout @(_closing ? "fluent-calendar-date-picker-popout--closing" : "")"
-             @ref="_popoutElement">
-            <FluentCalendarView Value="@Value"
-                                ValueChanged="@OnDateChangedAsync"
-                                Min="@Min"
-                                Max="@Max"
-                                Blackout="@Blackout"
-                                WeekStart="@WeekStart"
-                                Locale="@Locale"
-                                Floating="true" />
+        <div class="fluent-calendar-date-picker-popout">
+            <div class="fluent-calendar-date-picker-popout-inner @(_closing ? "fluent-calendar-date-picker-popout--closing" : "")">
+                <FluentCalendarView Value="@Value"
+                                    ValueChanged="@OnDateChangedAsync"
+                                    Min="@Min"
+                                    Max="@Max"
+                                    Blackout="@Blackout"
+                                    WeekStart="@WeekStart"
+                                    Locale="@Locale"
+                                    Floating="true" />
+            </div>
         </div>
     }
 </div>
