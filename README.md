@@ -14,6 +14,7 @@ WebAssembly · Server · MAUI Blazor Hybrid — pure Razor and CSS, no third-par
 [Live sample](https://vibenoobnotfound.github.io/FluentKit/) · [Getting started](#getting-started) · [Known gaps](#known-gaps--next-up) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 </div>
+<img width="1912" height="1242" alt="image" src="https://github.com/user-attachments/assets/299a9235-6fc5-4eb4-9c92-64560ebd6cae" />
 
 ---
 
