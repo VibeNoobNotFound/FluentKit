@@ -1,9 +1,26 @@
 @namespace FluentKit.Primitives
 
-<button type="button"
-        class="fluent-button @VariantClass"
-        disabled="@Disabled"
-        @onclick="OnClick"
-        @attributes="AdditionalAttributes">
-    @ChildContent
-</button>
+@if (IsLink)
+{
+    <a class="fluent-button @VariantClass"
+       href="@(Disabled ? null : Href)"
+       target="@Target"
+       rel="@(IsExternalTarget ? "noopener noreferrer" : null)"
+       aria-disabled="@(Disabled ? "true" : null)"
+       tabindex="@(Disabled ? "-1" : null)"
+       @onclick="OnClick"
+       @onclick:preventDefault="Disabled"
+       @attributes="AdditionalAttributes">
+        @ChildContent
+    </a>
+}
+else
+{
+    <button type="button"
+            class="fluent-button @VariantClass"
+            disabled="@Disabled"
+            @onclick="OnClick"
+            @attributes="AdditionalAttributes">
+        @ChildContent
+    </button>
+}

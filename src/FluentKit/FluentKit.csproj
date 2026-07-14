@@ -9,7 +9,7 @@
 
     <!-- NuGet metadata -->
     <PackageId>FluentKit.Blazor</PackageId>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.1.1-alpha</Version>
     <Authors>NoobNotFound</Authors>
     <Description>A token-accurate Fluent Design (WinUI 3) component library for Blazor WASM, Server, and MAUI Blazor Hybrid.</Description>
 

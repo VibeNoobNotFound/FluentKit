@@ -30,6 +30,10 @@
                 color var(--duration-fast) var(--easing-standard);
 }
 
+a.fluent-button[aria-disabled="true"] {
+    pointer-events: none;
+}
+
 .fluent-button:focus-visible {
     outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
     outline-offset: 2px;
@@ -41,17 +45,18 @@
     color: var(--button-foreground);
     border-color: var(--button-border-brush);
 }
-.fluent-button--standard:hover:not(:disabled) {
+.fluent-button--standard:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color: var(--button-background-pointer-over);
     color: var(--button-foreground-pointer-over);
     border-color: var(--button-border-brush-pointer-over);
 }
-.fluent-button--standard:active:not(:disabled) {
+.fluent-button--standard:active:not(:disabled):not([aria-disabled="true"]) {
     background-color: var(--button-background-pressed);
     color: var(--button-foreground-pressed);
     border-color: var(--button-border-brush-pressed);
 }
-.fluent-button--standard:disabled {
+.fluent-button--standard:disabled,
+.fluent-button--standard[aria-disabled="true"] {
     background-color: var(--button-background-disabled);
     color: var(--button-foreground-disabled);
     border-color: var(--button-border-brush-disabled);
@@ -64,15 +69,16 @@
     color: var(--accent-button-foreground);
     border-color: transparent;
 }
-.fluent-button--accent:hover:not(:disabled) {
+.fluent-button--accent:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color: var(--accent-button-background-pointer-over);
     color: var(--accent-button-foreground-pointer-over);
 }
-.fluent-button--accent:active:not(:disabled) {
+.fluent-button--accent:active:not(:disabled):not([aria-disabled="true"]) {
     background-color: var(--accent-button-background-pressed);
     color: var(--accent-button-foreground-pressed);
 }
-.fluent-button--accent:disabled {
+.fluent-button--accent:disabled,
+.fluent-button--accent[aria-disabled="true"] {
     background-color: var(--accent-button-background-disabled);
     color: var(--accent-button-foreground-disabled);
     cursor: not-allowed;
@@ -85,13 +91,14 @@
     border-color: transparent;
     min-width: unset;
 }
-.fluent-button--subtle:hover:not(:disabled) {
+.fluent-button--subtle:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color: var(--subtle-button-background-pointer-over);
 }
-.fluent-button--subtle:active:not(:disabled) {
+.fluent-button--subtle:active:not(:disabled):not([aria-disabled="true"]) {
     background-color: var(--subtle-button-background-pressed);
 }
-.fluent-button--subtle:disabled {
+.fluent-button--subtle:disabled,
+.fluent-button--subtle[aria-disabled="true"] {
     background-color: var(--subtle-button-background-disabled);
     color: var(--subtle-button-foreground-disabled);
     cursor: not-allowed;
@@ -108,14 +115,15 @@
     color: var(--accent-fill-color-default);
     text-decoration: none;
 }
-.fluent-button--hyperlink:hover:not(:disabled) {
+.fluent-button--hyperlink:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color: var(--subtle-fill-color-secondary);
 }
-.fluent-button--hyperlink:active:not(:disabled) {
+.fluent-button--hyperlink:active:not(:disabled):not([aria-disabled="true"]) {
     background-color: var(--subtle-fill-color-tertiary);
     color: var(--accent-fill-color-tertiary);
 }
-.fluent-button--hyperlink:disabled {
+.fluent-button--hyperlink:disabled,
+.fluent-button--hyperlink[aria-disabled="true"] {
     color: var(--text-fill-color-disabled);
     cursor: not-allowed;
 }
