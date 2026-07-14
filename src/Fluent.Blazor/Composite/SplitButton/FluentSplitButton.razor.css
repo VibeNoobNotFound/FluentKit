@@ -1,0 +1,118 @@
+.fluent-splitbutton {
+    display: inline-flex;
+    align-items: stretch;
+    height: 32px;
+    border-radius: var(--control-corner-radius);
+    overflow: hidden;
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+}
+
+.fluent-splitbutton-action,
+.fluent-splitbutton-chevron {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    background-color: transparent;
+    color: inherit;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-splitbutton-action {
+    flex: 1;
+    min-width: 88px;
+    padding: 0 12px;
+    gap: 8px;
+    justify-content: flex-start;
+    border-right-width: var(--control-stroke-thickness);
+    border-right-style: solid;
+}
+
+.fluent-splitbutton-chevron {
+    width: 32px;
+    flex-shrink: 0;
+}
+
+.fluent-splitbutton-action:focus-visible,
+.fluent-splitbutton-chevron:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+/* ---------- Standard ---------- */
+.fluent-splitbutton--standard {
+    background-color: var(--button-background);
+    color: var(--button-foreground);
+    border-color: var(--button-border-brush);
+}
+.fluent-splitbutton--standard .fluent-splitbutton-action {
+    border-right-color: var(--button-border-brush);
+}
+.fluent-splitbutton--standard .fluent-splitbutton-action:hover:not(:disabled),
+.fluent-splitbutton--standard .fluent-splitbutton-chevron:hover:not(:disabled) {
+    background-color: var(--button-background-pointer-over);
+}
+.fluent-splitbutton--standard .fluent-splitbutton-action:active:not(:disabled),
+.fluent-splitbutton--standard .fluent-splitbutton-chevron:active:not(:disabled) {
+    background-color: var(--button-background-pressed);
+}
+.fluent-splitbutton--standard .fluent-splitbutton-action:disabled,
+.fluent-splitbutton--standard .fluent-splitbutton-chevron:disabled {
+    color: var(--button-foreground-disabled);
+    cursor: not-allowed;
+}
+
+/* ---------- Accent ---------- */
+.fluent-splitbutton--accent {
+    background-color: var(--accent-button-background);
+    color: var(--accent-button-foreground);
+    border-color: transparent;
+}
+.fluent-splitbutton--accent .fluent-splitbutton-action {
+    border-right-color: rgba(0, 0, 0, 0.15);
+}
+.fluent-splitbutton--accent .fluent-splitbutton-action:hover:not(:disabled),
+.fluent-splitbutton--accent .fluent-splitbutton-chevron:hover:not(:disabled) {
+    background-color: var(--accent-button-background-pointer-over);
+}
+.fluent-splitbutton--accent .fluent-splitbutton-action:active:not(:disabled),
+.fluent-splitbutton--accent .fluent-splitbutton-chevron:active:not(:disabled) {
+    background-color: var(--accent-button-background-pressed);
+}
+.fluent-splitbutton--accent .fluent-splitbutton-action:disabled,
+.fluent-splitbutton--accent .fluent-splitbutton-chevron:disabled {
+    color: var(--accent-button-foreground-disabled);
+    cursor: not-allowed;
+}
+
+/* ---------- Subtle ---------- */
+.fluent-splitbutton--subtle {
+    background-color: var(--subtle-button-background);
+    color: var(--subtle-button-foreground);
+    border-color: transparent;
+}
+.fluent-splitbutton--subtle .fluent-splitbutton-action {
+    border-right-color: var(--divider-stroke-color-default);
+}
+.fluent-splitbutton--subtle .fluent-splitbutton-action:hover:not(:disabled),
+.fluent-splitbutton--subtle .fluent-splitbutton-chevron:hover:not(:disabled) {
+    background-color: var(--subtle-button-background-pointer-over);
+}
+.fluent-splitbutton--subtle .fluent-splitbutton-action:active:not(:disabled),
+.fluent-splitbutton--subtle .fluent-splitbutton-chevron:active:not(:disabled) {
+    background-color: var(--subtle-button-background-pressed);
+}
+.fluent-splitbutton--subtle .fluent-splitbutton-action:disabled,
+.fluent-splitbutton--subtle .fluent-splitbutton-chevron:disabled {
+    color: var(--subtle-button-foreground-disabled);
+    cursor: not-allowed;
+}

@@ -1,0 +1,47 @@
+.fluent-reveal {
+    position: relative;
+    isolation: isolate;
+    --reveal-opacity: 0;
+    --reveal-x: 50%;
+    --reveal-y: 50%;
+}
+
+/* Fill highlight — a soft light spot that fades in near the pointer, cut to the element's own
+   box via the pseudo-element so it never bleeds past rounded corners. */
+.fluent-reveal::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: var(--reveal-opacity);
+    transition: opacity var(--duration-fast) var(--easing-standard);
+    background: radial-gradient(120px circle at var(--reveal-x) var(--reveal-y),
+        rgba(255, 255, 255, 0.15), transparent 70%);
+    z-index: 0;
+}
+
+/* Border highlight — same spotlight, but masked down to a 1px ring instead of the whole fill,
+   matching WinUI's separate RevealBorderBrush behavior (border light is brighter/tighter than
+   the fill light). */
+.fluent-reveal--bordered::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: var(--reveal-opacity);
+    transition: opacity var(--duration-fast) var(--easing-standard);
+    padding: 1px;
+    background: radial-gradient(80px circle at var(--reveal-x) var(--reveal-y),
+        rgba(255, 255, 255, 0.6), transparent 70%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 1;
+}
+
+.fluent-reveal > * {
+    position: relative;
+    z-index: 2;
+}

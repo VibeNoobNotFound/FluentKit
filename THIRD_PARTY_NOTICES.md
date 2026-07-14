@@ -65,6 +65,42 @@ navigation with wraparound) ports fluent-svelte's `MenuBar.svelte`/`MenuBarItem.
 this project's existing MenuFlyoutItem/MenuFlyoutDivider for each item's dropdown content rather
 than reimplementing flyout rendering.
 
+IconButton (bare icon-only button, no min-width/label padding) and PersonPicture (round avatar with
+Src-with-initials-fallback, live 404 fallback, Badge slot) port fluent-svelte's `IconButton.svelte`
+and `PersonPicture.svelte`. MenuBar/MenuBarItem (top-level app menu bar — File/Edit/View-style —
+click-or-Enter/Space open, hover-to-switch between open siblings, ArrowLeft/ArrowRight roving
+navigation with wraparound) ports fluent-svelte's `MenuBar.svelte`/`MenuBarItem.svelte`, reusing
+this project's existing MenuFlyoutItem/MenuFlyoutDivider for each item's dropdown content rather
+than reimplementing flyout rendering.
+
+ToggleButton rides the same Standard/Accent visual ramp as FluentButton (unchecked looks like a
+plain Button, checked switches to the Accent ramp) rather than porting a dedicated fluent-svelte
+source file — fluent-svelte doesn't have a standalone ToggleButton distinct from its ToggleSwitch,
+so this one is this project's own composition of tokens already established by Button/ToggleSwitch.
+PasswordBox composes FluentTextBox + FluentTextBoxButton (swapping the underlying input's `Type`
+between "password"/"text" on a reveal-eye click) the same way NumberBox composes TextBox +
+TextBoxButton — not a fluent-svelte port, since fluent-svelte's own TextBox handles password mode
+via a bare `type` prop with no reveal button.
+Pivot/PivotItem (horizontal tab strip, one visible content pane, arrow-key/Home/End roving
+navigation between tab headers) is this project's own implementation — fluent-svelte has no direct
+equivalent — built on the same item-self-registers-with-a-shared-context pattern MenuBarContext
+already established, rather than a live DOM query.
+DropDownButton and SplitButton are thin compositions over the existing FluentMenuFlyout (itself
+ported from fluent-svelte's `MenuFlyoutWrapper.svelte`, see above) with a button-styled trigger in
+place of MenuFlyout's plain trigger span — not separate fluent-svelte ports, since fluent-svelte
+doesn't split these out as distinct components from its MenuFlyout either.
+TeachingTip (anchor-relative persistent callout — title/subtitle, optional action-button row,
+explicit close button, a beak/pointer toward the anchor) is this project's own component, built
+directly on IOverlayService/FluentOverlayHost the same shape as FluentFlyout, rendered `bare` since
+it supplies its own card chrome and beak rather than the default flyout surface. fluent-svelte has
+no TeachingTip equivalent to port from.
+Reveal (Effects/Reveal) is a from-scratch implementation of WinUI's Reveal highlight — a
+pointer-tracked radial-gradient spotlight, same effects layer as Mica/Acrylic. The JS module
+(`wwwroot/Effects/Reveal/reveal-interop.js`) only measures pointer position via `pointermove`/
+`pointerleave` and writes it into two CSS custom properties; all actual rendering is a CSS
+radial-gradient in `FluentRevealBackground.razor.css`. Not ported from fluent-svelte, which doesn't
+implement Reveal (it isn't part of Fluent Svelte's own component set).
+
 ## microsoft-ui-xaml
 Design token values (colors, corner radius, component state aliases) are transcribed from
 [microsoft/microsoft-ui-xaml](https://github.com/microsoft/microsoft-ui-xaml)

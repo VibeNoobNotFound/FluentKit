@@ -1,0 +1,81 @@
+/*
+ * Rides the same visual ramp as FluentButton's Standard variant at rest, then switches to the
+ * accent ramp once Checked — same "unchecked looks like Button, checked looks like AccentButton"
+ * behavior WinUI's own ToggleButton style uses (ToggleButton_themeresources.xaml aliases straight
+ * into Button's resource keys for the unchecked states).
+ */
+
+.fluent-togglebutton {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-width: 120px;
+    height: 32px;
+    padding: 0 12px;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-normal);
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+
+    background-color: var(--button-background);
+    color: var(--button-foreground);
+    border-color: var(--button-border-brush);
+}
+
+.fluent-togglebutton:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: 2px;
+}
+
+.fluent-togglebutton:hover:not(:disabled):not(.fluent-togglebutton--checked) {
+    background-color: var(--button-background-pointer-over);
+    color: var(--button-foreground-pointer-over);
+}
+
+.fluent-togglebutton:active:not(:disabled):not(.fluent-togglebutton--checked) {
+    background-color: var(--button-background-pressed);
+    color: var(--button-foreground-pressed);
+}
+
+.fluent-togglebutton:disabled {
+    background-color: var(--button-background-disabled);
+    color: var(--button-foreground-disabled);
+    border-color: var(--button-border-brush-disabled);
+    cursor: not-allowed;
+}
+
+/* ---------- Checked (rides the AccentButton ramp) ---------- */
+.fluent-togglebutton--checked {
+    background-color: var(--accent-button-background);
+    color: var(--accent-button-foreground);
+    border-color: transparent;
+}
+
+.fluent-togglebutton--checked:hover:not(:disabled) {
+    background-color: var(--accent-button-background-pointer-over);
+    color: var(--accent-button-foreground-pointer-over);
+}
+
+.fluent-togglebutton--checked:active:not(:disabled) {
+    background-color: var(--accent-button-background-pressed);
+    color: var(--accent-button-foreground-pressed);
+}
+
+.fluent-togglebutton--checked:disabled {
+    background-color: var(--accent-button-background-disabled);
+    color: var(--accent-button-foreground-disabled);
+    cursor: not-allowed;
+}

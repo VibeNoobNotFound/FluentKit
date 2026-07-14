@@ -1,0 +1,16 @@
+@namespace Fluent.Blazor.Composite
+
+<div class="fluent-splitbutton @VariantClass">
+    <button type="button"
+            class="fluent-splitbutton-action"
+            disabled="@Disabled"
+            @onclick="OnClick"
+            @attributes="AdditionalAttributes">
+        @ChildContent
+    </button>
+    <FluentMenuFlyout @bind-IsOpen="IsOpen" MenuItems="MenuItems" Placement="Placement">
+        <button type="button" class="fluent-splitbutton-chevron" disabled="@Disabled" aria-label="More options">
+            <FluentIcon Name="@FluentIconNames.ChevronDown" />
+        </button>
+    </FluentMenuFlyout>
+</div>

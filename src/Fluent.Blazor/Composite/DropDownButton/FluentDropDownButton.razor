@@ -1,0 +1,11 @@
+@namespace Fluent.Blazor.Composite
+
+<FluentMenuFlyout @bind-IsOpen="IsOpen" MenuItems="MenuItems" Placement="Placement">
+    <button type="button"
+            class="fluent-dropdownbutton @VariantClass"
+            disabled="@Disabled"
+            @attributes="AdditionalAttributes">
+        <span class="fluent-dropdownbutton-label">@ChildContent</span>
+        <FluentIcon Name="@FluentIconNames.ChevronDown" />
+    </button>
+</FluentMenuFlyout>

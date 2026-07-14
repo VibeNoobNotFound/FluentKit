@@ -1,0 +1,91 @@
+/* Same ramp as FluentButton — see Primitives/Button/FluentButton.razor.css for the state-mapping
+   note (this repeats the Standard/Accent/Subtle shape rather than reusing FluentButton's own CSS
+   classes, since a plain CSS-isolation .razor.css can't be shared across two different components'
+   scope attributes). */
+
+.fluent-dropdownbutton {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-width: 120px;
+    height: 32px;
+    padding: 0 12px;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-dropdownbutton:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: 2px;
+}
+
+.fluent-dropdownbutton-label {
+    flex: 1;
+    text-align: left;
+}
+
+.fluent-dropdownbutton--standard {
+    background-color: var(--button-background);
+    color: var(--button-foreground);
+    border-color: var(--button-border-brush);
+}
+.fluent-dropdownbutton--standard:hover:not(:disabled) {
+    background-color: var(--button-background-pointer-over);
+}
+.fluent-dropdownbutton--standard:active:not(:disabled) {
+    background-color: var(--button-background-pressed);
+}
+.fluent-dropdownbutton--standard:disabled {
+    background-color: var(--button-background-disabled);
+    color: var(--button-foreground-disabled);
+    cursor: not-allowed;
+}
+
+.fluent-dropdownbutton--accent {
+    background-color: var(--accent-button-background);
+    color: var(--accent-button-foreground);
+    border-color: transparent;
+}
+.fluent-dropdownbutton--accent:hover:not(:disabled) {
+    background-color: var(--accent-button-background-pointer-over);
+}
+.fluent-dropdownbutton--accent:active:not(:disabled) {
+    background-color: var(--accent-button-background-pressed);
+}
+.fluent-dropdownbutton--accent:disabled {
+    background-color: var(--accent-button-background-disabled);
+    color: var(--accent-button-foreground-disabled);
+    cursor: not-allowed;
+}
+
+.fluent-dropdownbutton--subtle {
+    background-color: var(--subtle-button-background);
+    color: var(--subtle-button-foreground);
+    border-color: transparent;
+    min-width: unset;
+}
+.fluent-dropdownbutton--subtle:hover:not(:disabled) {
+    background-color: var(--subtle-button-background-pointer-over);
+}
+.fluent-dropdownbutton--subtle:active:not(:disabled) {
+    background-color: var(--subtle-button-background-pressed);
+}
+.fluent-dropdownbutton--subtle:disabled {
+    background-color: var(--subtle-button-background-disabled);
+    color: var(--subtle-button-foreground-disabled);
+    cursor: not-allowed;
+}

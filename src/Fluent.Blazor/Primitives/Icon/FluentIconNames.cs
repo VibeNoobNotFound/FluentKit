@@ -25,6 +25,8 @@ public static class FluentIconNames
     public const string ArrowRight = "ic_fluent_arrow_right_20_regular";
     public const string Calendar = "ic_fluent_calendar_20_regular";
     public const string Delete = "ic_fluent_delete_20_regular";
+    public const string Eye = "ic_fluent_eye_20_regular";
+    public const string EyeOff = "ic_fluent_eye_off_20_regular";
 
     /// <summary>The "hamburger"/GlobalNavButton glyph — used by NavigationView's pane-toggle button.</summary>
     public const string Navigation = "ic_fluent_navigation_20_regular";

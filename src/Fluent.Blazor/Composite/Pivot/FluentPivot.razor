@@ -1,0 +1,30 @@
+@namespace Fluent.Blazor.Composite
+
+<div class="fluent-pivot" @attributes="AdditionalAttributes">
+    <div class="fluent-pivot-header" role="tablist">
+        @for (var i = 0; i < _context.Items.Count; i++)
+        {
+            var index = i;
+            var item = _context.Items[i];
+            <button type="button"
+                    class="fluent-pivot-tab @(index == SelectedIndex ? "fluent-pivot-tab--selected" : null)"
+                    role="tab"
+                    disabled="@item.Disabled"
+                    aria-selected="@(index == SelectedIndex ? "true" : "false")"
+                    tabindex="@(index == SelectedIndex ? "0" : "-1")"
+                    @onclick="() => SelectAsync(index)"
+                    @onkeydown="e => OnKeyDown(e, index)">
+                @item.RenderHeader
+            </button>
+        }
+    </div>
+    <div class="fluent-pivot-content">
+        @if (_context.Items.Count > 0 && SelectedIndex >= 0 && SelectedIndex < _context.Items.Count)
+        {
+            @_context.Items[SelectedIndex].ChildContent
+        }
+    </div>
+</div>
+<CascadingValue Value="_context" IsFixed="true">
+    @ChildContent
+</CascadingValue>

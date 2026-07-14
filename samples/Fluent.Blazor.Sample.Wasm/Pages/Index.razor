@@ -719,6 +719,120 @@
     </FluentMenuBar>
     <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_menuBarLastAction — show grid: @_menuBarShowGrid</FluentTextBlock>
 
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">ToggleButton</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Stays visually pressed once activated — unchecked rides the same ramp as a plain
+        <code>FluentButton</code>, checked switches to the Accent ramp. For toolbar-style toggles
+        (Bold/Italic/Mute), unlike <code>FluentToggleSwitch</code> which always pairs its state with
+        On/Off text.
+    </FluentTextBlock>
+    <div style="display:flex; gap:8px; align-items:center;">
+        <FluentToggleButton @bind-Checked="_toggleButtonBold">Bold</FluentToggleButton>
+        <FluentToggleButton @bind-Checked="_toggleButtonItalic">Italic</FluentToggleButton>
+        <FluentToggleButton Checked="true" Disabled="true">Locked on</FluentToggleButton>
+    </div>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Bold: @_toggleButtonBold — Italic: @_toggleButtonItalic</FluentTextBlock>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">PasswordBox</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Composes <code>FluentTextBox</code> + <code>FluentTextBoxButton</code> — the eye icon
+        toggles the underlying input between <code>password</code> and <code>text</code> rather than
+        leaving no way to check what you typed.
+    </FluentTextBlock>
+    <div style="max-width:280px;">
+        <FluentPasswordBox Header="Password" Placeholder="Enter password" @bind-Value="_passwordBoxValue" />
+    </div>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">Reveal</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Pointer-tracked spotlight highlight — move your cursor over the cards below.
+        <code>Bordered</code> additionally reveals along a 1px ring instead of the fill.
+    </FluentTextBlock>
+    <div style="display:flex; gap:16px;">
+        <FluentRevealBackground style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); display:flex; align-items:center; justify-content:center;">
+            <FluentTextBlock>Fill reveal</FluentTextBlock>
+        </FluentRevealBackground>
+        <FluentRevealBackground Bordered="true" style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); border:1px solid var(--card-stroke-default); display:flex; align-items:center; justify-content:center;">
+            <FluentTextBlock>Border reveal</FluentTextBlock>
+        </FluentRevealBackground>
+    </div>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">Pivot</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Horizontal tab strip, one visible content pane at a time. ArrowLeft/ArrowRight/Home/End walk
+        between headers with wraparound.
+    </FluentTextBlock>
+    <FluentPivot @bind-SelectedIndex="_pivotSelectedIndex">
+        <FluentPivotItem Title="Overview">
+            <FluentTextBlock>High-level summary content goes here.</FluentTextBlock>
+        </FluentPivotItem>
+        <FluentPivotItem Title="Details">
+            <FluentTextBlock>More detailed content for the second tab.</FluentTextBlock>
+        </FluentPivotItem>
+        <FluentPivotItem Title="Unavailable" Disabled="true">
+            <FluentTextBlock>Not reachable — tab is disabled.</FluentTextBlock>
+        </FluentPivotItem>
+    </FluentPivot>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected index: @_pivotSelectedIndex</FluentTextBlock>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">DropDownButton</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Always opens a menu rather than firing a click itself — thin composition over
+        <code>FluentMenuFlyout</code> with a chevron-suffixed button trigger.
+    </FluentTextBlock>
+    <FluentDropDownButton>
+        <ChildContent>Sort by</ChildContent>
+        <MenuItems>
+            <FluentMenuFlyoutItem OnClick="@(() => _dropDownLastAction = "Name")">Name</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem OnClick="@(() => _dropDownLastAction = "Date")">Date</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem OnClick="@(() => _dropDownLastAction = "Size")">Size</FluentMenuFlyoutItem>
+        </MenuItems>
+    </FluentDropDownButton>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_dropDownLastAction</FluentTextBlock>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">SplitButton</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        A real independent action (left region) joined to a separate chevron region that opens a menu
+        of related actions — one visually-continuous pill, unlike DropDownButton which is nothing but
+        a menu trigger.
+    </FluentTextBlock>
+    <FluentSplitButton Variant="ButtonVariant.Accent" OnClick="@(() => _splitButtonLastAction = "Save")">
+        <ChildContent>Save</ChildContent>
+        <MenuItems>
+            <FluentMenuFlyoutItem OnClick="@(() => _splitButtonLastAction = "Save as…")">Save as…</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem OnClick="@(() => _splitButtonLastAction = "Save a copy")">Save a copy</FluentMenuFlyoutItem>
+        </MenuItems>
+    </FluentSplitButton>
+    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_splitButtonLastAction</FluentTextBlock>
+
+    <FluentDivider />
+
+    <FluentTextBlock Variant="TextBlockVariant.Title">TeachingTip</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Persistent anchor-relative callout — shown/dismissed programmatically (not by clicking its own
+        target), stays up until explicitly closed rather than light-dismissing on outside click.
+    </FluentTextBlock>
+    <FluentTeachingTip @bind-IsOpen="_teachingTipOpen" Title="New feature" Subtitle="Try the new Reveal effect on cards above.">
+        <ChildContent>
+            <FluentButton OnClick="@(() => _teachingTipOpen = true)">Show tip</FluentButton>
+        </ChildContent>
+        <ActionContent>
+            <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _teachingTipOpen = false)">Got it</FluentButton>
+        </ActionContent>
+    </FluentTeachingTip>
+
 </div>
 
 @code {
@@ -833,6 +947,19 @@
 
     private string? _menuBarLastAction;
     private bool _menuBarShowGrid;
+
+    private bool _toggleButtonBold;
+    private bool _toggleButtonItalic = true;
+
+    private string? _passwordBoxValue;
+
+    private int _pivotSelectedIndex;
+
+    private string? _dropDownLastAction;
+
+    private string? _splitButtonLastAction;
+
+    private bool _teachingTipOpen;
 
     private void CloseConfirmDialog(string action)
     {

@@ -1,0 +1,53 @@
+.fluent-pivot {
+    display: flex;
+    flex-direction: column;
+}
+
+.fluent-pivot-header {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--divider-stroke-color-default);
+}
+
+.fluent-pivot-tab {
+    position: relative;
+    box-sizing: border-box;
+    padding: 8px 4px;
+    margin-bottom: -1px;
+
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body-large);
+    color: var(--text-fill-color-secondary);
+
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-pivot-tab:hover:not(:disabled):not(.fluent-pivot-tab--selected) {
+    color: var(--text-fill-color-primary);
+}
+
+.fluent-pivot-tab:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: 2px;
+}
+
+.fluent-pivot-tab:disabled {
+    color: var(--text-fill-color-disabled);
+    cursor: not-allowed;
+}
+
+.fluent-pivot-tab--selected {
+    color: var(--text-fill-color-primary);
+    border-bottom-color: var(--accent-fill-color-default);
+}
+
+.fluent-pivot-content {
+    padding: 16px 0;
+}

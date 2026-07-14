@@ -11,9 +11,10 @@ for the full roadmap this follows.
   - `wwwroot/Tokens/` — the token layer (`tokens.css` is the single entry point consumers link).
     Primitives (`_primitives.css`) are theme-independent; semantics (`_semantic.{light,dark}.css`)
     are transcribed from real WinUI XAML resource dictionaries, structured to mirror each other 1:1.
-  - `Primitives/` — `FluentButton` (4 variants × 4 states), `FluentCheckBox` (incl. three-state/
-    indeterminate), `FluentRadioButton` + `FluentRadioGroup`, `FluentToggleSwitch`, `FluentTextBox`,
-    `FluentTextBlock` (full type ramp), `FluentDivider`.
+  - `Primitives/` — `FluentButton` (4 variants × 4 states), `FluentToggleButton`, `FluentCheckBox`
+    (incl. three-state/indeterminate), `FluentRadioButton` + `FluentRadioGroup`, `FluentToggleSwitch`,
+    `FluentTextBox`, `FluentPasswordBox`, `FluentTextBlock` (full type ramp), `FluentDivider`,
+    `FluentIconButton`, `FluentPersonPicture`.
   - `Composite/FluentTooltip` — the proof-of-concept consumer of the overlay infra.
   - `Overlay/` — `IOverlayService` + `FluentOverlayHost` + `OverlaySurface`, Blazor's answer to
     portal/teleportation for anything that needs to render outside its parent's layout flow
@@ -30,6 +31,13 @@ for the full roadmap this follows.
     different mechanism from Mica: it live-blurs whatever's actually rendered behind it via CSS
     `backdrop-filter`, the same way in-app Acrylic blurs live content behind a flyout/nav pane.
     `Kind.Base` (more opaque) / `Kind.Thin` (more see-through), matching `DesktopAcrylicKind`.
+  - `Effects/Reveal/FluentRevealBackground` — pointer-tracked radial-gradient highlight (WinUI's
+    Reveal). JS interop only measures pointer position; the gradient itself is pure CSS driven by
+    two custom properties it writes.
+  - `Composite/` — beyond `FluentTooltip`, now also `FluentFlyout`, `FluentMenuFlyout`/
+    `FluentContextMenu`, `FluentComboBox`, `FluentAutoSuggestBox`, `FluentCalendarView`/
+    `FluentCalendarDatePicker`, `FluentNavigationView`, `FluentContentDialog`, `FluentMenuBar`,
+    `FluentPivot`, `FluentDropDownButton`, `FluentSplitButton`, and `FluentTeachingTip`.
 - `samples/Fluent.Blazor.Sample.Wasm/` — a Blazor WASM host demoing all of the above: theme
   switching, the whole page background running through `FluentMicaPanel` over a real wallpaper
   image, Mica Base vs. Base Alt side by side, and `FluentAcrylicBrush` cards live-blurring that
@@ -58,14 +66,20 @@ the `.razor` file's `@code` block instead — `FluentTooltip` is set up this way
 
 ## Known gaps / next up
 
-Per the plan's Phase 3/4 priority table, in roughly this order:
-1. `FluentFlyout` and `FluentComboBox`, using the same `IOverlayService` pattern `FluentTooltip`
-   already proved out (`overlay-interop.js` currently only flips vertically — left/right placement
-   and full 4-direction collision handling is needed before ComboBox can rely on it).
-2. `FluentProgressBar` / `FluentProgressRing`.
-3. Reveal (pointer-tracked gradient highlight) — same effects layer as Mica/Acrylic.
-4. The accent color tokens (`--accent-fill-color-default` etc.) are still placeholders (Windows'
+Every component in the plan's Phase 2–5 priority table is now built. What's actually left:
+1. The accent color tokens (`--accent-fill-color-default` etc.) are still placeholders (Windows'
    default blue), not derived from the user's actual system accent — flagged with `TODO` in both
    `_semantic.*.css` files.
-5. No automated tests yet (Phase 6 in the plan calls for Playwright screenshot tests pinned against
-   real WinUI 3 screenshots).
+2. No automated tests yet (`tests/` doesn't exist) — Phase 6 in the plan calls for bUnit plus
+   Playwright screenshot tests pinned against real WinUI 3 screenshots.
+3. No `docs/` demo site yet.
+4. No High Contrast theme dictionary (§7 of the plan calls for a third theme alongside light/dark,
+   mirroring WinUI's own `HighContrast` resource key) — `Theming/` currently only resolves
+   light/dark/system.
+5. `overlay-interop.js` only flips vertically (below → above) — full 4-direction collision handling
+   (left/right flipping too) hasn't been needed yet by any built component, but would matter for a
+   ComboBox/AutoSuggestBox dropdown pinned near a viewport edge.
+6. `FluentTeachingTip`'s beak is positioned from the *requested* placement, not whatever
+   `overlay-interop.js` actually flipped it to — fine as long as there's room, but the beak won't
+   flip sides if the tip itself gets flipped. Fixing this needs the overlay layer to report the
+   resolved placement back to the component (see `OverlayEntry`), not just the computed style.
