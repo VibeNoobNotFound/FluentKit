@@ -1,14 +1,12 @@
 using Microsoft.AspNetCore.Components;
+using System.Globalization;
 
 namespace Fluent.Blazor.Primitives;
 
 /// <summary>
-/// Circular ProgressRing. Built with a conic-gradient + radial-gradient mask instead of SVG
-/// stroke-dashoffset — no JS, no per-frame arc-length math, just a CSS custom property
-/// (--fluent-progress-ring-angle) driving how much of the conic-gradient reads as "filled". The
-/// indeterminate mode is a single continuous CSS rotation instead (real WinUI ProgressRing's
-/// indeterminate animation is a more elaborate multi-arc easing curve; this is a deliberate v1
-/// simplification, flagged for anyone doing a pixel pass later).
+/// Circular ProgressRing. Rewritten to match fluent-svelte's precise SVG circle-stroke-dashoffset math 
+/// and CSS keyframe animations. Uses vector strokes rather than conic-gradient masks for maximum 
+/// rendering sharpness and accurate animation easing curves.
 /// </summary>
 public partial class FluentProgressRing : ComponentBase
 {
@@ -24,4 +22,14 @@ public partial class FluentProgressRing : ComponentBase
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private double ClampedValue => Math.Clamp(Value, 0, 100);
+
+    private string? DashOffset
+    {
+        get
+        {
+            var circumference = Math.PI * 14.0; // r = 7 -> diameter = 14
+            var offset = ((100.0 - ClampedValue) / 100.0) * circumference;
+            return offset.ToString(CultureInfo.InvariantCulture);
+        }
+    }
 }
