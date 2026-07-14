@@ -210,6 +210,46 @@
         </FluentAcrylicBrush>
     </div>
 
+    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Acrylic tweaks — Tint, TintOpacity, TintLuminosityOpacity</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Same three knobs as WinUI Gallery's own AcrylicPage custom-brush examples (<code>TintColor</code>,
+        <code>TintOpacity</code>, <code>TintLuminosityOpacity</code>), live-editable here. Leaving the
+        luminosity slider at its minimum omits that layer entirely — same single-wash tint as the
+        Base/Thin cards above; drag it up to add the second, luminosity-blended pass that keeps the
+        tint reading consistent against the busier part of the photo underneath.
+    </FluentTextBlock>
+    <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
+        <div style="position:relative; width:320px; height:200px; border-radius:8px; overflow:hidden; flex:0 0 auto;">
+            <div style="position:absolute; inset:0; background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;"></div>
+            <FluentAcrylicBrush TintColor="@_acrylicTintColor" TintOpacity="_acrylicTintOpacity"
+                                TintLuminosityOpacity="@_acrylicLuminosityOpacityParam"
+                                style="position:absolute; inset:14px; padding:12px 14px;">
+                <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Custom Acrylic</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Caption">Tweak the controls to see it change live.</FluentTextBlock>
+            </FluentAcrylicBrush>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px; min-width:220px;">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <FluentTextBlock Variant="TextBlockVariant.Caption">Tint color</FluentTextBlock>
+                <FluentRadioGroup @bind-Value="_acrylicTintColorName">
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <FluentRadioButton Value="@("black")">Black</FluentRadioButton>
+                        <FluentRadioButton Value="@("skyblue")">Sky blue</FluentRadioButton>
+                        <FluentRadioButton Value="@("red")">Red</FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <FluentTextBlock Variant="TextBlockVariant.Caption">Tint opacity: @_acrylicTintOpacity.ToString("0.00")</FluentTextBlock>
+                <FluentSlider @bind-Value="_acrylicTintOpacitySlider" Min="0" Max="1" Step="0.01" />
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <FluentTextBlock Variant="TextBlockVariant.Caption">Tint luminosity opacity: @_acrylicLuminosityOpacity.ToString("0.00")</FluentTextBlock>
+                <FluentSlider @bind-Value="_acrylicLuminosityOpacitySlider" Min="0" Max="1" Step="0.01" />
+            </div>
+        </div>
+    </div>
+
     <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Mica — Base vs. Base Alt (Tabbed)</FluentTextBlock>
     <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
         Mica is a window-level material, so this switches the actual main app background above,
@@ -1069,6 +1109,23 @@
             _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Left;
         }
     }
+
+    private object? _acrylicTintColorName = "black";
+    private string _acrylicTintColor => (_acrylicTintColorName as string) switch
+    {
+        "skyblue" => "skyblue",
+        "red" => "#c42b1c",
+        _ => "black"
+    };
+    private double _acrylicTintOpacitySlider = 0.8;
+    private double _acrylicTintOpacity => _acrylicTintOpacitySlider;
+    private double _acrylicLuminosityOpacitySlider;
+    private double _acrylicLuminosityOpacity => _acrylicLuminosityOpacitySlider;
+    // Only pass TintLuminosityOpacity through to the component once it's actually been raised above
+    // zero — that's what opts a FluentAcrylicBrush into rendering the extra luminosity-blend layer
+    // at all (see FluentAcrylicBrush.razor.cs's HasLuminosityLayer), so leaving the slider at 0 keeps
+    // this demo on the simpler single-wash tint by default, same as the Base/Thin cards above.
+    private double? _acrylicLuminosityOpacityParam => _acrylicLuminosityOpacitySlider > 0 ? _acrylicLuminosityOpacitySlider : null;
 
     private MicaVariant _mainMicaVariant = MicaVariant.Base;
     private string _mainMicaMode = "base";

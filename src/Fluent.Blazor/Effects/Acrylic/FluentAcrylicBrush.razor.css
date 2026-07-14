@@ -14,7 +14,8 @@
     position: relative;
     overflow: hidden;
     border-radius: var(--overlay-corner-radius);
-    background-color: var(--acrylic-fallback-fill); /* no backdrop-filter support / reduced-transparency */
+    /* no backdrop-filter support / reduced-transparency */
+    background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
@@ -30,20 +31,57 @@
     z-index: 0;
     backdrop-filter: blur(var(--acrylic-blur-amount));
     -webkit-backdrop-filter: blur(var(--acrylic-blur-amount));
-    background-color: rgba(var(--acrylic-tint-color), var(--acrylic-tint-opacity));
+    /* Tint wash, built with color-mix() rather than the old rgba(var(--...-tint-color), opacity)
+       pairing so a caller's TintColor override (any valid CSS color — hex/rgb()/named) and
+       TintOpacity override (baked into a percentage by the component's C# code-behind) can each be
+       supplied independently, without needing an r,g,b triplet the way the token defaults do. */
+    background-color: color-mix(
+        in srgb,
+        var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)))
+        var(--acrylic-tint-opacity-pct-override, calc(var(--acrylic-tint-opacity) * 100%)),
+        transparent
+    );
 }
 
 .fluent-acrylic--thin::before {
     backdrop-filter: blur(var(--acrylic-thin-blur-amount));
     -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
-    background-color: rgba(var(--acrylic-tint-color), var(--acrylic-thin-tint-opacity));
+    background-color: color-mix(
+        in srgb,
+        var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)))
+        var(--acrylic-tint-opacity-pct-override, calc(var(--acrylic-thin-tint-opacity) * 100%)),
+        transparent
+    );
+}
+
+/* Opt-in second tint pass (only rendered when the component's TintLuminosityOpacity parameter is
+   set — see FluentAcrylicBrush.razor.cs's HasLuminosityLayer) — approximates the other half of
+   real WinUI Acrylic's two-pass recipe: a luminosity-blended wash sat directly against the blurred
+   backdrop (this element paints immediately above ::before, so mix-blend-mode: luminosity blends
+   against ::before's own rendered blur output), UNDER the flat tint wash below. Real Acrylic keeps
+   its tint reading consistent whether the content behind it is light or dark; this is the same idea
+   without requiring a from-scratch blend pipeline the way FluentMicaPanel's static-raster approach
+   needed (there, mica-interop.js bakes it once since Mica's wallpaper is static — Acrylic's backdrop
+   is live, so this stays a real, cheap CSS layer instead). */
+.fluent-acrylic__luminosity {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    mix-blend-mode: luminosity;
+    background-color: color-mix(
+        in srgb,
+        var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)))
+        var(--acrylic-luminosity-opacity-pct-override, 100%),
+        transparent
+    );
 }
 
 .fluent-acrylic::after {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
     pointer-events: none;
     background-image: var(--noise-asset);
     background-repeat: repeat;
@@ -51,18 +89,25 @@
     opacity: 0.02;
 }
 
-.fluent-acrylic > * {
+/* Excludes the luminosity layer below — it's also a direct child, but needs to stay
+   position:absolute/z-index:1 (set in its own rule above), not get promoted into the content
+   stacking layer this rule defines for everything else. */
+.fluent-acrylic > *:not(.fluent-acrylic__luminosity) {
     position: relative;
-    z-index: 2;
+    z-index: 3;
 }
 
 @media (prefers-reduced-transparency: reduce) {
     .fluent-acrylic {
-        background-color: var(--acrylic-fallback-fill) !important;
+        background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
     }
     .fluent-acrylic::before {
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
+        background-color: transparent;
+    }
+    .fluent-acrylic__luminosity {
+        mix-blend-mode: normal;
         background-color: transparent;
     }
 }

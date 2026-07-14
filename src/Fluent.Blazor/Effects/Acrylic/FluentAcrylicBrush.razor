@@ -1,5 +1,9 @@
 @namespace Fluent.Blazor.Effects
 
-<div class="fluent-acrylic @VariantClass" @attributes="AdditionalAttributes">
+<div class="fluent-acrylic @VariantClass" style="@CombinedStyle" @attributes="SplattedAttributes">
+    @if (HasLuminosityLayer)
+    {
+        <div class="fluent-acrylic__luminosity"></div>
+    }
     @ChildContent
 </div>
