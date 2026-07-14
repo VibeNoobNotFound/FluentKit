@@ -7,11 +7,28 @@
     <RootNamespace>FluentKit</RootNamespace>
     <RazorLangVersion>Latest</RazorLangVersion>
 
-    <!-- NuGet metadata — fill in before your first `dotnet pack` -->
+    <!-- NuGet metadata -->
     <PackageId>FluentKit.Blazor</PackageId>
     <Version>0.1.0-alpha</Version>
     <Authors>NoobNotFound</Authors>
     <Description>A token-accurate Fluent Design (WinUI 3) component library for Blazor WASM, Server, and MAUI Blazor Hybrid.</Description>
+
+    <!-- Required for the package to auto-link to this repo on the GitHub Packages tab -->
+    <RepositoryUrl>https://github.com/VibeNoobNotFound/FluentKit</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <PackageProjectUrl>https://github.com/VibeNoobNotFound/FluentKit</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>blazor;fluent-design;winui;ui;components;wasm;maui</PackageTags>
+    <PackageReleaseNotes>https://github.com/VibeNoobNotFound/FluentKit/releases</PackageReleaseNotes>
+
+    <!-- Embeds README.md as the package's landing-page description on nuget.org / GitHub Packages -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <PackageIcon>icon.png</PackageIcon>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +38,12 @@
   <ItemGroup>
     <!-- Ensures wwwroot/tokens.css and overlay-interop.js etc. get bundled as static web assets -->
     <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Pulls the repo-root README into the .nupkg so PackageReadmeFile above has something to point at -->
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
+    <!-- <None Include="../../icon.png" Pack="true" PackagePath="\" /> -->
   </ItemGroup>
 
 </Project>

@@ -57,6 +57,7 @@ jobs:
     permissions:
       id-token: write   # required for NuGet Trusted Publishing (OIDC)
       contents: read
+      packages: write   # required to push to GitHub Packages (NuGet registry)
 
     steps:
       - name: Checkout
@@ -84,4 +85,24 @@ jobs:
           dotnet nuget push "./nupkg/*.nupkg" \
             --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      # Separate push to GitHub Packages so the package also shows under
+      # https://github.com/VibeNoobNotFound/FluentKit/pkgs — uses the built-in
+      # GITHUB_TOKEN, no extra secret needed. Requires RepositoryUrl in the
+      # .csproj to point at this repo (already set) so GitHub links it correctly.
+      - name: Add GitHub Packages source
+        run: |
+          dotnet nuget add source \
+            --username VibeNoobNotFound \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text \
+            --name github \
+            "https://nuget.pkg.github.com/VibeNoobNotFound/index.json"
+
+      - name: Push to GitHub Packages
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --source github \
             --skip-duplicate
