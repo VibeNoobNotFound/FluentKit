@@ -16,7 +16,7 @@ public interface IOverlayService
 
     Guid Show(RenderFragment content, ElementReference anchor,
         OverlayPlacement placement = OverlayPlacement.Bottom, bool lightDismiss = true, bool bare = false,
-        bool matchAnchorWidth = false);
+        bool matchAnchorWidth = false, bool scrollAnchorIntoView = false, bool watchAnchorRemoved = false);
 
     /// <summary>Shows an overlay with no anchor element — positioned relative to the viewport (see
     /// <see cref="OverlayScreenPlacement"/>) instead of relative to a trigger control. For content

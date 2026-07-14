@@ -2,6 +2,61 @@
 // on the cross axis so the popup never runs off the opposite edge.
 
 const lightDismissHandlers = new Map();
+const anchorRemovalObservers = new Map();
+
+// Scrolls the anchor into view (centered, instant — no smooth-scroll animation, since this runs
+// before the popup's first measure/paint and a smooth scroll would just make positioning lag
+// behind) if it isn't already fully within the viewport. Resolves after giving the browser two
+// animation frames to actually settle the scroll + reflow, so the caller's subsequent
+// getBoundingClientRect() in computePosition reads the anchor's final, post-scroll position
+// instead of a stale mid-scroll one.
+export function scrollIntoViewIfNeeded(anchorEl) {
+    if (!anchorEl || !anchorEl.isConnected) {
+        return Promise.resolve();
+    }
+
+    const r = anchorEl.getBoundingClientRect();
+    const inView = r.top >= 0 && r.left >= 0 &&
+        r.bottom <= window.innerHeight && r.right <= window.innerWidth;
+
+    if (inView) {
+        return Promise.resolve();
+    }
+
+    anchorEl.scrollIntoView({ behavior: "auto", block: "center", inline: "center" });
+    return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+
+// For TeachingTip's Target mode: the anchor may live somewhere other than the control that
+// triggered the tip (e.g. a list item, a card), so unlike Flyout/MenuFlyout it can be unmounted
+// out from under an open overlay — filtered out of a list, its parent conditionally removed, etc.
+// A MutationObserver on the anchor's parent tree is the only reliable way to catch that (no
+// "element removed" event exists); watching document.body with subtree:true keeps this working
+// even if the anchor's own immediate parent is what gets swapped out, not just the anchor itself.
+export function watchAnchorRemoved(overlayId, anchorEl, dotNetRef) {
+    if (!anchorEl) {
+        return;
+    }
+
+    const observer = new MutationObserver(() => {
+        if (!anchorEl.isConnected) {
+            observer.disconnect();
+            anchorRemovalObservers.delete(overlayId);
+            dotNetRef.invokeMethodAsync("OnAnchorRemoved", overlayId);
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    anchorRemovalObservers.set(overlayId, observer);
+}
+
+export function unwatchAnchorRemoved(overlayId) {
+    const observer = anchorRemovalObservers.get(overlayId);
+    if (observer) {
+        observer.disconnect();
+        anchorRemovalObservers.delete(overlayId);
+    }
+}
 
 export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth) {
     const anchorRect = anchorEl.getBoundingClientRect();
@@ -103,4 +158,8 @@ export function unregisterLightDismiss(overlayId) {
         document.removeEventListener("pointerdown", handler, true);
         lightDismissHandlers.delete(overlayId);
     }
+    // Cheap no-op when nothing was registered (non-Target overlays never call watchAnchorRemoved),
+    // so it's safe to always sweep this here rather than making OverlaySurface.DisposeAsync track
+    // whether it opted in.
+    unwatchAnchorRemoved(overlayId);
 }

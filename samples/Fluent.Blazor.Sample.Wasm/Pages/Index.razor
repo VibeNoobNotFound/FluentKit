@@ -755,9 +755,11 @@
         <code>Bordered</code> additionally reveals along a 1px ring instead of the fill.
     </FluentTextBlock>
     <div style="display:flex; gap:16px;">
-        <FluentRevealBackground style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); display:flex; align-items:center; justify-content:center;">
-            <FluentTextBlock>Fill reveal</FluentTextBlock>
-        </FluentRevealBackground>
+        <div @ref="_revealCardTargetRef">
+            <FluentRevealBackground style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); display:flex; align-items:center; justify-content:center;">
+                <FluentTextBlock>Fill reveal</FluentTextBlock>
+            </FluentRevealBackground>
+        </div>
         <FluentRevealBackground Bordered="true" style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); border:1px solid var(--card-stroke-default); display:flex; align-items:center; justify-content:center;">
             <FluentTextBlock>Border reveal</FluentTextBlock>
         </FluentRevealBackground>
@@ -823,21 +825,24 @@
     <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
         Persistent callout — shown/dismissed programmatically (not by clicking its own target), and
         stays up until explicitly closed rather than light-dismissing on outside click. Two modes,
-        chosen automatically by whether <code>ChildContent</code> is supplied: <b>targeted</b> (points
-        a beak at an anchor control, positioned via <code>Placement</code>) and <b>detached</b> (no
-        anchor, no beak, positioned relative to the viewport via <code>ScreenPlacement</code>).
+        chosen automatically by whether <code>ChildContent</code>/<code>Target</code> is supplied:
+        <b>targeted</b> (points a beak at an anchor control, positioned via <code>Placement</code>)
+        and <b>detached</b> (no anchor, no beak, positioned relative to the viewport via
+        <code>ScreenPlacement</code>).
     </FluentTextBlock>
 
-    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Targeted — points at a control</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Targeted — points at a control elsewhere on the page</FluentTextBlock>
     <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        <code>ChildContent</code> is the anchor; <code>Placement</code> picks which side the beak
-        points from.
+        The trigger button below is deliberately NOT the anchor — <code>Target</code> points at the
+        "Fill reveal" card way up in the Reveal section instead. Click it: the page auto-scrolls that
+        card into view (it's nowhere near the button, so you'd otherwise have to scroll up yourself to
+        even see what the tip is pointing at), then the tip's beak lands on it.
     </FluentTextBlock>
-    <FluentTeachingTip @bind-IsOpen="_teachingTipOpen" Placement="OverlayPlacement.Bottom"
-                        Title="New feature" Subtitle="Try the new Reveal effect on cards above.">
-        <ChildContent>
-            <FluentButton OnClick="@(() => _teachingTipOpen = true)">Show targeted tip</FluentButton>
-        </ChildContent>
+    <div>
+        <FluentButton OnClick="@(() => _teachingTipOpen = true)">Show targeted tip (points at Reveal card above)</FluentButton>
+    </div>
+    <FluentTeachingTip @bind-IsOpen="_teachingTipOpen" Target="_revealCardTargetRef" Placement="OverlayPlacement.Bottom"
+                        Title="New feature" Subtitle="Try the new Reveal effect on this card.">
         <ActionContent>
             <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _teachingTipOpen = false)">Got it</FluentButton>
         </ActionContent>
@@ -997,6 +1002,7 @@
     private string? _splitButtonLastAction;
 
     private bool _teachingTipOpen;
+    private ElementReference _revealCardTargetRef;
 
     private bool _teachingTipDetachedOpen;
     private OverlayScreenPlacement _teachingTipScreenPlacement = OverlayScreenPlacement.BottomCenter;

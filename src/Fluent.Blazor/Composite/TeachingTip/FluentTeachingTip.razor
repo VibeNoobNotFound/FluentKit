@@ -1,8 +1,11 @@
 @namespace Fluent.Blazor.Composite
 @implements IDisposable
 
-@if (IsTargeted)
+@if (ChildContent is not null)
 {
+    @* Only rendered when ChildContent is actually supplied — when the tip targets an external
+       element via Target instead, there's nothing here to wrap, and _anchor is simply unused
+       (EffectiveAnchor falls back to Target). *@
     <span @ref="_anchor" class="fluent-teachingtip-anchor">
         @ChildContent
     </span>

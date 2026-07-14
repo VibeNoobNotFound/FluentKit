@@ -35,10 +35,22 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
 {
     [Inject] private IOverlayService OverlayService { get; set; } = default!;
 
-    /// <summary>The target element the tip's beak points at. Omit this to get the detached variant
-    /// instead — a tip positioned by <see cref="ScreenPlacement"/> with no beak, not tied to any
-    /// particular control.</summary>
+    /// <summary>Content wrapped in the anchor span. Historically this also doubled as the anchor
+    /// itself, which breaks the moment the thing you want the tip to point at isn't the same element
+    /// you clicked to trigger it (e.g. a toolbar button that should show a tip pointing at a card
+    /// somewhere else on the page). Prefer <see cref="Target"/> for that case — leave ChildContent
+    /// unset when using Target, or set both if you also want the tip to wrap some markup for its own
+    /// sake.</summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Explicit element the tip's beak points at, independent of whatever triggered
+    /// <see cref="IsOpen"/>. Takes priority over <see cref="ChildContent"/>'s own wrapper span as the
+    /// anchor when both are set. If the target isn't fully visible in the viewport when the tip
+    /// opens, it's scrolled into view (centered, instant) first — there's no guarantee it's already
+    /// on screen the way a Flyout's own trigger always is. If the target element is later removed
+    /// from the DOM while the tip is still open, the tip auto-closes rather than floating in place
+    /// pointing at nothing.</summary>
+    [Parameter] public ElementReference? Target { get; set; }
 
     [Parameter] public string? Title { get; set; }
 
@@ -69,7 +81,9 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
     private Guid? _overlayId;
     private bool _lastRenderedIsOpen;
 
-    private bool IsTargeted => ChildContent is not null;
+    private bool IsTargeted => ChildContent is not null || Target is not null;
+
+    private ElementReference EffectiveAnchor => Target ?? _anchor;
 
     private string PlacementClass => Placement.ToString().ToLowerInvariant();
 
@@ -97,7 +111,8 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
         }
 
         _overlayId = IsTargeted
-            ? OverlayService.Show(RenderTipContent, _anchor, Placement, LightDismiss)
+            ? OverlayService.Show(RenderTipContent, EffectiveAnchor, Placement, LightDismiss,
+                scrollAnchorIntoView: true, watchAnchorRemoved: true)
             : OverlayService.ShowDetached(RenderTipContent, ScreenPlacement, LightDismiss);
     }
 

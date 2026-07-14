@@ -43,6 +43,14 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             return;
         }
 
+        if (Entry.ScrollAnchorIntoView)
+        {
+            // Must finish (and its two-rAF settle) before computePosition measures the anchor below,
+            // or the position math would read a mid-scroll rect and place the popup somewhere that's
+            // about to scroll away from it.
+            await _module.InvokeVoidAsync("scrollIntoViewIfNeeded", Entry.Anchor);
+        }
+
         var placementArg = Entry.PreferredPlacement.ToString().ToLowerInvariant();
         var position = await _module.InvokeAsync<OverlayPosition>(
             "computePosition", Entry.Anchor, _surfaceElement, placementArg, Entry.MatchAnchorWidth);
@@ -52,11 +60,21 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             $"position: fixed; top: {position.Top}px; left: {position.Left}px; {widthStyle}z-index: 1000;";
         _positioned = true;
 
-        if (Entry.LightDismiss)
+        if (Entry.LightDismiss || Entry.WatchAnchorRemoved)
         {
             _selfReference = DotNetObjectReference.Create(this);
+        }
+
+        if (Entry.LightDismiss)
+        {
             await _module.InvokeVoidAsync(
                 "registerLightDismiss", Entry.Id.ToString(), _surfaceElement, Entry.Anchor, _selfReference);
+        }
+
+        if (Entry.WatchAnchorRemoved)
+        {
+            await _module.InvokeVoidAsync(
+                "watchAnchorRemoved", Entry.Id.ToString(), Entry.Anchor, _selfReference);
         }
 
         StateHasChanged();
@@ -64,6 +82,18 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
     [JSInvokable]
     public void OnLightDismiss(string overlayIdText)
+    {
+        if (Guid.TryParse(overlayIdText, out var overlayId) && overlayId == Entry.Id)
+        {
+            OverlayService.Close(overlayId);
+        }
+    }
+
+    /// <summary>Called from overlay-interop.js's watchAnchorRemoved when Entry.Anchor is detected to
+    /// have left the DOM while this overlay was still open (see WatchAnchorRemoved's own doc comment
+    /// for why this only applies to some overlays, not every Flyout/MenuFlyout).</summary>
+    [JSInvokable]
+    public void OnAnchorRemoved(string overlayIdText)
     {
         if (Guid.TryParse(overlayIdText, out var overlayId) && overlayId == Entry.Id)
         {
