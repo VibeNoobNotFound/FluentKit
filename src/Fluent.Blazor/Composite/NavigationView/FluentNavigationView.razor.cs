@@ -97,12 +97,17 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     private NavigationViewContext? _context;
     private IJSObjectReference? _module;
 
+    private NavigationViewPaneDisplayMode _activePaneDisplayMode = NavigationViewPaneDisplayMode.Left;
+    private NavigationViewPaneDisplayMode _lastPaneDisplayMode = NavigationViewPaneDisplayMode.Left;
+    private bool _isTransitioning;
+    private System.Threading.CancellationTokenSource? _transitionCts;
+
     public NavigationViewDisplayMode DisplayMode { get; private set; } = NavigationViewDisplayMode.Expanded;
 
     private bool IsCompactOrMinimal =>
-        PaneDisplayMode is NavigationViewPaneDisplayMode.LeftCompact or NavigationViewPaneDisplayMode.LeftMinimal;
+        _activePaneDisplayMode is NavigationViewPaneDisplayMode.LeftCompact or NavigationViewPaneDisplayMode.LeftMinimal;
 
-    private string PaneDisplayModeClass => PaneDisplayMode switch
+    private string PaneDisplayModeClass => _activePaneDisplayMode switch
     {
         NavigationViewPaneDisplayMode.LeftCompact => "compact",
         NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
@@ -116,6 +121,8 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         _context = new NavigationViewContext(this);
         _context.SelectionChanged += OnContextSelectionChanged;
         _context.ItemClicked += (object? sender1) => OnItemClicked(sender1);
+        _activePaneDisplayMode = PaneDisplayMode;
+        _lastPaneDisplayMode = PaneDisplayMode;
         base.OnInitialized();
     }
 
@@ -148,7 +155,71 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         {
             _context.SelectedValue = SelectedValue;
         }
+
+        if (PaneDisplayMode != _lastPaneDisplayMode)
+        {
+            HandleModeChange(PaneDisplayMode, _lastPaneDisplayMode);
+            _lastPaneDisplayMode = PaneDisplayMode;
+        }
+
         base.OnParametersSet();
+    }
+
+    private void HandleModeChange(NavigationViewPaneDisplayMode newMode, NavigationViewPaneDisplayMode oldMode)
+    {
+        _transitionCts?.Cancel();
+        _transitionCts?.Dispose();
+        _transitionCts = new System.Threading.CancellationTokenSource();
+        var token = _transitionCts.Token;
+
+        if (oldMode == NavigationViewPaneDisplayMode.Left && newMode == NavigationViewPaneDisplayMode.LeftCompact)
+        {
+            // Transitioning from Left (Expanded) to LeftCompact (Compact)
+            _isTransitioning = true;
+            // Keep the active layout as Left, but close the pane (which triggers width transition)
+            _activePaneDisplayMode = NavigationViewPaneDisplayMode.Left;
+            IsPaneOpen = false;
+
+            _ = CompleteTransitionAfterDelayAsync(NavigationViewPaneDisplayMode.LeftCompact, 250, token);
+        }
+        else if (oldMode == NavigationViewPaneDisplayMode.LeftCompact && newMode == NavigationViewPaneDisplayMode.Left)
+        {
+            // Transitioning from LeftCompact (Compact) to Left (Expanded)
+            _isTransitioning = true;
+            // First set active layout to Left but closed (rail)
+            _activePaneDisplayMode = NavigationViewPaneDisplayMode.Left;
+            IsPaneOpen = false;
+
+            _ = CompleteTransitionAfterDelayAsync(NavigationViewPaneDisplayMode.Left, 50, token, openPaneAfter: true);
+        }
+        else
+        {
+            // Direct switch for other modes
+            _activePaneDisplayMode = newMode;
+            _isTransitioning = false;
+        }
+    }
+
+    private async Task CompleteTransitionAfterDelayAsync(NavigationViewPaneDisplayMode targetMode, int delayMs, System.Threading.CancellationToken token, bool openPaneAfter = false)
+    {
+        try
+        {
+            await Task.Delay(delayMs, token);
+            if (token.IsCancellationRequested) return;
+
+            _activePaneDisplayMode = targetMode;
+            if (openPaneAfter)
+            {
+                IsPaneOpen = true;
+                await IsPaneOpenChanged.InvokeAsync(IsPaneOpen);
+            }
+            _isTransitioning = false;
+            StateHasChanged();
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignored
+        }
     }
 
     private void OnContextSelectionChanged()
