@@ -77,7 +77,7 @@ export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth) 
 export function registerLightDismiss(overlayId, popupEl, anchorEl, dotNetRef) {
     const handler = (event) => {
         const target = event.target;
-        if (popupEl.contains(target) || anchorEl.contains(target)) {
+        if (popupEl.contains(target) || (anchorEl && anchorEl.contains(target))) {
             return;
         }
         dotNetRef.invokeMethodAsync("OnLightDismiss", overlayId);
@@ -86,6 +86,15 @@ export function registerLightDismiss(overlayId, popupEl, anchorEl, dotNetRef) {
     // Capture phase so this runs before the click can be swallowed by stopPropagation elsewhere.
     document.addEventListener("pointerdown", handler, true);
     lightDismissHandlers.set(overlayId, handler);
+}
+
+// Same as registerLightDismiss, minus the anchor-exclusion check — for detached overlays (see
+// OverlayEntry.IsDetached) there's no anchor element to exempt from the dismiss check, since
+// there's nothing on screen the overlay is "attached to". Kept as a separate export rather than
+// making anchorEl optional on the call site, so the C# side's intent (targeted vs detached) is
+// explicit at the call rather than inferred from a null.
+export function registerLightDismissDetached(overlayId, popupEl, dotNetRef) {
+    registerLightDismiss(overlayId, popupEl, null, dotNetRef);
 }
 
 export function unregisterLightDismiss(overlayId) {

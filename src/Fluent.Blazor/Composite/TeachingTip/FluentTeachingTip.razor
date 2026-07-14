@@ -1,17 +1,23 @@
 @namespace Fluent.Blazor.Composite
 @implements IDisposable
 
-<span @ref="_anchor" class="fluent-teachingtip-anchor">
-    @ChildContent
-</span>
+@if (IsTargeted)
+{
+    <span @ref="_anchor" class="fluent-teachingtip-anchor">
+        @ChildContent
+    </span>
+}
 
 @code {
     // Declared here (not in the .cs code-behind) on purpose: CSS isolation only scopes markup that's
     // physically written in a .razor file. A RenderFragment built via RenderTreeBuilder in plain C#
     // never gets the scope attribute, so its styles in FluentTeachingTip.razor.css would silently
     // not apply.
-    private RenderFragment RenderTipContent => @<div class="fluent-teachingtip fluent-teachingtip--@PlacementClass">
-        <div class="fluent-teachingtip-beak" aria-hidden="true"></div>
+    private RenderFragment RenderTipContent => @<div class="fluent-teachingtip @(IsTargeted ? $"fluent-teachingtip--{PlacementClass}" : "fluent-teachingtip--detached")">
+        @if (IsTargeted)
+        {
+            <div class="fluent-teachingtip-beak" aria-hidden="true"></div>
+        }
         <div class="fluent-teachingtip-body">
             <div class="fluent-teachingtip-text">
                 @if (!string.IsNullOrEmpty(Title))

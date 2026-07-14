@@ -1,55 +1,33 @@
-/* Full-viewport blur, not the small `.fluent-overlay-surface`'s own backdrop-filter (that only
-   blurs directly behind the little popup box). Teaching tips are meant to draw focus the way a
-   spotlight tutorial step does, so this blurs the whole page behind it — pointer-events:none so it
-   doesn't block interacting with the rest of the app while the tip is up (LightDismiss defaults
-   false specifically so the tip doesn't disappear the moment you touch something else). Being
-   position:fixed makes it viewport-relative regardless of the small, anchor-positioned parent
-   OverlaySurface it actually lives inside (see OverlaySurface.razor.cs — no transformed ancestor
-   sits between here and the viewport, so `fixed` escapes that positioning normally). */
-@keyframes fluent-teachingtip-backdrop-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.fluent-teachingtip-backdrop {
-    position: fixed;
-    inset: 0;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    background-color: rgba(0, 0, 0, 0.08);
-    pointer-events: none;
-    animation: fluent-teachingtip-backdrop-fade-in var(--duration-fast) var(--easing-standard);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .fluent-teachingtip-backdrop {
-        animation: none;
-    }
-}
-
 .fluent-teachingtip {
     position: relative;
     box-sizing: border-box;
     min-width: 240px;
     max-width: 320px;
 
-    background-color: var(--card-background-default);
-    border: 1px solid var(--card-stroke-default);
-    border-radius: var(--overlay-corner-radius);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
-
-    padding: 16px;
+    /* No background-color/border/box-shadow here — unlike a standalone card, this content lives
+       inside OverlaySurface (see OverlaySurface.razor.css: --flyout-background, blur, border, and
+       shadow are already applied there), the same way every other flyout/menu's content does
+       (compare FluentMenuFlyout.razor.css, which supplies none of its own chrome either). Adding a
+       second, separate background+border+shadow here was stacking a solid card box on top of the
+       already-chromed blurred surface — a visible "double background" box-in-a-box, not two
+       different blurs. Padding stays: OverlaySurface's own 8px is chrome padding, this is the
+       tip's own content padding, and the two are meant to add up. */
+    padding: 8px 16px;
 }
 
 /* Beak — a small rotated square clipped to a triangle, positioned on whichever edge faces the
    anchor. Same technique fluent-svelte's own callout components use (a 45deg-rotated square rather
-   than a CSS border-triangle hack, so it can share the card's border/background exactly). */
+   than a CSS border-triangle hack, so it can share the surface's border/background exactly). Uses
+   --flyout-background/--flyout-border — the same tokens OverlaySurface itself paints with — rather
+   than a card token, since the beak has to visually fuse with OverlaySurface's box, not a separate
+   card. Only rendered for the targeted variant (see FluentTeachingTip.razor); a beak pointing at
+   nothing doesn't make sense for the detached/screen-anchored variant. */
 .fluent-teachingtip-beak {
     position: absolute;
     width: 12px;
     height: 12px;
-    background-color: var(--card-background-default);
-    border: 1px solid var(--card-stroke-default);
+    background-color: var(--flyout-background);
+    border: var(--control-stroke-thickness) solid var(--flyout-border);
     transform: rotate(45deg);
 }
 
@@ -79,6 +57,15 @@
     top: 20px;
     border-top: none;
     border-right: none;
+}
+
+/* Detached variant (no anchor, no beak — see FluentTeachingTip.razor.cs) gets a bit more room than
+   the targeted popup, since it reads more like a standalone toast/announcement sitting on the
+   viewport than a callout pinned tight against a control. No extra box-shadow here — that's
+   exactly the double-background mistake this file just got fixed for; OverlaySurface already
+   draws the one shadow this box gets. */
+.fluent-teachingtip--detached {
+    min-width: 280px;
 }
 
 .fluent-teachingtip-body {

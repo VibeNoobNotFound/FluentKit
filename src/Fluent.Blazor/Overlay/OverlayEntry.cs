@@ -23,6 +23,13 @@ public sealed class OverlayEntry
     /// it via <c>getBoundingClientRect</c>.</summary>
     public bool MatchAnchorWidth { get; init; }
 
+    /// <summary>True for overlays created via <see cref="IOverlayService.ShowDetached"/> — no anchor
+    /// element, positioned relative to the viewport instead. OverlaySurface uses this to skip the
+    /// anchor-measurement JS round-trip entirely (ComputedStyle is already filled in by
+    /// OverlayService by the time this is true) and to register light-dismiss without an anchor
+    /// exclusion zone.</summary>
+    public bool IsDetached { get; init; }
+
     /// <summary>Inline "position: fixed; top: …px; left: …px" string, filled in by FluentOverlayHost
     /// after JS interop reports the anchor's measured position. Empty until first measured, so the
     /// overlay renders off-screen-but-in-the-DOM for one frame rather than flashing at (0,0).</summary>

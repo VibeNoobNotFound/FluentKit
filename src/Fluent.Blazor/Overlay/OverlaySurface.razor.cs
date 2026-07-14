@@ -25,6 +25,24 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
         _module = await JS.InvokeAsync<IJSObjectReference>(
             "import", "./_content/Fluent.Blazor/Overlay/overlay-interop.js");
 
+        if (Entry.IsDetached)
+        {
+            // No anchor to measure — OverlayService already computed Entry.ComputedStyle
+            // synchronously (plain viewport-relative `position: fixed`), so there's nothing to do
+            // here except mark positioning done and, if requested, wire up light-dismiss without an
+            // anchor exclusion zone.
+            _positioned = true;
+
+            if (Entry.LightDismiss)
+            {
+                _selfReference = DotNetObjectReference.Create(this);
+                await _module.InvokeVoidAsync(
+                    "registerLightDismissDetached", Entry.Id.ToString(), _surfaceElement, _selfReference);
+            }
+
+            return;
+        }
+
         var placementArg = Entry.PreferredPlacement.ToString().ToLowerInvariant();
         var position = await _module.InvokeAsync<OverlayPosition>(
             "computePosition", Entry.Anchor, _surfaceElement, placementArg, Entry.MatchAnchorWidth);

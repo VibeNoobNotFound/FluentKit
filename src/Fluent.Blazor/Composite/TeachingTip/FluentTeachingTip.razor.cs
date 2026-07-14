@@ -11,20 +11,33 @@ namespace Fluent.Blazor.Composite;
 /// programmatic-<see cref="IsOpen"/>-binding shape as <see cref="FluentFlyout"/>, and — like every
 /// other flyout/menu/tooltip — relies entirely on OverlaySurface's own default chrome (background,
 /// <c>backdrop-filter: blur(60px)</c>, border, shadow) for its blur; it does NOT pass <c>bare</c>.
-/// Two real differences from Flyout: it adds its own pointer/"beak" toward the anchor (WinUI
-/// teaching tips always draw one — see the beak's own matching background/border in
-/// FluentTeachingTip.razor.css), and it defaults <see cref="LightDismiss"/> to false — a teaching
+/// One real difference from Flyout: it adds its own pointer/beak toward the anchor in targeted
+/// mode (WinUI teaching tips always draw one there — see the beak's own matching background/border
+/// in FluentTeachingTip.razor.css), and it defaults <see cref="LightDismiss"/> to false — a teaching
 /// tip is meant to stay up until the person reads it and dismisses it via the explicit close button,
 /// not disappear the moment they click elsewhere.
-/// <see cref="ChildContent"/> is the anchor/target element the tip points at; unlike Flyout/MenuFlyout
-/// it is NOT wrapped in a click handler — teaching tips are shown/hidden programmatically (e.g. after
-/// a first-run check), never by clicking their own target.
+///
+/// Two placement modes, chosen automatically by whether <see cref="ChildContent"/> is supplied:
+/// <list type="bullet">
+/// <item><b>Targeted</b> (<see cref="ChildContent"/> set) — <see cref="ChildContent"/> is the
+/// anchor/target element the tip points its beak at, positioned via <see cref="Placement"/>
+/// (top/bottom/left/right of the anchor), same anchor-measurement path as Flyout/MenuFlyout. Unlike
+/// Flyout/MenuFlyout it is NOT wrapped in a click handler — teaching tips are shown/hidden
+/// programmatically (e.g. after a first-run check), never by clicking their own target.</item>
+/// <item><b>Detached</b> (<see cref="ChildContent"/> omitted) — for a tip that is not pointing at any
+/// particular control (e.g. a general new-features announcement). No beak is drawn, and
+/// position is set by <see cref="ScreenPlacement"/> relative to the viewport (defaults to
+/// bottom-center) via <see cref="IOverlayService.ShowDetached"/> instead of the anchor-based
+/// <see cref="IOverlayService.Show"/> overload.</item>
+/// </list>
 /// </summary>
 public partial class FluentTeachingTip : ComponentBase, IDisposable
 {
     [Inject] private IOverlayService OverlayService { get; set; } = default!;
 
-    /// <summary>The target element the tip's beak points at.</summary>
+    /// <summary>The target element the tip's beak points at. Omit this to get the detached variant
+    /// instead — a tip positioned by <see cref="ScreenPlacement"/> with no beak, not tied to any
+    /// particular control.</summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     [Parameter] public string? Title { get; set; }
@@ -34,7 +47,16 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
     /// <summary>Optional row of action buttons (e.g. "Got it" / "Learn more") below the text.</summary>
     [Parameter] public RenderFragment? ActionContent { get; set; }
 
+    /// <summary>Placement relative to the anchor. Only meaningful in targeted mode (i.e. when
+    /// <see cref="ChildContent"/> is set) — ignored in detached mode, where
+    /// <see cref="ScreenPlacement"/> is used instead.</summary>
     [Parameter] public OverlayPlacement Placement { get; set; } = OverlayPlacement.Bottom;
+
+    /// <summary>Placement relative to the viewport for the detached variant (i.e. when
+    /// <see cref="ChildContent"/> is NOT set). Ignored in targeted mode. Defaults to
+    /// <see cref="OverlayScreenPlacement.BottomCenter"/>, matching WinUI's own default spot for an
+    /// untargeted teaching tip.</summary>
+    [Parameter] public OverlayScreenPlacement ScreenPlacement { get; set; } = OverlayScreenPlacement.BottomCenter;
 
     /// <summary>Closes on outside click. Defaults false — teaching tips are dismissed explicitly.</summary>
     [Parameter] public bool LightDismiss { get; set; }
@@ -46,6 +68,8 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
     private ElementReference _anchor;
     private Guid? _overlayId;
     private bool _lastRenderedIsOpen;
+
+    private bool IsTargeted => ChildContent is not null;
 
     private string PlacementClass => Placement.ToString().ToLowerInvariant();
 
@@ -72,7 +96,9 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
             return;
         }
 
-        _overlayId = OverlayService.Show(RenderTipContent, _anchor, Placement, LightDismiss);
+        _overlayId = IsTargeted
+            ? OverlayService.Show(RenderTipContent, _anchor, Placement, LightDismiss)
+            : OverlayService.ShowDetached(RenderTipContent, ScreenPlacement, LightDismiss);
     }
 
     private void HideInternal()

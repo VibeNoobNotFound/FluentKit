@@ -821,15 +821,52 @@
 
     <FluentTextBlock Variant="TextBlockVariant.Title">TeachingTip</FluentTextBlock>
     <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Persistent anchor-relative callout — shown/dismissed programmatically (not by clicking its own
-        target), stays up until explicitly closed rather than light-dismissing on outside click.
+        Persistent callout — shown/dismissed programmatically (not by clicking its own target), and
+        stays up until explicitly closed rather than light-dismissing on outside click. Two modes,
+        chosen automatically by whether <code>ChildContent</code> is supplied: <b>targeted</b> (points
+        a beak at an anchor control, positioned via <code>Placement</code>) and <b>detached</b> (no
+        anchor, no beak, positioned relative to the viewport via <code>ScreenPlacement</code>).
     </FluentTextBlock>
-    <FluentTeachingTip @bind-IsOpen="_teachingTipOpen" Title="New feature" Subtitle="Try the new Reveal effect on cards above.">
+
+    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Targeted — points at a control</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        <code>ChildContent</code> is the anchor; <code>Placement</code> picks which side the beak
+        points from.
+    </FluentTextBlock>
+    <FluentTeachingTip @bind-IsOpen="_teachingTipOpen" Placement="OverlayPlacement.Bottom"
+                        Title="New feature" Subtitle="Try the new Reveal effect on cards above.">
         <ChildContent>
-            <FluentButton OnClick="@(() => _teachingTipOpen = true)">Show tip</FluentButton>
+            <FluentButton OnClick="@(() => _teachingTipOpen = true)">Show targeted tip</FluentButton>
         </ChildContent>
         <ActionContent>
             <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _teachingTipOpen = false)">Got it</FluentButton>
+        </ActionContent>
+    </FluentTeachingTip>
+
+    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Detached — no anchor, positioned on screen</FluentTextBlock>
+    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
+        Omit <code>ChildContent</code> and the tip has no beak, no anchor — just a fixed spot on the
+        viewport picked via <code>ScreenPlacement</code> (defaults to <code>BottomCenter</code>, same
+        as WinUI's own default for an untargeted teaching tip). Pick a corner, then show it.
+    </FluentTextBlock>
+    <FluentRadioGroup @bind-Value="_teachingTipScreenPlacementString">
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <FluentRadioButton Value="@("topleft")">Top left</FluentRadioButton>
+            <FluentRadioButton Value="@("topcenter")">Top center</FluentRadioButton>
+            <FluentRadioButton Value="@("topright")">Top right</FluentRadioButton>
+            <FluentRadioButton Value="@("center")">Center</FluentRadioButton>
+            <FluentRadioButton Value="@("bottomleft")">Bottom left</FluentRadioButton>
+            <FluentRadioButton Value="@("bottomcenter")">Bottom center</FluentRadioButton>
+            <FluentRadioButton Value="@("bottomright")">Bottom right</FluentRadioButton>
+        </div>
+    </FluentRadioGroup>
+    <div>
+        <FluentButton OnClick="@(() => _teachingTipDetachedOpen = true)">Show detached tip</FluentButton>
+    </div>
+    <FluentTeachingTip @bind-IsOpen="_teachingTipDetachedOpen" ScreenPlacement="_teachingTipScreenPlacement"
+                        Title="What's new" Subtitle="This tip isn't pointing at anything — it's pinned to the viewport.">
+        <ActionContent>
+            <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _teachingTipDetachedOpen = false)">Got it</FluentButton>
         </ActionContent>
     </FluentTeachingTip>
 
@@ -960,6 +997,26 @@
     private string? _splitButtonLastAction;
 
     private bool _teachingTipOpen;
+
+    private bool _teachingTipDetachedOpen;
+    private OverlayScreenPlacement _teachingTipScreenPlacement = OverlayScreenPlacement.BottomCenter;
+    private object? _teachingTipScreenPlacementString
+    {
+        get => _teachingTipScreenPlacement.ToString().ToLowerInvariant();
+        set
+        {
+            _teachingTipScreenPlacement = (value as string) switch
+            {
+                "topleft" => OverlayScreenPlacement.TopLeft,
+                "topcenter" => OverlayScreenPlacement.TopCenter,
+                "topright" => OverlayScreenPlacement.TopRight,
+                "center" => OverlayScreenPlacement.Center,
+                "bottomleft" => OverlayScreenPlacement.BottomLeft,
+                "bottomright" => OverlayScreenPlacement.BottomRight,
+                _ => OverlayScreenPlacement.BottomCenter
+            };
+        }
+    }
 
     private void CloseConfirmDialog(string action)
     {

@@ -1,3 +1,36 @@
+/* Typed custom properties (CSS Houdini @property) for the click-flash radius/intensity. This is
+   the actual fix for "the flash doesn't animate": a plain `background: radial-gradient(...)` is one
+   opaque value as far as the CSS transition spec is concerned — browsers do not interpolate between
+   two different radial-gradient() values in a `background`/`background-image` transition (some do
+   for identically-shaped gradients in limited cases, but not reliably), so the previous
+   `transition: background 120ms ...` was a no-op and the flash always snapped instantly regardless
+   of the duration. Registering --reveal-radius/--reveal-alpha with a `syntax` makes THEM smoothly
+   animatable instead — the gradient expression is rebuilt from their interpolated values every
+   frame of the transition, which is what actually produces a smooth flash. */
+@property --reveal-radius {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 120px;
+}
+
+@property --reveal-alpha {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0.15;
+}
+
+@property --reveal-border-radius {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 80px;
+}
+
+@property --reveal-border-alpha {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0.6;
+}
+
 .fluent-reveal {
     position: relative;
     isolation: isolate;
@@ -27,16 +60,22 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .fluent-reveal {
-        transition: none;
+    .fluent-reveal,
+    .fluent-reveal::before,
+    .fluent-reveal--bordered::after {
+        transition: none !important;
     }
 }
 
 /* Fill highlight — a soft light spot that tracks the pointer, cut to the element's own box via
-   the pseudo-element so it never bleeds past rounded corners. No CSS transition on opacity/
-   background here on purpose — reveal-interop.js already computes a smooth proximity-based fade
-   every animation frame (see PROXIMITY there), so a CSS transition on top of that would just add a
-   second, fighting layer of lag between the cursor and the light instead of smoothing anything. */
+   the pseudo-element so it never bleeds past rounded corners. Position (--reveal-x/y) is still
+   applied with no transition delay of its own — reveal-interop.js already computes that at rAF
+   cadence, so the spotlight's *location* stays glued to the cursor with no added lag. The `opacity`
+   fade-in and the --reveal-radius/--reveal-alpha click-flash (registered as typed properties above,
+   which is what makes them transitionable at all — see the comment up top) are what make entering
+   proximity and pressing read as animated changes instead of a hard cut. 180ms rather than the
+   duration-fast token: short enough to feel immediate, long enough to actually be visible as motion
+   instead of reading as "broken/instant" again. */
 .fluent-reveal::before {
     content: "";
     position: absolute;
@@ -44,22 +83,28 @@
     pointer-events: none;
     border-radius: inherit;
     opacity: var(--reveal-opacity);
-    background: radial-gradient(120px circle at var(--reveal-x) var(--reveal-y),
-        rgba(255, 255, 255, 0.15), transparent 70%);
+    background: radial-gradient(var(--reveal-radius) circle at var(--reveal-x) var(--reveal-y),
+        rgba(255, 255, 255, var(--reveal-alpha)), transparent 70%);
+    transition: opacity 180ms var(--easing-standard),
+        --reveal-radius 180ms var(--easing-standard),
+        --reveal-alpha 180ms var(--easing-standard);
     z-index: 0;
 }
 
 /* Click flash — the spotlight briefly brightens/tightens at the press point on top of the
    translateY/scale press above, so the click reads as light hitting the surface rather than just
-   the surface physically moving. */
+   the surface physically moving. Now actually animates (see the @property block up top for why the
+   previous version, which transitioned the `background` shorthand directly, didn't). */
 .fluent-reveal:active::before {
-    background: radial-gradient(90px circle at var(--reveal-x) var(--reveal-y),
-        rgba(255, 255, 255, 0.35), transparent 70%);
+    --reveal-radius: 90px;
+    --reveal-alpha: 0.35;
 }
 
 /* Border highlight — same spotlight, but masked down to a 1px ring instead of the whole fill,
    matching WinUI's separate RevealBorderBrush behavior (border light is brighter/tighter than
-   the fill light). Same no-CSS-transition reasoning as the fill highlight above. */
+   the fill light). Same typed-property transition reasoning as the fill highlight above, via its
+   own --reveal-border-radius/--reveal-border-alpha pair (kept separate from --reveal-radius/-alpha
+   since ::before and ::after are different boxes with independent press-flash timing). */
 .fluent-reveal--bordered::after {
     content: "";
     position: absolute;
@@ -68,12 +113,20 @@
     border-radius: inherit;
     opacity: var(--reveal-opacity);
     padding: 1px;
-    background: radial-gradient(80px circle at var(--reveal-x) var(--reveal-y),
-        rgba(255, 255, 255, 0.6), transparent 70%);
+    background: radial-gradient(var(--reveal-border-radius) circle at var(--reveal-x) var(--reveal-y),
+        rgba(255, 255, 255, var(--reveal-border-alpha)), transparent 70%);
+    transition: opacity 180ms var(--easing-standard),
+        --reveal-border-radius 180ms var(--easing-standard),
+        --reveal-border-alpha 180ms var(--easing-standard);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     z-index: 1;
+}
+
+.fluent-reveal--bordered:active::after {
+    --reveal-border-radius: 60px;
+    --reveal-border-alpha: 0.85;
 }
 
 .fluent-reveal > * {
