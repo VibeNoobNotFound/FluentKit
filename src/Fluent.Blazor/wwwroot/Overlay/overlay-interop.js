@@ -4,12 +4,13 @@
 const lightDismissHandlers = new Map();
 const anchorRemovalObservers = new Map();
 
-// Scrolls the anchor into view (centered, instant — no smooth-scroll animation, since this runs
-// before the popup's first measure/paint and a smooth scroll would just make positioning lag
-// behind) if it isn't already fully within the viewport. Resolves after giving the browser two
-// animation frames to actually settle the scroll + reflow, so the caller's subsequent
-// getBoundingClientRect() in computePosition reads the anchor's final, post-scroll position
-// instead of a stale mid-scroll one.
+// Scrolls the anchor into view (centered, smooth) if it isn't already fully within the viewport.
+// Resolves once the scroll actually finishes, not on a fixed timer or a couple of rAFs — a smooth
+// scroll's duration varies with distance, so the caller's subsequent getBoundingClientRect() in
+// computePosition needs to wait for the real end of motion or it'd measure (and the popup would
+// briefly render at) a mid-scroll position. Prefers the native 'scrollend' event where available;
+// falls back to polling scrollTop/scrollLeft until they stop changing for browsers that don't fire
+// it yet (Safari < 15.4).
 export function scrollIntoViewIfNeeded(anchorEl) {
     if (!anchorEl || !anchorEl.isConnected) {
         return Promise.resolve();
@@ -23,8 +24,55 @@ export function scrollIntoViewIfNeeded(anchorEl) {
         return Promise.resolve();
     }
 
-    anchorEl.scrollIntoView({ behavior: "auto", block: "center", inline: "center" });
-    return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return new Promise((resolve) => {
+        let settled = false;
+        const finish = () => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            window.removeEventListener("scrollend", finish, true);
+            resolve();
+        };
+
+        if ("onscrollend" in window) {
+            // Capture phase: the scrolling ancestor (could be any scrollable container between the
+            // anchor and the viewport, not necessarily `window` itself) is what actually fires this.
+            window.addEventListener("scrollend", finish, true);
+            // Safety net in case scrollIntoView ends up being a no-op distance (e.g. element was
+            // already at the edge of "in view" and rounding says otherwise) and scrollend never fires.
+            setTimeout(finish, 1000);
+        } else {
+            let lastTop = window.scrollY;
+            let lastLeft = window.scrollX;
+            let stableFrames = 0;
+            const poll = () => {
+                if (settled) {
+                    return;
+                }
+                const top = window.scrollY;
+                const left = window.scrollX;
+                if (top === lastTop && left === lastLeft) {
+                    stableFrames++;
+                } else {
+                    stableFrames = 0;
+                    lastTop = top;
+                    lastLeft = left;
+                }
+                // A couple of consecutive unchanged frames = motion has actually stopped, not just
+                // between two animation steps.
+                if (stableFrames >= 3) {
+                    finish();
+                    return;
+                }
+                requestAnimationFrame(poll);
+            };
+            requestAnimationFrame(poll);
+            setTimeout(finish, 1000);
+        }
+
+        anchorEl.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+    });
 }
 
 // For TeachingTip's Target mode: the anchor may live somewhere other than the control that
