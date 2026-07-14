@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 
 namespace Fluent.Blazor.Composite;
 
@@ -17,8 +18,10 @@ namespace Fluent.Blazor.Composite;
 /// positioned rather than going through IOverlayService — the dropdown needs to be exactly the
 /// trigger's width, same reasoning as ComboBox's own dropdown.
 /// </summary>
-public partial class FluentAutoSuggestBox<TValue> : ComponentBase
+public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposable
 {
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
     /// <summary>The raw typed text. Two-way bindable — always reflects what's in the box, never
     /// snapped back to a suggestion's Name unless the user actually picks one.</summary>
     [Parameter] public string? Text { get; set; }
@@ -69,6 +72,22 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase
     private bool _open;
     private int _highlightedIndex = -1;
 
+    // Same enter/exit animation shape as OverlaySurface (see its own comments for the full
+    // rationale), just self-contained here instead of going through IOverlayService — the dropdown
+    // is a plain `@if`-conditional <ul>, not an overlay entry, since (like ComboBox) it needs to be
+    // exactly the trigger's width rather than independently positioned/measured.
+    private bool _closing;
+    // Bumped on every open/close request; a pending FinishClosingAsync only applies its own result if
+    // the generation it captured is still current, so a rapid close-then-reopen (e.g. arrow-key-close
+    // then immediately typing again) can't have a stale exit-animation wait clobber a state the user
+    // has already moved past.
+    private int _closeGeneration;
+    private List<AutoSuggestBoxItem<TValue>> _lastMatches = [];
+    private ElementReference _dropdownElement;
+    private IJSObjectReference? _module;
+
+    private List<AutoSuggestBoxItem<TValue>> DisplayMatches => _open ? Matches : _lastMatches;
+
     private List<AutoSuggestBoxItem<TValue>> Matches
     {
         get
@@ -86,30 +105,95 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase
     private static bool DefaultFilter(string text, AutoSuggestBoxItem<TValue> item) =>
         item.Name.Contains(text, StringComparison.OrdinalIgnoreCase);
 
+    private void OpenDropdown()
+    {
+        _closeGeneration++;
+        _open = true;
+        _closing = false;
+    }
+
+    private void CloseDropdown()
+    {
+        if (!_open)
+        {
+            return;
+        }
+
+        // Snapshot now, before Text/Items can change further — e.g. ClearAsync blanks Text in the
+        // same call that closes the dropdown, which would make the live Matches property go empty
+        // immediately and the list would vanish instead of fading out with its last contents.
+        _lastMatches = Matches;
+        _open = false;
+        _closing = true;
+        var generation = ++_closeGeneration;
+        _ = FinishClosingAsync(generation);
+    }
+
+    private async Task FinishClosingAsync(int generation)
+    {
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./_content/Fluent.Blazor/Overlay/overlay-interop.js");
+            await _module.InvokeVoidAsync("waitForExitAnimation", _dropdownElement);
+        }
+        catch (JSDisconnectedException)
+        {
+            return;
+        }
+        catch (ObjectDisposedException)
+        {
+            return;
+        }
+
+        // Only the most recent close request gets to actually unmount the list — if the user reopened
+        // (or closed again) while this was waiting, that newer request already owns _closing/_open.
+        if (generation == _closeGeneration && _closing)
+        {
+            _closing = false;
+            StateHasChanged();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is not null)
+        {
+            await _module.DisposeAsync();
+        }
+    }
+
     private async Task OnTextChangedAsync(string? text)
     {
         Text = text;
         _highlightedIndex = -1;
         await TextChanged.InvokeAsync(Text);
 
-        _open = Matches.Count > 0;
+        if (Matches.Count > 0)
+        {
+            OpenDropdown();
+        }
+        else
+        {
+            CloseDropdown();
+        }
     }
 
     private void OnFocusIn()
     {
         if (!Disabled && Matches.Count > 0)
         {
-            _open = true;
+            OpenDropdown();
         }
     }
 
-    private void OnFocusLost() => _open = false;
+    private void OnFocusLost() => CloseDropdown();
 
     private async Task ClearAsync()
     {
         Text = string.Empty;
         _highlightedIndex = -1;
-        _open = false;
+        CloseDropdown();
         await TextChanged.InvokeAsync(Text);
     }
 
@@ -122,7 +206,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase
 
         Text = item.Name;
         _highlightedIndex = -1;
-        _open = false;
+        CloseDropdown();
         await TextChanged.InvokeAsync(Text);
         await SuggestionChosen.InvokeAsync(item);
     }
@@ -134,7 +218,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase
         switch (e.Key)
         {
             case "Escape":
-                _open = false;
+                CloseDropdown();
                 _highlightedIndex = -1;
                 return;
 
@@ -144,7 +228,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase
                     return;
                 }
 
-                _open = true;
+                OpenDropdown();
                 _highlightedIndex = _highlightedIndex + 1 >= matches.Count ? 0 : _highlightedIndex + 1;
                 return;
 
@@ -154,7 +238,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase
                     return;
                 }
 
-                _open = true;
+                OpenDropdown();
                 _highlightedIndex = _highlightedIndex - 1 < 0 ? matches.Count - 1 : _highlightedIndex - 1;
                 return;
 
@@ -165,7 +249,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase
                 }
                 else
                 {
-                    _open = false;
+                    CloseDropdown();
                     await QuerySubmitted.InvokeAsync(Text);
                 }
                 return;

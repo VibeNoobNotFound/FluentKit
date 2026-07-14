@@ -30,6 +30,49 @@
     max-height: 320px;
     inset-inline-start: 0;
     inset-block-start: 100%;
+
+    /* Same enter/exit approach as OverlaySurface (see that file's comments for the full rationale,
+       including why this animates the standalone `scale`/`translate` properties instead of writing
+       to `transform` directly — avoids clobbering any positioning transform, even though this
+       particular element doesn't currently have one). A small downward-into-place translate on top
+       of the fade/scale reads better here than a pure scale, since the dropdown always grows out of
+       a fixed edge (right under the TextBox) rather than from a point that could be anywhere
+       on-screen the way a generic overlay's anchor can be. */
+    transform-origin: top center;
+    animation: fluent-autosuggest-enter var(--duration-fast) var(--easing-decelerate) both;
+}
+
+/* Applied by FluentAutoSuggestBox.razor.cs's CloseDropdown/_closing the instant a close is
+   requested — see that file's FinishClosingAsync for the matching JS-animationend wait that keeps
+   the <ul> mounted long enough for this to actually play before it's removed from the DOM. */
+.fluent-autosuggest-dropdown--closing {
+    animation: fluent-autosuggest-exit var(--duration-fast) var(--easing-accelerate) both;
+}
+
+@keyframes fluent-autosuggest-enter {
+    from {
+        opacity: 0;
+        scale: 0.96;
+        translate: 0 -4px;
+    }
+    to {
+        opacity: 1;
+        scale: 1;
+        translate: 0 0;
+    }
+}
+
+@keyframes fluent-autosuggest-exit {
+    from {
+        opacity: 1;
+        scale: 1;
+        translate: 0 0;
+    }
+    to {
+        opacity: 0;
+        scale: 0.96;
+        translate: 0 -4px;
+    }
 }
 
 .fluent-autosuggest-item {

@@ -28,12 +28,12 @@
     }
 }</Buttons></FluentTextBox>
 
-    @if (!Disabled && _open && Matches.Count > 0)
+    @if (!Disabled && (_open || _closing) && DisplayMatches.Count > 0)
     {
-        <ul class="fluent-autosuggest-dropdown" role="listbox" tabindex="-1">
-            @for (var i = 0; i < Matches.Count; i++)
+        <ul class="fluent-autosuggest-dropdown @(_closing ? "fluent-autosuggest-dropdown--closing" : "")" role="listbox" tabindex="-1" @ref="_dropdownElement">
+            @for (var i = 0; i < DisplayMatches.Count; i++)
             {
-                var item = Matches[i];
+                var item = DisplayMatches[i];
                 var isHighlighted = i == _highlightedIndex;
                 <li class="fluent-autosuggest-item @(isHighlighted ? "fluent-autosuggest-item--highlighted" : null) @(item.Disabled ? "fluent-autosuggest-item--disabled" : null)"
                     role="option"
