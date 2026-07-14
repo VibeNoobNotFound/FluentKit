@@ -4,7 +4,7 @@
 
 <ThemeProvider>
     @* Background material — switches between Mica (Base) and Mica Alt (Tabbed/BaseAlt) *@
-    <FluentMicaPanel Variant="@_backgroundVariant" BackgroundImageUrl="wallpaper.jpg"
+    <FluentMicaPanel Variant="@_backgroundVariant" BackgroundImageUrl="@_wallpaperUrl"
                      style="position:fixed; inset:0; z-index:-1; opacity:0.72;" />
 
     <div style="width:100%; height:100dvh; position:relative; overflow:hidden;">
@@ -265,16 +265,26 @@
         BackgroundVariantChanged?.Invoke();
     }
 
+    internal static string WallpaperUrlSetting = "wallpaper.jpg";
+    internal static event Action? WallpaperUrlChanged;
+    internal static void SetWallpaperUrl(string url)
+    {
+        WallpaperUrlSetting = url;
+        WallpaperUrlChanged?.Invoke();
+    }
+
     // ── State ──────────────────────────────────────────────────────
     private bool _paneOpen = true;
     private object? _selectedRoute;
     private MicaVariant _backgroundVariant = BackgroundVariantSetting;
+    private string _wallpaperUrl = WallpaperUrlSetting;
 
     protected override void OnInitialized()
     {
         SyncSelectionFromUrl(Navigation.Uri);
         Navigation.LocationChanged += OnLocationChanged;
         BackgroundVariantChanged += OnBackgroundVariantChanged;
+        WallpaperUrlChanged += OnWallpaperUrlChanged;
     }
 
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
@@ -286,6 +296,12 @@
     private void OnBackgroundVariantChanged()
     {
         _backgroundVariant = BackgroundVariantSetting;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnWallpaperUrlChanged()
+    {
+        _wallpaperUrl = WallpaperUrlSetting;
         InvokeAsync(StateHasChanged);
     }
 
@@ -308,5 +324,6 @@
     {
         Navigation.LocationChanged -= OnLocationChanged;
         BackgroundVariantChanged -= OnBackgroundVariantChanged;
+        WallpaperUrlChanged -= OnWallpaperUrlChanged;
     }
 }

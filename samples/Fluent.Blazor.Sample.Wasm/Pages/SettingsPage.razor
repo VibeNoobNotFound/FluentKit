@@ -62,6 +62,32 @@
                 </div>
             </FluentRadioGroup>
         </div>
+
+        @* Custom wallpaper upload *@
+        <div class="settings-item">
+            <div class="settings-item__icon">
+                <FluentIcon Name="ic_fluent_image_20_regular" Size="20" />
+            </div>
+            <div class="settings-item__info">
+                <span class="settings-item__label">Custom Wallpaper</span>
+                <span class="settings-item__desc">
+                    Upload your own image to use as the Mica backdrop. Recommended size is 1920x1080.
+                </span>
+            </div>
+            <div class="demo-row" style="align-items:center; gap:12px;">
+                @if (MainLayout.WallpaperUrlSetting != "wallpaper.jpg")
+                {
+                    <FluentButton Variant="ButtonVariant.Subtle" OnClick="ResetWallpaper">
+                        Reset to default
+                    </FluentButton>
+                }
+                <InputFile OnChange="OnWallpaperUpload" id="wallpaper-upload" style="display:none;" accept=".jpg,.jpeg,.png,.webp" />
+                <label for="wallpaper-upload" class="fluent-file-upload-btn">
+                    <FluentIcon Name="ic_fluent_arrow_upload_20_regular" Size="16" style="margin-right:6px;" />
+                    Choose image...
+                </label>
+            </div>
+        </div>
     </div>
 
     @* ── About ────────────────────────────────────────────────────────── *@
@@ -101,5 +127,39 @@
         _bgVariantStr = value;
         var variant = value == "basealt" ? MicaVariant.BaseAlt : MicaVariant.Base;
         MainLayout.SetBackgroundVariant(variant);
+    }
+
+    private async Task OnWallpaperUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            // Limit to 5MB to prevent browser issues with massive strings
+            if (file.Size <= 5 * 1024 * 1024)
+            {
+                var format = file.ContentType;
+                var buffer = new byte[file.Size];
+                
+                using (var stream = file.OpenReadStream(5 * 1024 * 1024))
+                {
+                    int totalRead = 0;
+                    while (totalRead < buffer.Length)
+                    {
+                        int read = await stream.ReadAsync(buffer, totalRead, buffer.Length - totalRead);
+                        if (read == 0) break;
+                        totalRead += read;
+                    }
+                }
+                
+                var base64 = Convert.ToBase64String(buffer);
+                var dataUrl = $"data:{format};base64,{base64}";
+                MainLayout.SetWallpaperUrl(dataUrl);
+            }
+        }
+    }
+
+    private void ResetWallpaper()
+    {
+        MainLayout.SetWallpaperUrl("wallpaper.jpg");
     }
 }

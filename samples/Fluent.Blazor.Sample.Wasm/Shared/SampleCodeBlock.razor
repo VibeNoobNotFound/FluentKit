@@ -1,7 +1,12 @@
 @inject GalleryJsInterop GalleryJs
 
-<div class="sample-code-block">
+<div class="sample-code-block" style="position:relative;">
     <pre><code id="@_elementId" class="@LangClass">@Code</code></pre>
+    <button class="code-copy-btn @(_copied ? "code-copy-btn--copied" : "")"
+            style="position:absolute; top:8px; right:8px; z-index:10;"
+            @onclick="CopyThisCode">
+        @(_copied ? "✓ Copied" : "Copy")
+    </button>
 </div>
 
 @code {
@@ -13,6 +18,7 @@
     [Parameter] public string Language { get; set; } = "razor";
 
     private string _elementId = $"code-{Guid.NewGuid():N}";
+    private bool _copied = false;
 
     private string LangClass => Language.ToLowerInvariant() switch
     {
@@ -28,6 +34,19 @@
         if (firstRender)
         {
             await GalleryJs.HighlightElementAsync(_elementId);
+        }
+    }
+
+    private async Task CopyThisCode()
+    {
+        if (!string.IsNullOrEmpty(Code))
+        {
+            await GalleryJs.CopyToClipboardAsync(Code);
+            _copied = true;
+            StateHasChanged();
+            await Task.Delay(1800);
+            _copied = false;
+            StateHasChanged();
         }
     }
 }

@@ -46,11 +46,6 @@
                             C#
                         </button>
                     }
-                    <div style="flex:1;"></div>
-                    <button class="code-copy-btn @(_copied ? "code-copy-btn--copied" : "")"
-                            @onclick="CopyActiveCode">
-                        @(_copied ? "✓ Copied" : "Copy")
-                    </button>
                 </div>
 
                 <div class="control-example__code-content">
@@ -88,7 +83,6 @@
     [Parameter] public string? CSharpCode { get; set; }
 
     private string _activeTab = "razor";
-    private bool _copied;
 
     protected override void OnInitialized()
     {
@@ -98,18 +92,4 @@
     }
 
     private void SetTab(string tab) => _activeTab = tab;
-
-    private async Task CopyActiveCode()
-    {
-        var code = _activeTab == "razor" ? RazorCode : CSharpCode;
-        if (!string.IsNullOrEmpty(code))
-        {
-            await GalleryJs.CopyToClipboardAsync(code);
-            _copied = true;
-            StateHasChanged();
-            await Task.Delay(1800);
-            _copied = false;
-            StateHasChanged();
-        }
-    }
 }
