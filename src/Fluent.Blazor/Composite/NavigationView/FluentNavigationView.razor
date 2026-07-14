@@ -12,9 +12,9 @@
             <header class="fluent-nav-view-pane-header @(IsHeaderRail ? "fluent-nav-view-pane-header--rail" : "")">
                 @if (IsHeaderRail)
                 {
-                    @if (ShowBackButton)
+                    @if (IsBackButtonVisible)
                     {
-                        <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="OnBackClick" aria-label="Back">
+                        <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="OnBackClick" aria-label="Back" disabled="@(!IsBackButtonEnabled)">
                             <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
                         </button>
                     }
@@ -25,9 +25,9 @@
                 else
                 {
                     <div class="fluent-nav-view-pane-header-buttons">
-                        @if (ShowBackButton && IsPaneOpen)
+                        @if (IsBackButtonVisible && IsPaneOpen)
                         {
-                            <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
+                            <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back" disabled="@(!IsBackButtonEnabled)">
                                 <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
                             </button>
                         }
@@ -55,10 +55,7 @@
                 </div>
             </div>
             <footer class="fluent-nav-view-pane-footer">
-                @if (IsPaneOpen && !IsCompactOrMinimal)
-                {
-                    @PaneFooter
-                }
+                @PaneFooter
                 @if (ShowSettingsButton)
                 {
                     <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
@@ -82,9 +79,9 @@
                 <div class="fluent-nav-view-pane-overlay-content">
                     <header class="fluent-nav-view-pane-header">
                         <div class="fluent-nav-view-pane-header-buttons">
-                            @if (ShowBackButton)
+                            @if (IsBackButtonVisible)
                             {
-                                <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
+                                <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back" disabled="@(!IsBackButtonEnabled)">
                                     <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
                                 </button>
                             }

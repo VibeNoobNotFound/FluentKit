@@ -58,7 +58,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     public EventCallback<object?> ItemInvoked { get; set; }
 
     [Parameter]
-    public bool ShowBackButton { get; set; }
+    public bool IsBackButtonVisible { get; set; } = true;
+
+    [Parameter]
+    public bool IsBackButtonEnabled { get; set; } = true;
 
     [Parameter]
     public EventCallback BackRequested { get; set; }

@@ -236,8 +236,14 @@
     transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.fluent-nav-view-nav-button:hover {
+.fluent-nav-view-nav-button:hover:not(:disabled) {
     background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-nav-view-nav-button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .fluent-nav-view-nav-button:focus-visible {
@@ -277,6 +283,11 @@
     flex: 0 0 auto;
     padding: 4px 8px 8px;
     border-top: 1px solid var(--card-stroke-default);
+}
+
+/* Hide generic elements in footer (like version info) when closed in compact rail mode */
+.fluent-nav-view--compact .fluent-nav-view-pane:not(.fluent-nav-view-pane-overlay) .fluent-nav-view-pane-footer > :not(.fluent-nav-view-item) {
+    display: none !important;
 }
 
 .fluent-nav-view-settings-button {

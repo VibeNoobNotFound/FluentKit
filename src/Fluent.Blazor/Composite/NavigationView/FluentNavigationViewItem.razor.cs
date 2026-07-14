@@ -28,12 +28,17 @@ public partial class FluentNavigationViewItem : ComponentBase, IDisposable
     [Parameter]
     public EventCallback<bool> IsExpandedChanged { get; set; }
 
+    [Parameter]
+    public bool? IsSelectable { get; set; }
+
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private NavigationViewContext? Context { get; set; }
     private ElementReference _element;
     private bool _hasChildren;
+
+    private bool RealIsSelectable => IsSelectable ?? !_hasChildren;
 
     // Compute selection based on context's SelectedValue
     private bool IsSelected => Context?.SelectedValue != null && Equals(Context.SelectedValue, Value);
@@ -62,21 +67,16 @@ public partial class FluentNavigationViewItem : ComponentBase, IDisposable
         {
             IsExpanded = !IsExpanded;
             await IsExpandedChanged.InvokeAsync(IsExpanded);
+            if (RealIsSelectable)
+            {
+                Context.SelectValue(Value);
+            }
         }
         else
         {
-            // Update context selection and notify parent view
-            Context.SelectValue(Value);
-            // The view will handle ItemInvoked and overlay close via its own logic
-            if (Context is NavigationViewContext ctx)
+            if (RealIsSelectable)
             {
-                // We need to notify the NavigationView that an item was clicked
-                // The context can call the view's method, but we can use a callback.
-                // Since we don't have a direct reference, we can let the view subscribe to SelectionChanged.
-                // We'll add an event for item clicked, or we can use the existing SelectionChanged event.
-                // But SelectionChanged only fires when the value changes, not on every click of the same item.
-                // For item invoked, we should call ItemInvoked even if the same item is clicked.
-                // We'll handle that in the NavigationView by observing clicks.
+                Context.SelectValue(Value);
             }
         }
     }

@@ -285,20 +285,26 @@
         MIT-licensed Fluent System Icons webfont (no managed dependency, no CSS leak risk).
     </FluentTextBlock>
 
-    <!-- Mode selector using RadioGroup with strings mapped to NavigationViewPaneDisplayMode -->
-    <FluentRadioGroup @bind-Value="_navModeString">
-        <div style="display:flex; gap:16px;">
-            <FluentRadioButton Value="@("expanded")">Expanded</FluentRadioButton>
-            <FluentRadioButton Value="@("compact")">Compact</FluentRadioButton>
-            <FluentRadioButton Value="@("minimal")">Minimal</FluentRadioButton>
-        </div>
-    </FluentRadioGroup>
+    <!-- Mode selector and Back/Settings Button controls -->
+    <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+        <FluentRadioGroup @bind-Value="_navModeString">
+            <div style="display:flex; gap:16px;">
+                <FluentRadioButton Value="@("expanded")">Expanded</FluentRadioButton>
+                <FluentRadioButton Value="@("compact")">Compact</FluentRadioButton>
+                <FluentRadioButton Value="@("minimal")">Minimal</FluentRadioButton>
+            </div>
+        </FluentRadioGroup>
+
+        <FluentCheckBox @bind-Checked="_navBackButtonVisible">Back Button Visible (IsBackButtonVisible)</FluentCheckBox>
+        <FluentCheckBox @bind-Checked="_navBackButtonEnabled">Back Button Enabled (IsBackButtonEnabled)</FluentCheckBox>
+        <FluentCheckBox @bind-Checked="_navShowSettingsButton">Settings Button Visible (ShowSettingsButton)</FluentCheckBox>
+    </div>
 
     <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
         This instance also shows the rest of the shell chrome: a custom <code>PaneHeader</code> (a
         search box, rendered in both the full pane and the icon-only rail), a <code>PaneFooter</code>
         item, the built-in Settings row (<code>ShowSettingsButton</code> — separate from ItemInvoked,
-        fires its own <code>SettingsRequested</code>), and a back button (<code>ShowBackButton</code> /
+        fires its own <code>SettingsRequested</code>), and a back button (<code>IsBackButtonVisible</code> /
         <code>BackRequested</code>). The blue selection indicator slides between rows instead of
         appearing/disappearing.
     </FluentTextBlock>
@@ -307,9 +313,10 @@
         <FluentNavigationView PaneDisplayMode="_navMode"
                                @bind-IsPaneOpen="_navPaneOpen"
                                @bind-SelectedValue="_navSelected"
-                               ShowBackButton="true"
+                               IsBackButtonVisible="_navBackButtonVisible"
+                               IsBackButtonEnabled="_navBackButtonEnabled"
                                BackRequested="OnNavBack"
-                               ShowSettingsButton="true"
+                               ShowSettingsButton="_navShowSettingsButton"
                                SettingsRequested="OnNavSettings">
             <PaneHeaderIcon>
                 <FluentIcon Name="@FluentIconNames.Search" Size="16" />
@@ -327,7 +334,7 @@
                 </FluentNavigationViewItem>
                 <FluentNavigationViewItemSeparator />
                 <FluentNavigationViewItemHeader Text="Components" />
-                <FluentNavigationViewItem Value="@("components")" Text="Components">
+                <FluentNavigationViewItem Value="@("components")" Text="Components" IsSelectable="true">
                     <Icon><FluentIcon Name="@FluentIconNames.Apps" /></Icon>
                     <ChildContent>
                         <FluentNavigationViewItem Value="@("button")" Text="Button" />
@@ -339,7 +346,10 @@
                 </FluentNavigationViewItem>
             </MenuItems>
             <PaneFooter>
-                <FluentTextBlock Variant="TextBlockVariant.Caption" style="padding-inline:12px;">v1.0.0</FluentTextBlock>
+                <FluentNavigationViewItem Value="@("feedback")" Text="Help & Feedback">
+                    <Icon><FluentIcon Name="ic_fluent_question_circle_20_regular" /></Icon>
+                </FluentNavigationViewItem>
+                <FluentTextBlock Variant="TextBlockVariant.Caption" style="padding-inline:12px; margin-top:4px;">v1.0.0</FluentTextBlock>
             </PaneFooter>
             <ChildContent>
                 <FluentTextBlock Variant="TextBlockVariant.Title">@_navSelected</FluentTextBlock>
@@ -1090,6 +1100,9 @@
     private object? _navSelected = "home";
     private string? _navSearch;
     private string? _navLastAction;
+    private bool _navBackButtonVisible = true;
+    private bool _navBackButtonEnabled = true;
+    private bool _navShowSettingsButton = true;
 
     private void OnNavBack() => _navLastAction = "Back pressed";
 
