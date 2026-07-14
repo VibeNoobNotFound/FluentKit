@@ -1,7 +1,21 @@
+<div align="center">
+
 # FluentKit
 
-A token-accurate Fluent Design (WinUI 3) component library for Blazor — WebAssembly, Server, and
-MAUI Blazor Hybrid — built as pure Razor and CSS, with no third-party UI framework underneath it.
+**A token-accurate Fluent Design (WinUI 3) component library for Blazor**
+
+WebAssembly · Server · MAUI Blazor Hybrid — pure Razor and CSS, no third-party UI framework underneath
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/VibeNoobNotFound/FluentKit/actions/workflows/ci.yml/badge.svg)](https://github.com/VibeNoobNotFound/FluentKit/actions/workflows/ci.yml)
+[![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
+![Status: alpha](https://img.shields.io/badge/status-alpha%20(0.1.0--alpha)-orange)
+
+[Live sample](https://vibenoobnotfound.github.io/FluentKit/) · [Getting started](#getting-started) · [Known gaps](#known-gaps--next-up) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+
+</div>
+
+---
 
 Design tokens (color, corner radius, state aliases) are transcribed directly from Microsoft's own
 `microsoft-ui-xaml` resource dictionaries, and effects like Mica and Acrylic are rebuilt against
@@ -9,12 +23,13 @@ WinUI's actual effect graph rather than approximated from screenshots. See
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for exactly where each component's markup,
 styling, or token values were sourced from.
 
-> Status: alpha (`0.1.0-alpha`). APIs may still change between versions. See "Known gaps" below.
+> **Status:** alpha (`0.1.0-alpha`). APIs may still change between versions — see [Known gaps](#known-gaps--next-up).
 
 ## Contents
 
 - [What's in here](#whats-in-here)
 - [Getting started](#getting-started)
+- [Installing from NuGet](#installing-from-nuget)
 - [Running the sample](#running-the-sample)
 - [Theming](#theming)
 - [Project layout](#project-layout)
@@ -25,36 +40,131 @@ styling, or token values were sourced from.
 
 ## What's in here
 
-**Primitives** — `FluentButton` (4 variants x 4 states), `FluentToggleButton`, `FluentCheckBox`
-(including three-state/indeterminate), `FluentRadioButton` + `FluentRadioGroup`,
-`FluentToggleSwitch`, `FluentTextBox`, `FluentPasswordBox`, `FluentNumberBox`, `FluentTextBlock`
-(full type ramp), `FluentDivider`, `FluentCard`, `FluentExpander`, `FluentIcon`, `FluentIconButton`,
-`FluentPersonPicture`, `FluentProgressBar`, `FluentProgressRing`, `FluentInfoBadge`, `FluentInfoBar`,
-`FluentListView`, and `FluentSlider`.
+<table>
+<tr>
+<td width="50%" valign="top">
 
-**Composite controls** — `FluentTooltip`, `FluentFlyout`, `FluentMenuFlyout` /
-`FluentContextMenu`, `FluentComboBox`, `FluentAutoSuggestBox`, `FluentCalendarView` /
-`FluentCalendarDatePicker`, `FluentNavigationView`, `FluentContentDialog`, `FluentMenuBar`,
-`FluentPivot`, `FluentDropDownButton`, `FluentSplitButton`, and `FluentTeachingTip`.
+### Primitives — Buttons
 
-**Effects** — `FluentMicaPanel` (opaque backdrop material, rebuilt against WinUI's real
-`BuildMicaEffectBrush` effect graph: blurred wallpaper -> luminosity blend -> color tint -> noise),
-`FluentAcrylicBrush` (translucent, live `backdrop-filter` blur, `Base`/`Thin` kinds), and
-`FluentRevealBackground` (pointer-tracked radial-gradient highlight).
+- `FluentButton` (4 variants × 4 states)
+- `FluentToggleButton`
+- `FluentIconButton`
 
-**Theming** — light/dark/system theme resolved through `IThemeService`, applied as `data-theme` on
-`<html>`, with live updates when the OS `prefers-color-scheme` changes.
+</td>
+<td width="50%" valign="top">
 
-**Overlay infrastructure** — `IOverlayService` + `FluentOverlayHost` + `OverlaySurface`, a
-portal/teleportation layer for anything that needs to render outside its parent's layout flow
-(tooltips, flyouts, context menus, teaching tips).
+### Primitives — Input
+
+- `FluentTextBox`
+- `FluentPasswordBox`
+- `FluentNumberBox`
+- `FluentCheckBox` (incl. indeterminate)
+- `FluentRadioButton` / `FluentRadioGroup`
+- `FluentToggleSwitch`
+- `FluentSlider`
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Primitives — Display
+
+- `FluentTextBlock` (full type ramp)
+- `FluentDivider`
+- `FluentCard`
+- `FluentExpander`
+- `FluentIcon`
+- `FluentPersonPicture`
+
+</td>
+<td width="50%" valign="top">
+
+### Primitives — Status & progress / collections
+
+- `FluentProgressBar`
+- `FluentProgressRing`
+- `FluentInfoBadge`
+- `FluentInfoBar`
+- `FluentListView`
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Composite — Overlays
+
+- `FluentTooltip`
+- `FluentFlyout`
+- `FluentMenuFlyout` / `FluentContextMenu`
+- `FluentContentDialog`
+- `FluentTeachingTip`
+
+</td>
+<td width="50%" valign="top">
+
+### Composite — Pickers & inputs
+
+- `FluentComboBox`
+- `FluentAutoSuggestBox`
+- `FluentCalendarView` / `FluentCalendarDatePicker`
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Composite — Buttons with menus
+
+- `FluentDropDownButton`
+- `FluentSplitButton`
+
+</td>
+<td width="50%" valign="top">
+
+### Composite — Navigation
+
+- `FluentNavigationView`
+- `FluentMenuBar`
+- `FluentPivot`
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Effects
+
+- **`FluentMicaPanel`** — opaque backdrop material: blurred wallpaper → luminosity blend → color tint → noise, rebuilt against WinUI's real `BuildMicaEffectBrush` graph
+- **`FluentAcrylicBrush`** — translucent, live `backdrop-filter` blur, `Base`/`Thin` kinds
+- **`FluentRevealBackground`** — pointer-tracked radial-gradient highlight
+
+</td>
+<td width="50%" valign="top">
+
+### Theming
+
+Light / dark / system, resolved through `IThemeService`, applied as `data-theme` on `<html>`, with
+live updates on OS `prefers-color-scheme` changes.
+
+### Overlay infrastructure
+
+`IOverlayService` + `FluentOverlayHost` + `OverlaySurface` — a portal layer for anything rendering
+outside its parent's layout flow (tooltips, flyouts, context menus, teaching tips).
+
+</td>
+</tr>
+</table>
 
 ## Getting started
 
-FluentKit isn't published to NuGet yet, so consume it as a project or repository reference:
+FluentKit isn't published to NuGet yet, so consume it as a project or repository reference.
+
+**1. Clone and reference**
 
 ```bash
-git clone https://github.com/VibeNoobNotFound/Fluent.Blazor.git
+git clone https://github.com/VibeNoobNotFound/FluentKit.git
 ```
 
 ```xml
@@ -63,7 +173,7 @@ git clone https://github.com/VibeNoobNotFound/Fluent.Blazor.git
 </ItemGroup>
 ```
 
-Then wire up theming and tokens in your host app.
+**2. Link the token stylesheet**
 
 `wwwroot/index.html` (WASM) or `Pages/_Host.cshtml` / `App.razor` (Server):
 
@@ -71,13 +181,15 @@ Then wire up theming and tokens in your host app.
 <link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
 ```
 
+**3. Register theming**
+
 `Program.cs`:
 
 ```csharp
 builder.Services.AddScoped<IThemeService, ThemeService>();
 ```
 
-Root component (e.g. `App.razor` or `MainLayout.razor`):
+**4. Wrap your root component**
 
 ```razor
 <ThemeProvider>
@@ -88,11 +200,25 @@ Root component (e.g. `App.razor` or `MainLayout.razor`):
 ```
 
 `ThemeProvider` resolves and applies the theme on first render; `FluentOverlayHost` is required by
-any composite control built on the overlay service (tooltips, flyouts, menus, dialogs, teaching
-tips). Then use components as you would any other Razor component:
+any composite control built on the overlay service (tooltips, flyouts, menus, dialogs, teaching tips).
+
+**5. Use components**
 
 ```razor
 <FluentButton Variant="FluentButtonVariant.Accent">Save changes</FluentButton>
+```
+
+## Installing from NuGet
+
+FluentKit isn't published yet — for now, consume it as a project or repository reference (see
+above). Once it's published, installation will look like:
+
+```bash
+dotnet add package FluentKit.Placeholder
+```
+
+```xml
+<PackageReference Include="FluentKit.Placeholder" Version="0.1.0-alpha" />
 ```
 
 ## Running the sample
@@ -102,13 +228,14 @@ background rendered through `FluentMicaPanel` over a real wallpaper image, Mica 
 side by side, and `FluentAcrylicBrush` cards live-blurring that Mica background behind them.
 
 ```bash
-git clone https://github.com/VibeNoobNotFound/Fluent.Blazor.git
-cd Fluent.Blazor
+git clone https://github.com/VibeNoobNotFound/FluentKit.git
+cd FluentKit
 dotnet restore
 dotnet run --project samples/FluentKit.Sample.Wasm
 ```
 
-Requires the .NET 10 SDK.
+Requires the **.NET 10 SDK**. A hosted build is also published to
+[vibenoobnotfound.github.io/FluentKit](https://vibenoobnotfound.github.io/FluentKit/).
 
 ## Theming
 
@@ -120,13 +247,13 @@ Three modes, matching WinUI: `System` (tracks the OS/browser preference live), `
 await ThemeService.SetModeAsync(ThemeMode.Dark);
 ```
 
-The token layer is split into two pieces so consumers only ever need to link one file:
+The token layer is split so consumers only ever need to link one file:
 
-- `_primitives.css` — theme-independent primitive values (raw color ramps, spacing, corner radius).
-- `_semantic.light.css` / `_semantic.dark.css` — semantic aliases transcribed from WinUI's own XAML
-  resource dictionaries, structured to mirror each other property-for-property.
-- `tokens.css` — the single entry point that imports both layers; this is the only file consumers
-  should link directly.
+| File | Purpose |
+|---|---|
+| `_primitives.css` | Theme-independent primitive values (raw color ramps, spacing, corner radius) |
+| `_semantic.light.css` / `_semantic.dark.css` | Semantic aliases transcribed from WinUI's own XAML resource dictionaries, mirrored property-for-property |
+| `tokens.css` | Single entry point importing both layers — **the only file consumers should link directly** |
 
 ## Project layout
 
@@ -155,10 +282,10 @@ bundle (`{HostAssemblyName}.styles.css`, served flat from the app's own root) wh
 `@import`s every referenced RCL's bundle. Only link the host app's own generated stylesheet — see
 `samples/FluentKit.Sample.Wasm/wwwroot/index.html` for a working example.
 
-Related: any markup built via `RenderTreeBuilder` in a `.cs` file does not get a component's CSS
-isolation scope attribute, so `.razor.css` styles silently won't apply to it. Define
-dynamically-shown markup as Razor template fields (`RenderFragment x = @<span>...</span>;`) inside
-the `.razor` file's `@code` block instead.
+> **Related:** any markup built via `RenderTreeBuilder` in a `.cs` file does not get a component's
+> CSS isolation scope attribute, so `.razor.css` styles silently won't apply to it. Define
+> dynamically-shown markup as Razor template fields (`RenderFragment x = @<span>...</span>;`) inside
+> the `.razor` file's `@code` block instead.
 
 ## Known gaps / next up
 
@@ -176,7 +303,8 @@ the `.razor` file's `@code` block instead.
 6. `FluentTeachingTip`'s beak is positioned from the requested placement, not whatever
    `overlay-interop.js` actually flipped it to — fine as long as there's room, but the beak won't
    flip sides if the tip itself gets flipped.
-7. Not yet published to NuGet — consume via project or repository reference for now.
+7. Not yet published to NuGet — consume via project or repository reference for now (see
+   [Installing from NuGet](#installing-from-nuget)).
 
 ## Contributing
 
@@ -186,5 +314,6 @@ are derived from an external source.
 
 ## License
 
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution of design tokens, ported
-component structure, and bundled assets (fluent-svelte, microsoft-ui-xaml, Fluent System Icons).
+MIT — see [LICENSE](LICENSE). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution
+of design tokens, ported component structure, and bundled assets (fluent-svelte, microsoft-ui-xaml,
+Fluent System Icons).
