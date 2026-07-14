@@ -99,6 +99,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     private ElementReference _rootElement;
     private NavigationViewContext? _context;
     private IJSObjectReference? _module;
+    private DotNetObjectReference<FluentNavigationView>? _selfReference;
 
     private NavigationViewPaneDisplayMode _activePaneDisplayMode = NavigationViewPaneDisplayMode.Left;
     private NavigationViewPaneDisplayMode _lastPaneDisplayMode = NavigationViewPaneDisplayMode.Left;
@@ -133,17 +134,16 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     {
         if (firstRender)
         {
+            _selfReference = DotNetObjectReference.Create(this);
             try
             {
                 _module = await JS.InvokeAsync<IJSObjectReference>(
                     "import", "./_content/Fluent.Blazor/Composite/NavigationView/navview-interop.js");
+                await _module.InvokeVoidAsync("startObservingResize", _rootElement, _selfReference);
             }
             catch (JSException)
             {
-                // GetWidthAsync() already tolerates _module being null (falls back to a fixed 800px
-                // assumed width for the Auto-mode breakpoint calc below) — better to keep
-                // NavigationView usable at a wrong breakpoint than crash the whole component tree if
-                // the interop module ever fails to load (e.g. static assets misconfigured).
+                // GetWidthAsync() already tolerates _module being null
                 _module = null;
             }
 
@@ -271,9 +271,20 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         StateHasChanged();
     }
 
+    [JSInvokable]
+    public async Task OnResize(double width)
+    {
+        await UpdateDisplayModeWithWidthAsync(width);
+    }
+
     private async Task UpdateDisplayModeAsync()
     {
         var width = await GetWidthAsync();
+        await UpdateDisplayModeWithWidthAsync(width);
+    }
+
+    private async Task UpdateDisplayModeWithWidthAsync(double width)
+    {
         var paneDisplayMode = PaneDisplayMode;
 
         NavigationViewDisplayMode displayMode;
@@ -312,16 +323,63 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             StateHasChanged();
         }
 
-        // Auto close pane when switching to compact/minimal
-        if (IsCompactOrMinimal && IsPaneOpen)
+        if (PaneDisplayMode == NavigationViewPaneDisplayMode.Auto)
         {
-            await TogglePaneAsync();
+            var expandedThreshold = 1008.0;
+            var compactThreshold = 641.0;
+
+            NavigationViewPaneDisplayMode targetMode;
+            bool targetPaneOpen = IsPaneOpen;
+
+            if (width >= expandedThreshold)
+            {
+                targetMode = NavigationViewPaneDisplayMode.Left;
+                if (_activePaneDisplayMode != NavigationViewPaneDisplayMode.Left)
+                {
+                    targetPaneOpen = true;
+                }
+            }
+            else if (width >= compactThreshold)
+            {
+                targetMode = NavigationViewPaneDisplayMode.LeftCompact;
+                if (_activePaneDisplayMode != NavigationViewPaneDisplayMode.LeftCompact)
+                {
+                    targetPaneOpen = false;
+                }
+            }
+            else
+            {
+                targetMode = NavigationViewPaneDisplayMode.LeftMinimal;
+                if (_activePaneDisplayMode != NavigationViewPaneDisplayMode.LeftMinimal)
+                {
+                    targetPaneOpen = false;
+                }
+            }
+
+            if (_activePaneDisplayMode != targetMode)
+            {
+                _activePaneDisplayMode = targetMode;
+                if (IsPaneOpen != targetPaneOpen)
+                {
+                    IsPaneOpen = targetPaneOpen;
+                    await IsPaneOpenChanged.InvokeAsync(IsPaneOpen);
+                }
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            // Auto close pane when switching to compact/minimal
+            if (IsCompactOrMinimal && IsPaneOpen)
+            {
+                await TogglePaneAsync();
+            }
         }
     }
 
     private async Task<double> GetWidthAsync()
     {
-        if (!string.IsNullOrEmpty(_rootElement.Id) && _module != null)
+        if (_module != null)
         {
             try
             {
@@ -340,9 +398,15 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     public void Dispose()
     {
         _context?.Dispose();
+        _selfReference?.Dispose();
         if (_module is not null)
         {
-            try { _module.DisposeAsync().AsTask().Wait(); } catch { }
+            try
+            {
+                _module.InvokeVoidAsync("stopObservingResize", _rootElement);
+                _module.DisposeAsync().AsTask().Wait();
+            }
+            catch { }
         }
     }
 }

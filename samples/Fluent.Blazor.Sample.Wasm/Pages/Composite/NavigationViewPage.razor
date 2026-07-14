@@ -69,7 +69,7 @@
 </div>
 
 @code {
-    private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
+    private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Auto;
     private bool _navPaneOpen = true;
     private object? _navSelected = "home";
     private string? _navSearch;
@@ -134,7 +134,7 @@
     </ChildContent>
 </FluentNavigationView>";
 
-    private const string _navCs = @"private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
+    private const string _navCs = @"private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Auto;
 private bool _navPaneOpen = true;
 private object? _navSelected = ""home"";
 private string? _navSearch;
@@ -152,6 +152,7 @@ private void OnNavSettings() => _navLastAction = ""Settings requested"";";
                 <span style="font-size: 11px; opacity: 0.7;">Pane Display Mode</span>
                 <FluentRadioGroup @bind-Value="_navModeString">
                     <div class="demo-row">
+                        <FluentRadioButton Value='@("auto")'>Auto</FluentRadioButton>
                         <FluentRadioButton Value='@("expanded")'>Expanded</FluentRadioButton>
                         <FluentRadioButton Value='@("compact")'>Compact</FluentRadioButton>
                         <FluentRadioButton Value='@("minimal")'>Minimal</FluentRadioButton>
@@ -171,20 +172,22 @@ private void OnNavSettings() => _navLastAction = ""Settings requested"";";
     {
         get => _navMode switch
         {
+            NavigationViewPaneDisplayMode.Auto => "auto",
             NavigationViewPaneDisplayMode.Left => "expanded",
             NavigationViewPaneDisplayMode.LeftCompact => "compact",
             NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
-            _ => "expanded"
+            _ => "auto"
         };
         set
         {
             _navMode = (value as string) switch
             {
+                "expanded" => NavigationViewPaneDisplayMode.Left,
                 "compact" => NavigationViewPaneDisplayMode.LeftCompact,
                 "minimal" => NavigationViewPaneDisplayMode.LeftMinimal,
-                _ => NavigationViewPaneDisplayMode.Left
+                _ => NavigationViewPaneDisplayMode.Auto
             };
-            _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Left;
+            _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Left || _navMode == NavigationViewPaneDisplayMode.Auto;
         }
     }
 }
