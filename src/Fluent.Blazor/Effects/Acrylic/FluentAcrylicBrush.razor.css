@@ -21,6 +21,13 @@
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
     .fluent-acrylic {
         background-color: transparent;
+        backdrop-filter: blur(var(--acrylic-blur-amount));
+        -webkit-backdrop-filter: blur(var(--acrylic-blur-amount));
+    }
+
+    .fluent-acrylic--thin {
+        backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+        -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
     }
 }
 
@@ -29,29 +36,13 @@
     position: absolute;
     inset: 0;
     z-index: 0;
-    backdrop-filter: blur(var(--acrylic-blur-amount));
-    -webkit-backdrop-filter: blur(var(--acrylic-blur-amount));
-    /* Tint wash, built with color-mix() rather than the old rgba(var(--...-tint-color), opacity)
-       pairing so a caller's TintColor override (any valid CSS color — hex/rgb()/named) and
-       TintOpacity override (baked into a percentage by the component's C# code-behind) can each be
-       supplied independently, without needing an r,g,b triplet the way the token defaults do. */
-    background-color: color-mix(
-        in srgb,
-        var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)))
-        var(--acrylic-tint-opacity-pct-override, calc(var(--acrylic-tint-opacity) * 100%)),
-        transparent
-    );
+    pointer-events: none;
+    background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
+    opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-tint-opacity));
 }
 
 .fluent-acrylic--thin::before {
-    backdrop-filter: blur(var(--acrylic-thin-blur-amount));
-    -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
-    background-color: color-mix(
-        in srgb,
-        var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)))
-        var(--acrylic-tint-opacity-pct-override, calc(var(--acrylic-thin-tint-opacity) * 100%)),
-        transparent
-    );
+    opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-thin-tint-opacity));
 }
 
 /* Opt-in second tint pass (only rendered when the component's TintLuminosityOpacity parameter is
@@ -69,12 +60,8 @@
     z-index: 1;
     pointer-events: none;
     mix-blend-mode: luminosity;
-    background-color: color-mix(
-        in srgb,
-        var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)))
-        var(--acrylic-luminosity-opacity-pct-override, 100%),
-        transparent
-    );
+    background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
+    opacity: var(--acrylic-luminosity-opacity-pct-override, 100%);
 }
 
 .fluent-acrylic::after {
@@ -100,14 +87,20 @@
 @media (prefers-reduced-transparency: reduce) {
     .fluent-acrylic {
         background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .fluent-acrylic--thin {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
     .fluent-acrylic::before {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
         background-color: transparent;
+        opacity: 0;
     }
     .fluent-acrylic__luminosity {
         mix-blend-mode: normal;
         background-color: transparent;
+        opacity: 0;
     }
 }

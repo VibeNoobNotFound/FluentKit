@@ -19,13 +19,78 @@
     font-family: var(--font-family-base);
 }
 
+/* Real Acrylic recipe (see FluentAcrylicBrush.razor.css / OverlaySurface.razor.css), applied via a
+   dedicated .fluent-calendar-view-material sibling div (see FluentCalendarView.razor) rather than
+   ::before/::after + cross-sibling z-index — real DOM nesting means the calendar's own header/
+   table-wrapper content is guaranteed to paint after (and therefore visually above) the material,
+   with no dependency on z-index stacking-context arithmetic a backdrop-filter boundary doesn't
+   always honor consistently across engines (same fix as OverlaySurface/AutoSuggestBox/ComboBox/
+   NavigationView). Thin tier (this is CalendarDatePicker's small transient popout). Self-contained
+   popout (doesn't route through OverlayService — see FluentCalendarDatePicker.razor.cs), so it
+   carries its own copy of the recipe rather than inheriting OverlaySurface's. */
 .fluent-calendar-view--floating {
+    position: relative;
     border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
     border-color: var(--flyout-border);
-    background-color: var(--flyout-background);
-    backdrop-filter: blur(40px);
     box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
+    /* no backdrop-filter support / reduced-transparency */
+    background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
 }
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .fluent-calendar-view--floating {
+        background-color: transparent;
+        backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+        -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+    }
+
+    .fluent-calendar-view--floating::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        pointer-events: none;
+        background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
+        opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-thin-tint-opacity));
+    }
+}
+
+.fluent-calendar-view--floating::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: var(--noise-asset);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.02;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .fluent-calendar-view--floating {
+        background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .fluent-calendar-view--floating::before {
+        background-color: transparent;
+        opacity: 0;
+    }
+}
+
+.fluent-calendar-view-material {
+    display: none;
+}
+
+/* Real content (header/table-wrapper) already renders after .fluent-calendar-view-material in the
+   DOM (see markup) — no z-index needed, guaranteed on top by paint order. Both direct children are
+   already non-transparent-background elements themselves (.fluent-calendar-view-header has no
+   background set so it's transparent over the material; .fluent-calendar-view-table-wrapper has
+   its own opaque --card-background-default, intentionally opaque so the grid of day cells reads
+   clearly — unaffected by this restructure either way). */
 
 .fluent-calendar-view-header,
 .fluent-calendar-view-pagination-controls {
@@ -40,6 +105,19 @@
 }
 
 .fluent-calendar-view-header {
+    /* Without an explicit `position`, this is a plain in-flow box, which CSS's stacking/paint
+       order always paints BEFORE any positioned descendant of the same stacking context — even
+       one with z-index:auto and even if that positioned element (.fluent-calendar-view-material)
+       comes earlier in the DOM. That's what was putting the month/year bar visually behind the
+       acrylic material despite the material being painted first in markup: DOM order only decides
+       paint order between elements in the SAME paint-order bucket, and "positioned" vs
+       "non-positioned" are different buckets, positioned always on top. Making this `position:
+       relative` (no z-index needed) moves it into the same bucket as the material, where DOM/tree
+       order applies again — and since this is later in the DOM than .fluent-calendar-view-material,
+       it now correctly paints on top of it. (.fluent-calendar-view-table-wrapper below already has
+       `position: relative` for its own reasons, which is why the date grid itself was never
+       affected by this — only the header bar was.) */
+    position: relative;
     box-sizing: border-box;
     border-block-end: 1px solid var(--card-stroke-default);
     inline-size: 100%;

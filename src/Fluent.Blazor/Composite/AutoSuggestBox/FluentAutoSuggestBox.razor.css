@@ -9,34 +9,33 @@
     max-width: 300px;
 }
 
+/* Outer box: absolutely positioned/sized/animated, exactly what overlay-interop.js's
+   observeAutoHeight/waitForExitAnimation target via @ref="_dropdownElement" (see
+   FluentAutoSuggestBox.razor). Holds two children (see markup): a material div painted first,
+   then the actual scrolling <ul> painted after it — content is guaranteed above the acrylic
+   material by DOM/paint order, not z-index arithmetic across siblings that a backdrop-filter
+   boundary doesn't always honor consistently. */
 .fluent-autosuggest-dropdown {
     z-index: 100;
     position: absolute;
     box-sizing: border-box;
-    margin: 0;
-    margin-block-start: 4px;
-    padding: 4px;
-    list-style: none;
-
-    border: 1px solid var(--flyout-border);
-    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
-    background-color: var(--flyout-background);
-    backdrop-filter: blur(40px);
-    background-clip: padding-box;
-    box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
-
-    overflow: auto;
-    width: 100%;
-    max-height: 320px;
     inset-inline-start: 0;
     inset-block-start: 100%;
+    margin: 0;
+    margin-block-start: 4px;
+    width: 100%;
+    max-height: 320px;
+    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
+    /* Clips the material's square corners/noise tile to the rounded box, and clips the inner <ul>'s
+       own scroll content the same way a plain overflow:hidden card would. */
+    overflow: hidden;
 
     /* Explicit `height` is set/kept in sync by overlay-interop.js's observeAutoHeight (see
        FluentAutoSuggestBox.razor.cs's OnAfterRenderAsync) rather than left as the browser's normal
        auto/intrinsic sizing — CSS can only transition between two concrete values, not to/from
        `auto`, so without a script pinning it to the content's actual scrollHeight on every list-size
        change, this `transition` would have nothing to animate and item-count changes would keep
-       snapping instantly even with everything else here in place. `max-height` still caps the
+       snapping instantly even with everything else here in place. `max-height` above still caps the
        visible/rendered size the normal way regardless of what the JS-set `height` says, so long
        lists still scroll instead of growing past 320px. */
     transition: height var(--duration-normal) var(--easing-standard);
@@ -53,6 +52,73 @@
        reads better a touch slower/more deliberate than a quick hover-feedback fade. */
     transform-origin: top center;
     animation: fluent-autosuggest-enter var(--duration-normal) var(--easing-decelerate) both;
+
+    border: 1px solid var(--flyout-border);
+    background-clip: padding-box;
+    box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
+    /* no backdrop-filter support / reduced-transparency */
+    background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .fluent-autosuggest-dropdown {
+        background-color: transparent;
+        backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+        -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+    }
+
+    .fluent-autosuggest-dropdown::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        pointer-events: none;
+        background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
+        opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-thin-tint-opacity));
+    }
+}
+
+.fluent-autosuggest-dropdown::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: var(--noise-asset);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.02;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .fluent-autosuggest-dropdown {
+        background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .fluent-autosuggest-dropdown::before {
+        background-color: transparent;
+        opacity: 0;
+    }
+}
+
+.fluent-autosuggest-dropdown-material {
+    display: none;
+}
+
+/* Inner scrolling list — plain, no position/background/animation of its own. Sized to fill the
+   outer box exactly (100%/100%), scrolls independently of the material sibling painted behind it. */
+.fluent-autosuggest-dropdown-list {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    overflow: auto;
 }
 
 /* Applied by FluentAutoSuggestBox.razor.cs's CloseDropdown/_closing the instant a close is

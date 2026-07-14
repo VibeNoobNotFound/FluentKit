@@ -42,15 +42,17 @@
 }
 
 /* --- Overlay pane (compact/minimal when open) --- */
+/* Outer box: positioned/sized/transitioned. Holds two children (see markup): a material div
+   painted first, then a dedicated content wrapper painted after it — real header/items/footer
+   content sits above the acrylic material by DOM/paint order, not cross-sibling z-index (same
+   restructure as OverlaySurface/AutoSuggestBox/ComboBox; a backdrop-filter element's compositing
+   doesn't reliably honor z-index against later, higher-z-index siblings across every engine). */
 .fluent-nav-view-pane-overlay {
     position: absolute;
     left: 0;
     top: 0;
     width: var(--nav-view-open-width, 320px);
     height: 100%;
-    background-color: var(--flyout-background);
-    backdrop-filter: blur(60px);
-    -webkit-backdrop-filter: blur(60px);
     border-inline-end: var(--control-stroke-thickness) solid var(--flyout-border);
     box-shadow: 4px 0 16px rgba(0, 0, 0, 0.14);
     transform: translateX(-100%);
@@ -59,10 +61,70 @@
     opacity var(--duration-fast) var(--easing-standard);
     will-change: transform, opacity;
     z-index: 5;
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
     pointer-events: none; /* prevent interaction when hidden */
+
+    /* no backdrop-filter support / reduced-transparency */
+    background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .fluent-nav-view-pane-overlay {
+        background-color: transparent;
+        backdrop-filter: blur(var(--acrylic-blur-amount));
+        -webkit-backdrop-filter: blur(var(--acrylic-blur-amount));
+    }
+
+    .fluent-nav-view-pane-overlay::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
+        opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-tint-opacity));
+    }
+}
+
+.fluent-nav-view-pane-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--noise-asset);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.02;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .fluent-nav-view-pane-overlay {
+        background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .fluent-nav-view-pane-overlay::before {
+        background-color: transparent;
+        opacity: 0;
+    }
+}
+
+.fluent-nav-view-pane-overlay-material {
+    display: none;
+}
+
+/* Content wrapper — plain, no position/background/animation of its own, holds the real
+   header/items-wrapper/footer and lays them out in the same column flex the overlay itself used
+   to provide directly. Fills the overlay exactly (100%/100%) and sits above the material sibling
+   painted behind it purely by DOM/paint order. */
+.fluent-nav-view-pane-overlay-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 .fluent-nav-view-pane-overlay--open {

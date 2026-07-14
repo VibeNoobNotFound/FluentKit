@@ -68,32 +68,41 @@
 
             <div class="fluent-nav-view-pane-overlay @(IsPaneOpen ? "fluent-nav-view-pane-overlay--open" : "")"
                  aria-hidden="@(!IsPaneOpen)">
-                <header class="fluent-nav-view-pane-header">
-                    @if (ShowBackButton)
-                    {
-                        <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
-                            <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                @* Real DOM nesting instead of ::before/::after + cross-sibling z-index (same fix
+                   applied to OverlaySurface/AutoSuggestBox/ComboBox — a backdrop-filter element's
+                   compositing doesn't reliably honor z-index against later, higher-z-index siblings
+                   across engines). Material div paints first, then the real header/items/footer
+                   content paints after it in a dedicated wrapper, guaranteed on top by DOM order
+                   alone. *@
+                <div class="fluent-nav-view-pane-overlay-material" aria-hidden="true"></div>
+                <div class="fluent-nav-view-pane-overlay-content">
+                    <header class="fluent-nav-view-pane-header">
+                        @if (ShowBackButton)
+                        {
+                            <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
+                                <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                            </button>
+                        }
+                        <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
+                            <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
                         </button>
-                    }
-                    <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
-                        <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
-                    </button>
-                    @PaneHeader
-                </header>
-                <div class="fluent-nav-view-pane-items-wrapper">
-                    <div class="fluent-nav-view-pane-items" role="list">
-                        @MenuItems
+                        @PaneHeader
+                    </header>
+                    <div class="fluent-nav-view-pane-items-wrapper">
+                        <div class="fluent-nav-view-pane-items" role="list">
+                            @MenuItems
+                        </div>
                     </div>
+                    <footer class="fluent-nav-view-pane-footer">
+                        @PaneFooter
+                        @if (ShowSettingsButton)
+                        {
+                            <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
+                                <Icon><FluentIcon Name="ic_fluent_settings_20_regular" Size="16" /></Icon>
+                            </FluentNavigationViewItem>
+                        }
+                    </footer>
                 </div>
-                <footer class="fluent-nav-view-pane-footer">
-                    @PaneFooter
-                    @if (ShowSettingsButton)
-                    {
-                        <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
-                            <Icon><FluentIcon Name="ic_fluent_settings_20_regular" Size="16" /></Icon>
-                        </FluentNavigationViewItem>
-                    }
-                </footer>
             </div>
         }
 

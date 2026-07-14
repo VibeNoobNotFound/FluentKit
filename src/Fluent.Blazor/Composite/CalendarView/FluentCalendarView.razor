@@ -1,6 +1,15 @@
 @namespace Fluent.Blazor.Composite
 
+@* When Floating, the acrylic material needs to be a real sibling element painted before the
+   calendar's own content (not a ::before/::after pseudo-element competing with cross-sibling
+   z-index against a backdrop-filter box — see FluentCalendarView.razor.css for the same fix
+   applied to OverlaySurface/AutoSuggestBox/ComboBox/NavigationView). Non-floating usage is
+   untouched: no extra wrapper, no material div, same plain card as before. *@
 <div class="fluent-calendar-view @(Floating ? "fluent-calendar-view--floating" : null)" @attributes="AdditionalAttributes">
+    @if (Floating)
+    {
+        <div class="fluent-calendar-view-material" aria-hidden="true"></div>
+    }
     <header class="fluent-calendar-view-header">
         <div class="fluent-calendar-view-header-text" role="heading" aria-live="polite">
             <button type="button"

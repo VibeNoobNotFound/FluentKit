@@ -1,6 +1,17 @@
+/* Real Acrylic recipe (matches FluentAcrylicBrush.razor.css), applied via a dedicated
+   .fluent-overlay-surface-material div (see OverlaySurface.razor) rather than ::before/::after +
+   cross-sibling z-index — real DOM nesting means content is guaranteed to paint after (and
+   therefore visually above) the material, with no dependency on z-index stacking-context
+   arithmetic that some engines don't honor consistently across a backdrop-filter boundary. Uses
+   the Thin tier (--acrylic-thin-blur-amount/--acrylic-thin-tint-opacity) on purpose —
+   FluentAcrylicBrush's own AcrylicKind doc comment already calls Thin the kind meant for "smaller
+   transient surfaces like flyouts and context menus", which is exactly what this shared surface
+   renders (Flyout, MenuFlyout, Tooltip, TeachingTip). */
 .fluent-overlay-surface {
-    background-color: var(--flyout-background);
-    backdrop-filter: blur(60px);
+    position: relative;
+    /* TeachingTip's beak (FluentTeachingTip.razor.css) intentionally renders outside this box's own
+       rect via negative offsets — don't clip it. */
+    overflow: visible;
     border: var(--control-stroke-thickness) solid var(--flyout-border);
     border-radius: var(--overlay-corner-radius);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
@@ -22,6 +33,64 @@
        drive one of them without touching whatever else already occupies `transform`. */
     transform-origin: top center;
     animation: fluent-overlay-enter var(--duration-fast) var(--easing-decelerate) both;
+
+    /* no backdrop-filter support / reduced-transparency */
+    background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .fluent-overlay-surface {
+        background-color: transparent;
+        backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+        -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+    }
+
+    .fluent-overlay-surface::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        pointer-events: none;
+        background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
+        opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-thin-tint-opacity));
+    }
+}
+
+.fluent-overlay-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: var(--noise-asset);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    opacity: 0.02;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .fluent-overlay-surface {
+        background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .fluent-overlay-surface::before {
+        background-color: transparent;
+        opacity: 0;
+    }
+}
+
+.fluent-overlay-surface-material {
+    display: none;
+}
+
+/* Real content, always painted after .fluent-overlay-surface-material in the DOM — guaranteed on
+   top with no z-index required. Plain block; the surface's own 8px padding (set above) still
+   wraps this normally since this participates in normal flow. */
+.fluent-overlay-surface-content {
+    position: relative;
 }
 
 /* Applied by OverlaySurface.razor.cs the instant Entry.IsClosing flips true (see OverlaySurface.razor.cs
@@ -56,12 +125,11 @@
 }
 
 /* Bare variant: content supplies its own surface material (e.g. FluentAcrylicBrush wrapping
-   NavigationView's Compact/Minimal overlay pane) — strip all of OverlaySurface's own chrome so it
-   isn't stacked underneath (double blur, double background, an extra unwanted border/shadow). */
+   NavigationView's Compact/Minimal overlay pane) — OverlaySurface.razor doesn't even render the
+   .fluent-overlay-surface-material div for Bare entries, so there's no acrylic layer to strip here;
+   this only needs to remove the surface's own chrome (border/shadow/padding) so it isn't stacked
+   underneath the caller's own material. */
 .fluent-overlay-surface--bare {
-    background-color: transparent;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
     border: none;
     box-shadow: none;
     padding: 0;

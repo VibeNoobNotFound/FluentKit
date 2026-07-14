@@ -30,26 +30,36 @@
 
     @if (!Disabled && (_open || _closing) && DisplayMatches.Count > 0)
     {
-        <ul class="fluent-autosuggest-dropdown @(_closing ? "fluent-autosuggest-dropdown--closing" : "")" role="listbox" tabindex="-1" @ref="_dropdownElement">
-            @for (var i = 0; i < DisplayMatches.Count; i++)
-            {
-                var item = DisplayMatches[i];
-                var isHighlighted = i == _highlightedIndex;
-                <li class="fluent-autosuggest-item @(isHighlighted ? "fluent-autosuggest-item--highlighted" : null) @(item.Disabled ? "fluent-autosuggest-item--disabled" : null)"
-                    role="option"
-                    aria-selected="@isHighlighted"
-                    @onmousedown:preventDefault="true"
-                    @onclick="() => ChooseAsync(item)">
-                    @if (ItemTemplate is not null)
-                    {
-                        @ItemTemplate(item)
-                    }
-                    else
-                    {
-                        <span>@item.Name</span>
-                    }
-                </li>
-            }
-        </ul>
+        @* .fluent-autosuggest-dropdown is now the OUTER, non-scrolling positioned/animated box
+           (matches OverlaySurface's shape: a material div painted first, then real content painted
+           after it). @ref="_dropdownElement" moves to this outer box, since that's what
+           overlay-interop.js's observeAutoHeight/waitForExitAnimation need to measure/animate —
+           the actual scrolling now happens on the inner <ul>, one level down, which stays plain
+           (no position/background/animation of its own) so scroll offset never touches the
+           material sibling above it. *@
+        <div class="fluent-autosuggest-dropdown @(_closing ? "fluent-autosuggest-dropdown--closing" : "")" @ref="_dropdownElement">
+            <div class="fluent-autosuggest-dropdown-material" aria-hidden="true"></div>
+            <ul class="fluent-autosuggest-dropdown-list" role="listbox" tabindex="-1">
+                @for (var i = 0; i < DisplayMatches.Count; i++)
+                {
+                    var item = DisplayMatches[i];
+                    var isHighlighted = i == _highlightedIndex;
+                    <li class="fluent-autosuggest-item @(isHighlighted ? "fluent-autosuggest-item--highlighted" : null) @(item.Disabled ? "fluent-autosuggest-item--disabled" : null)"
+                        role="option"
+                        aria-selected="@isHighlighted"
+                        @onmousedown:preventDefault="true"
+                        @onclick="() => ChooseAsync(item)">
+                        @if (ItemTemplate is not null)
+                        {
+                            @ItemTemplate(item)
+                        }
+                        else
+                        {
+                            <span>@item.Name</span>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
     }
 </div>
