@@ -1,0 +1,631 @@
+/* ================================================================
+   gallery.css — FluentKit Gallery layout & design system
+   ================================================================ */
+
+/* ── Reset / base ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Full-viewport root chain ──────────────────────────────────── */
+/* The NavView lives in a wrapper div with height:100dvh (see MainLayout.razor).
+   block-size:100% on .fluent-nav-view resolves against that explicit height.
+   html/body/app just need to fill the viewport with no scrollbars. */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#app {
+    height: 100%;
+    overflow: hidden;
+}
+
+/* ── Gallery shell layout ──────────────────────────────────────── */
+.gallery-body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: transparent;
+}
+
+/* Page content wrapper — adds consistent padding and max-width */
+.gallery-page {
+    padding: 28px 36px 48px;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ── Page Header ───────────────────────────────────────────────── */
+.page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--card-stroke-default);
+}
+
+.page-header__eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+}
+
+.page-header__title {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text-fill-color-primary);
+    margin: 0;
+}
+
+.page-header__description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-fill-color-secondary);
+    max-width: 720px;
+    margin: 4px 0 0;
+}
+
+.page-header__links {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Control Example block ─────────────────────────────────────── */
+.control-example {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--card-stroke-default);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--card-background-default);
+}
+
+.control-example__header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--card-stroke-default);
+}
+
+.control-example__header-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-fill-color-primary);
+    margin: 0;
+}
+
+.control-example__header-desc {
+    font-size: 12px;
+    color: var(--text-fill-color-secondary);
+    margin: 4px 0 0;
+    line-height: 1.5;
+}
+
+.control-example__body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Live demo area */
+.control-example__demo {
+    padding: 28px 24px;
+    background: var(--layer-fill-color-alt);
+    border-bottom: 1px solid var(--card-stroke-default);
+}
+
+/* Options row (optional interactive tweaks panel) */
+.control-example__options {
+    padding: 16px 20px;
+    background: var(--card-background-secondary, var(--subtle-fill-color-secondary));
+    border-bottom: 1px solid var(--card-stroke-default);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.control-example__options-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-fill-color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 4px;
+}
+
+/* Code panel */
+.control-example__code-panel {
+    background: #1e1e1e;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+/* Pivot inside code panel — blend header into dark background, remove content padding */
+.control-example__code-panel .fluent-pivot-header {
+    background: #1e1e1e;
+    border-bottom-color: #333;
+    padding: 0 8px;
+}
+
+.control-example__code-panel .fluent-pivot-tab {
+    font-size: 12px;
+    padding: 8px 12px;
+    color: #aaa;
+}
+
+.control-example__code-panel .fluent-pivot-tab:hover:not(:disabled):not(.fluent-pivot-tab--selected) {
+    color: #fff;
+}
+
+.control-example__code-panel .fluent-pivot-tab--selected {
+    color: #fff;
+}
+
+.control-example__code-panel .fluent-pivot-content {
+    padding: 0;
+    max-height: 400px;
+    overflow: auto;
+    position: relative;
+}
+
+
+/* ── Sample Code Block ─────────────────────────────────────────── */
+.sample-code-block {
+    margin: 0;
+    padding: 0;
+}
+
+.sample-code-block pre[class*="language-"] {
+    margin: 0;
+    padding: 16px 20px;
+    border-radius: 0;
+    background: #1e1e1e !important;
+    font-size: 13px;
+    line-height: 1.6;
+    tab-size: 2;
+}
+
+.sample-code-block code[class*="language-"] {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+}
+
+/* Copy button inside code block */
+.code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    
+    /* Acrylic Material */
+    background: rgba(30, 30, 30, 0.45) !important;
+    backdrop-filter: blur(12px) saturate(1.25);
+    -webkit-backdrop-filter: blur(12px) saturate(1.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    color: #e2e2e2;
+    cursor: pointer;
+    transition: 
+        background-color var(--duration-fast) var(--easing-standard), 
+        border-color var(--duration-fast) var(--easing-standard),
+        transform var(--duration-fast) var(--easing-standard);
+    font-family: inherit;
+    z-index: 10;
+}
+
+.code-copy-btn:hover {
+    background: rgba(45, 45, 45, 0.65) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.code-copy-btn:active {
+    background: rgba(25, 25, 25, 0.8) !important;
+    transform: scale(0.96);
+}
+
+.code-copy-btn--copied {
+    color: #4cd964 !important;
+    border-color: rgba(76, 217, 100, 0.4) !important;
+    background: rgba(76, 217, 100, 0.15) !important;
+}
+
+
+/* ── Home Page ─────────────────────────────────────────────────── */
+.home-hero {
+    position: relative;
+    padding: 56px 48px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0e162d 0%, #1c0e2a 45%, #2a0b27 75%, #18193f 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 1;
+}
+
+/* Glowing radial mesh background overlay */
+.home-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 15% 25%, rgba(98, 0, 234, 0.3) 0%, transparent 55%),
+        radial-gradient(circle at 85% 20%, rgba(0, 229, 255, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(245, 0, 87, 0.18) 0%, transparent 50%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+html[data-theme="light"] .home-hero {
+    background: linear-gradient(135deg, #ced8e4 0%, #d8e1eb 50%, #e3e9f2 100%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: #000000;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="light"] .home-hero::before {
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(200, 220, 245, 0.6) 0%, transparent 60%),
+        radial-gradient(circle at 90% 80%, rgba(225, 210, 240, 0.5) 0%, transparent 55%);
+}
+
+.home-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+html[data-theme="light"] .home-hero__badge {
+    background: rgba(0, 95, 184, 0.08);
+    border: 1px solid rgba(0, 95, 184, 0.2);
+    color: var(--accent-fill-color-default);
+}
+
+.home-hero__title {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: inherit;
+    margin: 0 0 12px;
+    letter-spacing: -0.5px;
+}
+
+.home-hero__title span {
+    background: linear-gradient(90deg, #60a5fa, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+html[data-theme="light"] .home-hero__title span {
+    background: linear-gradient(90deg, #005fb8, #8664b8, #b93b8f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.home-hero__subtitle {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    max-width: 620px;
+    margin: 0 0 32px;
+}
+
+html[data-theme="light"] .home-hero__subtitle {
+    color: var(--text-fill-color-secondary);
+}
+
+.home-hero__stats {
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+}
+
+.home-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.home-stat__number {
+    font-size: 30px;
+    font-weight: 700;
+    color: #60a5fa;
+    line-height: 1;
+}
+
+html[data-theme="light"] .home-stat__number {
+    color: var(--accent-fill-color-default);
+}
+
+.home-stat__label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+html[data-theme="light"] .home-stat__label {
+    color: var(--text-fill-color-secondary);
+}
+
+/* Control card grid */
+.home-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.home-section__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-fill-color-primary);
+    padding: 0 2px;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.control-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    
+    /* Acrylic Style */
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px) saturate(1.25);
+    -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    
+    /* Background-only transition — transform/shadow now live on the reveal wrapper */
+    transition: 
+        background-color var(--duration-normal) var(--easing-standard),
+        border-color var(--duration-normal) var(--easing-standard);
+}
+
+.control-card:hover {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+html[data-theme="dark"] .control-card {
+    background: rgba(45, 45, 45, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+html[data-theme="dark"] .control-card:hover {
+    background: rgba(55, 55, 55, 0.60);
+}
+
+.control-card__icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(128, 128, 128, 0.08);
+    border-radius: 8px;
+    color: var(--accent-fill-color-default);
+}
+
+
+.control-card__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-fill-color-primary);
+    line-height: 1.3;
+}
+
+.control-card__category {
+    font-size: 11px;
+    color: var(--text-fill-color-secondary);
+}
+
+/* Reveal wrapper — fills the grid cell and owns the lift animation so the
+   reveal spotlight pseudo-elements rise together with the card on hover */
+.fluent-reveal:has(.control-card) {
+    display: flex;
+    flex-direction: column;
+
+    /* Override FluentRevealBackground's own transform baseline so we can
+       add our lift on top without fighting its perspective() default */
+    transform: perspective(600px) translateY(0) scale(1);
+    transition:
+        transform var(--duration-normal) var(--easing-decelerate),
+        box-shadow var(--duration-normal) var(--easing-standard);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+}
+
+.fluent-reveal:has(.control-card):hover {
+    transform: perspective(600px) translateY(-4px) scale(1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Active press — inherit reveal's own slight squish */
+.fluent-reveal:has(.control-card):active {
+    transform: perspective(600px) translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="dark"] .fluent-reveal:has(.control-card) {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme="dark"] .fluent-reveal:has(.control-card):hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.fluent-reveal .control-card {
+    flex: 1;
+}
+
+
+/* ── Settings Page ─────────────────────────────────────────────── */
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.settings-group__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-fill-color-primary);
+    margin: 0 0 8px;
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--card-background-default);
+    border: 1px solid var(--card-stroke-default);
+    border-radius: 8px;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.fluent-file-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    background: var(--control-fill-color-default);
+    border: 1px solid var(--control-stroke-default);
+    border-radius: var(--control-corner-radius);
+    color: var(--text-fill-color-primary);
+    font-size: var(--font-size-body);
+    font-weight: 400;
+    cursor: pointer;
+    transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+
+.fluent-file-upload-btn:hover {
+    background: var(--control-fill-color-secondary);
+}
+
+.fluent-file-upload-btn:active {
+    background: var(--control-fill-color-tertiary);
+}
+
+
+.settings-item__icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-fill-color-secondary);
+}
+
+.settings-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.settings-item__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-fill-color-primary);
+}
+
+.settings-item__desc {
+    font-size: 12px;
+    color: var(--text-fill-color-secondary);
+    line-height: 1.4;
+}
+
+/* ── Demo layout helpers ───────────────────────────────────────── */
+.demo-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.demo-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.demo-output {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: var(--subtle-fill-color-secondary);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-fill-color-secondary);
+    font-family: monospace;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .gallery-page { padding: 16px 16px 40px; }
+    .home-hero { padding: 28px 20px; }
+    .home-hero__title { font-size: 28px; }
+    .control-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .page-header__title { font-size: 26px; }
+}
+
+/* ── Mica Transparency Overrides ───────────────────────────────── */
+/* In order for the background MicaPanel to shine through beautifully, 
+   we override the NavigationView's solid pane and content backgrounds 
+   with premium, WinUI-spec translucent alternatives. */
+.fluent-nav-view {
+    background-color: transparent !important;
+}
+
+.fluent-nav-view-pane {
+    background: rgba(243, 243, 243, 0.45) !important;
+}
+
+.fluent-nav-view-content {
+    background: rgba(249, 249, 249, 0.3) !important;
+}
+
+/* Dark theme translucent layers */
+html[data-theme="dark"] .fluent-nav-view-pane {
+    background: rgba(32, 32, 32, 0.45) !important;
+}
+
+html[data-theme="dark"] .fluent-nav-view-content {
+    background: rgba(26, 26, 26, 0.3) !important;
+}
+

@@ -1,0 +1,11 @@
+@namespace FluentKit.Composite
+
+<FluentMenuFlyout @bind-IsOpen="IsOpen" MenuItems="MenuItems" Placement="Placement" MatchAnchorWidth="true">
+    <button type="button"
+            class="fluent-dropdownbutton @VariantClass"
+            disabled="@Disabled"
+            @attributes="AdditionalAttributes">
+        <span class="fluent-dropdownbutton-label">@ChildContent</span>
+        <FluentIcon Name="@FluentIconNames.ChevronDown" />
+    </button>
+</FluentMenuFlyout>

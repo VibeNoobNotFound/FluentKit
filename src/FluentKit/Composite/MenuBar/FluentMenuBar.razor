@@ -1,0 +1,16 @@
+@namespace FluentKit.Composite
+
+<ul class="fluent-menu-bar" role="menubar" @attributes="AdditionalAttributes">
+    <CascadingValue Value="_context" IsFixed="true">
+        @ChildContent
+    </CascadingValue>
+</ul>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private readonly MenuBarContext _context = new();
+}

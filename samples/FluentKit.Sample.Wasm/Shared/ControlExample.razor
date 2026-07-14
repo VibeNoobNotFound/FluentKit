@@ -1,0 +1,85 @@
+@using FluentKit.Composite
+@inject GalleryJsInterop GalleryJs
+
+<div class="control-example">
+    @if (!string.IsNullOrEmpty(HeaderText))
+    {
+        <div class="control-example__header">
+            <p class="control-example__header-text">@HeaderText</p>
+            @if (!string.IsNullOrEmpty(Description))
+            {
+                <p class="control-example__header-desc">@Description</p>
+            }
+        </div>
+    }
+
+    <div class="control-example__body">
+        <!-- Live demo area -->
+        <div class="control-example__demo">
+            @Example
+        </div>
+
+        <!-- Interactive options (optional) -->
+        @if (Options is not null)
+        {
+            <div class="control-example__options">
+                <span class="control-example__options-label">Options</span>
+                @Options
+            </div>
+        }
+
+        <!-- Code panel — FluentPivot tabs for Razor / C# -->
+        @if (!string.IsNullOrEmpty(RazorCode) || !string.IsNullOrEmpty(CSharpCode))
+        {
+            <div class="control-example__code-panel">
+                <FluentPivot SelectedIndex="@_selectedIndex"
+                             SelectedIndexChanged="@((i) => _selectedIndex = i)"
+                             style="--pivot-content-padding:0;">
+
+                    @if (!string.IsNullOrEmpty(RazorCode))
+                    {
+                        <FluentPivotItem Title="Razor">
+                            <SampleCodeBlock Code="@RazorCode" Language="razor" />
+                        </FluentPivotItem>
+                    }
+
+                    @if (!string.IsNullOrEmpty(CSharpCode))
+                    {
+                        <FluentPivotItem Title="C#">
+                            <SampleCodeBlock Code="@CSharpCode" Language="csharp" />
+                        </FluentPivotItem>
+                    }
+
+                </FluentPivot>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Short label shown in the example's header bar, e.g. "Standard button variants".</summary>
+    [Parameter] public string? HeaderText { get; set; }
+
+    /// <summary>Optional longer description shown below HeaderText.</summary>
+    [Parameter] public string? Description { get; set; }
+
+    /// <summary>The live interactive demo content.</summary>
+    [Parameter] public RenderFragment? Example { get; set; }
+
+    /// <summary>Optional slot for option controls (checkboxes, sliders, etc.).</summary>
+    [Parameter] public RenderFragment? Options { get; set; }
+
+    /// <summary>Razor/HTML code shown in the Razor tab.</summary>
+    [Parameter] public string? RazorCode { get; set; }
+
+    /// <summary>C# code shown in the C# tab.</summary>
+    [Parameter] public string? CSharpCode { get; set; }
+
+    private int _selectedIndex = 0;
+
+    protected override void OnInitialized()
+    {
+        // If only C# code is provided, start on index 0 (the only tab)
+        // If both are provided, Razor is index 0 which is correct already
+    }
+}

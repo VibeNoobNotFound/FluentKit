@@ -1,0 +1,43 @@
+@page "/controls/numberbox"
+@using FluentKit.Composite
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="NumberBox" Description="NumberBox control allows inputting and evaluating numeric values, clamping value inside bounds." />
+
+    <ControlExample HeaderText="NumberBox Spin Button Modes" RazorCode="@_numRazor" CSharpCode="@_numCs">
+        <Example>
+            <div style="display:flex; gap:48px; align-items:flex-start; flex-wrap:wrap;">
+                <div class="demo-col" style="gap: 4px;">
+                    <span style="font-size: 11px; opacity: 0.7;">Compact Mode</span>
+                    <FluentNumberBox @bind-Value="_val1" Mode="NumberBoxSpinButtonMode.Compact" Min="0" Max="10" Step="1" />
+                </div>
+                <div class="demo-col" style="gap: 4px;">
+                    <span style="font-size: 11px; opacity: 0.7;">Expanded (Focus to see popout)</span>
+                    <FluentNumberBox @bind-Value="_val2" Mode="NumberBoxSpinButtonMode.Expanded" Min="0" Max="10" Step="1" />
+                </div>
+                <div class="demo-col" style="gap: 4px;">
+                    <span style="font-size: 11px; opacity: 0.7;">Disabled</span>
+                    <FluentNumberBox Value="3.5" Disabled="true" />
+                </div>
+            </div>
+            <div class="demo-output" style="margin-top: 12px; font-size: 12px; opacity: 0.8;">Compact: @_val1, Expanded: @_val2</div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private double _val1 = 5;
+    private double _val2 = 5;
+
+    private const string _numRazor = @"<!-- Compact spin buttons -->
+<FluentNumberBox @bind-Value=""_val1"" Mode=""NumberBoxSpinButtonMode.Compact"" Min=""0"" Max=""10"" Step=""1"" />
+
+<!-- Expanded spin buttons -->
+<FluentNumberBox @bind-Value=""_val2"" Mode=""NumberBoxSpinButtonMode.Expanded"" Min=""0"" Max=""10"" Step=""1"" />
+
+<!-- Disabled -->
+<FluentNumberBox Value=""3.5"" Disabled=""true"" />";
+
+    private const string _numCs = @"private double _val1 = 5;
+private double _val2 = 5;";
+}

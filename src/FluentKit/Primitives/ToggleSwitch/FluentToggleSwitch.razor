@@ -1,0 +1,20 @@
+@namespace FluentKit.Primitives
+
+<div class="fluent-toggleswitch-root">
+    @if (!string.IsNullOrEmpty(Header))
+    {
+        <span class="fluent-toggleswitch-header">@Header</span>
+    }
+    <label class="fluent-toggleswitch-container" @onclick="ToggleAsync">
+        <span class="fluent-toggleswitch @(Checked ? "fluent-toggleswitch--checked" : null)"
+              role="switch"
+              aria-checked="@(Checked ? "true" : "false")"
+              aria-disabled="@(Disabled ? "true" : "false")"
+              tabindex="@(Disabled ? "-1" : "0")"
+              @onkeydown="OnKeyDownAsync"
+              @attributes="AdditionalAttributes">
+            <span class="fluent-toggleswitch__thumb" aria-hidden="true"></span>
+        </span>
+        <span class="fluent-toggleswitch-label">@(Checked ? OnContent : OffContent)</span>
+    </label>
+</div>

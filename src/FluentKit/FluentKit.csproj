@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FluentKit</RootNamespace>
+    <RazorLangVersion>Latest</RazorLangVersion>
+
+    <!-- NuGet metadata — fill in before your first `dotnet pack` -->
+    <PackageId>FluentKit</PackageId>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Chaniru</Authors>
+    <Description>A token-accurate Fluent Design (WinUI 3) component library for Blazor WASM, Server, and MAUI Blazor Hybrid.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ensures wwwroot/tokens.css and overlay-interop.js etc. get bundled as static web assets -->
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+</Project>

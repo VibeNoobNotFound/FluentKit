@@ -1,0 +1,42 @@
+@namespace FluentKit.Primitives
+
+@{
+    var tag = ResolvedTag;
+}
+
+@if (tag == "h1")
+{
+    <h1 class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</h1>
+}
+else if (tag == "h2")
+{
+    <h2 class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</h2>
+}
+else if (tag == "h3")
+{
+    <h3 class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</h3>
+}
+else if (tag == "h4")
+{
+    <h4 class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</h4>
+}
+else if (tag == "h5")
+{
+    <h5 class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</h5>
+}
+else if (tag == "h6")
+{
+    <h6 class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</h6>
+}
+else if (tag == "p")
+{
+    <p class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</p>
+}
+else if (tag == "div")
+{
+    <div class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</div>
+}
+else
+{
+    <span class="fluent-textblock @VariantClass @Class" @attributes="AdditionalAttributes">@ChildContent</span>
+}

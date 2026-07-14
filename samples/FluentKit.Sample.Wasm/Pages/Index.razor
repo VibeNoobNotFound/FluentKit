@@ -1,0 +1,142 @@
+@page "/"
+@using FluentKit.Effects
+
+<div class="gallery-page">
+    <!-- Hero -->
+    <div class="home-hero">
+        <div class="home-hero__badge">
+            <FluentIcon Name="ic_fluent_flash_20_regular" Size="14" style="margin-right:6px; color:var(--accent-fill-color-default);" />
+            <span>WinUI-style Blazor Components</span>
+        </div>
+        <h1 class="home-hero__title">
+            <span>FluentKit</span> Gallery
+        </h1>
+        <p class="home-hero__subtitle">
+            An interactive showcase of all FluentKit components — each page mirrors the WinUI 3 Gallery
+            with live demos, interactive options, and syntax-highlighted code samples.
+        </p>
+        <div class="home-hero__stats">
+            <div class="home-stat">
+                <span class="home-stat__number">39</span>
+                <span class="home-stat__label">Components</span>
+            </div>
+            <div class="home-stat">
+                <span class="home-stat__number">38</span>
+                <span class="home-stat__label">Gallery Pages</span>
+            </div>
+            <div class="home-stat">
+                <span class="home-stat__number">3</span>
+                <span class="home-stat__label">Material Effects</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Primitives -->
+    <div class="home-section">
+        <div class="home-section__title">Primitives</div>
+        <div class="control-grid">
+            @foreach (var card in _primitiveCards)
+            {
+                <FluentRevealBackground Bordered style="border-radius:8px;">
+                    <a class="control-card" href="@card.Route">
+                        <div class="control-card__icon">
+                            <FluentIcon Name="@card.Icon" Size="24" />
+                        </div>
+                        <div class="control-card__name">@card.Name</div>
+                        <div class="control-card__category">Primitives</div>
+                    </a>
+                </FluentRevealBackground>
+            }
+        </div>
+    </div>
+
+    <!-- Composite Controls -->
+    <div class="home-section">
+        <div class="home-section__title">Composite Controls</div>
+        <div class="control-grid">
+            @foreach (var card in _compositeCards)
+            {
+                <FluentRevealBackground Bordered style="border-radius:8px;">
+                    <a class="control-card" href="@card.Route">
+                        <div class="control-card__icon">
+                            <FluentIcon Name="@card.Icon" Size="24" />
+                        </div>
+                        <div class="control-card__name">@card.Name</div>
+                        <div class="control-card__category">Composite</div>
+                    </a>
+                </FluentRevealBackground>
+            }
+        </div>
+    </div>
+
+    <!-- Effects & Materials -->
+    <div class="home-section">
+        <div class="home-section__title">Effects &amp; Materials</div>
+        <div class="control-grid">
+            @foreach (var card in _effectCards)
+            {
+                <FluentRevealBackground Bordered style="border-radius:8px;">
+                    <a class="control-card" href="@card.Route">
+                        <div class="control-card__icon">
+                            <FluentIcon Name="@card.Icon" Size="24" />
+                        </div>
+                        <div class="control-card__name">@card.Name</div>
+                        <div class="control-card__category">Effects</div>
+                    </a>
+                </FluentRevealBackground>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private record ControlCardInfo(string Name, string Route, string Icon);
+
+    private readonly ControlCardInfo[] _primitiveCards =
+    [
+        new("Button",        "/controls/button",        "ic_fluent_rectangle_landscape_20_regular"),
+        new("TextBlock",     "/controls/textblock",     "ic_fluent_text_description_20_regular"),
+        new("CheckBox",      "/controls/checkbox",      "ic_fluent_checkbox_checked_20_regular"),
+        new("RadioButton",   "/controls/radiobutton",   "ic_fluent_radio_button_20_regular"),
+        new("ToggleSwitch",  "/controls/toggleswitch",  "ic_fluent_toggle_left_20_regular"),
+        new("ToggleButton",  "/controls/togglebutton",  "ic_fluent_toggle_multiple_20_regular"),
+        new("TextBox",       "/controls/textbox",       "ic_fluent_text_field_20_regular"),
+        new("PasswordBox",   "/controls/passwordbox",   "ic_fluent_password_20_regular"),
+        new("Slider",        "/controls/slider",        "ic_fluent_options_20_regular"),
+        new("ProgressBar",   "/controls/progressbar",   "ic_fluent_status_20_regular"),
+        new("ProgressRing",  "/controls/progressring",  "ic_fluent_spinner_ios_20_regular"),
+        new("Expander",      "/controls/expander",      "ic_fluent_chevron_circle_down_20_regular"),
+        new("InfoBar",       "/controls/infobar",       "ic_fluent_info_20_regular"),
+        new("InfoBadge",     "/controls/infobadge",     "ic_fluent_badge_20_regular"),
+        new("PersonPicture", "/controls/personpicture", "ic_fluent_person_circle_20_regular"),
+        new("IconButton",    "/controls/iconbutton",    "ic_fluent_icons_20_regular"),
+        new("Card",          "/controls/card",          "ic_fluent_card_ui_20_regular"),
+        new("ListView",      "/controls/listview",      "ic_fluent_list_20_regular"),
+    ];
+
+    private readonly ControlCardInfo[] _compositeCards =
+    [
+        new("NavigationView",  "/controls/navigationview",  "ic_fluent_navigation_20_regular"),
+        new("ComboBox",        "/controls/combobox",        "ic_fluent_chevron_down_20_regular"),
+        new("AutoSuggestBox",  "/controls/autosuggestbox",  "ic_fluent_search_20_regular"),
+        new("NumberBox",       "/controls/numberbox",       "ic_fluent_number_symbol_20_regular"),
+        new("Calendar",        "/controls/calendar",        "ic_fluent_calendar_20_regular"),
+        new("Flyout",          "/controls/flyout",          "ic_fluent_panel_right_20_regular"),
+        new("MenuFlyout",      "/controls/menuflyout",      "ic_fluent_list_bar_20_regular"),
+        new("ContextMenu",     "/controls/contextmenu",     "ic_fluent_apps_list_20_regular"),
+        new("MenuBar",         "/controls/menubar",         "ic_fluent_more_horizontal_20_regular"),
+        new("ContentDialog",   "/controls/contentdialog",   "ic_fluent_chat_20_regular"),
+        new("Pivot",           "/controls/pivot",           "ic_fluent_tab_desktop_20_regular"),
+        new("DropDownButton",  "/controls/dropdownbutton",  "ic_fluent_chevron_circle_down_20_regular"),
+        new("SplitButton",     "/controls/splitbutton",     "ic_fluent_split_horizontal_20_regular"),
+        new("Tooltip",         "/controls/tooltip",         "ic_fluent_chat_bubbles_question_20_regular"),
+        new("TeachingTip",     "/controls/teachingtip",     "ic_fluent_lightbulb_20_regular"),
+    ];
+
+    private readonly ControlCardInfo[] _effectCards =
+    [
+        new("Acrylic", "/controls/acrylic", "ic_fluent_blur_20_regular"),
+        new("Mica",    "/controls/mica",    "ic_fluent_color_background_20_regular"),
+        new("Reveal",  "/controls/reveal",  "ic_fluent_sparkle_20_regular"),
+    ];
+}

@@ -1,0 +1,10 @@
+@namespace FluentKit.Primitives
+
+<button type="button"
+        class="fluent-togglebutton @(Checked ? "fluent-togglebutton--checked" : null)"
+        disabled="@Disabled"
+        aria-pressed="@(Checked ? "true" : "false")"
+        @onclick="ToggleAsync"
+        @attributes="AdditionalAttributes">
+    @ChildContent
+</button>

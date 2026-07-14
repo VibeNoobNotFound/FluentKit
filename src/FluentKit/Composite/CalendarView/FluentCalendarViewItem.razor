@@ -1,0 +1,17 @@
+@namespace FluentKit.Composite
+
+<button type="button"
+        @ref="ButtonRef"
+        class="fluent-calendar-view-item fluent-calendar-view-item--@(Variant == CalendarViewItemVariant.Day ? "day" : "month-year") @(Selected ? "fluent-calendar-view-item--selected" : null) @(Current ? "fluent-calendar-view-item--current" : null) @(Blackout ? "fluent-calendar-view-item--blackout" : null) @(Disabled ? "fluent-calendar-view-item--disabled" : null) @(OutOfRange ? "fluent-calendar-view-item--out-of-range" : null)"
+        disabled="@(Disabled || Blackout)"
+        aria-selected="@Selected"
+        tabindex="@TabIndex"
+        @onclick="OnClick"
+        @onkeydown="OnKeyDown"
+        @onmousedown:preventDefault="true">
+    @if (!string.IsNullOrEmpty(Header))
+    {
+        <small>@Header</small>
+    }
+    @ChildContent
+</button>

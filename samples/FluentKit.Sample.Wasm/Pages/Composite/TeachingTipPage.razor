@@ -1,0 +1,134 @@
+@page "/controls/teachingtip"
+@using FluentKit.Effects
+@using FluentKit.Composite
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="TeachingTip" Description="Use TeachingTip to guide users with targeted callouts or viewport fixed info notifications." />
+
+    <ControlExample HeaderText="Targeted Callout Tip" RazorCode="@_targetedRazor" CSharpCode="@_targetedCs">
+        <Example>
+            <div class="demo-col" style="align-items: flex-start;">
+                <div @ref="_targetElement" style="width:120px; height:60px; border:1px solid var(--card-stroke-default); display:flex; align-items:center; justify-content:center; border-radius:6px; background:var(--layer-fill-color-alt);">
+                    Anchor Item
+                </div>
+                
+                <div style="margin-top:16px;">
+                    <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _tipOpen = true)">Show Targeted Tip</FluentButton>
+                </div>
+
+                <FluentTeachingTip @bind-IsOpen="_tipOpen" Target="_targetElement" Placement="OverlayPlacement.Bottom" Title="Update Alert" Subtitle="New adjustments have been released for this control.">
+                    <ActionContent>
+                        <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _tipOpen = false)">Got It</FluentButton>
+                    </ActionContent>
+                </FluentTeachingTip>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Detached / Screen-Positioned Tip" RazorCode="@_detachedRazor" CSharpCode="@_detachedCs">
+        <Example>
+            <div class="demo-col" style="align-items: flex-start; gap: 16px;">
+                <FluentRadioGroup @bind-Value="_screenPlacementString">
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <FluentRadioButton Value="@("topleft")">Top left</FluentRadioButton>
+                        <FluentRadioButton Value="@("topcenter")">Top center</FluentRadioButton>
+                        <FluentRadioButton Value="@("topright")">Top right</FluentRadioButton>
+                        <FluentRadioButton Value="@("center")">Center</FluentRadioButton>
+                        <FluentRadioButton Value="@("bottomleft")">Bottom left</FluentRadioButton>
+                        <FluentRadioButton Value="@("bottomcenter")">Bottom center</FluentRadioButton>
+                        <FluentRadioButton Value="@("bottomright")">Bottom right</FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+                
+                <div>
+                    <FluentButton OnClick="@(() => _tipDetachedOpen = true)">Show detached tip</FluentButton>
+                </div>
+
+                <FluentTeachingTip @bind-IsOpen="_tipDetachedOpen" ScreenPlacement="_screenPlacement"
+                                    Title="What's new" Subtitle="This tip isn't pointing at anything — it's pinned to the viewport.">
+                    <ActionContent>
+                        <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _tipDetachedOpen = false)">Got it</FluentButton>
+                    </ActionContent>
+                </FluentTeachingTip>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private ElementReference _targetElement;
+    private bool _tipOpen;
+
+    private bool _tipDetachedOpen;
+    private OverlayScreenPlacement _screenPlacement = OverlayScreenPlacement.BottomCenter;
+    private object? _screenPlacementString
+    {
+        get => _screenPlacement.ToString().ToLowerInvariant();
+        set
+        {
+            _screenPlacement = (value as string) switch
+            {
+                "topleft" => OverlayScreenPlacement.TopLeft,
+                "topcenter" => OverlayScreenPlacement.TopCenter,
+                "topright" => OverlayScreenPlacement.TopRight,
+                "center" => OverlayScreenPlacement.Center,
+                "bottomleft" => OverlayScreenPlacement.BottomLeft,
+                "bottomright" => OverlayScreenPlacement.BottomRight,
+                _ => OverlayScreenPlacement.BottomCenter
+            };
+        }
+    }
+
+    private const string _targetedRazor = @"<div @ref=""_targetElement"">Anchor Item</div>
+<FluentButton Variant=""ButtonVariant.Standard"" OnClick=""@(() => _tipOpen = true)"">Show Targeted Tip</FluentButton>
+
+<FluentTeachingTip @bind-IsOpen=""_tipOpen"" Target=""_targetElement"" Placement=""OverlayPlacement.Bottom"" Title=""Update Alert"" Subtitle=""New adjustments have been released for this control."">
+    <ActionContent>
+        <FluentButton Variant=""ButtonVariant.Accent"" OnClick=""@(() => _tipOpen = false)"">Got It</FluentButton>
+    </ActionContent>
+</FluentTeachingTip>";
+
+    private const string _targetedCs = @"private ElementReference _targetElement;
+private bool _tipOpen;";
+
+    private const string _detachedRazor = @"<FluentRadioGroup @bind-Value=""_screenPlacementString"">
+    <div style=""display:flex; gap:12px; flex-wrap:wrap;"">
+        <FluentRadioButton Value=""@(""topleft"")"">Top left</FluentRadioButton>
+        <FluentRadioButton Value=""@(""topcenter"")"">Top center</FluentRadioButton>
+        <FluentRadioButton Value=""@(""topright"")"">Top right</FluentRadioButton>
+        <FluentRadioButton Value=""@(""center"")"">Center</FluentRadioButton>
+        <FluentRadioButton Value=""@(""bottomleft"")"">Bottom left</FluentRadioButton>
+        <FluentRadioButton Value=""@(""bottomcenter"")"">Bottom center</FluentRadioButton>
+        <FluentRadioButton Value=""@(""bottomright"")"">Bottom right</FluentRadioButton>
+    </div>
+</FluentRadioGroup>
+
+<FluentButton OnClick=""@(() => _tipDetachedOpen = true)"">Show detached tip</FluentButton>
+
+<FluentTeachingTip @bind-IsOpen=""_tipDetachedOpen"" ScreenPlacement=""_screenPlacement""
+                    Title=""What's new"" Subtitle=""This tip isn't pointing at anything — it's pinned to the viewport."">
+    <ActionContent>
+        <FluentButton Variant=""ButtonVariant.Accent"" OnClick=""@(() => _tipDetachedOpen = false)"">Got it</FluentButton>
+    </ActionContent>
+</FluentTeachingTip>";
+
+    private const string _detachedCs = @"private bool _tipDetachedOpen;
+private OverlayScreenPlacement _screenPlacement = OverlayScreenPlacement.BottomCenter;
+private object? _screenPlacementString
+{
+    get => _screenPlacement.ToString().ToLowerInvariant();
+    set
+    {
+        _screenPlacement = (value as string) switch
+        {
+            ""topleft"" => OverlayScreenPlacement.TopLeft,
+            ""topcenter"" => OverlayScreenPlacement.TopCenter,
+            ""topright"" => OverlayScreenPlacement.TopRight,
+            ""center"" => OverlayScreenPlacement.Center,
+            ""bottomleft"" => OverlayScreenPlacement.BottomLeft,
+            ""bottomright"" => OverlayScreenPlacement.BottomRight,
+            _ => OverlayScreenPlacement.BottomCenter
+        };
+    }
+}";
+}

@@ -1,0 +1,17 @@
+@namespace FluentKit.Composite
+@implements IDisposable
+
+<span @ref="_anchor" class="fluent-menu-flyout-trigger" @onclick="ToggleAsync">
+    @ChildContent
+</span>
+
+@code {
+    // Same CascadingValue re-wrap reasoning as FluentMenuFlyoutItem.RenderSubmenuContent: this
+    // fragment is portalled to FluentOverlayHost via OverlayService.Show, so _context has to be
+    // (re)established here, at the point the fragment actually renders, not just held as a field.
+    private RenderFragment RenderMenuContent => @<CascadingValue Value="_context">
+        <div @onkeydown="HandleContentKeyDown">
+            <FluentMenuFlyoutSurface>@MenuItems</FluentMenuFlyoutSurface>
+        </div>
+    </CascadingValue>;
+}

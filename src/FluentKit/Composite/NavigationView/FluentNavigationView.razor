@@ -1,0 +1,184 @@
+@namespace FluentKit.Composite
+@implements IDisposable
+
+<CascadingValue Value="_context" IsFixed="true">
+    <div class="fluent-nav-view fluent-nav-view--@EffectivePaneDisplayModeClass"
+         @attributes="AdditionalAttributes"
+         @ref="_rootElement">
+
+        @* Unified Aside: Shared across Left, LeftCompact, and LeftMinimal modes to maintain DOM stability
+           and enable smooth width transitions. Top mode hides this via display: none in CSS. *@
+        <aside class="fluent-nav-view-pane @AsideModeClass">
+            <header class="fluent-nav-view-pane-header @(IsHeaderRail ? "fluent-nav-view-pane-header--rail" : "")">
+                @if (IsHeaderRail)
+                {
+                    @if (IsBackButtonVisible)
+                    {
+                        <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="OnBackClick" aria-label="Back" disabled="@(!IsBackButtonEnabled)">
+                            <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                        </button>
+                    }
+                    <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
+                        <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                    </button>
+                }
+                else
+                {
+                    <div class="fluent-nav-view-pane-header-buttons">
+                        @if (IsBackButtonVisible && IsPaneOpen)
+                        {
+                            <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back" disabled="@(!IsBackButtonEnabled)">
+                                <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                            </button>
+                        }
+                        <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
+                            <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                        </button>
+                    </div>
+                    @if (PaneHeader is not null && IsPaneOpen)
+                    {
+                        <div class="fluent-nav-view-pane-custom-header">
+                            @PaneHeader
+                        </div>
+                    }
+                }
+            </header>
+            <div class="fluent-nav-view-pane-items-wrapper">
+                <div class="fluent-nav-view-pane-items" role="list">
+                    @if (IsHeaderRail && PaneHeaderIcon is not null)
+                    {
+                        <button type="button" class="fluent-nav-view-pane-header-icon-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
+                            @PaneHeaderIcon
+                        </button>
+                    }
+                    @MenuItems
+                </div>
+            </div>
+            <footer class="fluent-nav-view-pane-footer">
+                @PaneFooter
+                @if (ShowSettingsButton)
+                {
+                    <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
+                        <Icon><FluentIcon Name="ic_fluent_settings_20_regular" Size="16" /></Icon>
+                    </FluentNavigationViewItem>
+                }
+            </footer>
+        </aside>
+
+        @if (IsCompactOrMinimal)
+        {
+            @if (IsPaneOpen)
+            {
+                <div class="fluent-nav-view-dismiss-backdrop" @onclick="TogglePaneAsync"></div>
+            }
+
+            <div class="fluent-nav-view-pane-overlay @(IsPaneOpen ? "fluent-nav-view-pane-overlay--open" : "")"
+                 aria-hidden="@(!IsPaneOpen)">
+                @* Real DOM nesting instead of ::before/::after + z-index for backdrop-filter reliability *@
+                <div class="fluent-nav-view-pane-overlay-material" aria-hidden="true"></div>
+                <div class="fluent-nav-view-pane-overlay-content">
+                    <header class="fluent-nav-view-pane-header">
+                        <div class="fluent-nav-view-pane-header-buttons">
+                            @if (IsBackButtonVisible)
+                            {
+                                <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back" disabled="@(!IsBackButtonEnabled)">
+                                    <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                                </button>
+                            }
+                            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
+                                <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                            </button>
+                        </div>
+                        @if (PaneHeader is not null)
+                        {
+                            <div class="fluent-nav-view-pane-custom-header">
+                                @PaneHeader
+                            </div>
+                        }
+                    </header>
+                    <div class="fluent-nav-view-pane-items-wrapper">
+                        <div class="fluent-nav-view-pane-items" role="list">
+                            @MenuItems
+                        </div>
+                    </div>
+                    <footer class="fluent-nav-view-pane-footer">
+                        @PaneFooter
+                        @if (ShowSettingsButton)
+                        {
+                            <FluentNavigationViewItem Value="@FluentNavigationView.SettingsItemValue" Text="Settings">
+                                <Icon><FluentIcon Name="ic_fluent_settings_20_regular" Size="16" /></Icon>
+                            </FluentNavigationViewItem>
+                        }
+                    </footer>
+                </div>
+            </div>
+        }
+
+        <div class="fluent-nav-view-content @(_activePaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal && !IsPaneOpen ? "fluent-nav-view-content--minimal-closed" : "")">
+            @if (_activePaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal && !IsPaneOpen)
+            {
+                <div class="fluent-nav-view-content-top-bar">
+                    <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
+                        <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
+                    </button>
+                    @if (HeaderContent is not null)
+                    {
+                        <span class="fluent-nav-view-content-title">@HeaderContent</span>
+                    }
+                </div>
+            }
+            else if (AlwaysShowHeader || IsPaneOpen || _activePaneDisplayMode == NavigationViewPaneDisplayMode.Top)
+            {
+                <header class="fluent-nav-view-header">
+                    @HeaderContent
+                </header>
+            }
+            <main class="fluent-nav-view-main">
+                @ChildContent
+            </main>
+        </div>
+    </div>
+</CascadingValue>
+
+@code {
+    private string EffectivePaneDisplayModeClass
+    {
+        get
+        {
+            // When in compact/minimal and pane is open, we switch to minimal mode class
+            // so the overlay shows labels properly.
+            if (IsCompactOrMinimal && IsPaneOpen)
+            {
+                return "minimal";
+            }
+            // Left mode when closed: apply compact CSS rules so items show icon-only (rail look)
+            if (_activePaneDisplayMode == NavigationViewPaneDisplayMode.Left && !IsPaneOpen)
+            {
+                return "compact";
+            }
+            return PaneDisplayModeClass;
+        }
+    }
+
+    private string AsideModeClass
+    {
+        get
+        {
+            if (_activePaneDisplayMode == NavigationViewPaneDisplayMode.Left)
+            {
+                return IsPaneOpen ? "fluent-nav-view-pane--open" : "fluent-nav-view-pane--rail";
+            }
+            if (_activePaneDisplayMode == NavigationViewPaneDisplayMode.LeftCompact)
+            {
+                return "fluent-nav-view-pane--rail";
+            }
+            if (_activePaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal)
+            {
+                return "fluent-nav-view-pane--rail fluent-nav-view-pane--rail-minimal";
+            }
+            return "";
+        }
+    }
+
+    private bool IsHeaderRail => !IsPaneOpen || IsCompactOrMinimal;
+}

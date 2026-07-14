@@ -1,0 +1,37 @@
+@namespace FluentKit.Composite
+
+<div @ref="_root"
+     class="fluent-calendar-date-picker @(Disabled ? "fluent-calendar-date-picker--disabled" : null) @(_open ? "fluent-calendar-date-picker--open" : null)"
+     @onfocusout="OnFocusOutAsync"
+     @onkeydown="OnKeyDownAsync"
+     @attributes="AdditionalAttributes">
+
+    <button type="button"
+            class="fluent-calendar-date-picker-button"
+            disabled="@Disabled"
+            aria-haspopup="dialog"
+            aria-expanded="@_open"
+            @onclick="ToggleOpenAsync">
+        <span class="fluent-calendar-date-picker-label @(Value is null ? "fluent-calendar-date-picker-label--placeholder" : null)">
+            @(Value?.ToString("d", Culture) ?? Placeholder)
+        </span>
+        <FluentIcon Name="@FluentIconNames.Calendar" Size="16" />
+    </button>
+
+    @if (!Disabled && (_open || _closing))
+    {
+        <div class="fluent-calendar-date-picker-dismiss-backdrop" @onclick="ClosePopout"></div>
+        <div class="fluent-calendar-date-picker-popout">
+            <div class="fluent-calendar-date-picker-popout-inner @(_closing ? "fluent-calendar-date-picker-popout--closing" : "")">
+                <FluentCalendarView Value="@Value"
+                                    ValueChanged="@OnDateChangedAsync"
+                                    Min="@Min"
+                                    Max="@Max"
+                                    Blackout="@Blackout"
+                                    WeekStart="@WeekStart"
+                                    Locale="@Locale"
+                                    Floating="true" />
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,43 @@
+@namespace FluentKit.Composite
+
+<button type="button"
+        @ref="_element"
+        class="fluent-nav-view-item @(IsSelected ? "fluent-nav-view-item--selected" : "") @(IsExpanded ? "fluent-nav-view-item--expanded" : "") @(Disabled ? "fluent-nav-view-item--disabled" : "")"
+        disabled="@Disabled"
+        aria-current="@(IsSelected ? "page" : null)"
+        @onclick="HandleClickAsync"
+        @onmouseenter="HandleMouseEnter"
+        @onmouseleave="HandleMouseLeave"
+        @onmousedown="HandleMouseDown"
+        @onmouseup="HandleMouseUp"
+        @attributes="AdditionalAttributes">
+    
+    <span class="fluent-nav-view-item-indicator" aria-hidden="true"></span>
+    
+    @if (Icon is not null)
+    {
+        <span class="fluent-nav-view-item-icon">@Icon</span>
+    }
+    
+    <span class="fluent-nav-view-item-text">@Text</span>
+    
+    @if (_hasChildren)
+    {
+        <span class="fluent-nav-view-item-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M8.47 4.47a.75.75 0 0 1 1.06 0l8 8a.75.75 0 0 1 0 1.06l-8 8a.75.75 0 0 1-1.06-1.06L15.94 13 8.47 5.53a.75.75 0 0 1 0-1.06Z" fill="currentColor"/>
+            </svg>
+        </span>
+    }
+</button>
+
+@if (IsExpanded && ChildContent is not null)
+{
+    <div class="fluent-nav-view-item-children">
+        @ChildContent
+    </div>
+}
+
+@code {
+    // Code in .cs file
+}

@@ -1,8 +1,0 @@
-@namespace Fluent.Blazor.Composite
-
-<hr class="fluent-menu-flyout-divider" @attributes="AdditionalAttributes" />
-
-@code {
-    [Parameter(CaptureUnmatchedValues = true)]
-    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
-}

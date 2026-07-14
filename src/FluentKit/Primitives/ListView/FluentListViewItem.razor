@@ -1,0 +1,14 @@
+@namespace FluentKit.Primitives
+
+<button type="button"
+        @ref="_element"
+        class="fluent-list-view-item @(Selected ? "fluent-list-view-item--selected" : "")"
+        disabled="@Disabled"
+        role="listitem"
+        aria-selected="@Selected"
+        @onclick="HandleClickAsync"
+        @onkeydown="HandleKeyDownAsync"
+        @attributes="AdditionalAttributes">
+    <span class="fluent-list-view-item-indicator" aria-hidden="true"></span>
+    @ChildContent
+</button>

@@ -1,0 +1,41 @@
+@namespace FluentKit.Composite
+@implements IDisposable
+
+<CascadingValue Value="_iconGutterContext">
+    <ul class="fluent-menu-flyout" @onkeydown="HandleKeyDown" @attributes="AdditionalAttributes">
+        @ChildContent
+    </ul>
+</CascadingValue>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public EventCallback<Microsoft.AspNetCore.Components.Web.KeyboardEventArgs> OnKeyDown { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    // One instance per menu *level* — a fresh FluentMenuFlyoutSurface is rendered for the root menu
+    // and again for every cascading submenu (see FluentMenuFlyoutItem.RenderSubmenuContent), and
+    // each level's icon-gutter decision is independent: a submenu can have icons throughout while
+    // its parent menu has none, or vice versa.
+    private readonly MenuFlyoutIconGutterContext _iconGutterContext = new();
+
+    protected override void OnInitialized()
+    {
+        _iconGutterContext.Changed += OnIconGutterChanged;
+    }
+
+    // See MenuFlyoutIconGutterContext's own doc comment for why this second render pass is what
+    // actually makes the whole thing work — items further down the list registering an icon after
+    // an earlier icon-less item already rendered is exactly the case this re-render exists to catch.
+    private void OnIconGutterChanged() => InvokeAsync(StateHasChanged);
+
+    private Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
+        => OnKeyDown.HasDelegate ? OnKeyDown.InvokeAsync(e) : Task.CompletedTask;
+
+    public void Dispose()
+    {
+        _iconGutterContext.Changed -= OnIconGutterChanged;
+    }
+}
