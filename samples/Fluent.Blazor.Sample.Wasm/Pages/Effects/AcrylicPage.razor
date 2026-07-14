@@ -1,64 +1,199 @@
 @page "/controls/acrylic"
 
 <div class="gallery-page">
-    <PageHeader Eyebrow="Effects &amp; Materials" Title="Acrylic" Description="Acrylic is a translucent material that applies a backdrop-filter blur over backgrounds." />
+    <PageHeader Eyebrow="Effects &amp; Materials" Title="Acrylic"
+                Description="Acrylic is a translucent material that live-blurs in-app content behind it using CSS backdrop-filter, approximating WinUI's AcrylicBrush / DesktopAcrylicBackdrop." />
 
-    <ControlExample HeaderText="Acrylic Brush Styles" RazorCode="@_brushRazor">
+    @* ── Brush Kinds ──────────────────────────────────────────────────── *@
+    <ControlExample HeaderText="Acrylic Brush Styles"
+                    Description="Base is the thicker, more opaque variant used for panels. Thin is highly transparent — intended for flyouts and transient surfaces."
+                    RazorCode="@_brushRazor">
         <Example>
-            <div style="position:relative; width:100%; height:220px; border-radius:12px; overflow:hidden; background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
-                <FluentAcrylicBrush Kind="AcrylicKind.Base" style="position:absolute; top:20px; left:20px; width:160px; padding:16px; border-radius:8px;">
+            <div style="position:relative; width:100%; height:240px; border-radius:12px; overflow:hidden;
+                        background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
+                <FluentAcrylicBrush Kind="AcrylicKind.Base"
+                                    style="position:absolute; top:20px; left:20px; width:200px; padding:20px; border-radius:8px;">
                     <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Base Acrylic</FluentTextBlock>
-                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">Thicker context tinting layer.</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">
+                        Thicker tinting layer. Maps to AcrylicInAppFillColorDefaultBrush.
+                    </FluentTextBlock>
                 </FluentAcrylicBrush>
-                <FluentAcrylicBrush Kind="AcrylicKind.Thin" style="position:absolute; bottom:20px; right:20px; width:160px; padding:16px; border-radius:8px;">
+                <FluentAcrylicBrush Kind="AcrylicKind.Thin"
+                                    style="position:absolute; bottom:20px; right:20px; width:200px; padding:20px; border-radius:8px;">
                     <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Thin Acrylic</FluentTextBlock>
-                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">Highly transparent glass filter.</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">
+                        Highly transparent glass. Maps to AcrylicInAppFillColorSecondaryBrush.
+                    </FluentTextBlock>
                 </FluentAcrylicBrush>
             </div>
         </Example>
     </ControlExample>
 
-    <ControlExample HeaderText="Live Tweak Settings" RazorCode="@_tweakRazor" CSharpCode="@_tweakCs" Options="@_options">
+    @* ── Live Tint Color ──────────────────────────────────────────────── *@
+    <ControlExample HeaderText="TintColor Override"
+                    Description="Overrides the theme-default tint color. Accepts any valid CSS color value."
+                    RazorCode="@_tintColorRazor" CSharpCode="@_tintColorCs">
         <Example>
-            <div style="position:relative; width:100%; height:200px; border-radius:12px; overflow:hidden; background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
-                <FluentAcrylicBrush TintColor="@(_tintColor as string)" TintOpacity="_tintOpacity" style="position:absolute; inset:20px; padding:20px; display:flex; flex-direction:column; justify-content:center;">
-                    <FluentTextBlock Variant="TextBlockVariant.Title">Custom Acrylic Settings</FluentTextBlock>
-                    <FluentTextBlock Variant="TextBlockVariant.Body">Observe live styling modifications based on the option sliders.</FluentTextBlock>
+            <div style="position:relative; width:100%; height:180px; border-radius:12px; overflow:hidden;
+                        background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
+                <FluentAcrylicBrush TintColor="@_tintColor"
+                                    style="position:absolute; inset:20px; padding:20px; border-radius:8px; display:flex; flex-direction:column; justify-content:center;">
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">TintColor = @_tintColor</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">
+                        Live preview of the custom tint color.
+                    </FluentTextBlock>
                 </FluentAcrylicBrush>
             </div>
         </Example>
+        <Options>
+            <div class="demo-col">
+                <FluentRadioGroup Value="@_tintColor" ValueChanged="@((object? v) => _tintColor = (v as string) ?? "black")">
+                    <div class="demo-row">
+                        <FluentRadioButton Value='@("black")'>Black</FluentRadioButton>
+                        <FluentRadioButton Value='@("skyblue")'>Sky Blue</FluentRadioButton>
+                        <FluentRadioButton Value='@("#8764b8")'>Purple</FluentRadioButton>
+                        <FluentRadioButton Value='@("#c42b1c")'>Red</FluentRadioButton>
+                        <FluentRadioButton Value='@("#0f7b0f")'>Green</FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+            </div>
+        </Options>
+    </ControlExample>
+
+    @* ── TintOpacity ──────────────────────────────────────────────────── *@
+    <ControlExample HeaderText="TintOpacity"
+                    Description="Controls how opaque the flat tint wash is over the blurred backdrop. 0 = fully transparent tint; 1 = solid tint covering blur entirely."
+                    RazorCode="@_tintOpacityRazor" CSharpCode="@_tintOpacityCs">
+        <Example>
+            <div style="position:relative; width:100%; height:180px; border-radius:12px; overflow:hidden;
+                        background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
+                <FluentAcrylicBrush TintOpacity="@_tintOpacity"
+                                    style="position:absolute; inset:20px; padding:20px; border-radius:8px; display:flex; flex-direction:column; justify-content:center;">
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">TintOpacity = @_tintOpacity.ToString("0.00")</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">
+                        Drag the slider to change how solid the tint layer is.
+                    </FluentTextBlock>
+                </FluentAcrylicBrush>
+            </div>
+        </Example>
+        <Options>
+            <div class="demo-col">
+                <div class="demo-row" style="align-items:center; gap:12px;">
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="min-width:80px;">TintOpacity</FluentTextBlock>
+                    <FluentSlider Value="@_tintOpacity"
+                                  ValueChanged="@((double v) => _tintOpacity = v)"
+                                  Min="0" Max="1" Step="0.05"
+                                  style="flex:1;" />
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="min-width:36px; text-align:right;">@_tintOpacity.ToString("0.00")</FluentTextBlock>
+                </div>
+            </div>
+        </Options>
+    </ControlExample>
+
+    @* ── TintLuminosityOpacity (two-layer) ────────────────────────────── *@
+    <ControlExample HeaderText="TintLuminosityOpacity (Two-Layer Mode)"
+                    Description="Enables WinUI's two-pass approximation: a luminosity-blended layer sits under the flat tint layer, keeping the tint consistent regardless of what's behind it. Set above 0 to opt in."
+                    RazorCode="@_luminosityRazor" CSharpCode="@_luminosityCs">
+        <Example>
+            <div style="position:relative; width:100%; height:180px; border-radius:12px; overflow:hidden;
+                        background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
+                <FluentAcrylicBrush TintLuminosityOpacity="@(_luminosityOpacity > 0 ? _luminosityOpacity : null)"
+                                    style="position:absolute; inset:20px; padding:20px; border-radius:8px; display:flex; flex-direction:column; justify-content:center;">
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">
+                        TintLuminosityOpacity = @(_luminosityOpacity > 0 ? _luminosityOpacity.ToString("0.00") : "off")
+                    </FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">
+                        @(_luminosityOpacity > 0 ? "Two-layer mode active." : "Single-layer mode (slider at 0).")
+                    </FluentTextBlock>
+                </FluentAcrylicBrush>
+            </div>
+        </Example>
+        <Options>
+            <div class="demo-col">
+                <div class="demo-row" style="align-items:center; gap:12px;">
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="min-width:160px;">TintLuminosityOpacity</FluentTextBlock>
+                    <FluentSlider Value="@_luminosityOpacity"
+                                  ValueChanged="@((double v) => _luminosityOpacity = v)"
+                                  Min="0" Max="1" Step="0.05"
+                                  style="flex:1;" />
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="min-width:36px; text-align:right;">@_luminosityOpacity.ToString("0.00")</FluentTextBlock>
+                </div>
+            </div>
+        </Options>
+    </ControlExample>
+
+    @* ── FallbackColor ────────────────────────────────────────────────── *@
+    <ControlExample HeaderText="FallbackColor"
+                    Description="The solid background shown when the browser does not support backdrop-filter, or when the user has enabled Reduce Transparency. Override to match your app's color scheme."
+                    RazorCode="@_fallbackRazor" CSharpCode="@_fallbackCs">
+        <Example>
+            <div style="position:relative; width:100%; height:180px; border-radius:12px; overflow:hidden;
+                        background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
+                <FluentAcrylicBrush FallbackColor="@_fallbackColor"
+                                    style="position:absolute; inset:20px; padding:20px; border-radius:8px; display:flex; flex-direction:column; justify-content:center;">
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">FallbackColor = @_fallbackColor</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">
+                        Only visible if backdrop-filter is unsupported in your browser.
+                    </FluentTextBlock>
+                </FluentAcrylicBrush>
+            </div>
+        </Example>
+        <Options>
+            <div class="demo-col">
+                <FluentRadioGroup Value="@_fallbackColor" ValueChanged="@((object? v) => _fallbackColor = (v as string) ?? "#2b2b2b")">
+                    <div class="demo-row">
+                        <FluentRadioButton Value='@("#2b2b2b")'>Dark gray</FluentRadioButton>
+                        <FluentRadioButton Value='@("#f3f3f3")'>Light gray</FluentRadioButton>
+                        <FluentRadioButton Value='@("#0078d4")'>Blue</FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+            </div>
+        </Options>
     </ControlExample>
 </div>
 
 @code {
-    private object? _tintColor = "black";
+    // ── TintColor ──────────────────────────────────────────────────────
+    private string _tintColor = "black";
+
+    private const string _tintColorRazor = @"<FluentAcrylicBrush TintColor=""@_tintColor"" style=""..."">
+    ...
+</FluentAcrylicBrush>";
+    private const string _tintColorCs = @"private string _tintColor = ""black"";";
+
+    // ── TintOpacity ────────────────────────────────────────────────────
     private double _tintOpacity = 0.6;
 
-    private const string _brushRazor = @"<FluentAcrylicBrush Kind=""AcrylicKind.Base"" style=""position:absolute; top:20px; left:20px; width:160px; padding:16px; border-radius:8px;"">
-    <FluentTextBlock Variant=""TextBlockVariant.BodyStrong"">Base Acrylic</FluentTextBlock>
+    private const string _tintOpacityRazor = @"<FluentAcrylicBrush TintOpacity=""@_tintOpacity"" style=""..."">
+    ...
 </FluentAcrylicBrush>";
+    private const string _tintOpacityCs = @"private double _tintOpacity = 0.6;";
 
-    private const string _tweakRazor = @"<FluentAcrylicBrush TintColor=""@_tintColor"" TintOpacity=""_tintOpacity"">
-    <FluentTextBlock Variant=""TextBlockVariant.Title"">Custom Acrylic Settings</FluentTextBlock>
+    // ── TintLuminosityOpacity ──────────────────────────────────────────
+    private double _luminosityOpacity = 0;
+
+    private const string _luminosityRazor = @"<FluentAcrylicBrush TintLuminosityOpacity=""@(_luminosityOpacity > 0 ? _luminosityOpacity : null)"">
+    ...
 </FluentAcrylicBrush>";
+    private const string _luminosityCs = @"private double _luminosityOpacity = 0;
 
-    private const string _tweakCs = @"private string _tintColor = ""black"";
-private double _tintOpacity = 0.6;";
+// Only opt into two-layer mode when slider is above 0.
+// Passing null keeps the simpler single-layer tint.";
 
-    private RenderFragment _options => __builder => {
-        <div class="demo-col" style="width:100%;">
-            <FluentRadioGroup @bind-Value="_tintColor">
-                <div class="demo-row">
-                    <FluentRadioButton Value='@("black")'>Black Tint</FluentRadioButton>
-                    <FluentRadioButton Value='@("skyblue")'>Sky Blue Tint</FluentRadioButton>
-                    <FluentRadioButton Value='@("red")'>Red Tint</FluentRadioButton>
-                </div>
-            </FluentRadioGroup>
-            <div class="demo-row" style="margin-top:12px; align-items:center;">
-                <span style="font-size:12px; font-weight:600;">Opacity:</span>
-                <FluentSlider @bind-Value="_tintOpacity" Min="0" Max="1" Step="0.05" style="width:180px;" />
-                <span style="font-size:12px;">@_tintOpacity.ToString("0.00")</span>
-            </div>
-        </div>
-    };
+    // ── FallbackColor ──────────────────────────────────────────────────
+    private string _fallbackColor = "#2b2b2b";
+
+    private const string _fallbackRazor = @"<FluentAcrylicBrush FallbackColor=""@_fallbackColor"" style=""..."">
+    ...
+</FluentAcrylicBrush>";
+    private const string _fallbackCs = @"private string _fallbackColor = ""#2b2b2b"";";
+
+    // ── Kind Styles ────────────────────────────────────────────────────
+    private const string _brushRazor = @"<FluentAcrylicBrush Kind=""AcrylicKind.Base"" style=""..."">
+    ...
+</FluentAcrylicBrush>
+
+<FluentAcrylicBrush Kind=""AcrylicKind.Thin"" style=""..."">
+    ...
+</FluentAcrylicBrush>";
 }

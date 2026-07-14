@@ -337,9 +337,9 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 95, 184, 0.1);
+    background: rgba(128, 128, 128, 0.08);
     border-radius: 8px;
-    font-size: 20px;
+    color: var(--accent-fill-color-default);
 }
 
 .control-card__name {
@@ -372,17 +372,28 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 14px 16px;
     background: var(--card-background-default);
     border: 1px solid var(--card-stroke-default);
     border-radius: 8px;
-    gap: 12px;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.settings-item__icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-fill-color-secondary);
 }
 
 .settings-item__info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .settings-item__label {
@@ -394,6 +405,7 @@ html, body {
 .settings-item__desc {
     font-size: 12px;
     color: var(--text-fill-color-secondary);
+    line-height: 1.4;
 }
 
 /* ── Demo layout helpers ───────────────────────────────────────── */
@@ -434,3 +446,29 @@ html, body {
     .control-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     .page-header__title { font-size: 26px; }
 }
+
+/* ── Mica Transparency Overrides ───────────────────────────────── */
+/* In order for the background MicaPanel to shine through beautifully, 
+   we override the NavigationView's solid pane and content backgrounds 
+   with premium, WinUI-spec translucent alternatives. */
+.fluent-nav-view {
+    background-color: transparent !important;
+}
+
+.fluent-nav-view-pane {
+    background: rgba(243, 243, 243, 0.45) !important;
+}
+
+.fluent-nav-view-content {
+    background: rgba(249, 249, 249, 0.3) !important;
+}
+
+/* Dark theme translucent layers */
+html[data-theme="dark"] .fluent-nav-view-pane {
+    background: rgba(32, 32, 32, 0.45) !important;
+}
+
+html[data-theme="dark"] .fluent-nav-view-content {
+    background: rgba(26, 26, 26, 0.3) !important;
+}
+
