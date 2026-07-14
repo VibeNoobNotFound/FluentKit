@@ -29,7 +29,6 @@ styling, or token values were sourced from.
 
 - [What's in here](#whats-in-here)
 - [Getting started](#getting-started)
-- [Installing from NuGet](#installing-from-nuget)
 - [Running the sample](#running-the-sample)
 - [Theming](#theming)
 - [Project layout](#project-layout)
@@ -159,9 +158,19 @@ outside its parent's layout flow (tooltips, flyouts, context menus, teaching tip
 
 ## Getting started
 
-FluentKit isn't published to NuGet yet, so consume it as a project or repository reference.
+**1. Install**
 
-**1. Clone and reference**
+Recommended — from NuGet:
+
+```bash
+dotnet add package FluentKit.Blazor
+```
+
+```xml
+<PackageReference Include="FluentKit.Blazor" Version="0.1.0-alpha" />
+```
+
+Alternatively, to track `main` directly, consume it as a project or repository reference instead:
 
 ```bash
 git clone https://github.com/VibeNoobNotFound/FluentKit.git
@@ -206,19 +215,6 @@ any composite control built on the overlay service (tooltips, flyouts, menus, di
 
 ```razor
 <FluentButton Variant="FluentButtonVariant.Accent">Save changes</FluentButton>
-```
-
-## Installing from NuGet
-
-FluentKit isn't published yet — for now, consume it as a project or repository reference (see
-above). Once it's published, installation will look like:
-
-```bash
-dotnet add package FluentKit.Placeholder
-```
-
-```xml
-<PackageReference Include="FluentKit.Placeholder" Version="0.1.0-alpha" />
 ```
 
 ## Running the sample
@@ -303,8 +299,6 @@ bundle (`{HostAssemblyName}.styles.css`, served flat from the app's own root) wh
 6. `FluentTeachingTip`'s beak is positioned from the requested placement, not whatever
    `overlay-interop.js` actually flipped it to — fine as long as there's room, but the beak won't
    flip sides if the tip itself gets flipped.
-7. Not yet published to NuGet — consume via project or repository reference for now (see
-   [Installing from NuGet](#installing-from-nuget)).
 
 ## Contributing
 
