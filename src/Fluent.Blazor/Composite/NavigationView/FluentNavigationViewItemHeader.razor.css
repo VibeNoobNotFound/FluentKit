@@ -1,0 +1,27 @@
+.fluent-nav-view-item-header {
+    display: flex;
+    align-items: center;
+    padding-inline: 12px;
+    padding-block-start: 12px;
+    padding-block-end: 4px;
+    box-sizing: border-box;
+    user-select: none;
+    min-height: 28px;
+}
+
+.fluent-nav-view-item-header-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-fill-color-secondary, #666);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Hide header in rail/compact view when the pane is closed */
+.fluent-nav-view--compact .fluent-nav-view-pane:not(.fluent-nav-view-pane-overlay) .fluent-nav-view-item-header,
+.fluent-nav-view--minimal .fluent-nav-view-pane:not(.fluent-nav-view-pane-overlay) .fluent-nav-view-item-header {
+    display: none;
+}

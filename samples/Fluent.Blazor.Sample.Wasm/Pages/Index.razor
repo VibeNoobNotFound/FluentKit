@@ -304,7 +304,6 @@
     </FluentTextBlock>
 
     <div style="width:100%; max-width:720px; height:420px; border-radius:8px; overflow:hidden; border:1px solid var(--card-stroke-default);">
-        <!-- New NavigationView with improved implementation -->
         <FluentNavigationView PaneDisplayMode="_navMode"
                                @bind-IsPaneOpen="_navPaneOpen"
                                @bind-SelectedValue="_navSelected"
@@ -312,18 +311,28 @@
                                BackRequested="OnNavBack"
                                ShowSettingsButton="true"
                                SettingsRequested="OnNavSettings">
+            <PaneHeaderIcon>
+                <FluentIcon Name="@FluentIconNames.Search" Size="16" />
+            </PaneHeaderIcon>
             <PaneHeader>
                 <FluentTextBox @bind-Value="_navSearch" Placeholder="Search" />
             </PaneHeader>
             <MenuItems>
+                <FluentNavigationViewItemHeader Text="Main Section" />
                 <FluentNavigationViewItem Value="@("home")" Text="Home">
                     <Icon><FluentIcon Name="@FluentIconNames.Home" /></Icon>
                 </FluentNavigationViewItem>
                 <FluentNavigationViewItem Value="@("docs")" Text="Documentation">
                     <Icon><FluentIcon Name="@FluentIconNames.Document" /></Icon>
                 </FluentNavigationViewItem>
+                <FluentNavigationViewItemSeparator />
+                <FluentNavigationViewItemHeader Text="Components" />
                 <FluentNavigationViewItem Value="@("components")" Text="Components">
                     <Icon><FluentIcon Name="@FluentIconNames.Apps" /></Icon>
+                    <ChildContent>
+                        <FluentNavigationViewItem Value="@("button")" Text="Button" />
+                        <FluentNavigationViewItem Value="@("checkbox")" Text="Checkbox" />
+                    </ChildContent>
                 </FluentNavigationViewItem>
                 <FluentNavigationViewItem Value="@("disabled")" Text="Disabled item" Disabled="true">
                     <Icon><FluentIcon Name="@FluentIconNames.Dismiss" /></Icon>

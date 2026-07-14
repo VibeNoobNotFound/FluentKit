@@ -11,16 +11,23 @@
             <!-- Expanded mode: pane is always visible, toggles width -->
             <aside class="fluent-nav-view-pane @(IsPaneOpen ? "fluent-nav-view-pane--open" : "")">
                 <header class="fluent-nav-view-pane-header">
-                    @if (ShowBackButton && IsPaneOpen)
-                    {
-                        <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
-                            <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                    <div class="fluent-nav-view-pane-header-buttons">
+                        @if (ShowBackButton && IsPaneOpen)
+                        {
+                            <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
+                                <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                            </button>
+                        }
+                        <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
+                            <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
                         </button>
+                    </div>
+                    @if (PaneHeader is not null && IsPaneOpen)
+                    {
+                        <div class="fluent-nav-view-pane-custom-header">
+                            @PaneHeader
+                        </div>
                     }
-                    <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
-                        <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
-                    </button>
-                    @PaneHeader
                 </header>
                 <div class="fluent-nav-view-pane-items-wrapper">
                     <div class="fluent-nav-view-pane-items" role="list">
@@ -47,12 +54,24 @@
                  open. -->
             <aside class="fluent-nav-view-pane fluent-nav-view-pane--rail @(PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal ? "fluent-nav-view-pane--rail-minimal" : "")">
                 <header class="fluent-nav-view-pane-header fluent-nav-view-pane-header--rail">
+                    @if (ShowBackButton)
+                    {
+                        <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="OnBackClick" aria-label="Back">
+                            <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                        </button>
+                    }
                     <button type="button" class="fluent-nav-view-nav-button fluent-nav-view-nav-button--rail" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
                         <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
                     </button>
                 </header>
                 <div class="fluent-nav-view-pane-items-wrapper">
                     <div class="fluent-nav-view-pane-items" role="list">
+                        @if (PaneHeaderIcon is not null)
+                        {
+                            <button type="button" class="fluent-nav-view-pane-header-icon-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
+                                @PaneHeaderIcon
+                            </button>
+                        }
                         @MenuItems
                     </div>
                 </div>
@@ -82,16 +101,23 @@
                 <div class="fluent-nav-view-pane-overlay-material" aria-hidden="true"></div>
                 <div class="fluent-nav-view-pane-overlay-content">
                     <header class="fluent-nav-view-pane-header">
-                        @if (ShowBackButton)
-                        {
-                            <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
-                                <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                        <div class="fluent-nav-view-pane-header-buttons">
+                            @if (ShowBackButton)
+                            {
+                                <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
+                                    <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
+                                </button>
+                            }
+                            <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
+                                <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
                             </button>
+                        </div>
+                        @if (PaneHeader is not null)
+                        {
+                            <div class="fluent-nav-view-pane-custom-header">
+                                @PaneHeader
+                            </div>
                         }
-                        <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Toggle navigation pane">
-                            <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
-                        </button>
-                        @PaneHeader
                     </header>
                     <div class="fluent-nav-view-pane-items-wrapper">
                         <div class="fluent-nav-view-pane-items" role="list">
@@ -115,12 +141,6 @@
             @if (PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal && !IsPaneOpen)
             {
                 <div class="fluent-nav-view-content-top-bar">
-                    @if (ShowBackButton)
-                    {
-                        <button type="button" class="fluent-nav-view-nav-button" @onclick="OnBackClick" aria-label="Back">
-                            <FluentIcon Name="ic_fluent_arrow_left_20_regular" Size="16" />
-                        </button>
-                    }
                     <button type="button" class="fluent-nav-view-nav-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
                         <FluentIcon Name="ic_fluent_navigation_20_regular" Size="16" />
                     </button>

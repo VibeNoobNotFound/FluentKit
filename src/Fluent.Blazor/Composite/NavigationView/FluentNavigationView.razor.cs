@@ -67,6 +67,9 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     public RenderFragment? PaneHeader { get; set; }
 
     [Parameter]
+    public RenderFragment? PaneHeaderIcon { get; set; }
+
+    [Parameter]
     public RenderFragment? MenuItems { get; set; }
 
     [Parameter]

@@ -117,9 +117,13 @@
     }
 }
 
-/* Closed compact state - hide text */
+/* Closed compact state - hide text & children */
 .fluent-nav-view--compact .fluent-nav-view-item-text {
     display: none;
+}
+
+.fluent-nav-view--compact .fluent-nav-view-pane:not(.fluent-nav-view-pane-overlay) .fluent-nav-view-item-children {
+    display: none !important;
 }
 
 .fluent-nav-view--compact .fluent-nav-view-item {

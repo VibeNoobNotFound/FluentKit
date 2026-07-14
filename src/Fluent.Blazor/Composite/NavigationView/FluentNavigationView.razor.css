@@ -162,13 +162,26 @@
 /* --- Common header/footer styles --- */
 .fluent-nav-view-pane-header {
     display: flex;
-    align-items: center;
-    gap: 4px;
+    flex-direction: column;
     flex: 0 0 auto;
     padding-block-start: 4px;
     padding-inline: 8px;
-    min-height: 44px;
     border-bottom: 1px solid var(--card-stroke-default);
+}
+
+.fluent-nav-view-pane-header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 40px;
+}
+
+.fluent-nav-view-pane-custom-header {
+    display: flex;
+    align-items: center;
+    padding-block-end: 8px;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .fluent-nav-view-pane-header:empty {
@@ -176,10 +189,34 @@
 }
 
 .fluent-nav-view-pane-header--rail {
-    gap: 0;
+    flex-direction: column;
+    gap: 4px;
     padding-inline: 4px;
+    padding-block: 4px;
     min-height: 36px;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.fluent-nav-view-pane-header-icon-button {
+    display: flex;
+    align-items: center;
     justify-content: center;
+    inline-size: 100%;
+    min-height: 36px;
+    padding-inline: 12px;
+    box-sizing: border-box;
+    border: none;
+    background-color: transparent;
+    color: var(--nav-view-item-icon-foreground);
+    cursor: pointer;
+    border-radius: var(--control-corner-radius);
+    transition: background-color var(--duration-fast) var(--easing-standard);
+    margin-block-end: 4px;
+}
+
+.fluent-nav-view-pane-header-icon-button:hover {
+    background-color: var(--nav-view-item-background-hover);
 }
 
 .fluent-nav-view-nav-button {

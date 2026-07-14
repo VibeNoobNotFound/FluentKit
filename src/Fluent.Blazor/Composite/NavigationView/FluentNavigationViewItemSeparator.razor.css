@@ -1,0 +1,12 @@
+.fluent-nav-view-item-separator {
+    margin-block: 4px;
+    margin-inline: 12px;
+    border: none;
+    border-block-start: var(--control-stroke-thickness, 1px) solid var(--card-stroke-default, #e5e5e5);
+}
+
+/* Hide separator in rail/compact view since there is no item width to draw a line */
+.fluent-nav-view--compact .fluent-nav-view-pane:not(.fluent-nav-view-pane-overlay) .fluent-nav-view-item-separator,
+.fluent-nav-view--minimal .fluent-nav-view-pane:not(.fluent-nav-view-pane-overlay) .fluent-nav-view-item-separator {
+    display: none;
+}
