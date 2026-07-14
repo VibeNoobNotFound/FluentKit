@@ -1,0 +1,111 @@
+name: Deploy GitHub Pages
+
+# Two ways to trigger a publish:
+#   1. Push to main where ANY commit in the push contains "[publish-web]" in its message.
+#   2. Manually via the "Run workflow" button on the Actions tab (workflow_dispatch).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Only one Pages deployment at a time; let an in-flight one finish rather than killing it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Decides whether this run should actually publish, so the expensive build/deploy
+  # jobs only spin up when needed.
+  gate:
+    name: Check trigger
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.check.outputs.should_publish }}
+    steps:
+      - name: Evaluate trigger condition
+        id: check
+        env:
+          COMMITS_JSON: ${{ toJson(github.event.commits) }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manually triggered from the Actions tab -> publishing."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s' "$COMMITS_JSON" | grep -F -- '[publish-web]' > /dev/null; then
+            echo "Found [publish-web] in one of this push's commit messages -> publishing."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No [publish-web] tag in this push and not manually triggered -> skipping."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Build & prepare site
+    needs: gate
+    if: needs.gate.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore FluentKit.slnx
+
+      - name: Publish WASM sample (Release)
+        run: >
+          dotnet publish samples/FluentKit.Sample.Wasm/FluentKit.Sample.Wasm.csproj
+          -c Release
+          -o publish-output
+          --no-restore
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v6
+
+      # GitHub project Pages sites are served from /<repo-name>/, not /,
+      # so the <base href> baked in at build time ("/") has to be rewritten
+      # to match. steps.pages.outputs.base_path gives the correct subpath
+      # automatically (works even if the repo is ever renamed).
+      - name: Rewrite <base href> for GitHub Pages subpath
+        run: |
+          sed -i "s|<base href=\"/\" />|<base href=\"${{ steps.pages.outputs.base_path }}/\" />|" publish-output/wwwroot/index.html
+          grep '<base href=' publish-output/wwwroot/index.html
+
+      # Blazor is a client-side SPA: if someone deep-links or refreshes on a
+      # route like /Composite/Calendar, GitHub Pages has no such file and
+      # returns 404.html. Making 404.html a copy of index.html means the
+      # Blazor app boots up and its own router resolves the route client-side.
+      - name: Add SPA fallback (404.html)
+        run: cp publish-output/wwwroot/index.html publish-output/wwwroot/404.html
+
+      # GitHub Pages runs Jekyll by default, which ignores files/folders
+      # starting with an underscore (e.g. _framework, where Blazor's runtime
+      # and DLLs live). .nojekyll disables that processing.
+      - name: Disable Jekyll processing
+        run: touch publish-output/wwwroot/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: publish-output/wwwroot
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,36 @@
+name: CI
+
+# Runs on every commit: any branch push, and any PR targeting main.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build solution
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore FluentKit.slnx
+
+      # Building the .slnx builds every project it references —
+      # src/FluentKit (the library) and samples/FluentKit.Sample.Wasm (the sample) —
+      # so this single step covers "build everything".
+      - name: Build (Release)
+        run: dotnet build FluentKit.slnx -c Release --no-restore
+
+      - name: Report
+        run: echo "Build succeeded  library (src/FluentKit) + sample (FluentKit.Sample.Wasm) both compiled clean."
