@@ -200,6 +200,46 @@ export function registerLightDismissDetached(overlayId, popupEl, dotNetRef) {
     registerLightDismiss(overlayId, popupEl, null, dotNetRef);
 }
 
+// Resolves once popupEl's exit animation (the ".fluent-overlay-surface--closing" class's
+// fluent-overlay-exit keyframes) actually finishes, so OverlaySurface.razor.cs can await this before
+// telling OverlayService to remove the entry — removing it any earlier would unmount the element
+// mid-animation and the exit would never be seen. Listens for 'animationend' rather than a plain
+// setTimeout(duration) because --duration-fast is themeable (and zeroed under
+// prefers-reduced-motion, see _primitives.css), so a hardcoded JS-side delay would drift out of sync
+// with the real CSS duration; the timeout below is only a safety net in case the class never
+// actually triggers an animation.
+export function waitForExitAnimation(popupEl) {
+    if (!popupEl) {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+        let settled = false;
+        const finish = () => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            popupEl.removeEventListener("animationend", onAnimationEnd);
+            resolve();
+        };
+        const onAnimationEnd = (event) => {
+            // Only react to the surface's own exit animation, not a bubbled animationend from some
+            // animated element nested inside the flyout's content (a spinner, a transitioning chip).
+            if (event.target === popupEl) {
+                finish();
+            }
+        };
+
+        popupEl.addEventListener("animationend", onAnimationEnd);
+        // Safety net: duration-fast is 150ms today but this reads the *class* being applied, not a
+        // hardcoded number, so it stays correct if that token ever changes — 400ms is just a
+        // generous ceiling above any realistic exit-animation duration, not a value that needs to
+        // track it.
+        setTimeout(finish, 400);
+    });
+}
+
 export function unregisterLightDismiss(overlayId) {
     const handler = lightDismissHandlers.get(overlayId);
     if (handler) {

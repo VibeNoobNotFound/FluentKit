@@ -14,6 +14,48 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
     private IJSObjectReference? _module;
     private DotNetObjectReference<OverlaySurface>? _selfReference;
     private bool _positioned;
+    // Guards HandleClosingAsync against running twice — Entry.IsClosing stays true across every
+    // subsequent render once OverlayService.Close() flips it (the same OverlayEntry instance is kept
+    // mounted via FluentOverlayHost's @key="entry.Id" specifically so the exit animation can play),
+    // so without this OnParametersSet would kick off a redundant wait-and-CompleteClose on every
+    // one of those re-renders instead of just the first.
+    private bool _closingHandled;
+
+    protected override void OnParametersSet()
+    {
+        if (Entry.IsClosing && !_closingHandled)
+        {
+            _closingHandled = true;
+            // Fire-and-forget: this render still needs to complete synchronously so the
+            // "fluent-overlay-surface--closing" class actually lands in the DOM (that's what starts
+            // the CSS exit animation in the first place) before HandleClosingAsync goes looking for
+            // its animationend event.
+            _ = HandleClosingAsync();
+        }
+    }
+
+    private async Task HandleClosingAsync()
+    {
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./_content/Fluent.Blazor/Overlay/overlay-interop.js");
+            await _module.InvokeVoidAsync("waitForExitAnimation", _surfaceElement);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit already gone — nothing left to animate or clean up on the client, and
+            // OverlayService's own state doesn't need CompleteClose to keep it consistent once the
+            // whole circuit is torn down.
+            return;
+        }
+        catch (ObjectDisposedException)
+        {
+            return;
+        }
+
+        OverlayService.CompleteClose(Entry.Id);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

@@ -1,6 +1,6 @@
 @namespace Fluent.Blazor.Overlay
 @implements IAsyncDisposable
 
-<div class="fluent-overlay-surface @(Entry.Bare ? "fluent-overlay-surface--bare" : "")" style="@Entry.ComputedStyle" @ref="_surfaceElement">
+<div class="fluent-overlay-surface @(Entry.Bare ? "fluent-overlay-surface--bare" : "") @(Entry.IsClosing ? "fluent-overlay-surface--closing" : "")" style="@Entry.ComputedStyle" @ref="_surfaceElement">
     @Entry.Content
 </div>

@@ -5,6 +5,45 @@
     border-radius: var(--overlay-corner-radius);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
     padding: 8px;
+
+    /* `both` so the surface holds its from-state before the animation starts (no flash-in at full
+       opacity on the frame before this kicks off) and its to-state after it ends, rather than
+       snapping back to the un-animated CSS values. transform-origin biased toward the anchor edge
+       (top by default, since Bottom/top-flip are the overwhelmingly common placements) so the scale
+       reads as "growing out of the anchor" rather than growing from the surface's own center. */
+    transform-origin: top center;
+    animation: fluent-overlay-enter var(--duration-fast) var(--easing-decelerate) both;
+}
+
+/* Applied by OverlaySurface.razor.cs the instant Entry.IsClosing flips true (see OverlaySurface.razor.cs
+   for the full close handoff). Overriding `animation` here — rather than adding a second
+   animation-name — means there's no ambiguity about which keyframes are currently driving opacity
+   and transform; the enter animation has already finished by the time this class can apply (it's only
+   added post-open), so there's nothing to interrupt. */
+.fluent-overlay-surface--closing {
+    animation: fluent-overlay-exit var(--duration-fast) var(--easing-accelerate) both;
+}
+
+@keyframes fluent-overlay-enter {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fluent-overlay-exit {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.92);
+    }
 }
 
 /* Bare variant: content supplies its own surface material (e.g. FluentAcrylicBrush wrapping

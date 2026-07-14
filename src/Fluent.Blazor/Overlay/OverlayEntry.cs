@@ -44,6 +44,16 @@ public sealed class OverlayEntry
     /// open overlay it's the parent of.</summary>
     public bool WatchAnchorRemoved { get; init; }
 
+    /// <summary>True once <see cref="IOverlayService.Close"/> has been requested for this entry.
+    /// Deliberately NOT what removes the entry from <see cref="IOverlayService.Active"/> — that only
+    /// happens once OverlaySurface has actually played its exit animation and called
+    /// <see cref="IOverlayService.CompleteClose"/>. Kept mutable (not init-only like the rest of this
+    /// record) specifically so Close() can flip it on the same entry instance already in the Active
+    /// list, rather than needing to replace it — FluentOverlayHost's <c>@key="entry.Id"</c> then keeps
+    /// the same OverlaySurface component instance mounted across that mutation instead of tearing it
+    /// down and losing the chance to animate out.</summary>
+    public bool IsClosing { get; set; }
+
     /// <summary>Inline "position: fixed; top: …px; left: …px" string, filled in by FluentOverlayHost
     /// after JS interop reports the anchor's measured position. Empty until first measured, so the
     /// overlay renders off-screen-but-in-the-DOM for one frame rather than flashing at (0,0).</summary>

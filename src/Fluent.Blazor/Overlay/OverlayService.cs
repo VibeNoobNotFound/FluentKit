@@ -78,6 +78,27 @@ public sealed class OverlayService : IOverlayService
 
     public void Close(Guid id)
     {
+        OverlayEntry? entry = null;
+        foreach (var candidate in _active)
+        {
+            if (candidate.Id == id)
+            {
+                entry = candidate;
+                break;
+            }
+        }
+
+        if (entry is null || entry.IsClosing)
+        {
+            return;
+        }
+
+        entry.IsClosing = true;
+        Changed?.Invoke();
+    }
+
+    public void CompleteClose(Guid id)
+    {
         var removed = _active.RemoveAll(e => e.Id == id);
         if (removed > 0)
         {
@@ -92,7 +113,22 @@ public sealed class OverlayService : IOverlayService
             return;
         }
 
-        _active.Clear();
-        Changed?.Invoke();
+        // Same two-step handoff as Close() above, just for every active entry at once — each
+        // OverlaySurface plays its own exit animation independently and calls CompleteClose itself,
+        // rather than this yanking every overlay off-screen in one instant frame.
+        var anyNewlyClosing = false;
+        foreach (var entry in _active)
+        {
+            if (!entry.IsClosing)
+            {
+                entry.IsClosing = true;
+                anyNewlyClosing = true;
+            }
+        }
+
+        if (anyNewlyClosing)
+        {
+            Changed?.Invoke();
+        }
     }
 }
