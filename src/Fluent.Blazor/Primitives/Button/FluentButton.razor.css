@@ -98,17 +98,25 @@
 }
 
 /* ---------- Hyperlink ---------- */
+/* Matches fluent-svelte's own hyperlink recipe: same padding/corner-radius as every other button
+   (so the hover state reads as a proper chip, not a bare underline), just transparent at rest with
+   accent-colored text. Deliberately no text-decoration change on hover — fluent-svelte's own
+   hyperlink variant doesn't underline either, the background fill alone is the affordance. */
 .fluent-button--hyperlink {
     background-color: transparent;
     border-color: transparent;
     color: var(--accent-fill-color-default);
     min-width: unset;
     height: auto;
-    padding: 0;
+    padding: 4px 11px;
     text-decoration: none;
 }
 .fluent-button--hyperlink:hover:not(:disabled) {
-    text-decoration: underline;
+    background-color: var(--subtle-fill-color-secondary);
+}
+.fluent-button--hyperlink:active:not(:disabled) {
+    background-color: var(--subtle-fill-color-tertiary);
+    color: var(--accent-fill-color-tertiary);
 }
 .fluent-button--hyperlink:disabled {
     color: var(--text-fill-color-disabled);
