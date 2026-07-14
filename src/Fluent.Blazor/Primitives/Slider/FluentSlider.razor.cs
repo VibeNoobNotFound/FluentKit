@@ -100,6 +100,12 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
     /// <summary>
     /// CSS custom properties for the fill/thumb position. Thumb offset uses the fixed 20px thumb
     /// width so it never runs past the rail edges: halfWidth * (1 - 2*pct/100).
+    ///
+    /// Any user-supplied `style` (e.g. for sizing: style="height: 150px;") is merged in here rather
+    /// than left in AdditionalAttributes. Blazor attribute splatting resolves duplicate attribute
+    /// names by source order — since @attributes is written after this style attribute in the
+    /// markup, a caller-supplied style would otherwise silently replace this whole value (wiping out
+    /// --slider-percent/--slider-thumb-offset-x/y) instead of combining with it. See SplattedAttributes.
     /// </summary>
     private string ContainerStyle
     {
@@ -109,9 +115,35 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
             var halfWidth = ThumbWidthPx / 2;
             var offset = halfWidth * (1 - (2 * pct / 100));
             var axis = IsVertical ? "--slider-thumb-offset-y" : "--slider-thumb-offset-x";
-            return $"--slider-percent:{pct.ToString(System.Globalization.CultureInfo.InvariantCulture)}%; {axis}:{offset.ToString(System.Globalization.CultureInfo.InvariantCulture)}px;";
+            var computed = $"--slider-percent:{pct.ToString(System.Globalization.CultureInfo.InvariantCulture)}%; {axis}:{offset.ToString(System.Globalization.CultureInfo.InvariantCulture)}px;";
+
+            if (AdditionalAttributes is not null &&
+                AdditionalAttributes.TryGetValue("style", out var userStyleObj) &&
+                userStyleObj is string userStyle &&
+                !string.IsNullOrWhiteSpace(userStyle))
+            {
+                var trimmed = userStyle.Trim();
+                if (!trimmed.EndsWith(';'))
+                {
+                    trimmed += ";";
+                }
+                return $"{trimmed} {computed}";
+            }
+
+            return computed;
         }
     }
+
+    /// <summary>
+    /// AdditionalAttributes with "style" removed, so it can be splatted onto the root div without
+    /// clobbering ContainerStyle (which already folds any user style in — see above).
+    /// </summary>
+    private IReadOnlyDictionary<string, object>? SplattedAttributes =>
+        AdditionalAttributes is null || !AdditionalAttributes.ContainsKey("style")
+            ? AdditionalAttributes
+            : AdditionalAttributes
+                .Where(kv => !string.Equals(kv.Key, "style", StringComparison.OrdinalIgnoreCase))
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
 
     private string DisplayValue => ClampedValue.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 
