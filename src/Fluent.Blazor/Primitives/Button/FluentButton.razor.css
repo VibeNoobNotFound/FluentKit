@@ -106,9 +106,6 @@
     background-color: transparent;
     border-color: transparent;
     color: var(--accent-fill-color-default);
-    min-width: unset;
-    height: auto;
-    padding: 4px 11px;
     text-decoration: none;
 }
 .fluent-button--hyperlink:hover:not(:disabled) {
