@@ -1,12 +1,21 @@
+@using Fluent.Blazor.Effects
+@using Fluent.Blazor.Primitives
 @inject GalleryJsInterop GalleryJs
 
 <div class="sample-code-block" style="position:relative;">
     <pre><code id="@_elementId" class="@LangClass">@Code</code></pre>
-    <button class="code-copy-btn @(_copied ? "code-copy-btn--copied" : "")"
-            style="position:absolute; top:8px; right:8px; z-index:10;"
-            @onclick="CopyThisCode">
-        @(_copied ? "✓ Copied" : "Copy")
-    </button>
+
+    @* Acrylic + FluentButton copy overlay *@
+    <FluentAcrylicBrush Kind="AcrylicKind.Thin"
+                        TintColor="@(_copied ? "rgb(30,90,30)" : "rgb(20,20,20)")"
+                        TintOpacity="0.55"
+                        style="position:absolute; top:8px; right:10px; border-radius:4px; z-index:10;">
+        <FluentButton Variant="ButtonVariant.Subtle"
+                      OnClick="CopyThisCode"
+                      style="@_btnStyle">
+            @(_copied ? "✓ Copied" : "Copy")
+        </FluentButton>
+    </FluentAcrylicBrush>
 </div>
 
 @code {
@@ -19,6 +28,11 @@
 
     private string _elementId = $"code-{Guid.NewGuid():N}";
     private bool _copied = false;
+
+    private string _btnStyle =>
+        $"min-width:unset; height:26px; padding:0 10px; font-size:11px; font-weight:500; " +
+        $"color:{(_copied ? "#4cd964" : "#e2e2e2")}; background:transparent; border-color:transparent; " +
+        "transition: color var(--duration-fast) var(--easing-standard);";
 
     private string LangClass => Language.ToLowerInvariant() switch
     {

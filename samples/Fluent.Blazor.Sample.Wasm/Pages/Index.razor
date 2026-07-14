@@ -1,4 +1,5 @@
 @page "/"
+@using Fluent.Blazor.Effects
 
 <div class="gallery-page">
     <!-- Hero -->
@@ -36,13 +37,15 @@
         <div class="control-grid">
             @foreach (var card in _primitiveCards)
             {
-                <a class="control-card" href="@card.Route">
-                    <div class="control-card__icon">
-                        <FluentIcon Name="@card.Icon" Size="24" />
-                    </div>
-                    <div class="control-card__name">@card.Name</div>
-                    <div class="control-card__category">Primitives</div>
-                </a>
+                <FluentRevealBackground Bordered style="border-radius:8px;">
+                    <a class="control-card" href="@card.Route">
+                        <div class="control-card__icon">
+                            <FluentIcon Name="@card.Icon" Size="24" />
+                        </div>
+                        <div class="control-card__name">@card.Name</div>
+                        <div class="control-card__category">Primitives</div>
+                    </a>
+                </FluentRevealBackground>
             }
         </div>
     </div>
@@ -53,13 +56,15 @@
         <div class="control-grid">
             @foreach (var card in _compositeCards)
             {
-                <a class="control-card" href="@card.Route">
-                    <div class="control-card__icon">
-                        <FluentIcon Name="@card.Icon" Size="24" />
-                    </div>
-                    <div class="control-card__name">@card.Name</div>
-                    <div class="control-card__category">Composite</div>
-                </a>
+                <FluentRevealBackground Bordered style="border-radius:8px;">
+                    <a class="control-card" href="@card.Route">
+                        <div class="control-card__icon">
+                            <FluentIcon Name="@card.Icon" Size="24" />
+                        </div>
+                        <div class="control-card__name">@card.Name</div>
+                        <div class="control-card__category">Composite</div>
+                    </a>
+                </FluentRevealBackground>
             }
         </div>
     </div>
@@ -70,13 +75,15 @@
         <div class="control-grid">
             @foreach (var card in _effectCards)
             {
-                <a class="control-card" href="@card.Route">
-                    <div class="control-card__icon">
-                        <FluentIcon Name="@card.Icon" Size="24" />
-                    </div>
-                    <div class="control-card__name">@card.Name</div>
-                    <div class="control-card__category">Effects</div>
-                </a>
+                <FluentRevealBackground Bordered style="border-radius:8px;">
+                    <a class="control-card" href="@card.Route">
+                        <div class="control-card__icon">
+                            <FluentIcon Name="@card.Icon" Size="24" />
+                        </div>
+                        <div class="control-card__name">@card.Name</div>
+                        <div class="control-card__category">Effects</div>
+                    </a>
+                </FluentRevealBackground>
             }
         </div>
     </div>

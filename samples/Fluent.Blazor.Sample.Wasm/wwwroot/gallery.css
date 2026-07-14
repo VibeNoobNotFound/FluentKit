@@ -142,38 +142,38 @@ html, body {
 /* Code panel */
 .control-example__code-panel {
     background: #1e1e1e;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
 }
 
-.control-example__code-tabs {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid #333;
+/* Pivot inside code panel — blend header into dark background, remove content padding */
+.control-example__code-panel .fluent-pivot-header {
+    background: #1e1e1e;
+    border-bottom-color: #333;
+    padding: 0 8px;
 }
 
-.code-tab {
-    padding: 8px 16px;
+.control-example__code-panel .fluent-pivot-tab {
     font-size: 12px;
-    font-weight: 500;
+    padding: 8px 12px;
     color: #aaa;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-    font-family: inherit;
 }
 
-.code-tab:hover { color: #fff; }
-.code-tab--active {
+.control-example__code-panel .fluent-pivot-tab:hover:not(:disabled):not(.fluent-pivot-tab--selected) {
     color: #fff;
-    border-bottom-color: var(--accent-default);
 }
 
-.control-example__code-content {
-    position: relative;
+.control-example__code-panel .fluent-pivot-tab--selected {
+    color: #fff;
+}
+
+.control-example__code-panel .fluent-pivot-content {
+    padding: 0;
     max-height: 400px;
     overflow: auto;
+    position: relative;
 }
+
 
 /* ── Sample Code Block ─────────────────────────────────────────── */
 .sample-code-block {
@@ -201,18 +201,43 @@ html, body {
     position: absolute;
     top: 8px;
     right: 10px;
-    padding: 4px 10px;
+    padding: 5px 12px;
     font-size: 11px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
+    font-weight: 500;
+    
+    /* Acrylic Material */
+    background: rgba(30, 30, 30, 0.45) !important;
+    backdrop-filter: blur(12px) saturate(1.25);
+    -webkit-backdrop-filter: blur(12px) saturate(1.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 4px;
-    color: #ccc;
+    color: #e2e2e2;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: 
+        background-color var(--duration-fast) var(--easing-standard), 
+        border-color var(--duration-fast) var(--easing-standard),
+        transform var(--duration-fast) var(--easing-standard);
     font-family: inherit;
+    z-index: 10;
 }
-.code-copy-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
-.code-copy-btn--copied { color: #4caf50; border-color: #4caf50; }
+
+.code-copy-btn:hover {
+    background: rgba(45, 45, 45, 0.65) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.code-copy-btn:active {
+    background: rgba(25, 25, 25, 0.8) !important;
+    transform: scale(0.96);
+}
+
+.code-copy-btn--copied {
+    color: #4cd964 !important;
+    border-color: rgba(76, 217, 100, 0.4) !important;
+    background: rgba(76, 217, 100, 0.15) !important;
+}
+
 
 /* ── Home Page ─────────────────────────────────────────────────── */
 .home-hero {
@@ -389,8 +414,7 @@ html[data-theme="light"] .home-stat__label {
 
 .control-card:hover {
     background: rgba(255, 255, 255, 0.7);
-    border-color: var(--accent-fill-color-default);
-    transform: translateY(-4px); /* Lift / slide up transition */
+    transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
@@ -407,7 +431,6 @@ html[data-theme="dark"] .control-card {
 
 html[data-theme="dark"] .control-card:hover {
     background: rgba(55, 55, 55, 0.60);
-    border-color: var(--accent-fill-color-default);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -434,6 +457,17 @@ html[data-theme="dark"] .control-card:hover {
     font-size: 11px;
     color: var(--text-fill-color-secondary);
 }
+
+/* Reveal wrapper — must fill the grid cell so the reveal tracks the full card area */
+.fluent-reveal:has(.control-card) {
+    display: flex;
+    flex-direction: column;
+}
+
+.fluent-reveal .control-card {
+    flex: 1;
+}
+
 
 /* ── Settings Page ─────────────────────────────────────────────── */
 .settings-group {

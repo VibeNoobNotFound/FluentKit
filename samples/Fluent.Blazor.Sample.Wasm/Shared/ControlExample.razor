@@ -1,3 +1,4 @@
+@using Fluent.Blazor.Composite
 @inject GalleryJsInterop GalleryJs
 
 <div class="control-example">
@@ -27,37 +28,29 @@
             </div>
         }
 
-        <!-- Code panel with Razor / C# tabs -->
+        <!-- Code panel — FluentPivot tabs for Razor / C# -->
         @if (!string.IsNullOrEmpty(RazorCode) || !string.IsNullOrEmpty(CSharpCode))
         {
             <div class="control-example__code-panel">
-                <div class="control-example__code-tabs">
+                <FluentPivot SelectedIndex="@_selectedIndex"
+                             SelectedIndexChanged="@((i) => _selectedIndex = i)"
+                             style="--pivot-content-padding:0;">
+
                     @if (!string.IsNullOrEmpty(RazorCode))
                     {
-                        <button class="code-tab @(_activeTab == "razor" ? "code-tab--active" : "")"
-                                @onclick='() => SetTab("razor")'>
-                            Razor
-                        </button>
+                        <FluentPivotItem Title="Razor">
+                            <SampleCodeBlock Code="@RazorCode" Language="razor" />
+                        </FluentPivotItem>
                     }
+
                     @if (!string.IsNullOrEmpty(CSharpCode))
                     {
-                        <button class="code-tab @(_activeTab == "csharp" ? "code-tab--active" : "")"
-                                @onclick='() => SetTab("csharp")'>
-                            C#
-                        </button>
+                        <FluentPivotItem Title="C#">
+                            <SampleCodeBlock Code="@CSharpCode" Language="csharp" />
+                        </FluentPivotItem>
                     }
-                </div>
 
-                <div class="control-example__code-content">
-                    @if (_activeTab == "razor" && !string.IsNullOrEmpty(RazorCode))
-                    {
-                        <SampleCodeBlock Code="@RazorCode" Language="razor" />
-                    }
-                    else if (_activeTab == "csharp" && !string.IsNullOrEmpty(CSharpCode))
-                    {
-                        <SampleCodeBlock Code="@CSharpCode" Language="csharp" />
-                    }
-                </div>
+                </FluentPivot>
             </div>
         }
     </div>
@@ -82,14 +75,11 @@
     /// <summary>C# code shown in the C# tab.</summary>
     [Parameter] public string? CSharpCode { get; set; }
 
-    private string _activeTab = "razor";
+    private int _selectedIndex = 0;
 
     protected override void OnInitialized()
     {
-        // Default to the first available tab
-        if (string.IsNullOrEmpty(RazorCode) && !string.IsNullOrEmpty(CSharpCode))
-            _activeTab = "csharp";
+        // If only C# code is provided, start on index 0 (the only tab)
+        // If both are provided, Razor is index 0 which is correct already
     }
-
-    private void SetTab(string tab) => _activeTab = tab;
 }
