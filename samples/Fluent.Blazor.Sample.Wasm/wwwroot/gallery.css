@@ -404,34 +404,23 @@ html[data-theme="light"] .home-stat__label {
     border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
     
-    /* Sliding and lifting transition */
+    /* Background-only transition — transform/shadow now live on the reveal wrapper */
     transition: 
         background-color var(--duration-normal) var(--easing-standard),
-        border-color var(--duration-normal) var(--easing-standard),
-        transform var(--duration-normal) var(--easing-decelerate),
-        box-shadow var(--duration-normal) var(--easing-standard);
+        border-color var(--duration-normal) var(--easing-standard);
 }
 
 .control-card:hover {
     background: rgba(255, 255, 255, 0.7);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-}
-
-.control-card:active {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
 }
 
 html[data-theme="dark"] .control-card {
     background: rgba(45, 45, 45, 0.45);
     border: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 html[data-theme="dark"] .control-card:hover {
     background: rgba(55, 55, 55, 0.60);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .control-card__icon {
@@ -458,10 +447,39 @@ html[data-theme="dark"] .control-card:hover {
     color: var(--text-fill-color-secondary);
 }
 
-/* Reveal wrapper — must fill the grid cell so the reveal tracks the full card area */
+/* Reveal wrapper — fills the grid cell and owns the lift animation so the
+   reveal spotlight pseudo-elements rise together with the card on hover */
 .fluent-reveal:has(.control-card) {
     display: flex;
     flex-direction: column;
+
+    /* Override FluentRevealBackground's own transform baseline so we can
+       add our lift on top without fighting its perspective() default */
+    transform: perspective(600px) translateY(0) scale(1);
+    transition:
+        transform var(--duration-normal) var(--easing-decelerate),
+        box-shadow var(--duration-normal) var(--easing-standard);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+}
+
+.fluent-reveal:has(.control-card):hover {
+    transform: perspective(600px) translateY(-4px) scale(1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Active press — inherit reveal's own slight squish */
+.fluent-reveal:has(.control-card):active {
+    transform: perspective(600px) translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="dark"] .fluent-reveal:has(.control-card) {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme="dark"] .fluent-reveal:has(.control-card):hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .fluent-reveal .control-card {
