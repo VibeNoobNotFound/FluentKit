@@ -217,44 +217,44 @@
 
 @code {
     // ── Route constants ────────────────────────────────────────────
-    public const string RouteHome           = "/";
-    public const string RouteButton         = "/controls/button";
-    public const string RouteTextBlock      = "/controls/textblock";
-    public const string RouteCheckBox       = "/controls/checkbox";
-    public const string RouteRadioButton    = "/controls/radiobutton";
-    public const string RouteToggleSwitch   = "/controls/toggleswitch";
-    public const string RouteToggleButton   = "/controls/togglebutton";
-    public const string RouteTextBox        = "/controls/textbox";
-    public const string RoutePasswordBox    = "/controls/passwordbox";
-    public const string RouteSlider         = "/controls/slider";
-    public const string RouteProgressBar    = "/controls/progressbar";
-    public const string RouteProgressRing   = "/controls/progressring";
-    public const string RouteExpander       = "/controls/expander";
-    public const string RouteInfoBar        = "/controls/infobar";
-    public const string RouteInfoBadge      = "/controls/infobadge";
-    public const string RoutePersonPicture  = "/controls/personpicture";
-    public const string RouteIconButton     = "/controls/iconbutton";
-    public const string RouteCard           = "/controls/card";
-    public const string RouteListView       = "/controls/listview";
-    public const string RouteNavigationView = "/controls/navigationview";
-    public const string RouteComboBox       = "/controls/combobox";
-    public const string RouteAutoSuggestBox = "/controls/autosuggestbox";
-    public const string RouteNumberBox      = "/controls/numberbox";
-    public const string RouteCalendar       = "/controls/calendar";
-    public const string RouteFlyout         = "/controls/flyout";
-    public const string RouteMenuFlyout     = "/controls/menuflyout";
-    public const string RouteContextMenu    = "/controls/contextmenu";
-    public const string RouteMenuBar        = "/controls/menubar";
-    public const string RouteContentDialog  = "/controls/contentdialog";
-    public const string RoutePivot          = "/controls/pivot";
-    public const string RouteDropDownButton = "/controls/dropdownbutton";
-    public const string RouteSplitButton    = "/controls/splitbutton";
-    public const string RouteTooltip        = "/controls/tooltip";
-    public const string RouteTeachingTip    = "/controls/teachingtip";
-    public const string RouteAcrylic        = "/controls/acrylic";
-    public const string RouteMica           = "/controls/mica";
-    public const string RouteReveal         = "/controls/reveal";
-    public const string RouteSettings       = "/settings";
+    public const string RouteHome           = "";
+    public const string RouteButton         = "controls/button";
+    public const string RouteTextBlock      = "controls/textblock";
+    public const string RouteCheckBox       = "controls/checkbox";
+    public const string RouteRadioButton    = "controls/radiobutton";
+    public const string RouteToggleSwitch   = "controls/toggleswitch";
+    public const string RouteToggleButton   = "controls/togglebutton";
+    public const string RouteTextBox        = "controls/textbox";
+    public const string RoutePasswordBox    = "controls/passwordbox";
+    public const string RouteSlider         = "controls/slider";
+    public const string RouteProgressBar    = "controls/progressbar";
+    public const string RouteProgressRing   = "controls/progressring";
+    public const string RouteExpander       = "controls/expander";
+    public const string RouteInfoBar        = "controls/infobar";
+    public const string RouteInfoBadge      = "controls/infobadge";
+    public const string RoutePersonPicture  = "controls/personpicture";
+    public const string RouteIconButton     = "controls/iconbutton";
+    public const string RouteCard           = "controls/card";
+    public const string RouteListView       = "controls/listview";
+    public const string RouteNavigationView = "controls/navigationview";
+    public const string RouteComboBox       = "controls/combobox";
+    public const string RouteAutoSuggestBox = "controls/autosuggestbox";
+    public const string RouteNumberBox      = "controls/numberbox";
+    public const string RouteCalendar       = "controls/calendar";
+    public const string RouteFlyout         = "controls/flyout";
+    public const string RouteMenuFlyout     = "controls/menuflyout";
+    public const string RouteContextMenu    = "controls/contextmenu";
+    public const string RouteMenuBar        = "controls/menubar";
+    public const string RouteContentDialog  = "controls/contentdialog";
+    public const string RoutePivot          = "controls/pivot";
+    public const string RouteDropDownButton = "controls/dropdownbutton";
+    public const string RouteSplitButton    = "controls/splitbutton";
+    public const string RouteTooltip        = "controls/tooltip";
+    public const string RouteTeachingTip    = "controls/teachingtip";
+    public const string RouteAcrylic        = "controls/acrylic";
+    public const string RouteMica           = "controls/mica";
+    public const string RouteReveal         = "controls/reveal";
+    public const string RouteSettings       = "settings";
 
     // ── Background material (toggled from Settings page) ───────────
     internal static MicaVariant BackgroundVariantSetting = MicaVariant.Base;
@@ -307,8 +307,10 @@
 
     private void SyncSelectionFromUrl(string uri)
     {
-        var path = new Uri(uri).AbsolutePath.TrimEnd('/');
-        if (string.IsNullOrEmpty(path)) path = "/";
+        // ToBaseRelativePath strips the app's <base href> (e.g. "/FluentKit/")
+        // automatically, so this matches the RouteXxx constants regardless of
+        // whether the app is hosted at the domain root or a GitHub Pages subpath.
+        var path = Navigation.ToBaseRelativePath(uri).TrimEnd('/');
         _selectedRoute = path;
     }
 
