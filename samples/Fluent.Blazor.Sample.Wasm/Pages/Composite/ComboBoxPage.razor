@@ -1,0 +1,75 @@
+@page "/controls/combobox"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="ComboBox" Description="Use ComboBox to let users pick from a list of dropdown options, with editable search optional." />
+
+    <ControlExample HeaderText="Basic ComboBox" RazorCode="@_comboRazor" CSharpCode="@_comboCs">
+        <Example>
+            <div class="demo-col" style="max-width: 240px;">
+                <FluentComboBox TValue="string" Items="@_fruits" @bind-Value="_selectedFruit" Placeholder="Choose fruit" />
+                <div class="demo-output">Selected: @_selectedFruit</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Editable ComboBox with Custom Template" RazorCode="@_editRazor" CSharpCode="@_editCs">
+        <Example>
+            <div class="demo-col" style="max-width: 280px;">
+                <FluentComboBox TValue="string" Items="@_colors" @bind-Value="_selectedColor" Editable="true" Placeholder="Pick color">
+                    <ItemTemplate Context="item">
+                        <span style="display:inline-block; width:14px; height:14px; border-radius:3px; background:@ColorHexFor(item.Value); border:1px solid var(--card-stroke-default); margin-right:6px;"></span>
+                        <span>@item.Name</span>
+                    </ItemTemplate>
+                    <SelectedTemplate Context="item">
+                        <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:@ColorHexFor(item.Value); border:1px solid var(--card-stroke-default); margin-right:6px;"></span>
+                        <span>@item.Name</span>
+                    </SelectedTemplate>
+                </FluentComboBox>
+                <div class="demo-output">Selection: @_selectedColor</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private List<ComboBoxItem<string>> _fruits = new()
+    {
+        new("Apple", "apple"),
+        new("Banana", "banana"),
+        new("Cherry", "cherry"),
+    };
+    private string? _selectedFruit = "apple";
+
+    private List<ComboBoxItem<string>> _colors = new()
+    {
+        new("Red", "red"),
+        new("Green", "green"),
+        new("Blue", "blue"),
+    };
+    private string? _selectedColor = "blue";
+
+    private string ColorHexFor(string? value) => value switch
+    {
+        "red" => "#c42b1c",
+        "green" => "#0f7b0f",
+        "blue" => "#005fb8",
+        _ => "transparent"
+    };
+
+    private const string _comboRazor = @"<FluentComboBox TValue=""string"" Items=""@_fruits"" @bind-Value=""_selectedFruit"" Placeholder=""Choose fruit"" />";
+    private const string _comboCs = @"private List<ComboBoxItem<string>> _fruits = new() { ... };
+private string? _selectedFruit = ""apple"";";
+
+    private const string _editRazor = @"<FluentComboBox TValue=""string"" Items=""@_colors"" @bind-Value=""_selectedColor"" Editable=""true"" Placeholder=""Pick color"">
+    <ItemTemplate Context=""item"">
+        <span style=""display:inline-block; width:14px; height:14px; border-radius:3px; background:@ColorHexFor(item.Value); border:1px solid var(--card-stroke-default); margin-right:6px;""></span>
+        <span>@item.Name</span>
+    </ItemTemplate>
+    <SelectedTemplate Context=""item"">
+        <span style=""display:inline-block; width:12px; height:12px; border-radius:3px; background:@ColorHexFor(item.Value); border:1px solid var(--card-stroke-default); margin-right:6px;""></span>
+        <span>@item.Name</span>
+    </SelectedTemplate>
+</FluentComboBox>";
+    private const string _editCs = @"private List<ComboBoxItem<string>> _colors = new() { ... };
+private string? _selectedColor = ""blue"";";
+}

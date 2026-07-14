@@ -1,0 +1,23 @@
+@page "/controls/iconbutton"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="IconButton" Description="An IconButton is a specialized compact button displaying only an icon glyph." />
+
+    <ControlExample HeaderText="Basic IconButton" RazorCode="@_iconBtnRazor">
+        <Example>
+            <div class="demo-row" style="gap: 16px;">
+                <FluentIconButton><FluentIcon Name="@FluentIconNames.Settings" /></FluentIconButton>
+                <FluentIconButton><FluentIcon Name="@FluentIconNames.Delete" /></FluentIconButton>
+                <FluentIconButton Disabled="true"><FluentIcon Name="@FluentIconNames.Dismiss" /></FluentIconButton>
+                <FluentIconButton Href="https://github.com"><FluentIcon Name="@FluentIconNames.Home" /></FluentIconButton>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _iconBtnRazor = @"<FluentIconButton><FluentIcon Name=""@FluentIconNames.Settings"" /></FluentIconButton>
+<FluentIconButton><FluentIcon Name=""@FluentIconNames.Delete"" /></FluentIconButton>
+<FluentIconButton Disabled=""true""><FluentIcon Name=""@FluentIconNames.Dismiss"" /></FluentIconButton>
+<FluentIconButton Href=""https://github.com""><FluentIcon Name=""@FluentIconNames.Home"" /></FluentIconButton>";
+}

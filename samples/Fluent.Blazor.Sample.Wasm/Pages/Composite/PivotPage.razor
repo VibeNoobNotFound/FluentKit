@@ -1,0 +1,44 @@
+@page "/controls/pivot"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="Pivot" Description="Use Pivot for horizontal tab navigations to swap between different content containers." />
+
+    <ControlExample HeaderText="Basic Pivot Navigation" RazorCode="@_pivotRazor" CSharpCode="@_pivotCs">
+        <Example>
+            <div class="demo-col">
+                <FluentPivot @bind-SelectedIndex="_selectedIdx">
+                    <FluentPivotItem Title="Page 1">
+                        <div style="padding:12px 0;">
+                            <FluentTextBlock>First tab page layout view content details.</FluentTextBlock>
+                        </div>
+                    </FluentPivotItem>
+                    <FluentPivotItem Title="Page 2">
+                        <div style="padding:12px 0;">
+                            <FluentTextBlock>Second tab page layout view content details.</FluentTextBlock>
+                        </div>
+                    </FluentPivotItem>
+                    <FluentPivotItem Title="Disabled Option" Disabled="true">
+                        <div style="padding:12px 0;">
+                            <FluentTextBlock>This will not load.</FluentTextBlock>
+                        </div>
+                    </FluentPivotItem>
+                </FluentPivot>
+                <div class="demo-output">Selected Tab Index: @_selectedIdx</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private int _selectedIdx;
+
+    private const string _pivotRazor = @"<FluentPivot @bind-SelectedIndex=""_selectedIdx"">
+    <FluentPivotItem Title=""Page 1"">
+        <FluentTextBlock>First tab page layout view content details.</FluentTextBlock>
+    </FluentPivotItem>
+    <FluentPivotItem Title=""Page 2"">
+        <FluentTextBlock>Second tab page layout view content details.</FluentTextBlock>
+    </FluentPivotItem>
+</FluentPivot>";
+    private const string _pivotCs = @"private int _selectedIdx;";
+}

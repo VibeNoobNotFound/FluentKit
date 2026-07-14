@@ -1,0 +1,33 @@
+@inject GalleryJsInterop GalleryJs
+
+<div class="sample-code-block">
+    <pre><code id="@_elementId" class="@LangClass">@Code</code></pre>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Code { get; set; } = "";
+
+    /// <summary>
+    /// Language for Prism.js. Use "razor" (mapped to markup), "csharp", "css", "xml".
+    /// </summary>
+    [Parameter] public string Language { get; set; } = "razor";
+
+    private string _elementId = $"code-{Guid.NewGuid():N}";
+
+    private string LangClass => Language.ToLowerInvariant() switch
+    {
+        "razor" or "markup" or "html" => "language-markup",
+        "csharp" or "cs" or "c#"     => "language-csharp",
+        "css"                          => "language-css",
+        "xml"                          => "language-xml",
+        _                              => $"language-{Language}"
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GalleryJs.HighlightElementAsync(_elementId);
+        }
+    }
+}

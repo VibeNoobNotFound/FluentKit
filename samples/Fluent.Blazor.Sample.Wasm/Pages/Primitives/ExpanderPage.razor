@@ -1,0 +1,39 @@
+@page "/controls/expander"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="Expander" Description="An Expander has a header and a collapsible content panel area." />
+
+    <ControlExample HeaderText="Basic Expander" RazorCode="@_expanderRazor" CSharpCode="@_expanderCs">
+        <Example>
+            <div class="demo-col" style="max-width: 480px;">
+                <FluentExpander @bind-IsExpanded="_isExpanded">
+                    <ChildContent>Click to expand/collapse</ChildContent>
+                    <Content>
+                        <div style="padding: 4px 0;">
+                            <FluentTextBlock Variant="TextBlockVariant.Body">
+                                Collapsible content pane. Smooth CSS-based grid grid-template-rows transition rendering.
+                            </FluentTextBlock>
+                        </div>
+                    </Content>
+                </FluentExpander>
+                <div class="demo-output">Expanded: @_isExpanded</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _isExpanded;
+
+    private const string _expanderRazor = @"<FluentExpander @bind-IsExpanded=""_isExpanded"">
+    <ChildContent>Click to expand/collapse</ChildContent>
+    <Content>
+        <div style=""padding: 4px 0;"">
+            <FluentTextBlock Variant=""TextBlockVariant.Body"">
+                Collapsible content pane. Smooth CSS-based grid grid-template-rows transition rendering.
+            </FluentTextBlock>
+        </div>
+    </Content>
+</FluentExpander>";
+    private const string _expanderCs = @"private bool _isExpanded;";
+}

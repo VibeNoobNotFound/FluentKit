@@ -1,0 +1,42 @@
+@page "/controls/teachingtip"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="TeachingTip" Description="Use TeachingTip to guide users with targeted callouts or viewport fixed info notifications." />
+
+    <ControlExample HeaderText="Targeted Callout tip" RazorCode="@_targetedRazor" CSharpCode="@_targetedCs">
+        <Example>
+            <div class="demo-col" style="align-items: flex-start;">
+                <div @ref="_targetElement" style="width:120px; height:60px; border:1px solid var(--card-stroke-default); display:flex; align-items:center; justify-content:center; border-radius:6px; background:var(--layer-fill-color-alt);">
+                    Anchor Item
+                </div>
+                
+                <div style="margin-top:16px;">
+                    <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _tipOpen = true)">Show Targeted Tip</FluentButton>
+                </div>
+
+                <FluentTeachingTip @bind-IsOpen="_tipOpen" Target="_targetElement" Placement="OverlayPlacement.Bottom" Title="Update Alert" Subtitle="New adjustments have been released for this control.">
+                    <ActionContent>
+                        <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _tipOpen = false)">Got It</FluentButton>
+                    </ActionContent>
+                </FluentTeachingTip>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private ElementReference _targetElement;
+    private bool _tipOpen;
+
+    private const string _targetedRazor = @"<div @ref=""_targetElement"">Anchor Item</div>
+<FluentButton Variant=""ButtonVariant.Standard"" OnClick=""@(() => _tipOpen = true)"">Show Targeted Tip</FluentButton>
+
+<FluentTeachingTip @bind-IsOpen=""_tipOpen"" Target=""_targetElement"" Placement=""OverlayPlacement.Bottom"" Title=""Update Alert"" Subtitle=""New adjustments have been released for this control."">
+    <ActionContent>
+        <FluentButton Variant=""ButtonVariant.Accent"" OnClick=""@(() => _tipOpen = false)"">Got It</FluentButton>
+    </ActionContent>
+</FluentTeachingTip>";
+
+    private const string _targetedCs = @"private ElementReference _targetElement;
+private bool _tipOpen;";
+}

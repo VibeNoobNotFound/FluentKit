@@ -1,0 +1,33 @@
+@page "/controls/slider"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="Slider" Description="A Slider control lets users select from a range of numeric values by moving a thumb." />
+
+    <ControlExample HeaderText="Horizontal Slider with Ticks" RazorCode="@_slideRazor" CSharpCode="@_slideCs">
+        <Example>
+            <div class="demo-col" style="max-width: 320px;">
+                <FluentSlider @bind-Value="_volume" Min="0" Max="100" Step="1" />
+                <div class="demo-output">Volume: @_volume%</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Vertical and Ticked Sliders" RazorCode="@_vertRazor">
+        <Example>
+            <div class="demo-row" style="align-items: flex-start; gap: 48px;">
+                <FluentSlider Value="50" Min="0" Max="100" Orientation="FluentSliderOrientation.Vertical" style="height: 150px;" />
+                <FluentSlider Value="5" Min="0" Max="10" Step="1" TickFrequency="1" TickPlacement="FluentSliderTickPlacement.Outside" style="width: 200px;" />
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private double _volume = 45;
+
+    private const string _slideRazor = @"<FluentSlider @bind-Value=""_volume"" Min=""0"" Max=""100"" Step=""1"" />";
+    private const string _slideCs = @"private double _volume = 45;";
+
+    private const string _vertRazor = @"<FluentSlider Value=""50"" Min=""0"" Max=""100"" Orientation=""FluentSliderOrientation.Vertical"" style=""height: 150px;"" />
+<FluentSlider Value=""5"" Min=""0"" Max=""10"" Step=""1"" TickFrequency=""1"" TickPlacement=""FluentSliderTickPlacement.Outside"" style=""width: 200px;"" />";
+}

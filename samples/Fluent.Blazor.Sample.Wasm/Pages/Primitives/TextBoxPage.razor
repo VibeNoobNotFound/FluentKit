@@ -1,0 +1,43 @@
+@page "/controls/textbox"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="TextBox" Description="The TextBox control lets users enter single-line plain text." />
+
+    <ControlExample HeaderText="Simple TextBox" RazorCode="@_basicRazor" CSharpCode="@_basicCs">
+        <Example>
+            <div class="demo-col">
+                <FluentTextBox @bind-Value="_username" Header="Username" Placeholder="Enter your username..." />
+                <div class="demo-output">Value: @_username</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="TextBox with Action Buttons" RazorCode="@_actionRazor" CSharpCode="@_actionCs">
+        <Example>
+            <FluentTextBox @bind-Value="_search" Header="Search" Placeholder="Type search query...">
+                <Buttons>
+                    <FluentTextBoxButton OnClick="@(() => _search = string.Empty)">
+                        <FluentIcon Name="@FluentIconNames.Dismiss" Size="16" />
+                    </FluentTextBoxButton>
+                </Buttons>
+            </FluentTextBox>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private string? _username;
+    private string _search = "";
+
+    private const string _basicRazor = @"<FluentTextBox @bind-Value=""_username"" Header=""Username"" Placeholder=""Enter your username..."" />";
+    private const string _basicCs = @"private string? _username;";
+
+    private const string _actionRazor = @"<FluentTextBox @bind-Value=""_search"" Header=""Search"" Placeholder=""Type search query..."">
+    <Buttons>
+        <FluentTextBoxButton OnClick=""@(() => _search = string.Empty)"">
+            <FluentIcon Name=""@FluentIconNames.Dismiss"" Size=""16"" />
+        </FluentTextBoxButton>
+    </Buttons>
+</FluentTextBox>";
+    private const string _actionCs = @"private string _search = """";";
+}

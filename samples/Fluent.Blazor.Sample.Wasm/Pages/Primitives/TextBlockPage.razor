@@ -1,0 +1,31 @@
+@page "/controls/textblock"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="TextBlock" Description="Use TextBlock to display rich formatted text variants based on the WinUI type ramp." />
+
+    <ControlExample HeaderText="TextBlock Variants" RazorCode="@_variantsRazor">
+        <Example>
+            <div class="demo-col" style="gap: 12px;">
+                <FluentTextBlock Variant="TextBlockVariant.Display">Display text</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.TitleLarge">Title Large text</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Title">Title text</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Subtitle">Subtitle text</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.BodyLarge">Body Large text</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Body Strong text</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Body">Body text</FluentTextBlock>
+                <FluentTextBlock Variant="TextBlockVariant.Caption">Caption text</FluentTextBlock>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _variantsRazor = @"<FluentTextBlock Variant=""TextBlockVariant.Display"">Display text</FluentTextBlock>
+<FluentTextBlock Variant=""TextBlockVariant.TitleLarge"">Title Large text</FluentTextBlock>
+<FluentTextBlock Variant=""TextBlockVariant.Title"">Title text</FluentTextBlock>
+<FluentTextBlock Variant=""TextBlockVariant.Subtitle"">Subtitle text</FluentTextBlock>
+<FluentTextBlock Variant=""TextBlockVariant.BodyLarge"">Body Large text</FluentTextBlock>
+<FluentTextBlock Variant=""TextBlockVariant.BodyStrong"">Body Strong text</FluentTextBlock>
+<FluentTextBlock Variant=""TextBlockVariant.Body"">Body text</FluentTextBlock>
+<FluentTextBlock Variant=""TextBlockVariant.Caption"">Caption text</FluentTextBlock>";
+}

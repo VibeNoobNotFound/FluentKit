@@ -1,0 +1,37 @@
+@page "/controls/flyout"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="Flyout" Description="Flyouts show contextual information or request user confirmation." />
+
+    <ControlExample HeaderText="Standard Click Triggered Flyout" RazorCode="@_flyRazor">
+        <Example>
+            <div class="demo-row">
+                <FluentFlyout Placement="OverlayPlacement.Bottom">
+                    <ChildContent>
+                        <FluentButton Variant="ButtonVariant.Standard">Open Bottom Flyout</FluentButton>
+                    </ChildContent>
+                    <FlyoutContent>
+                        <div style="padding: 4px;">
+                            <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Delete Confirmation</FluentTextBlock>
+                            <FluentTextBlock Variant="TextBlockVariant.Body" style="margin-top:4px;">Are you sure? This cannot be undone.</FluentTextBlock>
+                        </div>
+                    </FlyoutContent>
+                </FluentFlyout>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _flyRazor = @"<FluentFlyout Placement=""OverlayPlacement.Bottom"">
+    <ChildContent>
+        <FluentButton Variant=""ButtonVariant.Standard"">Open Bottom Flyout</FluentButton>
+    </ChildContent>
+    <FlyoutContent>
+        <div style=""padding: 4px;"">
+            <FluentTextBlock Variant=""TextBlockVariant.BodyStrong"">Delete Confirmation</FluentTextBlock>
+            <FluentTextBlock Variant=""TextBlockVariant.Body"" style=""margin-top:4px;"">Are you sure? This cannot be undone.</FluentTextBlock>
+        </div>
+    </FlyoutContent>
+</FluentFlyout>";
+}

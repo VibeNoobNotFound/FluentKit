@@ -1,0 +1,29 @@
+@page "/controls/personpicture"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="PersonPicture" Description="Use PersonPicture to represent a user's avatar image or initials." />
+
+    <ControlExample HeaderText="PersonPicture Variants" RazorCode="@_personRazor">
+        <Example>
+            <div class="demo-row" style="gap: 24px; align-items: center;">
+                <FluentPersonPicture Alt="Ada Lovelace" />
+                <FluentPersonPicture Size="48" Src="https://this-domain-does-not-exist.example/avatar.jpg" Alt="Grace Hopper" />
+                <FluentPersonPicture Size="40" Alt="Alan Turing">
+                    <Badge>
+                        <span style="display:block; width:12px; height:12px; border-radius:50%; background:#0f7b0f; border:2px solid var(--card-background-default);"></span>
+                    </Badge>
+                </FluentPersonPicture>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _personRazor = @"<FluentPersonPicture Alt=""Ada Lovelace"" />
+<FluentPersonPicture Size=""48"" Src=""https://this-domain-does-not-exist.example/avatar.jpg"" Alt=""Grace Hopper"" />
+<FluentPersonPicture Size=""40"" Alt=""Alan Turing"">
+    <Badge>
+        <span style=""display:block; width:12px; height:12px; border-radius:50%; background:#0f7b0f; border:2px solid var(--card-background-default);""></span>
+    </Badge>
+</FluentPersonPicture>";
+}

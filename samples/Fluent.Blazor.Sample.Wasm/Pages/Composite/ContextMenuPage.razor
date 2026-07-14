@@ -1,0 +1,46 @@
+@page "/controls/contextmenu"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="ContextMenu" Description="Use ContextMenu to trigger secondary actions via right-click triggers." />
+
+    <ControlExample HeaderText="Right-Click Demo Area" RazorCode="@_contextRazor" CSharpCode="@_contextCs">
+        <Example>
+            <div class="demo-col">
+                <FluentContextMenu>
+                    <ChildContent>
+                        <div style="width:300px; height:120px; display:flex; align-items:center; justify-content:center; border: 1px dashed var(--card-stroke-default); border-radius:8px; cursor:context-menu;">
+                            Right-click inside this card
+                        </div>
+                    </ChildContent>
+                    <MenuItems>
+                        <FluentMenuFlyoutItem OnClick='@(() => LogAction("Cut"))'>Cut</FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem OnClick='@(() => LogAction("Copy"))'>Copy</FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem OnClick='@(() => LogAction("Paste"))'>Paste</FluentMenuFlyoutItem>
+                    </MenuItems>
+                </FluentContextMenu>
+                <div class="demo-output">Last Context Action: @_contextAction</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private string? _contextAction;
+
+    private void LogAction(string act) => _contextAction = act;
+
+    private const string _contextRazor = @"<FluentContextMenu>
+    <ChildContent>
+        <div style=""width:300px; height:120px; display:flex; align-items:center; justify-content:center; border: 1px dashed var(--card-stroke-default); border-radius:8px; cursor:context-menu;"">
+            Right-click inside this card
+        </div>
+    </ChildContent>
+    <MenuItems>
+        <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Cut""))'>Cut</FluentMenuFlyoutItem>
+        ...
+    </MenuItems>
+</FluentContextMenu>";
+
+    private const string _contextCs = @"private string? _contextAction;
+private void LogAction(string act) => _contextAction = act;";
+}

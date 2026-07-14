@@ -1,0 +1,21 @@
+@page "/controls/toggleswitch"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="ToggleSwitch" Description="Use ToggleSwitch to let users turn an option on or off." />
+
+    <ControlExample HeaderText="Basic ToggleSwitch" RazorCode="@_switchRazor" CSharpCode="@_switchCs">
+        <Example>
+            <div class="demo-col">
+                <FluentToggleSwitch @bind-Checked="_wifiOn" Header="Wi-Fi Status" />
+                <div class="demo-output">Is Enabled: @_wifiOn</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _wifiOn = true;
+
+    private const string _switchRazor = @"<FluentToggleSwitch @bind-Checked=""_wifiOn"" Header=""Wi-Fi Status"" />";
+    private const string _switchCs = @"private bool _wifiOn = true;";
+}

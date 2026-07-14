@@ -1,0 +1,34 @@
+@page "/controls/calendar"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="Calendar &amp; DatePicker" Description="CalendarView lets users browse and select dates. CalendarDatePicker displays this calendar in a popup." />
+
+    <ControlExample HeaderText="Standalone CalendarView" RazorCode="@_calRazor" CSharpCode="@_calCs">
+        <Example>
+            <div class="demo-col" style="align-items: flex-start;">
+                <FluentCalendarView @bind-Value="_selectedDate" Headers="true" />
+                <div class="demo-output">Selected Date: @_selectedDate?.ToShortDateString()</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="CalendarDatePicker Popout" RazorCode="@_pickerRazor" CSharpCode="@_pickerCs">
+        <Example>
+            <div class="demo-col" style="max-width: 240px;">
+                <FluentCalendarDatePicker @bind-Value="_pickedDate" />
+                <div class="demo-output">Picked: @_pickedDate?.ToShortDateString()</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private DateTime? _selectedDate = DateTime.Today;
+    private DateTime? _pickedDate;
+
+    private const string _calRazor = @"<FluentCalendarView @bind-Value=""_selectedDate"" Headers=""true"" />";
+    private const string _calCs = @"private DateTime? _selectedDate = DateTime.Today;";
+
+    private const string _pickerRazor = @"<FluentCalendarDatePicker @bind-Value=""_pickedDate"" />";
+    private const string _pickerCs = @"private DateTime? _pickedDate;";
+}

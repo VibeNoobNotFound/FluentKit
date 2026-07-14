@@ -1,0 +1,39 @@
+@page "/controls/button"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="Button" Description="The Button control is a standard push button that triggers an immediate action." />
+
+    <ControlExample HeaderText="Standard Button" RazorCode="@_standardRazor">
+        <Example>
+            <div class="demo-row">
+                <FluentButton Variant="ButtonVariant.Standard">Standard Button</FluentButton>
+                <FluentButton Variant="ButtonVariant.Accent">Accent Button</FluentButton>
+                <FluentButton Variant="ButtonVariant.Subtle">Subtle Button</FluentButton>
+                <FluentButton Variant="ButtonVariant.Hyperlink" Href="https://github.com">Hyperlink Button</FluentButton>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Interactive Options" RazorCode="@_interactiveRazor" CSharpCode="@_interactiveCs" Options="@_options">
+        <Example>
+            <FluentButton Variant="ButtonVariant.Standard" Disabled="_disabled">Click Me</FluentButton>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _disabled;
+
+    private const string _standardRazor = @"<FluentButton Variant=""ButtonVariant.Standard"">Standard Button</FluentButton>
+<FluentButton Variant=""ButtonVariant.Accent"">Accent Button</FluentButton>
+<FluentButton Variant=""ButtonVariant.Subtle"">Subtle Button</FluentButton>
+<FluentButton Variant=""ButtonVariant.Hyperlink"" Href=""https://github.com"">Hyperlink Button</FluentButton>";
+
+    private const string _interactiveRazor = @"<FluentButton Variant=""ButtonVariant.Standard"" Disabled=""@_disabled"">Click Me</FluentButton>";
+    
+    private const string _interactiveCs = @"private bool _disabled;";
+
+    private RenderFragment _options => __builder => {
+        <FluentCheckBox @bind-Checked="_disabled">Disable Button</FluentCheckBox>
+    };
+}

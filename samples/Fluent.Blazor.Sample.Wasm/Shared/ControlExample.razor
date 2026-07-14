@@ -1,0 +1,115 @@
+@inject GalleryJsInterop GalleryJs
+
+<div class="control-example">
+    @if (!string.IsNullOrEmpty(HeaderText))
+    {
+        <div class="control-example__header">
+            <p class="control-example__header-text">@HeaderText</p>
+            @if (!string.IsNullOrEmpty(Description))
+            {
+                <p class="control-example__header-desc">@Description</p>
+            }
+        </div>
+    }
+
+    <div class="control-example__body">
+        <!-- Live demo area -->
+        <div class="control-example__demo">
+            @Example
+        </div>
+
+        <!-- Interactive options (optional) -->
+        @if (Options is not null)
+        {
+            <div class="control-example__options">
+                <span class="control-example__options-label">Options</span>
+                @Options
+            </div>
+        }
+
+        <!-- Code panel with Razor / C# tabs -->
+        @if (!string.IsNullOrEmpty(RazorCode) || !string.IsNullOrEmpty(CSharpCode))
+        {
+            <div class="control-example__code-panel">
+                <div class="control-example__code-tabs">
+                    @if (!string.IsNullOrEmpty(RazorCode))
+                    {
+                        <button class="code-tab @(_activeTab == "razor" ? "code-tab--active" : "")"
+                                @onclick='() => SetTab("razor")'>
+                            Razor
+                        </button>
+                    }
+                    @if (!string.IsNullOrEmpty(CSharpCode))
+                    {
+                        <button class="code-tab @(_activeTab == "csharp" ? "code-tab--active" : "")"
+                                @onclick='() => SetTab("csharp")'>
+                            C#
+                        </button>
+                    }
+                    <div style="flex:1;"></div>
+                    <button class="code-copy-btn @(_copied ? "code-copy-btn--copied" : "")"
+                            @onclick="CopyActiveCode">
+                        @(_copied ? "✓ Copied" : "Copy")
+                    </button>
+                </div>
+
+                <div class="control-example__code-content">
+                    @if (_activeTab == "razor" && !string.IsNullOrEmpty(RazorCode))
+                    {
+                        <SampleCodeBlock Code="@RazorCode" Language="razor" />
+                    }
+                    else if (_activeTab == "csharp" && !string.IsNullOrEmpty(CSharpCode))
+                    {
+                        <SampleCodeBlock Code="@CSharpCode" Language="csharp" />
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Short label shown in the example's header bar, e.g. "Standard button variants".</summary>
+    [Parameter] public string? HeaderText { get; set; }
+
+    /// <summary>Optional longer description shown below HeaderText.</summary>
+    [Parameter] public string? Description { get; set; }
+
+    /// <summary>The live interactive demo content.</summary>
+    [Parameter] public RenderFragment? Example { get; set; }
+
+    /// <summary>Optional slot for option controls (checkboxes, sliders, etc.).</summary>
+    [Parameter] public RenderFragment? Options { get; set; }
+
+    /// <summary>Razor/HTML code shown in the Razor tab.</summary>
+    [Parameter] public string? RazorCode { get; set; }
+
+    /// <summary>C# code shown in the C# tab.</summary>
+    [Parameter] public string? CSharpCode { get; set; }
+
+    private string _activeTab = "razor";
+    private bool _copied;
+
+    protected override void OnInitialized()
+    {
+        // Default to the first available tab
+        if (string.IsNullOrEmpty(RazorCode) && !string.IsNullOrEmpty(CSharpCode))
+            _activeTab = "csharp";
+    }
+
+    private void SetTab(string tab) => _activeTab = tab;
+
+    private async Task CopyActiveCode()
+    {
+        var code = _activeTab == "razor" ? RazorCode : CSharpCode;
+        if (!string.IsNullOrEmpty(code))
+        {
+            await GalleryJs.CopyToClipboardAsync(code);
+            _copied = true;
+            StateHasChanged();
+            await Task.Delay(1800);
+            _copied = false;
+            StateHasChanged();
+        }
+    }
+}

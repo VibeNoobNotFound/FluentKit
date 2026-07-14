@@ -1,0 +1,69 @@
+@page "/controls/contentdialog"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="ContentDialog" Description="Use ContentDialog to show modals and prompt for structured forms or operations." />
+
+    <ControlExample HeaderText="ContentDialog Prompts" RazorCode="@_dialogRazor" CSharpCode="@_dialogCs">
+        <Example>
+            <div class="demo-row">
+                <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _basicOpen = true)">Basic Modal</FluentButton>
+                <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _confirmOpen = true)">Confirm Popup (Two Buttons)</FluentButton>
+            </div>
+            <div class="demo-output">Action State: @_actionState</div>
+
+            <FluentContentDialog @bind-IsOpen="_basicOpen" Title="About App">
+                <FluentTextBlock Variant="TextBlockVariant.Body">
+                    A basic Modal Dialog overlay box with default light dismiss behavior.
+                </FluentTextBlock>
+            </FluentContentDialog>
+
+            <FluentContentDialog @bind-IsOpen="_confirmOpen" Title="Confirm Delete">
+                <ChildContent>
+                    <FluentTextBlock Variant="TextBlockVariant.Body">Are you sure you want to proceed?</FluentTextBlock>
+                </ChildContent>
+                <Footer>
+                    <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => CloseConfirm("Cancelled"))">Cancel</FluentButton>
+                    <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => CloseConfirm("Confirmed"))">Delete</FluentButton>
+                </Footer>
+            </FluentContentDialog>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _basicOpen;
+    private bool _confirmOpen;
+    private string? _actionState;
+
+    private void CloseConfirm(string act)
+    {
+        _actionState = act;
+        _confirmOpen = false;
+    }
+
+    private const string _dialogRazor = @"<FluentContentDialog @bind-IsOpen=""_basicOpen"" Title=""About App"">
+    <FluentTextBlock Variant=""TextBlockVariant.Body"">
+        A basic Modal Dialog overlay box with default light dismiss behavior.
+    </FluentTextBlock>
+</FluentContentDialog>
+
+<FluentContentDialog @bind-IsOpen=""_confirmOpen"" Title=""Confirm Delete"">
+    <ChildContent>
+        <FluentTextBlock Variant=""TextBlockVariant.Body"">Are you sure you want to proceed?</FluentTextBlock>
+    </ChildContent>
+    <Footer>
+        <FluentButton Variant=""ButtonVariant.Standard"" OnClick=""@(() => CloseConfirm(""Cancelled""))"">Cancel</FluentButton>
+        <FluentButton Variant=""ButtonVariant.Accent"" OnClick=""@(() => CloseConfirm(""Confirmed""))"">Delete</FluentButton>
+    </Footer>
+</FluentContentDialog>";
+
+    private const string _dialogCs = @"private bool _basicOpen;
+private bool _confirmOpen;
+private string? _actionState;
+
+private void CloseConfirm(string act)
+{
+    _actionState = act;
+    _confirmOpen = false;
+}";
+}

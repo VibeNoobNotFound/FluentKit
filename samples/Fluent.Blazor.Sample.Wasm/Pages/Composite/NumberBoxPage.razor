@@ -1,0 +1,31 @@
+@page "/controls/numberbox"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="NumberBox" Description="NumberBox control allows inputting and evaluating numeric values, clamping value inside bounds." />
+
+    <ControlExample HeaderText="NumberBox Spin Button Modes" RazorCode="@_numRazor" CSharpCode="@_numCs">
+        <Example>
+            <div class="demo-row" style="gap: 48px;">
+                <div class="demo-col">
+                    <span style="font-size: 12px; font-weight: 600;">Compact Mode</span>
+                    <FluentNumberBox @bind-Value="_val1" Mode="NumberBoxSpinButtonMode.Compact" Min="0" Max="10" Step="1" />
+                </div>
+                <div class="demo-col">
+                    <span style="font-size: 12px; font-weight: 600;">Expanded (Focus to see popout)</span>
+                    <FluentNumberBox @bind-Value="_val2" Mode="NumberBoxSpinButtonMode.Expanded" Min="0" Max="10" Step="1" />
+                </div>
+            </div>
+            <div class="demo-output">Compact: @_val1, Expanded: @_val2</div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private double _val1 = 5;
+    private double _val2 = 5;
+
+    private const string _numRazor = @"<FluentNumberBox @bind-Value=""_val1"" Mode=""NumberBoxSpinButtonMode.Compact"" Min=""0"" Max=""10"" Step=""1"" />
+<FluentNumberBox @bind-Value=""_val2"" Mode=""NumberBoxSpinButtonMode.Expanded"" Min=""0"" Max=""10"" Step=""1"" />";
+    private const string _numCs = @"private double _val1 = 5;
+private double _val2 = 5;";
+}

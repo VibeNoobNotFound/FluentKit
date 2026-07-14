@@ -1,1164 +1,128 @@
 @page "/"
-@inject IThemeService ThemeService
 
-<FluentMicaPanel Variant="_mainMicaVariant" BackgroundImageUrl="wallpaper.jpg"
-                  style="@_mainMicaPanelStyle" />
-
-<div style="padding: 40px; display: flex; flex-direction: column; gap: 24px; align-items: flex-start; position:relative; min-height:100vh;">
-
-    <div style="display:flex; gap:8px;">
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Light))">Light</FluentButton>
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Dark))">Dark</FluentButton>
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.System))">System</FluentButton>
-    </div>
-
-    <div style="display:flex; gap:8px; align-items:center;">
-        <FluentButton Variant="ButtonVariant.Standard">Standard</FluentButton>
-        <FluentButton Variant="ButtonVariant.Accent">Accent</FluentButton>
-        <FluentButton Variant="ButtonVariant.Subtle">Subtle</FluentButton>
-        <FluentButton Variant="ButtonVariant.Hyperlink">Hyperlink</FluentButton>
-        <FluentButton Variant="ButtonVariant.Standard" Disabled="true">Disabled</FluentButton>
-    </div>
-
-    <div>
-        <FluentTooltip Text="This popup is rendered by FluentOverlayHost, not by the button itself.">
-            <FluentButton Variant="ButtonVariant.Standard">Hover me — proves the overlay infra</FluentButton>
-        </FluentTooltip>
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Fluent.Blazor primitives</FluentTextBlock>
-
-    <div style="display:flex; flex-direction:column; gap:6px;">
-        <FluentTextBlock Variant="TextBlockVariant.Display">Display</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.TitleLarge">Title large</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Title">Title</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Subtitle">Subtitle</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.BodyLarge">Body large</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Body strong</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Body">Body</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Caption">Caption</FluentTextBlock>
-    </div>
-
-    <FluentDivider />
-
-    <div style="display:flex; flex-direction:column; gap:12px;">
-        <FluentCheckBox @bind-Checked="_checkbox1">Wi-Fi</FluentCheckBox>
-        <FluentCheckBox @bind-Checked="_checkbox2" ThreeState="true" @bind-Indeterminate="_checkboxIndeterminate">Select all (three-state)</FluentCheckBox>
-        <FluentCheckBox Checked="true" Disabled="true">Disabled, checked</FluentCheckBox>
-    </div>
-
-    <FluentDivider />
-
-    <FluentRadioGroup @bind-Value="_flavor">
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            <FluentRadioButton Value="@("chocolate")">Chocolate</FluentRadioButton>
-            <FluentRadioButton Value="@("vanilla")">Vanilla</FluentRadioButton>
-            <FluentRadioButton Value="@("strawberry")">Strawberry</FluentRadioButton>
-            <FluentRadioButton Value="@("mint")" Disabled="true">Mint (disabled)</FluentRadioButton>
+<div class="gallery-page">
+    <!-- Hero -->
+    <div class="home-hero">
+        <div class="home-hero__badge">
+            <span>⚡</span> WinUI-style Blazor Components
         </div>
-    </FluentRadioGroup>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_flavor</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentToggleSwitch @bind-Checked="_wifiEnabled" Header="Wi-Fi" />
-    <FluentToggleSwitch Checked="true" Disabled="true" Header="Airplane mode (disabled)" />
-
-    <FluentDivider />
-
-    <FluentTextBox @bind-Value="_name" Header="Name" Placeholder="Enter your name" />
-    <FluentTextBlock Variant="TextBlockVariant.Caption">You typed: @_name</FluentTextBlock>
-    <FluentTextBox Value="Can't touch this" Header="Disabled" Disabled="true" />
-
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        TextBox's <code>Buttons</code> slot for arbitrary right-aligned buttons (search/clear/custom
-        icon) — same slot NumberBox's spin buttons below are built on.
-    </FluentTextBlock>
-    <FluentTextBox @bind-Value="_searchText" Header="Custom icon button" Placeholder="Search…">
-        <Buttons>
-            <FluentTextBoxButton OnClick="@(() => _searchText = string.Empty)">
-                <FluentIcon Name="@FluentIconNames.Dismiss" Size="16" />
-            </FluentTextBoxButton>
-        </Buttons>
-    </FluentTextBox>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">NumberBox</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Wraps FluentTextBox (composes it, doesn't reimplement input chrome — same relationship
-        fluent-svelte's own NumberBox has to its TextBox) with spin buttons. Typing an
-        invalid/in-progress value (e.g. a lone "-") is kept on screen without touching
-        <code>Value</code> until it parses; spin buttons clamp to Min/Max and disable at the bounds.
-        Two <code>Mode</code>s: <b>Compact</b> keeps small +/- buttons side by side inside the box
-        at all times; <b>Expanded</b> (default) keeps the box clean at rest and pops a bigger
-        stacked up/down control out from its right edge once you click/tab into it — try focusing
-        the second one below.
-    </FluentTextBlock>
-    <div style="display:flex; gap:48px; align-items:flex-start; flex-wrap:wrap;">
-        <div style="display:flex; flex-direction:column; gap:4px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Compact</FluentTextBlock>
-            <FluentNumberBox @bind-Value="_numberValueCompact" Mode="NumberBoxSpinButtonMode.Compact" Min="0" Max="10" Step="1" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:4px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Expanded (focus to see the popout)</FluentTextBlock>
-            <FluentNumberBox @bind-Value="_numberValueExpanded" Mode="NumberBoxSpinButtonMode.Expanded" Min="0" Max="10" Step="1" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:4px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Disabled</FluentTextBlock>
-            <FluentNumberBox Value="3.5" Disabled="true" />
-        </div>
-    </div>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Compact: @_numberValueCompact — Expanded: @_numberValueExpanded</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">AutoSuggestBox</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Free-typing search-as-you-type — unlike ComboBox's editable mode, <code>Text</code> is
-        never forced to match an item. <code>QuerySubmitted</code> fires on Enter with the raw
-        typed text when nothing's highlighted; <code>SuggestionChosen</code> fires separately when
-        you click a row or arrow-key to one and press Enter. Default filter is a case-insensitive
-        substring match (not prefix-only), so typing "ing" matches "Singapore".
-    </FluentTextBlock>
-    <FluentAutoSuggestBox TValue="string" Items="@_citySuggestions" @bind-Text="_citySearchText"
-                          Placeholder="Search for a city…"
-                          SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _citySuggestionChosen = item.Value)"
-                          QuerySubmitted="@((string? q) => _citySuggestionChosen = $"searched: {q}")" />
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Typed: @_citySearchText — Last result: @_citySuggestionChosen</FluentTextBlock>
-
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px; margin-top:8px;">
-        <code>EnableSearchIcon</code> shows a search glyph in the box's <code>Buttons</code> slot
-        (same slot TextBox/NumberBox use) at rest; once there's text it swaps to a clear/dismiss
-        icon that empties <code>Text</code> on click. <code>ItemTemplate</code> replaces each
-        dropdown row's inner content — same pattern as ComboBox's own ItemTemplate — so rows can
-        show more than plain text (here: a flag emoji + name + country code).
-    </FluentTextBlock>
-    <FluentAutoSuggestBox TValue="string" Items="@_countrySuggestions" @bind-Text="_countrySearchText"
-                          Placeholder="Search countries…"
-                          EnableSearchIcon="true"
-                          SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _countrySuggestionChosen = item.Value)">
-        <ItemTemplate Context="item">
-            <span>@FlagFor(item.Value)</span>
-            <span>@item.Name</span>
-            <span style="opacity:0.6; margin-left:auto;">@item.Value</span>
-        </ItemTemplate>
-    </FluentAutoSuggestBox>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Typed: @_countrySearchText — Last chosen: @_countrySuggestionChosen</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">CalendarView / CalendarDatePicker</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        FluentCalendarView is the standalone browsable calendar — header click cycles Days → Months →
-        Years (Years is a dead end); arrow keys move focus within the current page/grid. Blackout
-        dates get a diagonal strike and can't be picked; Min/Max clamp both selection and paging.
-        FluentCalendarDatePicker composes it as a self-contained popout under a trigger button — same
-        "not routed through IOverlayService" convention as NumberBox's Expanded mode and ComboBox's
-        dropdown — and closes itself automatically once a date is picked.
-    </FluentTextBlock>
-    <div style="display:flex; gap:48px; align-items:flex-start; flex-wrap:wrap;">
-        <div style="display:flex; flex-direction:column; gap:4px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">CalendarView (standalone, with a blackout date)</FluentTextBlock>
-            <FluentCalendarView @bind-Value="_calendarValue" Blackout="@_calendarBlackout" Headers="true" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <FluentTextBlock Variant="TextBlockVariant.Caption">CalendarDatePicker</FluentTextBlock>
-                <FluentCalendarDatePicker @bind-Value="_datePickerValue" />
+        <h1 class="home-hero__title">
+            <span>Fluent.Blazor</span> Gallery
+        </h1>
+        <p class="home-hero__subtitle">
+            An interactive showcase of all Fluent.Blazor components — each page mirrors the WinUI 3 Gallery
+            with live demos, interactive options, and syntax-highlighted code samples.
+        </p>
+        <div class="home-hero__stats">
+            <div class="home-stat">
+                <span class="home-stat__number">39</span>
+                <span class="home-stat__label">Components</span>
             </div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <FluentTextBlock Variant="TextBlockVariant.Caption">With Min/Max (this month only)</FluentTextBlock>
-                <FluentCalendarDatePicker @bind-Value="_datePickerRangedValue" Min="@_datePickerMin" Max="@_datePickerMax" />
+            <div class="home-stat">
+                <span class="home-stat__number">38</span>
+                <span class="home-stat__label">Gallery Pages</span>
             </div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <FluentTextBlock Variant="TextBlockVariant.Caption">Disabled</FluentTextBlock>
-                <FluentCalendarDatePicker Value="@DateTime.Today" Disabled="true" />
-            </div>
-        </div>
-    </div>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">CalendarView value: @_calendarValue?.ToShortDateString() — DatePicker: @_datePickerValue?.ToShortDateString() — Ranged: @_datePickerRangedValue?.ToShortDateString()</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Materials: Mica vs. Acrylic</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        The page background behind all of this is FluentMicaPanel, pinned with <code>position:fixed</code>
-        so it behaves like a real window backdrop — it doesn't scroll with the page, it just stretches
-        or compacts to match the current viewport/window size. The two demos below show each material
-        in the kind of small, self-contained context you'd actually use them in.
-    </FluentTextBlock>
-
-    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Acrylic — Base vs. Thin</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Acrylic doesn't need a background image of its own — it live-blurs whatever's actually behind
-        it. Small floating cards here, sat over a photo, so you see the live backdrop-filter blur
-        plus each kind's own tint strength: Base reads near-opaque, Thin noticeably more see-through
-        — the same contrast as a flyout/context-menu (Thin) vs. a nav pane (Base) in a real WinUI app.
-    </FluentTextBlock>
-    <div style="position:relative; width:320px; height:200px; border-radius:8px; overflow:hidden;">
-        <div style="position:absolute; inset:0; background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;"></div>
-        <FluentAcrylicBrush Kind="AcrylicKind.Base" style="position:absolute; top:14px; left:14px; width:130px; padding:10px 12px; border-radius:6px;">
-            <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Base</FluentTextBlock>
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Near-opaque</FluentTextBlock>
-        </FluentAcrylicBrush>
-        <FluentAcrylicBrush Kind="AcrylicKind.Thin" style="position:absolute; bottom:14px; right:14px; width:130px; padding:10px 12px; border-radius:6px;">
-            <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Thin</FluentTextBlock>
-            <FluentTextBlock Variant="TextBlockVariant.Caption">More see-through</FluentTextBlock>
-        </FluentAcrylicBrush>
-    </div>
-
-    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Acrylic tweaks — Tint, TintOpacity, TintLuminosityOpacity</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Same three knobs as WinUI Gallery's own AcrylicPage custom-brush examples (<code>TintColor</code>,
-        <code>TintOpacity</code>, <code>TintLuminosityOpacity</code>), live-editable here. Leaving the
-        luminosity slider at its minimum omits that layer entirely — same single-wash tint as the
-        Base/Thin cards above; drag it up to add the second, luminosity-blended pass that keeps the
-        tint reading consistent against the busier part of the photo underneath.
-    </FluentTextBlock>
-    <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
-        <div style="position:relative; width:320px; height:200px; border-radius:8px; overflow:hidden; flex:0 0 auto;">
-            <div style="position:absolute; inset:0; background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;"></div>
-            <FluentAcrylicBrush TintColor="@_acrylicTintColor" TintOpacity="_acrylicTintOpacity"
-                                TintLuminosityOpacity="@_acrylicLuminosityOpacityParam"
-                                style="position:absolute; inset:14px; padding:12px 14px;">
-                <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Custom Acrylic</FluentTextBlock>
-                <FluentTextBlock Variant="TextBlockVariant.Caption">Tweak the controls to see it change live.</FluentTextBlock>
-            </FluentAcrylicBrush>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:16px; min-width:220px;">
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <FluentTextBlock Variant="TextBlockVariant.Caption">Tint color</FluentTextBlock>
-                <FluentRadioGroup @bind-Value="_acrylicTintColorName">
-                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                        <FluentRadioButton Value="@("black")">Black</FluentRadioButton>
-                        <FluentRadioButton Value="@("skyblue")">Sky blue</FluentRadioButton>
-                        <FluentRadioButton Value="@("red")">Red</FluentRadioButton>
-                    </div>
-                </FluentRadioGroup>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <FluentTextBlock Variant="TextBlockVariant.Caption">Tint opacity: @_acrylicTintOpacity.ToString("0.00")</FluentTextBlock>
-                <FluentSlider @bind-Value="_acrylicTintOpacitySlider" Min="0" Max="1" Step="0.01" />
-            </div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <FluentTextBlock Variant="TextBlockVariant.Caption">Tint luminosity opacity: @_acrylicLuminosityOpacity.ToString("0.00")</FluentTextBlock>
-                <FluentSlider @bind-Value="_acrylicLuminosityOpacitySlider" Min="0" Max="1" Step="0.01" />
+            <div class="home-stat">
+                <span class="home-stat__number">3</span>
+                <span class="home-stat__label">Material Effects</span>
             </div>
         </div>
     </div>
 
-    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Mica — Base vs. Base Alt (Tabbed)</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Mica is a window-level material, so this switches the actual main app background above,
-        not a boxed-off sample. Base is the standard window surface tint; Base Alt is the stronger
-        tint WinUI uses for commanding/tabbed surfaces.
-    </FluentTextBlock>
-    <FluentRadioGroup @bind-Value="_mainMicaVariantString">
-        <div style="display:flex; gap:16px;">
-            <FluentRadioButton Value="@("base")">Base</FluentRadioButton>
-            <FluentRadioButton Value="@("basealt")">Base Alt (Tabbed)</FluentRadioButton>
-            <FluentRadioButton Value="@("none")">None</FluentRadioButton>
-        </div>
-    </FluentRadioGroup>
-
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        wallpaper.heic only decodes in Safari (native OS decoder) — other browsers silently fail to
-        load it and the main Mica background above gracefully falls back to WinUI's own documented
-        solid fill instead, same as real Mica falling back under RDP or Battery Saver. For
-        cross-browser testing, convert it once (macOS):
-        <code>sips -s format jpeg wallpaper.heic --out wallpaper.jpg</code>
-        and swap the BackgroundImageUrl reference above to "wallpaper.jpg".
-    </FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">NavigationView</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Expanded docks the pane in flow and pushes content. Compact keeps an icon-only rail always
-        docked and opens the full pane as a floating overlay (via IOverlayService — try clicking
-        outside the open pane, that's light-dismiss). Minimal hides the pane entirely until opened,
-        the mobile/narrow-window pattern. The item list itself is a FluentListView now (arrow keys
-        move focus between rows once one is focused), and icons come from FluentIcon wrapping the
-        MIT-licensed Fluent System Icons webfont (no managed dependency, no CSS leak risk).
-    </FluentTextBlock>
-
-    <!-- Mode selector and Back/Settings Button controls -->
-    <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
-        <FluentRadioGroup @bind-Value="_navModeString">
-            <div style="display:flex; gap:16px;">
-                <FluentRadioButton Value="@("expanded")">Expanded</FluentRadioButton>
-                <FluentRadioButton Value="@("compact")">Compact</FluentRadioButton>
-                <FluentRadioButton Value="@("minimal")">Minimal</FluentRadioButton>
-            </div>
-        </FluentRadioGroup>
-
-        <FluentCheckBox @bind-Checked="_navBackButtonVisible">Back Button Visible (IsBackButtonVisible)</FluentCheckBox>
-        <FluentCheckBox @bind-Checked="_navBackButtonEnabled">Back Button Enabled (IsBackButtonEnabled)</FluentCheckBox>
-        <FluentCheckBox @bind-Checked="_navShowSettingsButton">Settings Button Visible (ShowSettingsButton)</FluentCheckBox>
-    </div>
-
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        This instance also shows the rest of the shell chrome: a custom <code>PaneHeader</code> (a
-        search box, rendered in both the full pane and the icon-only rail), a <code>PaneFooter</code>
-        item, the built-in Settings row (<code>ShowSettingsButton</code> — separate from ItemInvoked,
-        fires its own <code>SettingsRequested</code>), and a back button (<code>IsBackButtonVisible</code> /
-        <code>BackRequested</code>). The blue selection indicator slides between rows instead of
-        appearing/disappearing.
-    </FluentTextBlock>
-
-    <div style="width:100%; max-width:720px; height:420px; border-radius:8px; overflow:hidden; border:1px solid var(--card-stroke-default);">
-        <FluentNavigationView PaneDisplayMode="_navMode"
-                               @bind-IsPaneOpen="_navPaneOpen"
-                               @bind-SelectedValue="_navSelected"
-                               IsBackButtonVisible="_navBackButtonVisible"
-                               IsBackButtonEnabled="_navBackButtonEnabled"
-                               BackRequested="OnNavBack"
-                               ShowSettingsButton="_navShowSettingsButton"
-                               SettingsRequested="OnNavSettings">
-            <PaneHeaderIcon>
-                <FluentIcon Name="@FluentIconNames.Search" Size="16" />
-            </PaneHeaderIcon>
-            <PaneHeader>
-                <FluentTextBox @bind-Value="_navSearch" Placeholder="Search" />
-            </PaneHeader>
-            <MenuItems>
-                <FluentNavigationViewItemHeader Text="Main Section" />
-                <FluentNavigationViewItem Value="@("home")" Text="Home">
-                    <Icon><FluentIcon Name="@FluentIconNames.Home" /></Icon>
-                </FluentNavigationViewItem>
-                <FluentNavigationViewItem Value="@("docs")" Text="Documentation">
-                    <Icon><FluentIcon Name="@FluentIconNames.Document" /></Icon>
-                </FluentNavigationViewItem>
-                <FluentNavigationViewItemSeparator />
-                <FluentNavigationViewItemHeader Text="Components" />
-                <FluentNavigationViewItem Value="@("components")" Text="Components" IsSelectable="true">
-                    <Icon><FluentIcon Name="@FluentIconNames.Apps" /></Icon>
-                    <ChildContent>
-                        <FluentNavigationViewItem Value="@("button")" Text="Button" />
-                        <FluentNavigationViewItem Value="@("checkbox")" Text="Checkbox" />
-                    </ChildContent>
-                </FluentNavigationViewItem>
-                <FluentNavigationViewItem Value="@("disabled")" Text="Disabled item" Disabled="true">
-                    <Icon><FluentIcon Name="@FluentIconNames.Dismiss" /></Icon>
-                </FluentNavigationViewItem>
-            </MenuItems>
-            <PaneFooter>
-                <FluentNavigationViewItem Value="@("feedback")" Text="Help & Feedback">
-                    <Icon><FluentIcon Name="ic_fluent_question_circle_20_regular" /></Icon>
-                </FluentNavigationViewItem>
-                <FluentTextBlock Variant="TextBlockVariant.Caption" style="padding-inline:12px; margin-top:4px;">v1.0.0</FluentTextBlock>
-            </PaneFooter>
-            <ChildContent>
-                <FluentTextBlock Variant="TextBlockVariant.Title">@_navSelected</FluentTextBlock>
-                <FluentTextBlock Variant="TextBlockVariant.Body">
-                    This is FluentNavigationView's content area — whatever page you'd route to goes here.
-                </FluentTextBlock>
-                @if (!string.IsNullOrEmpty(_navLastAction))
-                {
-                    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_navLastAction</FluentTextBlock>
-                }
-            </ChildContent>
-        </FluentNavigationView>
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">ListView / ListBox</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        FluentListView used standalone (outside NavigationView) as a single-select listbox — same
-        primitive that backs the NavigationView pane above, but here it owns Selected/OnSelect
-        itself instead of deferring to NavigationViewContext. Arrow keys/Home/End move focus,
-        Space/Enter (native button) selects.
-    </FluentTextBlock>
-    <FluentListView Role="listbox" style="width:280px; border:1px solid var(--card-stroke-default); border-radius:8px; overflow:hidden;">
-        @foreach (var fruit in _fruits)
-        {
-            <FluentListViewItem Selected="@(_selectedFruit == fruit)"
-                                 OnSelect="@(() => _selectedFruit = fruit)">
-                @fruit
-            </FluentListViewItem>
-        }
-    </FluentListView>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_selectedFruit</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Flyout</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Generic positioned content flyout — click the trigger to open, click outside or press Escape
-        to close. Built on the same IOverlayService/FluentOverlayHost infra as the Tooltip above, but
-        click-triggered instead of hover-triggered, and its open state is bindable from code.
-    </FluentTextBlock>
-
-    <div style="display:flex; gap:24px; align-items:flex-start;">
-        <FluentFlyout Placement="OverlayPlacement.Bottom">
-            <ChildContent>
-                <FluentButton Variant="ButtonVariant.Standard">Open flyout</FluentButton>
-            </ChildContent>
-            <FlyoutContent>
-                <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Delete item?</FluentTextBlock>
-                <FluentTextBlock Variant="TextBlockVariant.Body" style="margin-top:4px;">
-                    This action can't be undone.
-                </FluentTextBlock>
-            </FlyoutContent>
-        </FluentFlyout>
-
-        <div style="display:flex; gap:8px; align-items:center;">
-            <FluentFlyout @bind-IsOpen="_flyoutOpen" Placement="OverlayPlacement.Right">
-                <ChildContent>
-                    <FluentButton Variant="ButtonVariant.Standard">Externally controlled</FluentButton>
-                </ChildContent>
-                <FlyoutContent>
-                    <FluentTextBlock Variant="TextBlockVariant.Body">Opened from the button on the right.</FluentTextBlock>
-                    <div style="margin-top:12px;">
-                        <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _flyoutOpen = false)">Close</FluentButton>
-                    </div>
-                </FlyoutContent>
-            </FluentFlyout>
-            <FluentButton Variant="ButtonVariant.Subtle" OnClick="@(() => _flyoutOpen = true)">Open from here</FluentButton>
+    <!-- Primitives -->
+    <div class="home-section">
+        <div class="home-section__title">Primitives</div>
+        <div class="control-grid">
+            @foreach (var card in _primitiveCards)
+            {
+                <a class="control-card" href="@card.Route">
+                    <div class="control-card__icon">@card.Icon</div>
+                    <div class="control-card__name">@card.Name</div>
+                    <div class="control-card__category">Primitives</div>
+                </a>
+            }
         </div>
     </div>
 
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Card</FluentTextBlock>
-    <FluentCard style="max-width:360px;">
-        <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Plain surface primitive</FluentTextBlock>
-        <FluentTextBlock Variant="TextBlockVariant.Body" style="margin-top:4px;">
-            CardBackgroundFillColorDefault + CardStrokeColorDefault — the same surface Expander's
-            header/content and NavigationView's content pane are built on.
-        </FluentTextBlock>
-    </FluentCard>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">InfoBadge</FluentTextBlock>
-    <div style="display:flex; gap:16px; align-items:center;">
-        <FluentInfoBadge Severity="InfoBadgeSeverity.Attention" />
-        <FluentInfoBadge Severity="InfoBadgeSeverity.Success" />
-        <FluentInfoBadge Severity="InfoBadgeSeverity.Caution" />
-        <FluentInfoBadge Severity="InfoBadgeSeverity.Critical" />
-        <FluentInfoBadge Severity="InfoBadgeSeverity.Informational" />
-        <FluentInfoBadge Severity="InfoBadgeSeverity.Critical">99+</FluentInfoBadge>
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">ProgressBar / ProgressRing</FluentTextBlock>
-    <div style="display:flex; flex-direction:column; gap:12px; max-width:360px;">
-        <FluentProgressBar Value="@_progressValue" />
-        <FluentProgressBar IsIndeterminate="true" />
-        <FluentSlider @bind-Value="_progressValue" Min="0" Max="100" Step="1" />
-    </div>
-    <div style="display:flex; gap:24px; align-items:center;">
-        <FluentProgressRing IsIndeterminate="true" />
-        <FluentProgressRing IsIndeterminate="false" Value="@_progressValue" />
-        <FluentProgressRing IsIndeterminate="false" Value="@_progressValue" Size="56" />
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Expander</FluentTextBlock>
-    <div style="max-width:480px;">
-        <FluentExpander @bind-IsExpanded="_expanderOpen">
-            <ChildContent>Advanced settings</ChildContent>
-            <Content>
-                <FluentTextBlock Variant="TextBlockVariant.Body">
-                    Collapsible content area — header click, Enter, or Space toggles it. Animated with
-                    grid-template-rows (0fr/1fr), not max-height.
-                </FluentTextBlock>
-            </Content>
-        </FluentExpander>
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">InfoBar</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        App-wide status banner. Default icon slot is a FluentInfoBadge matching the bar's own
-        severity (same simplification fluent-svelte makes) — pass <code>Icon</code> to override it.
-        The dismissible one below is closable and bindable; the others are pinned open with
-        Closable="false".
-    </FluentTextBlock>
-    <div style="display:flex; flex-direction:column; gap:12px; max-width:640px;">
-        <FluentInfoBar @bind-IsOpen="_infoBarOpen" Severity="InfoBadgeSeverity.Informational"
-                        Title="Update available" Message="A new version is ready to install.">
-            <Action>
-                <FluentButton Variant="ButtonVariant.Standard">Restart now</FluentButton>
-            </Action>
-        </FluentInfoBar>
-        @if (!_infoBarOpen)
-        {
-            <FluentButton Variant="ButtonVariant.Subtle" OnClick="@(() => _infoBarOpen = true)">Reopen it</FluentButton>
-        }
-        <FluentInfoBar Severity="InfoBadgeSeverity.Success" Closable="false"
-                        Title="Saved" Message="Your changes have been saved successfully." />
-        <FluentInfoBar Severity="InfoBadgeSeverity.Caution" Closable="false"
-                        Title="Low disk space" Message="You're running low on storage — consider freeing up space." />
-        <FluentInfoBar Severity="InfoBadgeSeverity.Critical" Closable="false"
-                        Title="Sync failed" Message="Couldn't reach the server. Check your connection and try again." />
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Slider</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Drag the thumb, click/tap the rail to jump, or focus it and use arrow keys / Home / End /
-        Page Up / Page Down. Ticks below use TickFrequency + TickPlacement; the vertical and
-        reversed sliders share the same drag-interop module keyed per-instance.
-    </FluentTextBlock>
-    <div style="display:flex; gap:32px; align-items:flex-start; flex-wrap:wrap;">
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Horizontal, ticks</FluentTextBlock>
-            <FluentSlider @bind-Value="_sliderTicksValue" Min="0" Max="10" Step="1"
-                          TickFrequency="1" TickPlacement="FluentSliderTickPlacement.Outside" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Reversed</FluentTextBlock>
-            <FluentSlider @bind-Value="_sliderReverseValue" Min="0" Max="100" Reverse="true" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Disabled</FluentTextBlock>
-            <FluentSlider Value="35" Min="0" Max="100" Disabled="true" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px; align-items:center;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Vertical</FluentTextBlock>
-            <FluentSlider @bind-Value="_sliderVerticalValue" Min="0" Max="100" Orientation="FluentSliderOrientation.Vertical" />
+    <!-- Composite Controls -->
+    <div class="home-section">
+        <div class="home-section__title">Composite Controls</div>
+        <div class="control-grid">
+            @foreach (var card in _compositeCards)
+            {
+                <a class="control-card" href="@card.Route">
+                    <div class="control-card__icon">@card.Icon</div>
+                    <div class="control-card__name">@card.Name</div>
+                    <div class="control-card__category">Composite</div>
+                </a>
+            }
         </div>
     </div>
 
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">MenuFlyout</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Click-triggered command menu, built on the same overlay infra as Flyout above. Includes a
-        toggle item, a couple of radio-style items (mutual exclusion handled by the click handler
-        below, same as fluent-svelte leaves to the consumer), a disabled item, and a cascading item
-        that opens a submenu to the side (hover ~500ms or click/ArrowRight to open, ArrowLeft or
-        Escape to back out).
-    </FluentTextBlock>
-    <div style="display:flex; gap:8px; align-items:center;">
-        <FluentMenuFlyout Placement="OverlayPlacement.Bottom">
-            <ChildContent>
-                <FluentButton Variant="ButtonVariant.Standard">Open menu</FluentButton>
-            </ChildContent>
-            <MenuItems>
-                <FluentMenuFlyoutItem OnClick="@(() => _menuLastAction = "New")">
-                    <Icon><FluentIcon Name="@FluentIconNames.Add" /></Icon>
-                    <ChildContent>New</ChildContent>
-                </FluentMenuFlyoutItem>
-                <FluentMenuFlyoutItem OnClick="@(() => _menuLastAction = "Open")">Open</FluentMenuFlyoutItem>
-                <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Toggle" @bind-Checked="_menuShowHidden">
-                    Show hidden files
-                </FluentMenuFlyoutItem>
-                <FluentMenuFlyoutDivider />
-                <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Radio" Checked="@(_menuSortOrder == "name")"
-                                       OnClick="@(() => _menuSortOrder = "name")">
-                    Sort by name
-                </FluentMenuFlyoutItem>
-                <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Radio" Checked="@(_menuSortOrder == "date")"
-                                       OnClick="@(() => _menuSortOrder = "date")">
-                    Sort by date
-                </FluentMenuFlyoutItem>
-                <FluentMenuFlyoutDivider />
-                <FluentMenuFlyoutItem Cascading="true">
-                    <ChildContent>Share</ChildContent>
-                    <Flyout>
-                        <FluentMenuFlyoutItem OnClick="@(() => _menuLastAction = "Share via email")">Email</FluentMenuFlyoutItem>
-                        <FluentMenuFlyoutItem OnClick="@(() => _menuLastAction = "Copy link")">Copy link</FluentMenuFlyoutItem>
-                    </Flyout>
-                </FluentMenuFlyoutItem>
-                <FluentMenuFlyoutItem Disabled="true">Delete (disabled)</FluentMenuFlyoutItem>
-            </MenuItems>
-        </FluentMenuFlyout>
-        <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_menuLastAction — sort: @_menuSortOrder — hidden files: @_menuShowHidden</FluentTextBlock>
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">ContextMenu</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Right-click anywhere in the card below. Reuses the exact same overlay positioning as
-        MenuFlyout — the menu just anchors to an invisible marker moved to the cursor instead of to
-        a button.
-    </FluentTextBlock>
-    <FluentContextMenu>
-        <ChildContent>
-            <FluentCard style="width:320px; height:140px; display:flex; align-items:center; justify-content:center;">
-                <FluentTextBlock Variant="TextBlockVariant.Body">Right-click me</FluentTextBlock>
-            </FluentCard>
-        </ChildContent>
-        <MenuItems>
-            <FluentMenuFlyoutItem OnClick="@(() => _contextMenuLastAction = "Cut")">Cut</FluentMenuFlyoutItem>
-            <FluentMenuFlyoutItem OnClick="@(() => _contextMenuLastAction = "Copy")">Copy</FluentMenuFlyoutItem>
-            <FluentMenuFlyoutItem OnClick="@(() => _contextMenuLastAction = "Paste")">Paste</FluentMenuFlyoutItem>
-            <FluentMenuFlyoutDivider />
-            <FluentMenuFlyoutItem OnClick="@(() => _contextMenuLastAction = "Properties")">Properties</FluentMenuFlyoutItem>
-        </MenuItems>
-    </FluentContextMenu>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_contextMenuLastAction</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">ComboBox</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Standard (button-trigger) mode, editable (searchable text-box) mode, and a disabled instance.
-    </FluentTextBlock>
-    <div style="display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;">
-        <div style="display:flex; flex-direction:column; gap:4px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Standard</FluentTextBlock>
-            <FluentComboBox TValue="string" Items="@_comboFruitItems" @bind-Value="_comboFruit" Placeholder="Choose a fruit" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:4px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Editable / searchable</FluentTextBlock>
-            <FluentComboBox TValue="string" Items="@_comboFruitItems" @bind-Value="_comboFruitEditable"
-                            @bind-SearchValue="_comboFruitSearch" Editable="true" Placeholder="Type or pick a fruit" />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:4px;">
-            <FluentTextBlock Variant="TextBlockVariant.Caption">Disabled</FluentTextBlock>
-            <FluentComboBox TValue="string" Items="@_comboFruitItems" Value="@_comboFruit" Disabled="true" Placeholder="Choose a fruit" />
+    <!-- Effects & Materials -->
+    <div class="home-section">
+        <div class="home-section__title">Effects &amp; Materials</div>
+        <div class="control-grid">
+            @foreach (var card in _effectCards)
+            {
+                <a class="control-card" href="@card.Route">
+                    <div class="control-card__icon">@card.Icon</div>
+                    <div class="control-card__name">@card.Name</div>
+                    <div class="control-card__category">Effects</div>
+                </a>
+            }
         </div>
     </div>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected: @_comboFruit — editable selection: @_comboFruitEditable — search text: @_comboFruitSearch</FluentTextBlock>
-
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px; margin-top:8px;">
-        <code>ItemTemplate</code> replaces each dropdown row's inner content (the surrounding
-        selection bar/hover/focus chrome stays the same); <code>SelectedTemplate</code> does the
-        same for the closed trigger's label in non-editable mode. Both are optional — leave them
-        out and you get the plain-text row/label from the examples above.
-    </FluentTextBlock>
-    <div style="display:flex; flex-direction:column; gap:4px;">
-        <FluentTextBlock Variant="TextBlockVariant.Caption">With ItemTemplate + SelectedTemplate (color swatch)</FluentTextBlock>
-        <FluentComboBox TValue="string" Items="@_comboColorItems" @bind-Value="_comboColor" Placeholder="Choose a color">
-            <ItemTemplate Context="item">
-                <span style="display:inline-block; width:14px; height:14px; border-radius:3px; background:@ColorHexFor(item.Value); border:1px solid var(--card-stroke-default); flex:0 0 auto;"></span>
-                <span>@item.Name</span>
-            </ItemTemplate>
-            <SelectedTemplate Context="item">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:@ColorHexFor(item.Value); border:1px solid var(--card-stroke-default); flex:0 0 auto;"></span>
-                <span>@item.Name</span>
-            </SelectedTemplate>
-        </FluentComboBox>
-    </div>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected color: @_comboColor</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">ContentDialog</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Modal, viewport-centered — deliberately NOT built on IOverlayService (no trigger-anchored
-        positioning makes sense for a modal). Escape and clicking the darkened scrim both close it
-        unless <code>Closable="false"</code>. Footer buttons lay out in an equal-width row; a single
-        footer button instead sits half-width and end-aligned (WinUI's own convention).
-    </FluentTextBlock>
-    <div style="display:flex; gap:8px;">
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _dialogBasicOpen = true)">Basic dialog</FluentButton>
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _dialogConfirmOpen = true)">Confirm (two buttons)</FluentButton>
-        <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _dialogUnclosableOpen = true)">Not closable (Max size)</FluentButton>
-    </div>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Last dialog action: @_dialogLastAction</FluentTextBlock>
-
-    <FluentContentDialog @bind-IsOpen="_dialogBasicOpen" Title="About this app">
-        <FluentTextBlock Variant="TextBlockVariant.Body">
-            A single-button (no footer) dialog — just a title and body, dismissible via Escape or by
-            clicking the scrim.
-        </FluentTextBlock>
-    </FluentContentDialog>
-
-    <FluentContentDialog @bind-IsOpen="_dialogConfirmOpen" Title="Delete item?">
-        <ChildContent>
-            <FluentTextBlock Variant="TextBlockVariant.Body">This action can't be undone.</FluentTextBlock>
-        </ChildContent>
-        <Footer>
-            <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => CloseConfirmDialog("Cancelled"))">Cancel</FluentButton>
-            <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => CloseConfirmDialog("Deleted"))">Delete</FluentButton>
-        </Footer>
-    </FluentContentDialog>
-
-    <FluentContentDialog @bind-IsOpen="_dialogUnclosableOpen" Title="Processing…" Size="ContentDialogSize.Max" Closable="false">
-        <ChildContent>
-            <FluentTextBlock Variant="TextBlockVariant.Body">
-                Escape and scrim-click are disabled here (<code>Closable="false"</code>) — the only way
-                out is the explicit button below, same pattern as a real "can't cancel mid-operation" dialog.
-            </FluentTextBlock>
-        </ChildContent>
-        <Footer>
-            <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => CloseUnclosableDialog())">Done</FluentButton>
-        </Footer>
-    </FluentContentDialog>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">IconButton</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Bare icon-only button — no min-width/label padding, just a 30x30 box around whatever glyph
-        you give it. <code>Href</code> swaps the underlying element to an anchor.
-    </FluentTextBlock>
-    <div style="display:flex; gap:8px; align-items:center;">
-        <FluentIconButton OnClick="@(() => _iconButtonLastAction = "Settings")">
-            <FluentIcon Name="@FluentIconNames.Settings" />
-        </FluentIconButton>
-        <FluentIconButton OnClick="@(() => _iconButtonLastAction = "Delete")">
-            <FluentIcon Name="@FluentIconNames.Delete" />
-        </FluentIconButton>
-        <FluentIconButton Disabled="true">
-            <FluentIcon Name="@FluentIconNames.Dismiss" />
-        </FluentIconButton>
-        <FluentIconButton Href="https://github.com">
-            <FluentIcon Name="@FluentIconNames.Home" />
-        </FluentIconButton>
-    </div>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_iconButtonLastAction</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">PersonPicture</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Round avatar — shows <code>Src</code> when it loads, falls back to initials derived from
-        <code>Alt</code> otherwise (also falls back live if the image 404s). <code>Badge</code>
-        slot renders in the top-right corner, e.g. a presence dot.
-    </FluentTextBlock>
-    <div style="display:flex; gap:16px; align-items:center;">
-        <FluentPersonPicture Alt="Ada Lovelace" />
-        <FluentPersonPicture Size="48" Src="https://this-domain-does-not-exist.example/avatar.jpg" Alt="Grace Hopper" />
-        <FluentPersonPicture Size="40" Alt="Alan Turing">
-            <Badge>
-                <span style="display:block; width:12px; height:12px; border-radius:50%; background:#0f7b0f; border:2px solid var(--card-background-default);"></span>
-            </Badge>
-        </FluentPersonPicture>
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">MenuBar</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        App-style top-level menu bar (File/Edit/View…). Click or Enter/Space opens an item's dropdown
-        (reuses FluentMenuFlyoutItem/FluentMenuFlyoutDivider inside); once one is open, hovering a
-        sibling switches straight to its menu. ArrowLeft/ArrowRight walk between items with wraparound.
-    </FluentTextBlock>
-    <FluentMenuBar>
-        <FluentMenuBarItem>
-            <ChildContent>File</ChildContent>
-            <Flyout>
-                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "New")">New</FluentMenuFlyoutItem>
-                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Open")">Open</FluentMenuFlyoutItem>
-                <FluentMenuFlyoutDivider />
-                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Exit")">Exit</FluentMenuFlyoutItem>
-            </Flyout>
-        </FluentMenuBarItem>
-        <FluentMenuBarItem>
-            <ChildContent>Edit</ChildContent>
-            <Flyout>
-                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Cut")">Cut</FluentMenuFlyoutItem>
-                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Copy")">Copy</FluentMenuFlyoutItem>
-                <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Paste")">Paste</FluentMenuFlyoutItem>
-            </Flyout>
-        </FluentMenuBarItem>
-        <FluentMenuBarItem>
-            <ChildContent>View</ChildContent>
-            <Flyout>
-                <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Toggle" @bind-Checked="_menuBarShowGrid">
-                    Show grid
-                </FluentMenuFlyoutItem>
-                <FluentMenuFlyoutItem Cascading="true">
-                    <ChildContent>Zoom</ChildContent>
-                    <Flyout>
-                        <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Zoom in")">Zoom in</FluentMenuFlyoutItem>
-                        <FluentMenuFlyoutItem OnClick="@(() => _menuBarLastAction = "Zoom out")">Zoom out</FluentMenuFlyoutItem>
-                    </Flyout>
-                </FluentMenuFlyoutItem>
-            </Flyout>
-        </FluentMenuBarItem>
-        <FluentMenuBarItem Disabled="true">
-            <ChildContent>Disabled</ChildContent>
-        </FluentMenuBarItem>
-    </FluentMenuBar>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_menuBarLastAction — show grid: @_menuBarShowGrid</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">ToggleButton</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Stays visually pressed once activated — unchecked rides the same ramp as a plain
-        <code>FluentButton</code>, checked switches to the Accent ramp. For toolbar-style toggles
-        (Bold/Italic/Mute), unlike <code>FluentToggleSwitch</code> which always pairs its state with
-        On/Off text.
-    </FluentTextBlock>
-    <div style="display:flex; gap:8px; align-items:center;">
-        <FluentToggleButton @bind-Checked="_toggleButtonBold">Bold</FluentToggleButton>
-        <FluentToggleButton @bind-Checked="_toggleButtonItalic">Italic</FluentToggleButton>
-        <FluentToggleButton Checked="true" Disabled="true">Locked on</FluentToggleButton>
-    </div>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Bold: @_toggleButtonBold — Italic: @_toggleButtonItalic</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">PasswordBox</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Composes <code>FluentTextBox</code> + <code>FluentTextBoxButton</code> — the eye icon
-        toggles the underlying input between <code>password</code> and <code>text</code> rather than
-        leaving no way to check what you typed.
-    </FluentTextBlock>
-    <div style="max-width:280px;">
-        <FluentPasswordBox Header="Password" Placeholder="Enter password" @bind-Value="_passwordBoxValue" />
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Reveal</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Pointer-tracked spotlight highlight — move your cursor over the cards below.
-        <code>Bordered</code> additionally reveals along a 1px ring instead of the fill.
-    </FluentTextBlock>
-    <div style="display:flex; gap:16px;">
-        <div @ref="_revealCardTargetRef">
-            <FluentRevealBackground style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); display:flex; align-items:center; justify-content:center;">
-                <FluentTextBlock>Fill reveal</FluentTextBlock>
-            </FluentRevealBackground>
-        </div>
-        <FluentRevealBackground Bordered="true" style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); border:1px solid var(--card-stroke-default); display:flex; align-items:center; justify-content:center;">
-            <FluentTextBlock>Border reveal</FluentTextBlock>
-        </FluentRevealBackground>
-    </div>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">Pivot</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Horizontal tab strip, one visible content pane at a time. ArrowLeft/ArrowRight/Home/End walk
-        between headers with wraparound.
-    </FluentTextBlock>
-    <FluentPivot @bind-SelectedIndex="_pivotSelectedIndex">
-        <FluentPivotItem Title="Overview">
-            <FluentTextBlock>High-level summary content goes here.</FluentTextBlock>
-        </FluentPivotItem>
-        <FluentPivotItem Title="Details">
-            <FluentTextBlock>More detailed content for the second tab.</FluentTextBlock>
-        </FluentPivotItem>
-        <FluentPivotItem Title="Unavailable" Disabled="true">
-            <FluentTextBlock>Not reachable — tab is disabled.</FluentTextBlock>
-        </FluentPivotItem>
-    </FluentPivot>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Selected index: @_pivotSelectedIndex</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">DropDownButton</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Always opens a menu rather than firing a click itself — thin composition over
-        <code>FluentMenuFlyout</code> with a chevron-suffixed button trigger.
-    </FluentTextBlock>
-    <FluentDropDownButton>
-        <ChildContent>Sort by</ChildContent>
-        <MenuItems>
-            <FluentMenuFlyoutItem OnClick="@(() => _dropDownLastAction = "Name")">Name</FluentMenuFlyoutItem>
-            <FluentMenuFlyoutItem OnClick="@(() => _dropDownLastAction = "Date")">Date</FluentMenuFlyoutItem>
-            <FluentMenuFlyoutItem OnClick="@(() => _dropDownLastAction = "Size")">Size</FluentMenuFlyoutItem>
-        </MenuItems>
-    </FluentDropDownButton>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_dropDownLastAction</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">SplitButton</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        A real independent action (left region) joined to a separate chevron region that opens a menu
-        of related actions — one visually-continuous pill, unlike DropDownButton which is nothing but
-        a menu trigger.
-    </FluentTextBlock>
-    <FluentSplitButton Variant="ButtonVariant.Accent" OnClick="@(() => _splitButtonLastAction = "Save")">
-        <ChildContent>Save</ChildContent>
-        <MenuItems>
-            <FluentMenuFlyoutItem OnClick="@(() => _splitButtonLastAction = "Save as…")">Save as…</FluentMenuFlyoutItem>
-            <FluentMenuFlyoutItem OnClick="@(() => _splitButtonLastAction = "Save a copy")">Save a copy</FluentMenuFlyoutItem>
-        </MenuItems>
-    </FluentSplitButton>
-    <FluentTextBlock Variant="TextBlockVariant.Caption">Last action: @_splitButtonLastAction</FluentTextBlock>
-
-    <FluentDivider />
-
-    <FluentTextBlock Variant="TextBlockVariant.Title">TeachingTip</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Persistent callout — shown/dismissed programmatically (not by clicking its own target), and
-        stays up until explicitly closed rather than light-dismissing on outside click. Two modes,
-        chosen automatically by whether <code>ChildContent</code>/<code>Target</code> is supplied:
-        <b>targeted</b> (points a beak at an anchor control, positioned via <code>Placement</code>)
-        and <b>detached</b> (no anchor, no beak, positioned relative to the viewport via
-        <code>ScreenPlacement</code>).
-    </FluentTextBlock>
-
-    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Targeted — points at a control elsewhere on the page</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        The trigger button below is deliberately NOT the anchor — <code>Target</code> points at the
-        "Fill reveal" card way up in the Reveal section instead. Click it: the page auto-scrolls that
-        card into view (it's nowhere near the button, so you'd otherwise have to scroll up yourself to
-        even see what the tip is pointing at), then the tip's beak lands on it.
-    </FluentTextBlock>
-    <div>
-        <FluentButton OnClick="@(() => _teachingTipOpen = true)">Show targeted tip (points at Reveal card above)</FluentButton>
-    </div>
-    <FluentTeachingTip @bind-IsOpen="_teachingTipOpen" Target="_revealCardTargetRef" Placement="OverlayPlacement.Bottom"
-                        Title="New feature" Subtitle="Try the new Reveal effect on this card.">
-        <ActionContent>
-            <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _teachingTipOpen = false)">Got it</FluentButton>
-        </ActionContent>
-    </FluentTeachingTip>
-
-    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Detached — no anchor, positioned on screen</FluentTextBlock>
-    <FluentTextBlock Variant="TextBlockVariant.Caption" style="max-width:640px;">
-        Omit <code>ChildContent</code> and the tip has no beak, no anchor — just a fixed spot on the
-        viewport picked via <code>ScreenPlacement</code> (defaults to <code>BottomCenter</code>, same
-        as WinUI's own default for an untargeted teaching tip). Pick a corner, then show it.
-    </FluentTextBlock>
-    <FluentRadioGroup @bind-Value="_teachingTipScreenPlacementString">
-        <div style="display:flex; gap:12px; flex-wrap:wrap;">
-            <FluentRadioButton Value="@("topleft")">Top left</FluentRadioButton>
-            <FluentRadioButton Value="@("topcenter")">Top center</FluentRadioButton>
-            <FluentRadioButton Value="@("topright")">Top right</FluentRadioButton>
-            <FluentRadioButton Value="@("center")">Center</FluentRadioButton>
-            <FluentRadioButton Value="@("bottomleft")">Bottom left</FluentRadioButton>
-            <FluentRadioButton Value="@("bottomcenter")">Bottom center</FluentRadioButton>
-            <FluentRadioButton Value="@("bottomright")">Bottom right</FluentRadioButton>
-        </div>
-    </FluentRadioGroup>
-    <div>
-        <FluentButton OnClick="@(() => _teachingTipDetachedOpen = true)">Show detached tip</FluentButton>
-    </div>
-    <FluentTeachingTip @bind-IsOpen="_teachingTipDetachedOpen" ScreenPlacement="_teachingTipScreenPlacement"
-                        Title="What's new" Subtitle="This tip isn't pointing at anything — it's pinned to the viewport.">
-        <ActionContent>
-            <FluentButton Variant="ButtonVariant.Accent" OnClick="@(() => _teachingTipDetachedOpen = false)">Got it</FluentButton>
-        </ActionContent>
-    </FluentTeachingTip>
-
 </div>
 
 @code {
-    private bool _checkbox1;
-    private bool _checkbox2;
-    private bool _checkboxIndeterminate = true;
-    private object? _flavor = "vanilla";
-    private bool _wifiEnabled = true;
-    private string? _name;
-    private string _searchText = "";
-    private double _numberValueCompact = 5;
-    private double _numberValueExpanded = 5;
+    private record ControlCardInfo(string Name, string Route, string Icon);
 
-    private readonly IReadOnlyList<Fluent.Blazor.Composite.AutoSuggestBoxItem<string>> _citySuggestions = new List<Fluent.Blazor.Composite.AutoSuggestBoxItem<string>>
-    {
-        new("Singapore", "SG"),
-        new("Seattle", "US-SEA"),
-        new("Seoul", "KR"),
-        new("Stockholm", "SE"),
-        new("Sydney", "AU"),
-        new("Berlin", "DE"),
-        new("London", "UK"),
-        new("Tokyo (temporarily unavailable)", "JP", Disabled: true),
-    };
-    private string? _citySearchText;
-    private string? _citySuggestionChosen;
+    private readonly ControlCardInfo[] _primitiveCards =
+    [
+        new("Button",        "/controls/button",        "🔲"),
+        new("TextBlock",     "/controls/textblock",     "Ꭲ"),
+        new("CheckBox",      "/controls/checkbox",      "☑️"),
+        new("RadioButton",   "/controls/radiobutton",   "🔘"),
+        new("ToggleSwitch",  "/controls/toggleswitch",  "🔀"),
+        new("ToggleButton",  "/controls/togglebutton",  "⏺"),
+        new("TextBox",       "/controls/textbox",       "✏️"),
+        new("PasswordBox",   "/controls/passwordbox",   "🔑"),
+        new("Slider",        "/controls/slider",        "🎚"),
+        new("ProgressBar",   "/controls/progressbar",   "📊"),
+        new("ProgressRing",  "/controls/progressring",  "⭕"),
+        new("Expander",      "/controls/expander",      "⬇"),
+        new("InfoBar",       "/controls/infobar",       "ℹ️"),
+        new("InfoBadge",     "/controls/infobadge",     "🔴"),
+        new("PersonPicture", "/controls/personpicture", "👤"),
+        new("IconButton",    "/controls/iconbutton",    "🖱"),
+        new("Card",          "/controls/card",          "🃏"),
+        new("ListView",      "/controls/listview",      "📋"),
+    ];
 
-    private readonly IReadOnlyList<Fluent.Blazor.Composite.AutoSuggestBoxItem<string>> _countrySuggestions = new List<Fluent.Blazor.Composite.AutoSuggestBoxItem<string>>
-    {
-        new("Singapore", "SG"),
-        new("Sweden", "SE"),
-        new("Switzerland", "CH"),
-        new("United States", "US"),
-        new("United Kingdom", "UK"),
-        new("Japan", "JP"),
-        new("Germany (unavailable)", "DE", Disabled: true),
-    };
-    private string? _countrySearchText;
-    private string? _countrySuggestionChosen;
+    private readonly ControlCardInfo[] _compositeCards =
+    [
+        new("NavigationView",  "/controls/navigationview",  "🗂"),
+        new("ComboBox",        "/controls/combobox",        "⬇"),
+        new("AutoSuggestBox",  "/controls/autosuggestbox",  "🔍"),
+        new("NumberBox",       "/controls/numberbox",       "🔢"),
+        new("Calendar",        "/controls/calendar",        "📅"),
+        new("Flyout",          "/controls/flyout",          "💬"),
+        new("MenuFlyout",      "/controls/menuflyout",      "📋"),
+        new("ContextMenu",     "/controls/contextmenu",     "🖱"),
+        new("MenuBar",         "/controls/menubar",         "☰"),
+        new("ContentDialog",   "/controls/contentdialog",   "🪟"),
+        new("Pivot",           "/controls/pivot",           "📑"),
+        new("DropDownButton",  "/controls/dropdownbutton",  "⬇"),
+        new("SplitButton",     "/controls/splitbutton",     "✂️"),
+        new("Tooltip",         "/controls/tooltip",         "💭"),
+        new("TeachingTip",     "/controls/teachingtip",     "💡"),
+    ];
 
-    private static string FlagFor(string? value) => value switch
-    {
-        "SG" => "\U0001F1F8\U0001F1EC",
-        "SE" => "\U0001F1F8\U0001F1EA",
-        "CH" => "\U0001F1E8\U0001F1ED",
-        "US" => "\U0001F1FA\U0001F1F8",
-        "UK" => "\U0001F1EC\U0001F1E7",
-        "JP" => "\U0001F1EF\U0001F1F5",
-        "DE" => "\U0001F1E9\U0001F1EA",
-        _ => "\U0001F3F3\uFE0F"
-    };
-
-    private DateTime? _calendarValue = DateTime.Today;
-    private readonly IReadOnlyList<DateTime> _calendarBlackout = new List<DateTime> { DateTime.Today.AddDays(3), DateTime.Today.AddDays(4) };
-    private DateTime? _datePickerValue;
-    private DateTime? _datePickerRangedValue;
-    private readonly DateTime _datePickerMin = new(DateTime.Today.Year, DateTime.Today.Month, 1);
-    private readonly DateTime _datePickerMax = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(1).AddDays(-1);
-
-    private readonly string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
-    private string? _selectedFruit = "Apple";
-
-    private bool _flyoutOpen;
-
-    private double _progressValue = 40;
-    private bool _expanderOpen;
-    private bool _infoBarOpen = true;
-    private double _sliderTicksValue = 4;
-    private double _sliderReverseValue = 30;
-    private double _sliderVerticalValue = 60;
-    private string? _menuLastAction;
-    private bool _menuShowHidden;
-    private string _menuSortOrder = "name";
-    private string? _contextMenuLastAction;
-
-    private readonly IReadOnlyList<Fluent.Blazor.Composite.ComboBoxItem<string>> _comboFruitItems = new List<Fluent.Blazor.Composite.ComboBoxItem<string>>
-    {
-        new("Apple", "apple"),
-        new("Banana", "banana"),
-        new("Cherry", "cherry"),
-        new("Durian", "durian"),
-        new("Elderberry (out of stock)", "elderberry", Disabled: true),
-    };
-    private string? _comboFruit = "apple";
-    private string? _comboFruitEditable = "apple";
-    private string? _comboFruitSearch;
-
-    private readonly IReadOnlyList<Fluent.Blazor.Composite.ComboBoxItem<string>> _comboColorItems = new List<Fluent.Blazor.Composite.ComboBoxItem<string>>
-    {
-        new("Red", "red"),
-        new("Green", "green"),
-        new("Blue", "blue"),
-        new("Purple", "purple"),
-    };
-    private string? _comboColor = "blue";
-
-    private static string ColorHexFor(string? value) => value switch
-    {
-        "red" => "#c42b1c",
-        "green" => "#0f7b0f",
-        "blue" => "#005fb8",
-        "purple" => "#744da9",
-        _ => "transparent"
-    };
-
-    private bool _dialogBasicOpen;
-    private bool _dialogConfirmOpen;
-    private bool _dialogUnclosableOpen;
-    private string? _dialogLastAction;
-
-    private string? _iconButtonLastAction;
-
-    private string? _menuBarLastAction;
-    private bool _menuBarShowGrid;
-
-    private bool _toggleButtonBold;
-    private bool _toggleButtonItalic = true;
-
-    private string? _passwordBoxValue;
-
-    private int _pivotSelectedIndex;
-
-    private string? _dropDownLastAction;
-
-    private string? _splitButtonLastAction;
-
-    private bool _teachingTipOpen;
-    private ElementReference _revealCardTargetRef;
-
-    private bool _teachingTipDetachedOpen;
-    private OverlayScreenPlacement _teachingTipScreenPlacement = OverlayScreenPlacement.BottomCenter;
-    private object? _teachingTipScreenPlacementString
-    {
-        get => _teachingTipScreenPlacement.ToString().ToLowerInvariant();
-        set
-        {
-            _teachingTipScreenPlacement = (value as string) switch
-            {
-                "topleft" => OverlayScreenPlacement.TopLeft,
-                "topcenter" => OverlayScreenPlacement.TopCenter,
-                "topright" => OverlayScreenPlacement.TopRight,
-                "center" => OverlayScreenPlacement.Center,
-                "bottomleft" => OverlayScreenPlacement.BottomLeft,
-                "bottomright" => OverlayScreenPlacement.BottomRight,
-                _ => OverlayScreenPlacement.BottomCenter
-            };
-        }
-    }
-
-    private void CloseConfirmDialog(string action)
-    {
-        _dialogLastAction = action;
-        _dialogConfirmOpen = false;
-    }
-
-    private void CloseUnclosableDialog()
-    {
-        _dialogLastAction = "Done clicked";
-        _dialogUnclosableOpen = false;
-    }
-
-    private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
-    private bool _navPaneOpen = true;
-    private object? _navSelected = "home";
-    private string? _navSearch;
-    private string? _navLastAction;
-    private bool _navBackButtonVisible = true;
-    private bool _navBackButtonEnabled = true;
-    private bool _navShowSettingsButton = true;
-
-    private void OnNavBack() => _navLastAction = "Back pressed";
-
-    private void OnNavSettings() => _navLastAction = "Settings requested";
-
-    // Map radio button string values to NavigationViewPaneDisplayMode
-    private object? _navModeString
-    {
-        get => _navMode switch
-        {
-            NavigationViewPaneDisplayMode.Left => "expanded",      // Left is the "expanded" mode in our mapping
-            NavigationViewPaneDisplayMode.LeftCompact => "compact",
-            NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
-            _ => "expanded"
-        };
-        set
-        {
-            _navMode = (value as string) switch
-            {
-                "compact" => NavigationViewPaneDisplayMode.LeftCompact,
-                "minimal" => NavigationViewPaneDisplayMode.LeftMinimal,
-                _ => NavigationViewPaneDisplayMode.Left
-            };
-            // When switching modes, we start with a clean slate.
-            // For Left (expanded), we open the pane; for Compact/Minimal we close it.
-            _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Left;
-        }
-    }
-
-    private object? _acrylicTintColorName = "black";
-    private string _acrylicTintColor => (_acrylicTintColorName as string) switch
-    {
-        "skyblue" => "skyblue",
-        "red" => "#c42b1c",
-        _ => "black"
-    };
-    private double _acrylicTintOpacitySlider = 0.8;
-    private double _acrylicTintOpacity => _acrylicTintOpacitySlider;
-    private double _acrylicLuminosityOpacitySlider;
-    private double _acrylicLuminosityOpacity => _acrylicLuminosityOpacitySlider;
-    // Only pass TintLuminosityOpacity through to the component once it's actually been raised above
-    // zero — that's what opts a FluentAcrylicBrush into rendering the extra luminosity-blend layer
-    // at all (see FluentAcrylicBrush.razor.cs's HasLuminosityLayer), so leaving the slider at 0 keeps
-    // this demo on the simpler single-wash tint by default, same as the Base/Thin cards above.
-    private double? _acrylicLuminosityOpacityParam => _acrylicLuminosityOpacitySlider > 0 ? _acrylicLuminosityOpacitySlider : null;
-
-    private MicaVariant _mainMicaVariant = MicaVariant.Base;
-    private string _mainMicaMode = "base";
-    private string _mainMicaPanelStyle => $"position:fixed; inset:0; z-index:-1; display:{(_mainMicaMode == "none" ? "none" : "block")};";
-    private object? _mainMicaVariantString
-    {
-        get => _mainMicaMode;
-        set
-        {
-            _mainMicaMode = (value as string) ?? "base";
-            _mainMicaVariant = _mainMicaMode == "basealt" ? MicaVariant.BaseAlt : MicaVariant.Base;
-        }
-    }
+    private readonly ControlCardInfo[] _effectCards =
+    [
+        new("Acrylic", "/controls/acrylic", "🌫"),
+        new("Mica",    "/controls/mica",    "🪟"),
+        new("Reveal",  "/controls/reveal",  "✨"),
+    ];
 }

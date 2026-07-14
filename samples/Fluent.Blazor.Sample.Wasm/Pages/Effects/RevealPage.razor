@@ -1,0 +1,29 @@
+@page "/controls/reveal"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Effects &amp; Materials" Title="Reveal" Description="Reveal applies pointer tracked spotlight highlight shaders to borders and background overlays." />
+
+    <ControlExample HeaderText="Spotlight Reveal effect" RazorCode="@_revealRazor">
+        <Example>
+            <div class="demo-row" style="gap: 24px;">
+                <FluentRevealBackground style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); display:flex; align-items:center; justify-content:center; border:1px solid var(--card-stroke-default);">
+                    <FluentTextBlock>Fill Reveal</FluentTextBlock>
+                </FluentRevealBackground>
+                
+                <FluentRevealBackground Bordered="true" style="width:160px; height:100px; border-radius:8px; background:var(--card-background-default); display:flex; align-items:center; justify-content:center; border:1px solid var(--card-stroke-default);">
+                    <FluentTextBlock>Border Reveal</FluentTextBlock>
+                </FluentRevealBackground>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _revealRazor = @"<FluentRevealBackground style=""width:160px; height:100px; border-radius:8px; background:var(--card-background-default); display:flex; align-items:center; justify-content:center; border:1px solid var(--card-stroke-default);"">
+    <FluentTextBlock>Fill Reveal</FluentTextBlock>
+</FluentRevealBackground>
+
+<FluentRevealBackground Bordered=""true"" style=""width:160px; height:100px; border-radius:8px; background:var(--card-background-default); display:flex; align-items:center; justify-content:center; border:1px solid var(--card-stroke-default);"">
+    <FluentTextBlock>Border Reveal</FluentTextBlock>
+</FluentRevealBackground>";
+}

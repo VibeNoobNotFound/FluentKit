@@ -1,0 +1,21 @@
+@page "/controls/tooltip"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="Tooltip" Description="Use Tooltip to display helpful informational texts on hovering elements." />
+
+    <ControlExample HeaderText="Basic Hover Tooltip" RazorCode="@_toolRazor">
+        <Example>
+            <div class="demo-row">
+                <FluentTooltip Text="This displays in the overlay host positioning layer.">
+                    <FluentButton Variant="ButtonVariant.Standard">Hover Over Me</FluentButton>
+                </FluentTooltip>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _toolRazor = @"<FluentTooltip Text=""This displays in the overlay host positioning layer."">
+    <FluentButton Variant=""ButtonVariant.Standard"">Hover Over Me</FluentButton>
+</FluentTooltip>";
+}

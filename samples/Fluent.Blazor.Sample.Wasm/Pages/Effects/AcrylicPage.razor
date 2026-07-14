@@ -1,0 +1,64 @@
+@page "/controls/acrylic"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Effects &amp; Materials" Title="Acrylic" Description="Acrylic is a translucent material that applies a backdrop-filter blur over backgrounds." />
+
+    <ControlExample HeaderText="Acrylic Brush Styles" RazorCode="@_brushRazor">
+        <Example>
+            <div style="position:relative; width:100%; height:220px; border-radius:12px; overflow:hidden; background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
+                <FluentAcrylicBrush Kind="AcrylicKind.Base" style="position:absolute; top:20px; left:20px; width:160px; padding:16px; border-radius:8px;">
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Base Acrylic</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">Thicker context tinting layer.</FluentTextBlock>
+                </FluentAcrylicBrush>
+                <FluentAcrylicBrush Kind="AcrylicKind.Thin" style="position:absolute; bottom:20px; right:20px; width:160px; padding:16px; border-radius:8px;">
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Thin Acrylic</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Caption" style="margin-top:4px; opacity:0.8;">Highly transparent glass filter.</FluentTextBlock>
+                </FluentAcrylicBrush>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Live Tweak Settings" RazorCode="@_tweakRazor" CSharpCode="@_tweakCs" Options="@_options">
+        <Example>
+            <div style="position:relative; width:100%; height:200px; border-radius:12px; overflow:hidden; background-image:url('wallpaper.jpg'); background-size:cover; background-position:center;">
+                <FluentAcrylicBrush TintColor="@(_tintColor as string)" TintOpacity="_tintOpacity" style="position:absolute; inset:20px; padding:20px; display:flex; flex-direction:column; justify-content:center;">
+                    <FluentTextBlock Variant="TextBlockVariant.Title">Custom Acrylic Settings</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Body">Observe live styling modifications based on the option sliders.</FluentTextBlock>
+                </FluentAcrylicBrush>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private object? _tintColor = "black";
+    private double _tintOpacity = 0.6;
+
+    private const string _brushRazor = @"<FluentAcrylicBrush Kind=""AcrylicKind.Base"" style=""position:absolute; top:20px; left:20px; width:160px; padding:16px; border-radius:8px;"">
+    <FluentTextBlock Variant=""TextBlockVariant.BodyStrong"">Base Acrylic</FluentTextBlock>
+</FluentAcrylicBrush>";
+
+    private const string _tweakRazor = @"<FluentAcrylicBrush TintColor=""@_tintColor"" TintOpacity=""_tintOpacity"">
+    <FluentTextBlock Variant=""TextBlockVariant.Title"">Custom Acrylic Settings</FluentTextBlock>
+</FluentAcrylicBrush>";
+
+    private const string _tweakCs = @"private string _tintColor = ""black"";
+private double _tintOpacity = 0.6;";
+
+    private RenderFragment _options => __builder => {
+        <div class="demo-col" style="width:100%;">
+            <FluentRadioGroup @bind-Value="_tintColor">
+                <div class="demo-row">
+                    <FluentRadioButton Value='@("black")'>Black Tint</FluentRadioButton>
+                    <FluentRadioButton Value='@("skyblue")'>Sky Blue Tint</FluentRadioButton>
+                    <FluentRadioButton Value='@("red")'>Red Tint</FluentRadioButton>
+                </div>
+            </FluentRadioGroup>
+            <div class="demo-row" style="margin-top:12px; align-items:center;">
+                <span style="font-size:12px; font-weight:600;">Opacity:</span>
+                <FluentSlider @bind-Value="_tintOpacity" Min="0" Max="1" Step="0.05" style="width:180px;" />
+                <span style="font-size:12px;">@_tintOpacity.ToString("0.00")</span>
+            </div>
+        </div>
+    };
+}

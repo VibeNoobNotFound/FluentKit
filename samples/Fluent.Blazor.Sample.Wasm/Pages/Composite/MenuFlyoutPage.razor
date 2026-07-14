@@ -1,0 +1,63 @@
+@page "/controls/menuflyout"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="MenuFlyout" Description="A MenuFlyout displays contextual options in a list layout popup." />
+
+    <ControlExample HeaderText="MenuFlyout Demo" RazorCode="@_menuRazor" CSharpCode="@_menuCs">
+        <Example>
+            <div class="demo-row">
+                <FluentMenuFlyout Placement="OverlayPlacement.Bottom">
+                    <ChildContent>
+                        <FluentButton Variant="ButtonVariant.Standard">Open Context Menu</FluentButton>
+                    </ChildContent>
+                    <MenuItems>
+                        <FluentMenuFlyoutItem OnClick="@(() => LogAction("New"))">
+                            <Icon><FluentIcon Name="@FluentIconNames.Add" /></Icon>
+                            <ChildContent>New File</ChildContent>
+                        </FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem OnClick="@(() => LogAction("Open"))">Open...</FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutDivider />
+                        <FluentMenuFlyoutItem Variant="MenuFlyoutItemVariant.Toggle" @bind-Checked="_showHidden">
+                            Show Hidden Files
+                        </FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem Cascading="true">
+                            <ChildContent>Share options</ChildContent>
+                            <Flyout>
+                                <FluentMenuFlyoutItem OnClick="@(() => LogAction("Email"))">Via Email</FluentMenuFlyoutItem>
+                                <FluentMenuFlyoutItem OnClick="@(() => LogAction("Link"))">Copy Link</FluentMenuFlyoutItem>
+                            </Flyout>
+                        </FluentMenuFlyoutItem>
+                    </MenuItems>
+                </FluentMenuFlyout>
+            </div>
+            <div class="demo-output">Last Action: @_action, Show Hidden: @_showHidden</div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private string? _action;
+    private bool _showHidden;
+
+    private void LogAction(string act) => _action = act;
+
+    private const string _menuRazor = @"<FluentMenuFlyout Placement=""OverlayPlacement.Bottom"">
+    <ChildContent>
+        <FluentButton Variant=""ButtonVariant.Standard"">Open Context Menu</FluentButton>
+    </ChildContent>
+    <MenuItems>
+        <FluentMenuFlyoutItem OnClick=""@(() => LogAction(""New""))"">
+            <Icon><FluentIcon Name=""@FluentIconNames.Add"" /></Icon>
+            <ChildContent>New File</ChildContent>
+        </FluentMenuFlyoutItem>
+        ...
+        <FluentMenuFlyoutItem Variant=""MenuFlyoutItemVariant.Toggle"" @bind-Checked=""_showHidden"">
+            Show Hidden Files
+        </FluentMenuFlyoutItem>
+    </MenuItems>
+</FluentMenuFlyout>";
+
+    private const string _menuCs = @"private string? _action;
+private bool _showHidden;
+private void LogAction(string act) => _action = act;";
+}

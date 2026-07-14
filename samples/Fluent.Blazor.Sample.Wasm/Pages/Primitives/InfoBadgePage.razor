@@ -1,0 +1,27 @@
+@page "/controls/infobadge"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="InfoBadge" Description="Use InfoBadge to highlight count, status, or items needing attention." />
+
+    <ControlExample HeaderText="Basic InfoBadge" RazorCode="@_badgeRazor">
+        <Example>
+            <div class="demo-row" style="gap: 20px;">
+                <FluentInfoBadge Severity="InfoBadgeSeverity.Attention" />
+                <FluentInfoBadge Severity="InfoBadgeSeverity.Success" />
+                <FluentInfoBadge Severity="InfoBadgeSeverity.Caution" />
+                <FluentInfoBadge Severity="InfoBadgeSeverity.Critical" />
+                <FluentInfoBadge Severity="InfoBadgeSeverity.Informational" />
+                <FluentInfoBadge Severity="InfoBadgeSeverity.Critical">99+</FluentInfoBadge>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _badgeRazor = @"<FluentInfoBadge Severity=""InfoBadgeSeverity.Attention"" />
+<FluentInfoBadge Severity=""InfoBadgeSeverity.Success"" />
+<FluentInfoBadge Severity=""InfoBadgeSeverity.Caution"" />
+<FluentInfoBadge Severity=""InfoBadgeSeverity.Critical"" />
+<FluentInfoBadge Severity=""InfoBadgeSeverity.Informational"" />
+<FluentInfoBadge Severity=""InfoBadgeSeverity.Critical"">99+</FluentInfoBadge>";
+}

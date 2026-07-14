@@ -1,0 +1,436 @@
+/* ================================================================
+   gallery.css — Fluent.Blazor Gallery layout & design system
+   ================================================================ */
+
+/* ── Reset / base ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Full-viewport root chain ──────────────────────────────────── */
+/* The NavView lives in a wrapper div with height:100dvh (see MainLayout.razor).
+   block-size:100% on .fluent-nav-view resolves against that explicit height.
+   html/body/app just need to fill the viewport with no scrollbars. */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#app {
+    height: 100%;
+    overflow: hidden;
+}
+
+/* ── Gallery shell layout ──────────────────────────────────────── */
+.gallery-body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: transparent;
+}
+
+/* Page content wrapper — adds consistent padding and max-width */
+.gallery-page {
+    padding: 28px 36px 48px;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ── Page Header ───────────────────────────────────────────────── */
+.page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--card-stroke-default);
+}
+
+.page-header__eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+}
+
+.page-header__title {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text-fill-color-primary);
+    margin: 0;
+}
+
+.page-header__description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-fill-color-secondary);
+    max-width: 720px;
+    margin: 4px 0 0;
+}
+
+.page-header__links {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Control Example block ─────────────────────────────────────── */
+.control-example {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--card-stroke-default);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--card-background-default);
+}
+
+.control-example__header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--card-stroke-default);
+}
+
+.control-example__header-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-fill-color-primary);
+    margin: 0;
+}
+
+.control-example__header-desc {
+    font-size: 12px;
+    color: var(--text-fill-color-secondary);
+    margin: 4px 0 0;
+    line-height: 1.5;
+}
+
+.control-example__body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Live demo area */
+.control-example__demo {
+    padding: 28px 24px;
+    background: var(--layer-fill-color-alt);
+    border-bottom: 1px solid var(--card-stroke-default);
+}
+
+/* Options row (optional interactive tweaks panel) */
+.control-example__options {
+    padding: 16px 20px;
+    background: var(--card-background-secondary, var(--subtle-fill-color-secondary));
+    border-bottom: 1px solid var(--card-stroke-default);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.control-example__options-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-fill-color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 4px;
+}
+
+/* Code panel */
+.control-example__code-panel {
+    background: #1e1e1e;
+}
+
+.control-example__code-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #333;
+}
+
+.code-tab {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #aaa;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    font-family: inherit;
+}
+
+.code-tab:hover { color: #fff; }
+.code-tab--active {
+    color: #fff;
+    border-bottom-color: var(--accent-default);
+}
+
+.control-example__code-content {
+    position: relative;
+    max-height: 400px;
+    overflow: auto;
+}
+
+/* ── Sample Code Block ─────────────────────────────────────────── */
+.sample-code-block {
+    margin: 0;
+    padding: 0;
+}
+
+.sample-code-block pre[class*="language-"] {
+    margin: 0;
+    padding: 16px 20px;
+    border-radius: 0;
+    background: #1e1e1e !important;
+    font-size: 13px;
+    line-height: 1.6;
+    tab-size: 2;
+}
+
+.sample-code-block code[class*="language-"] {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+}
+
+/* Copy button inside code block */
+.code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    padding: 4px 10px;
+    font-size: 11px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 4px;
+    color: #ccc;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+.code-copy-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+.code-copy-btn--copied { color: #4caf50; border-color: #4caf50; }
+
+/* ── Home Page ─────────────────────────────────────────────────── */
+.home-hero {
+    position: relative;
+    padding: 48px 36px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(0, 95, 184, 0.08) 0%, rgba(104, 79, 221, 0.08) 100%);
+    border: 1px solid var(--card-stroke-default);
+}
+
+.home-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(0, 95, 184, 0.12);
+    border: 1px solid rgba(0, 95, 184, 0.25);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-default);
+    margin-bottom: 16px;
+}
+
+.home-hero__title {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-fill-color-primary);
+    margin: 0 0 12px;
+}
+
+.home-hero__title span {
+    background: linear-gradient(90deg, var(--accent-default), #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.home-hero__subtitle {
+    font-size: 16px;
+    color: var(--text-fill-color-secondary);
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 0 28px;
+}
+
+.home-hero__stats {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.home-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.home-stat__number {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent-default);
+    line-height: 1;
+}
+
+.home-stat__label {
+    font-size: 12px;
+    color: var(--text-fill-color-secondary);
+}
+
+/* Control card grid */
+.home-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.home-section__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-fill-color-primary);
+    padding: 0 2px;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.control-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    background: var(--card-background-default);
+    border: 1px solid var(--card-stroke-default);
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+}
+
+.control-card:hover {
+    background: var(--subtle-fill-color-secondary);
+    border-color: var(--accent-default);
+    transform: translateY(-1px);
+}
+
+.control-card:active {
+    transform: translateY(0);
+}
+
+.control-card__icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 95, 184, 0.1);
+    border-radius: 8px;
+    font-size: 20px;
+}
+
+.control-card__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-fill-color-primary);
+    line-height: 1.3;
+}
+
+.control-card__category {
+    font-size: 11px;
+    color: var(--text-fill-color-secondary);
+}
+
+/* ── Settings Page ─────────────────────────────────────────────── */
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.settings-group__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-fill-color-primary);
+    margin: 0 0 8px;
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--card-background-default);
+    border: 1px solid var(--card-stroke-default);
+    border-radius: 8px;
+    gap: 12px;
+}
+
+.settings-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.settings-item__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-fill-color-primary);
+}
+
+.settings-item__desc {
+    font-size: 12px;
+    color: var(--text-fill-color-secondary);
+}
+
+/* ── Demo layout helpers ───────────────────────────────────────── */
+.demo-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.demo-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.demo-output {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: var(--subtle-fill-color-secondary);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-fill-color-secondary);
+    font-family: monospace;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .gallery-page { padding: 16px 16px 40px; }
+    .home-hero { padding: 28px 20px; }
+    .home-hero__title { font-size: 28px; }
+    .control-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .page-header__title { font-size: 26px; }
+}

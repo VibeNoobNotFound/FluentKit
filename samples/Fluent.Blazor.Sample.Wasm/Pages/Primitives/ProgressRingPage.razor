@@ -1,0 +1,21 @@
+@page "/controls/progressring"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="ProgressRing" Description="ProgressRing indicates process progression via a circular ring." />
+
+    <ControlExample HeaderText="Determinate and Indeterminate Rings" RazorCode="@_ringRazor">
+        <Example>
+            <div class="demo-row" style="gap: 32px;">
+                <FluentProgressRing IsIndeterminate="true" />
+                <FluentProgressRing IsIndeterminate="false" Value="60" />
+                <FluentProgressRing IsIndeterminate="false" Value="75" Size="56" />
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _ringRazor = @"<FluentProgressRing IsIndeterminate=""true"" />
+<FluentProgressRing IsIndeterminate=""false"" Value=""60"" />
+<FluentProgressRing IsIndeterminate=""false"" Value=""75"" Size=""56"" />";
+}

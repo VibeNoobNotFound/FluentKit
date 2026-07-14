@@ -1,0 +1,102 @@
+@page "/controls/navigationview"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="NavigationView" Description="The NavigationView control provides top-level navigation layout structure for apps." />
+
+    <ControlExample HeaderText="Basic NavigationView Demo" RazorCode="@_navRazor" CSharpCode="@_navCs" Options="@_options">
+        <Example>
+            <div style="width:100%; height:320px; border-radius:8px; overflow:hidden; border:1px solid var(--card-stroke-default);">
+                <FluentNavigationView PaneDisplayMode="_navMode"
+                                       @bind-IsPaneOpen="_navPaneOpen"
+                                       @bind-SelectedValue="_navSelected"
+                                       IsBackButtonVisible="true"
+                                       ShowSettingsButton="true">
+                    <PaneHeader>
+                        <div style="padding: 4px 12px; font-weight: 600;">Sample App</div>
+                    </PaneHeader>
+                    <MenuItems>
+                        <FluentNavigationViewItem Value='@("home")' Text="Home">
+                            <Icon><FluentIcon Name="@FluentIconNames.Home" /></Icon>
+                        </FluentNavigationViewItem>
+                        <FluentNavigationViewItem Value='@("docs")' Text="Documentation">
+                            <Icon><FluentIcon Name="@FluentIconNames.Document" /></Icon>
+                        </FluentNavigationViewItem>
+                        <FluentNavigationViewItemSeparator />
+                        <FluentNavigationViewItem Value='@("settings")' Text="Preferences" />
+                    </MenuItems>
+                    <ChildContent>
+                        <div style="padding: 24px;">
+                            <FluentTextBlock Variant="TextBlockVariant.Title">Selected Page: @_navSelected</FluentTextBlock>
+                        </div>
+                    </ChildContent>
+                </FluentNavigationView>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
+    private bool _navPaneOpen = true;
+    private object? _navSelected = "home";
+
+    private const string _navRazor = @"<FluentNavigationView PaneDisplayMode=""_navMode""
+                      @bind-IsPaneOpen=""_navPaneOpen""
+                      @bind-SelectedValue=""_navSelected""
+                      IsBackButtonVisible=""true""
+                      ShowSettingsButton=""true"">
+    <PaneHeader>
+        <div style=""padding: 4px 12px; font-weight: 600;"">Sample App</div>
+    </PaneHeader>
+    <MenuItems>
+        <FluentNavigationViewItem Value='@(""home"")' Text=""Home"">
+            <Icon><FluentIcon Name=""@FluentIconNames.Home"" /></Icon>
+        </FluentNavigationViewItem>
+        <FluentNavigationViewItem Value='@(""docs"")' Text=""Documentation"">
+            <Icon><FluentIcon Name=""@FluentIconNames.Document"" /></Icon>
+        </FluentNavigationViewItem>
+        <FluentNavigationViewItemSeparator />
+        <FluentNavigationViewItem Value='@(""settings"")' Text=""Preferences"" />
+    </MenuItems>
+    <ChildContent>
+        <div style=""padding: 24px;"">
+            <FluentTextBlock Variant=""TextBlockVariant.Title"">Selected Page: @_navSelected</FluentTextBlock>
+        </div>
+    </ChildContent>
+</FluentNavigationView>";
+
+    private const string _navCs = @"private NavigationViewPaneDisplayMode _navMode = NavigationViewPaneDisplayMode.Left;
+private bool _navPaneOpen = true;
+private object? _navSelected = ""home"";";
+
+    private RenderFragment _options => __builder => {
+        <FluentRadioGroup @bind-Value="_navModeString">
+            <div class="demo-row">
+                <FluentRadioButton Value='@("left")'>Left (Expanded)</FluentRadioButton>
+                <FluentRadioButton Value='@("compact")'>Left Compact</FluentRadioButton>
+                <FluentRadioButton Value='@("minimal")'>Minimal</FluentRadioButton>
+            </div>
+        </FluentRadioGroup>
+    };
+
+    private object? _navModeString
+    {
+        get => _navMode switch
+        {
+            NavigationViewPaneDisplayMode.Left => "left",
+            NavigationViewPaneDisplayMode.LeftCompact => "compact",
+            NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
+            _ => "left"
+        };
+        set
+        {
+            _navMode = (value as string) switch
+            {
+                "compact" => NavigationViewPaneDisplayMode.LeftCompact,
+                "minimal" => NavigationViewPaneDisplayMode.LeftMinimal,
+                _ => NavigationViewPaneDisplayMode.Left
+            };
+            _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Left;
+        }
+    }
+}

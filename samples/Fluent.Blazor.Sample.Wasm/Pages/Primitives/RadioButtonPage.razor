@@ -1,0 +1,36 @@
+@page "/controls/radiobutton"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="RadioButton" Description="RadioButton allows a user to select one option from a mutually exclusive group." />
+
+    <ControlExample HeaderText="RadioButton Group" RazorCode="@_radioRazor" CSharpCode="@_radioCs">
+        <Example>
+            <div class="demo-col">
+                <FluentRadioGroup @bind-Value="_selectedFlavor">
+                    <div class="demo-col">
+                        <FluentRadioButton Value='@("Chocolate")'>Chocolate</FluentRadioButton>
+                        <FluentRadioButton Value='@("Vanilla")'>Vanilla</FluentRadioButton>
+                        <FluentRadioButton Value='@("Strawberry")'>Strawberry</FluentRadioButton>
+                        <FluentRadioButton Value='@("Mint")' Disabled="true">Mint (disabled)</FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+                <div class="demo-output">Selected: @_selectedFlavor</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private object? _selectedFlavor = "Chocolate";
+
+    private const string _radioRazor = @"<FluentRadioGroup @bind-Value=""_selectedFlavor"">
+    <div class=""demo-col"">
+        <FluentRadioButton Value='@(""Chocolate"")'>Chocolate</FluentRadioButton>
+        <FluentRadioButton Value='@(""Vanilla"")'>Vanilla</FluentRadioButton>
+        <FluentRadioButton Value='@(""Strawberry"")'>Strawberry</FluentRadioButton>
+        <FluentRadioButton Value='@(""Mint"")' Disabled=""true"">Mint (disabled)</FluentRadioButton>
+    </div>
+</FluentRadioGroup>";
+
+    private const string _radioCs = @"private object? _selectedFlavor = ""Chocolate"";";
+}

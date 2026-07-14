@@ -1,0 +1,51 @@
+@page "/controls/infobar"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="InfoBar" Description="The InfoBar control is for displaying app-wide status messages to users." />
+
+    <ControlExample HeaderText="InfoBar Severities" RazorCode="@_infoRazor">
+        <Example>
+            <div class="demo-col" style="gap: 12px; max-width: 640px;">
+                <FluentInfoBar Severity="InfoBadgeSeverity.Informational" Closable="false" Title="Informational" Message="An update is ready to download." />
+                <FluentInfoBar Severity="InfoBadgeSeverity.Success" Closable="false" Title="Success" Message="Your file was uploaded successfully." />
+                <FluentInfoBar Severity="InfoBadgeSeverity.Caution" Closable="false" Title="Caution" Message="Your backup might be out of date." />
+                <FluentInfoBar Severity="InfoBadgeSeverity.Critical" Closable="false" Title="Critical" Message="Unable to establish database server connection." />
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Dismissible InfoBar with Action Button" RazorCode="@_dismissRazor" CSharpCode="@_dismissCs">
+        <Example>
+            <div class="demo-col" style="max-width: 640px;">
+                @if (_isOpen)
+                {
+                    <FluentInfoBar @bind-IsOpen="_isOpen" Severity="InfoBadgeSeverity.Informational" Title="Restart required" Message="Apply updates by rebooting now.">
+                        <Action>
+                            <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _isOpen = false)">Restart</FluentButton>
+                        </Action>
+                    </FluentInfoBar>
+                }
+                else
+                {
+                    <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => _isOpen = true)">Reopen InfoBar</FluentButton>
+                }
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _isOpen = true;
+
+    private const string _infoRazor = @"<FluentInfoBar Severity=""InfoBadgeSeverity.Informational"" Closable=""false"" Title=""Informational"" Message=""An update is ready to download."" />
+<FluentInfoBar Severity=""InfoBadgeSeverity.Success"" Closable=""false"" Title=""Success"" Message=""Your file was uploaded successfully."" />
+<FluentInfoBar Severity=""InfoBadgeSeverity.Caution"" Closable=""false"" Title=""Caution"" Message=""Your backup might be out of date."" />
+<FluentInfoBar Severity=""InfoBadgeSeverity.Critical"" Closable=""false"" Title=""Critical"" Message=""Unable to establish database server connection."" />";
+
+    private const string _dismissRazor = @"<FluentInfoBar @bind-IsOpen=""_isOpen"" Severity=""InfoBadgeSeverity.Informational"" Title=""Restart required"" Message=""Apply updates by rebooting now."">
+    <Action>
+        <FluentButton Variant=""ButtonVariant.Standard"" OnClick=""@(() => _isOpen = false)"">Restart</FluentButton>
+    </Action>
+</FluentInfoBar>";
+    private const string _dismissCs = @"private bool _isOpen = true;";
+}

@@ -1,0 +1,37 @@
+@page "/controls/listview"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="ListView" Description="ListView displays structured data in a vertical single-select list container." />
+
+    <ControlExample HeaderText="Basic ListView Selection" RazorCode="@_listRazor" CSharpCode="@_listCs">
+        <Example>
+            <div class="demo-col" style="max-width: 280px;">
+                <FluentListView Role="listbox" style="border: 1px solid var(--card-stroke-default); border-radius: 8px; overflow: hidden;">
+                    @foreach (var fruit in _fruits)
+                    {
+                        <FluentListViewItem Selected="@(_selectedFruit == fruit)" OnSelect="@(() => _selectedFruit = fruit)">
+                            @fruit
+                        </FluentListViewItem>
+                    }
+                </FluentListView>
+                <div class="demo-output">Selected: @_selectedFruit</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
+    private string? _selectedFruit = "Apple";
+
+    private const string _listRazor = @"<FluentListView Role=""listbox"" style=""border: 1px solid var(--card-stroke-default); border-radius: 8px; overflow: hidden;"">
+    @foreach (var fruit in _fruits)
+    {
+        <FluentListViewItem Selected=""@(_selectedFruit == fruit)"" OnSelect=""@(() => _selectedFruit = fruit)"">
+            @fruit
+        </FluentListViewItem>
+    }
+</FluentListView>";
+    private const string _listCs = @"private string[] _fruits = { ""Apple"", ""Banana"", ""Cherry"", ""Durian"", ""Elderberry"" };
+private string? _selectedFruit = ""Apple"";";
+}

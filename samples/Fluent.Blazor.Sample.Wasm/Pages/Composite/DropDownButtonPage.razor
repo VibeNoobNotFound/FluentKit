@@ -1,0 +1,38 @@
+@page "/controls/dropdownbutton"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="DropDownButton" Description="DropDownButton triggers a context menu dropdown chevron action list when clicked." />
+
+    <ControlExample HeaderText="Standard DropDownButton" RazorCode="@_dropRazor" CSharpCode="@_dropCs">
+        <Example>
+            <div class="demo-col">
+                <FluentDropDownButton>
+                    <ChildContent>Sort By</ChildContent>
+                    <MenuItems>
+                        <FluentMenuFlyoutItem OnClick='@(() => SetSort("Name"))'>Name</FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem OnClick='@(() => SetSort("Date"))'>Date</FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem OnClick='@(() => SetSort("Size"))'>Size</FluentMenuFlyoutItem>
+                    </MenuItems>
+                </FluentDropDownButton>
+                <div class="demo-output">Sort Type: @_selectedSort</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private string _selectedSort = "Name";
+
+    private void SetSort(string sort) => _selectedSort = sort;
+
+    private const string _dropRazor = @"<FluentDropDownButton>
+    <ChildContent>Sort By</ChildContent>
+    <MenuItems>
+        <FluentMenuFlyoutItem OnClick='@(() => SetSort(""Name""))'>Name</FluentMenuFlyoutItem>
+        <FluentMenuFlyoutItem OnClick='@(() => SetSort(""Date""))'>Date</FluentMenuFlyoutItem>
+        <FluentMenuFlyoutItem OnClick='@(() => SetSort(""Size""))'>Size</FluentMenuFlyoutItem>
+    </MenuItems>
+</FluentDropDownButton>";
+    private const string _dropCs = @"private string _selectedSort = ""Name"";
+private void SetSort(string sort) => _selectedSort = sort;";
+}

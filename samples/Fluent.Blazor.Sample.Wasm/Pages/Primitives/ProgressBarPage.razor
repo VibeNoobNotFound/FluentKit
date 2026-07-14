@@ -1,0 +1,33 @@
+@page "/controls/progressbar"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="ProgressBar" Description="ProgressBar indicates the progress of an operation with a bar visualizer." />
+
+    <ControlExample HeaderText="Basic ProgressBar" RazorCode="@_progRazor" CSharpCode="@_progCs">
+        <Example>
+            <div class="demo-col" style="max-width: 320px; gap: 16px;">
+                <FluentProgressBar Value="@_progress" />
+                <FluentSlider @bind-Value="_progress" Min="0" Max="100" />
+                <div class="demo-output">Value: @_progress%</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Indeterminate ProgressBar" RazorCode="@_indetRazor">
+        <Example>
+            <div style="max-width: 320px;">
+                <FluentProgressBar IsIndeterminate="true" />
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private double _progress = 40;
+
+    private const string _progRazor = @"<FluentProgressBar Value=""@_progress"" />
+<FluentSlider @bind-Value=""_progress"" Min=""0"" Max=""100"" />";
+    private const string _progCs = @"private double _progress = 40;";
+
+    private const string _indetRazor = @"<FluentProgressBar IsIndeterminate=""true"" />";
+}

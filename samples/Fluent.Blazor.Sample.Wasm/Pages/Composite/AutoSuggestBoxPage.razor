@@ -1,0 +1,34 @@
+@page "/controls/autosuggestbox"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="AutoSuggestBox" Description="AutoSuggestBox provides search suggestions to select from as the user types." />
+
+    <ControlExample HeaderText="Basic Autocomplete" RazorCode="@_suggestRazor" CSharpCode="@_suggestCs">
+        <Example>
+            <div class="demo-col" style="max-width: 280px;">
+                <FluentAutoSuggestBox TValue="string" Items="@_suggestions" @bind-Text="_searchText" Placeholder="Search city..." 
+                                      SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _chosenVal = item.Value)" />
+                <div class="demo-output">Input Text: @_searchText | Chosen Value: @_chosenVal</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private string? _searchText;
+    private string? _chosenVal;
+
+    private List<AutoSuggestBoxItem<string>> _suggestions = new()
+    {
+        new("Singapore", "SG"),
+        new("Seattle", "US-SEA"),
+        new("Stockholm", "SE"),
+        new("Sydney", "AU"),
+    };
+
+    private const string _suggestRazor = @"<FluentAutoSuggestBox TValue=""string"" Items=""@_suggestions"" @bind-Text=""_searchText"" Placeholder=""Search city..."" 
+                      SuggestionChosen=""@((AutoSuggestBoxItem<string> item) => _chosenVal = item.Value)"" />";
+    private const string _suggestCs = @"private string? _searchText;
+private string? _chosenVal;
+private List<AutoSuggestBoxItem<string>> _suggestions = new() { ... };";
+}

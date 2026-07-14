@@ -1,0 +1,31 @@
+<div class="page-header">
+    @if (!string.IsNullOrEmpty(Eyebrow))
+    {
+        <div class="page-header__eyebrow">@Eyebrow</div>
+    }
+    <h1 class="page-header__title">@Title</h1>
+    @if (!string.IsNullOrEmpty(Description))
+    {
+        <p class="page-header__description">@Description</p>
+    }
+    @if (Links is not null)
+    {
+        <div class="page-header__links">
+            @Links
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>Small label above the title, e.g. the category name.</summary>
+    [Parameter] public string? Eyebrow { get; set; }
+
+    /// <summary>The control/page name shown as an H1.</summary>
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+
+    /// <summary>Short description paragraph.</summary>
+    [Parameter] public string? Description { get; set; }
+
+    /// <summary>Optional slot for doc/source link buttons.</summary>
+    [Parameter] public RenderFragment? Links { get; set; }
+}

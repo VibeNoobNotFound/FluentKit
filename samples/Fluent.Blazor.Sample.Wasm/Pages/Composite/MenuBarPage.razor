@@ -1,0 +1,55 @@
+@page "/controls/menubar"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="MenuBar" Description="Use MenuBar to display a horizontal top-level navigation bar for applications." />
+
+    <ControlExample HeaderText="Standard MenuBar Layout" RazorCode="@_barRazor" CSharpCode="@_barCs">
+        <Example>
+            <div class="demo-col">
+                <FluentMenuBar>
+                    <FluentMenuBarItem>
+                        <ChildContent>File</ChildContent>
+                        <Flyout>
+                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("New"))'>New</FluentMenuFlyoutItem>
+                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Open"))'>Open...</FluentMenuFlyoutItem>
+                            <FluentMenuFlyoutDivider />
+                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Exit"))'>Exit</FluentMenuFlyoutItem>
+                        </Flyout>
+                    </FluentMenuBarItem>
+                    <FluentMenuBarItem>
+                        <ChildContent>Edit</ChildContent>
+                        <Flyout>
+                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Undo"))'>Undo</FluentMenuFlyoutItem>
+                            <FluentMenuFlyoutItem OnClick='@(() => LogAction("Redo"))'>Redo</FluentMenuFlyoutItem>
+                        </Flyout>
+                    </FluentMenuBarItem>
+                    <FluentMenuBarItem Disabled="true">
+                        <ChildContent>Disabled View</ChildContent>
+                    </FluentMenuBarItem>
+                </FluentMenuBar>
+                <div class="demo-output">Last Menu Action: @_menuAction</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private string? _menuAction;
+
+    private void LogAction(string act) => _menuAction = act;
+
+    private const string _barRazor = @"<FluentMenuBar>
+    <FluentMenuBarItem>
+        <ChildContent>File</ChildContent>
+        <Flyout>
+            <FluentMenuFlyoutItem OnClick='@(() => LogAction(""New""))'>New</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Open""))'>Open...</FluentMenuFlyoutItem>
+            <FluentMenuFlyoutDivider />
+            <FluentMenuFlyoutItem OnClick='@(() => LogAction(""Exit""))'>Exit</FluentMenuFlyoutItem>
+        </Flyout>
+    </FluentMenuBarItem>
+</FluentMenuBar>";
+
+    private const string _barCs = @"private string? _menuAction;
+private void LogAction(string act) => _menuAction = act;";
+}

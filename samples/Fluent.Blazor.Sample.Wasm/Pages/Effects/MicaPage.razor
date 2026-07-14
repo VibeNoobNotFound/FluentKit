@@ -1,0 +1,34 @@
+@page "/controls/mica"
+@inject IThemeService ThemeService
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Effects &amp; Materials" Title="Mica" Description="Mica is an opaque window material tinting backdrop textures depending on dark/light themes." />
+
+    <ControlExample HeaderText="Mica Variants Selection" RazorCode="@_micaRazor" CSharpCode="@_micaCs">
+        <Example>
+            <div class="demo-col">
+                <FluentRadioGroup @bind-Value="_selectedVariant">
+                    <div class="demo-row">
+                        <FluentRadioButton Value='@("base")'>Base Mica</FluentRadioButton>
+                        <FluentRadioButton Value='@("basealt")'>Base Alt (Tabbed Surface)</FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+                
+                <div style="margin-top:16px;">
+                    <FluentMicaPanel Variant="_micaVariant" BackgroundImageUrl="wallpaper.jpg" style="height:120px; border-radius:8px; border:1px solid var(--card-stroke-default);" />
+                </div>
+                
+                <div class="demo-output">Mica Mode: @_selectedVariant</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private object? _selectedVariant = "base";
+    private MicaVariant _micaVariant => (_selectedVariant as string) == "basealt" ? MicaVariant.BaseAlt : MicaVariant.Base;
+
+    private const string _micaRazor = @"<FluentMicaPanel Variant=""_micaVariant"" BackgroundImageUrl=""wallpaper.jpg"" style=""height:120px; border-radius:8px; border:1px solid var(--card-stroke-default);"" />";
+    private const string _micaCs = @"private string _selectedVariant = ""base"";
+private MicaVariant _micaVariant => _selectedVariant == ""basealt"" ? MicaVariant.BaseAlt : MicaVariant.Base;";
+}

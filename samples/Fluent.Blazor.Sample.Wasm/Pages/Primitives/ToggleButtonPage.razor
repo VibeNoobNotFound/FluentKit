@@ -1,0 +1,28 @@
+@page "/controls/togglebutton"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="ToggleButton" Description="A ToggleButton is a push button that toggles between checked/pressed and unchecked states." />
+
+    <ControlExample HeaderText="Standard ToggleButton" RazorCode="@_toggleRazor" CSharpCode="@_toggleCs">
+        <Example>
+            <div class="demo-col">
+                <div class="demo-row">
+                    <FluentToggleButton @bind-Checked="_isBold">Bold</FluentToggleButton>
+                    <FluentToggleButton @bind-Checked="_isItalic">Italic</FluentToggleButton>
+                </div>
+                <div class="demo-output">Bold: @_isBold, Italic: @_isItalic</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _isBold;
+    private bool _isItalic = true;
+
+    private const string _toggleRazor = @"<FluentToggleButton @bind-Checked=""_isBold"">Bold</FluentToggleButton>
+<FluentToggleButton @bind-Checked=""_isItalic"">Italic</FluentToggleButton>";
+
+    private const string _toggleCs = @"private bool _isBold;
+private bool _isItalic = true;";
+}

@@ -1,0 +1,33 @@
+@page "/settings"
+@inject IThemeService ThemeService
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Get Started" Title="Settings" Description="Customize the gallery app settings and view version information." />
+
+    <div class="settings-group">
+        <h2 class="settings-group__title">Personalization</h2>
+        
+        <div class="settings-item">
+            <div class="settings-item__info">
+                <span class="settings-item__label">App theme</span>
+                <span class="settings-item__desc">Select which app theme to display.</span>
+            </div>
+            <div class="demo-row">
+                <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Light))">Light</FluentButton>
+                <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Dark))">Dark</FluentButton>
+                <FluentButton Variant="ButtonVariant.Standard" OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.System))">System</FluentButton>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-group">
+        <h2 class="settings-group__title">About</h2>
+        
+        <div class="settings-item">
+            <div class="settings-item__info">
+                <span class="settings-item__label">Fluent.Blazor Gallery</span>
+                <span class="settings-item__desc">v1.0.0 — WinUI style for Blazor</span>
+            </div>
+        </div>
+    </div>
+</div>

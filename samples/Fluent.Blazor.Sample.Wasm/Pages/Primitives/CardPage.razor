@@ -1,0 +1,27 @@
+@page "/controls/card"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="Card" Description="A Card provides a simple content framing surface to group related layout modules." />
+
+    <ControlExample HeaderText="Basic Content Card" RazorCode="@_cardRazor">
+        <Example>
+            <div style="max-width: 320px;">
+                <FluentCard>
+                    <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Plain Surface Primitive</FluentTextBlock>
+                    <FluentTextBlock Variant="TextBlockVariant.Body" style="margin-top: 4px;">
+                        Contains CardBackgroundFillColorDefault and CardStrokeColorDefault tokens.
+                    </FluentTextBlock>
+                </FluentCard>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private const string _cardRazor = @"<FluentCard>
+    <FluentTextBlock Variant=""TextBlockVariant.BodyStrong"">Plain Surface Primitive</FluentTextBlock>
+    <FluentTextBlock Variant=""TextBlockVariant.Body"" style=""margin-top: 4px;"">
+        Contains CardBackgroundFillColorDefault and CardStrokeColorDefault tokens.
+    </FluentTextBlock>
+</FluentCard>";
+}

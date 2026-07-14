@@ -1,0 +1,36 @@
+@page "/controls/splitbutton"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="SplitButton" Description="SplitButton joins a primary action area with a secondary dropdown action chevron item." />
+
+    <ControlExample HeaderText="Standard SplitButton" RazorCode="@_splitRazor" CSharpCode="@_splitCs">
+        <Example>
+            <div class="demo-col">
+                <FluentSplitButton Variant="ButtonVariant.Accent" OnClick="@(() => ActionClicked("Save"))">
+                    <ChildContent>Save</ChildContent>
+                    <MenuItems>
+                        <FluentMenuFlyoutItem OnClick='@(() => ActionClicked("Save As"))'>Save As...</FluentMenuFlyoutItem>
+                        <FluentMenuFlyoutItem OnClick='@(() => ActionClicked("Save Draft"))'>Save Draft</FluentMenuFlyoutItem>
+                    </MenuItems>
+                </FluentSplitButton>
+                <div class="demo-output">Last Action: @_action</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private string _action = "None";
+
+    private void ActionClicked(string act) => _action = act;
+
+    private const string _splitRazor = @"<FluentSplitButton Variant=""ButtonVariant.Accent"" OnClick=""@(() => ActionClicked(""Save""))"">
+    <ChildContent>Save</ChildContent>
+    <MenuItems>
+        <FluentMenuFlyoutItem OnClick='@(() => ActionClicked(""Save As""))'>Save As...</FluentMenuFlyoutItem>
+        <FluentMenuFlyoutItem OnClick='@(() => ActionClicked(""Save Draft""))'>Save Draft</FluentMenuFlyoutItem>
+    </MenuItems>
+</FluentSplitButton>";
+    private const string _splitCs = @"private string _action = ""None"";
+private void ActionClicked(string act) => _action = act;";
+}

@@ -1,0 +1,36 @@
+@page "/controls/checkbox"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Primitives" Title="CheckBox" Description="CheckBox controls allow the user to select one or more items from a set, or toggle options." />
+
+    <ControlExample HeaderText="Basic CheckBox" RazorCode="@_basicRazor" CSharpCode="@_basicCs">
+        <Example>
+            <div class="demo-col">
+                <FluentCheckBox @bind-Checked="_checked1">Wi-Fi Network Connection</FluentCheckBox>
+                <div class="demo-output">State: @_checked1</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Three-State CheckBox" RazorCode="@_threeStateRazor" CSharpCode="@_threeStateCs">
+        <Example>
+            <div class="demo-col">
+                <FluentCheckBox @bind-Checked="_checked2" ThreeState="true" @bind-Indeterminate="_indeterminate">Select All Option</FluentCheckBox>
+                <div class="demo-output">Checked: @_checked2, Indeterminate: @_indeterminate</div>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _checked1;
+    private bool _checked2;
+    private bool _indeterminate = true;
+
+    private const string _basicRazor = @"<FluentCheckBox @bind-Checked=""_checked1"">Wi-Fi Network Connection</FluentCheckBox>";
+    private const string _basicCs = @"private bool _checked1;";
+
+    private const string _threeStateRazor = @"<FluentCheckBox @bind-Checked=""_checked2"" ThreeState=""true"" @bind-Indeterminate=""_indeterminate"">Select All Option</FluentCheckBox>";
+    private const string _threeStateCs = @"private bool _checked2;
+private bool _indeterminate = true;";
+}
