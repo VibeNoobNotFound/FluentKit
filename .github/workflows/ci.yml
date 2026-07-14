@@ -1,11 +1,14 @@
 name: CI
 
 # Runs on every commit: any branch push, and any PR targeting main.
+# workflow_dispatch lets you trigger a run manually from the GitHub Actions page —
+# useful to force a NuGet publish without needing a new commit with [publish-nuget] in it.
 on:
   push:
     branches: ["**"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 env:
   PACKAGE_PROJECT: src/FluentKit/FluentKit.csproj
@@ -39,7 +42,7 @@ jobs:
         run: echo "Build succeeded  library (src/FluentKit) + sample (FluentKit.Sample.Wasm) both compiled clean."
 
   # ─────────────────────────────────────────────
-  # Job 2 – Pack & Publish (only on [publish-nuget])
+  # Job 2 – Pack & Publish (on [publish-nuget] commits, or manual dispatch)
   # ─────────────────────────────────────────────
   publish:
     name: Pack & Publish to NuGet
@@ -47,8 +50,9 @@ jobs:
     needs: build
 
     if: |
-      github.event_name == 'push' &&
-      contains(github.event.head_commit.message, '[publish-nuget]')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+       contains(github.event.head_commit.message, '[publish-nuget]'))
 
     permissions:
       id-token: write   # required for NuGet Trusted Publishing (OIDC)
