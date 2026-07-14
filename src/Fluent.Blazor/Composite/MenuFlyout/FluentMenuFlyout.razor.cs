@@ -47,6 +47,25 @@ public partial class FluentMenuFlyout : ComponentBase, IDisposable
     private bool _lastRenderedIsOpen;
     private MenuFlyoutCloseContext? _context;
 
+    protected override void OnInitialized()
+    {
+        OverlayService.Changed += OnOverlayServiceChanged;
+    }
+
+    private void OnOverlayServiceChanged()
+    {
+        if (_overlayId is { } id)
+        {
+            var entry = OverlayService.Active.FirstOrDefault(e => e.Id == id);
+            if (entry is null || entry.IsClosing)
+            {
+                _overlayId = null;
+                _context = null;
+                _ = SetOpenAsync(false);
+            }
+        }
+    }
+
     protected override void OnParametersSet()
     {
         if (IsOpen != _lastRenderedIsOpen)
@@ -113,5 +132,9 @@ public partial class FluentMenuFlyout : ComponentBase, IDisposable
     private Task HandleContentKeyDown(KeyboardEventArgs args)
         => args.Key == "Escape" && Closable ? CloseAsync() : Task.CompletedTask;
 
-    public void Dispose() => HideInternal();
+    public void Dispose()
+    {
+        OverlayService.Changed -= OnOverlayServiceChanged;
+        HideInternal();
+    }
 }

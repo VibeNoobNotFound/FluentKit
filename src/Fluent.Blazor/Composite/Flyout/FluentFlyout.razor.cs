@@ -37,6 +37,24 @@ public partial class FluentFlyout : ComponentBase, IDisposable
     private Guid? _overlayId;
     private bool _lastRenderedIsOpen;
 
+    protected override void OnInitialized()
+    {
+        OverlayService.Changed += OnOverlayServiceChanged;
+    }
+
+    private void OnOverlayServiceChanged()
+    {
+        if (_overlayId is { } id)
+        {
+            var entry = OverlayService.Active.FirstOrDefault(e => e.Id == id);
+            if (entry is null || entry.IsClosing)
+            {
+                _overlayId = null;
+                _ = SetOpenAsync(false);
+            }
+        }
+    }
+
     protected override void OnParametersSet()
     {
         // Support external/programmatic control: if a caller flips IsOpen between renders (rather
@@ -102,5 +120,9 @@ public partial class FluentFlyout : ComponentBase, IDisposable
     private Task HandleContentKeyDown(KeyboardEventArgs args)
         => args.Key == "Escape" ? CloseAsync() : Task.CompletedTask;
 
-    public void Dispose() => HideInternal();
+    public void Dispose()
+    {
+        OverlayService.Changed -= OnOverlayServiceChanged;
+        HideInternal();
+    }
 }

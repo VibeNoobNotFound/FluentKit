@@ -87,6 +87,24 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
 
     private string PlacementClass => Placement.ToString().ToLowerInvariant();
 
+    protected override void OnInitialized()
+    {
+        OverlayService.Changed += OnOverlayServiceChanged;
+    }
+
+    private void OnOverlayServiceChanged()
+    {
+        if (_overlayId is { } id)
+        {
+            var entry = OverlayService.Active.FirstOrDefault(e => e.Id == id);
+            if (entry is null || entry.IsClosing)
+            {
+                _overlayId = null;
+                _ = SetOpenAsync(false);
+            }
+        }
+    }
+
     protected override void OnParametersSet()
     {
         if (IsOpen != _lastRenderedIsOpen)
@@ -125,16 +143,26 @@ public partial class FluentTeachingTip : ComponentBase, IDisposable
         }
     }
 
-    private async Task CloseAsync()
+    // Called by the explicit close button in the razor markup.
+    private Task CloseAsync()
     {
         HideInternal();
-        _lastRenderedIsOpen = false;
-        if (IsOpen)
+        return SetOpenAsync(false);
+    }
+
+    private async Task SetOpenAsync(bool value)
+    {
+        _lastRenderedIsOpen = value;
+        if (IsOpen != value)
         {
-            IsOpen = false;
-            await IsOpenChanged.InvokeAsync(false);
+            IsOpen = value;
+            await IsOpenChanged.InvokeAsync(value);
         }
     }
 
-    public void Dispose() => HideInternal();
+    public void Dispose()
+    {
+        OverlayService.Changed -= OnOverlayServiceChanged;
+        HideInternal();
+    }
 }

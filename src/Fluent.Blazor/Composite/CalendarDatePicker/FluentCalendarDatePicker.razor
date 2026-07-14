@@ -18,10 +18,11 @@
         <FluentIcon Name="@FluentIconNames.Calendar" Size="16" />
     </button>
 
-    @if (!Disabled && _open)
+    @if (!Disabled && (_open || _closing))
     {
-        <div class="fluent-calendar-date-picker-dismiss-backdrop" @onclick="() => _open = false"></div>
-        <div class="fluent-calendar-date-picker-popout">
+        <div class="fluent-calendar-date-picker-dismiss-backdrop" @onclick="ClosePopout"></div>
+        <div class="fluent-calendar-date-picker-popout @(_closing ? "fluent-calendar-date-picker-popout--closing" : "")"
+             @ref="_popoutElement">
             <FluentCalendarView Value="@Value"
                                 ValueChanged="@OnDateChangedAsync"
                                 Min="@Min"

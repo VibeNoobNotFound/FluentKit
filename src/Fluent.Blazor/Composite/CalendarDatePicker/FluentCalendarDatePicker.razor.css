@@ -1,6 +1,17 @@
 /* Ported from fluent-svelte CalendarDatePicker.scss (trigger button chrome) plus a self-contained
    popout, same convention as NumberBox's Expanded popout / ComboBox's dropdown. */
 
+/* Enter/exit animations — identical shape to OverlaySurface's own fluent-overlay-enter/exit. */
+@keyframes fluent-calendar-picker-enter {
+    from { opacity: 0; scale: 0.92; }
+    to   { opacity: 1; scale: 1;    }
+}
+
+@keyframes fluent-calendar-picker-exit {
+    from { opacity: 1; scale: 1;    }
+    to   { opacity: 0; scale: 0.92; }
+}
+
 .fluent-calendar-date-picker {
     position: relative;
     display: inline-flex;
@@ -73,6 +84,12 @@
     z-index: 100;
     inset-block-start: calc(100% + 4px);
     inset-inline-start: 0;
+    transform-origin: top center;
+    animation: fluent-calendar-picker-enter var(--duration-fast) var(--easing-decelerate) both;
+}
+
+.fluent-calendar-date-picker-popout--closing {
+    animation: fluent-calendar-picker-exit var(--duration-fast) var(--easing-accelerate) both;
 }
 
 .fluent-calendar-date-picker-dismiss-backdrop {
