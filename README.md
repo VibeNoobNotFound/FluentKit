@@ -6,10 +6,10 @@
 
 WebAssembly · Server · MAUI Blazor Hybrid — pure Razor and CSS, no third-party UI framework underneath
 
+[![NuGet](https://img.shields.io/nuget/v/FluentKit.Blazor.svg?label=NuGet)](https://www.nuget.org/packages/FluentKit.Blazor)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/VibeNoobNotFound/FluentKit/actions/workflows/ci.yml/badge.svg)](https://github.com/VibeNoobNotFound/FluentKit/actions/workflows/ci.yml)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
-![Status: alpha](https://img.shields.io/badge/status-alpha%20(0.1.0--alpha)-orange)
 
 [Live sample](https://vibenoobnotfound.github.io/FluentKit/) · [Getting started](#getting-started) · [Known gaps](#known-gaps--next-up) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
@@ -23,7 +23,8 @@ WinUI's actual effect graph rather than approximated from screenshots. See
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for exactly where each component's markup,
 styling, or token values were sourced from.
 
-> **Status:** alpha (`0.1.0-alpha`). APIs may still change between versions — see [Known gaps](#known-gaps--next-up).
+> **Status:** alpha — see the NuGet badge above for the current published version. APIs may still
+> change between versions — see [Known gaps](#known-gaps--next-up).
 
 ## Contents
 
@@ -166,8 +167,12 @@ Recommended — from NuGet:
 dotnet add package FluentKit.Blazor
 ```
 
+`dotnet add package` pins the exact current version automatically — the current published version
+is always shown in the NuGet badge at the top of this README. If editing your `.csproj` by hand,
+pin a specific version rather than using a floating wildcard, for reproducible builds:
+
 ```xml
-<PackageReference Include="FluentKit.Blazor" Version="0.1.0-alpha" />
+<PackageReference Include="FluentKit.Blazor" Version="0.1.0-alpha" /> <!-- match the badge above -->
 ```
 
 Alternatively, to track `main` directly, consume it as a project or repository reference instead:
