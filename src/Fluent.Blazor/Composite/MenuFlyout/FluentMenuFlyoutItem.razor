@@ -27,11 +27,12 @@
             }
         </span>
     }
-    else
+    else if (ShowIconGutter)
     {
-        @* Always reserve the leading gutter, even with no Icon supplied, so labels line up with
-           sibling items that DO have one (or with radio/toggle bullets/checkmarks) instead of each
-           item's label starting at a different x-offset depending on its own icon state. *@
+        @* Reserve the leading gutter only when at least one item in this menu level actually has an
+           icon (see MenuFlyoutIconGutterContext) — otherwise every label in an icon-free menu would
+           sit indented for no reason. When it IS reserved, it's reserved even for items with no
+           Icon of their own, so labels still line up with sibling items that do have one. *@
         <span class="fluent-menu-flyout-item-icon">@Icon</span>
     }
 

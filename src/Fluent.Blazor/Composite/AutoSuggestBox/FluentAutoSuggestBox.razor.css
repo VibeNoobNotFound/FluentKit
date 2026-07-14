@@ -31,29 +31,42 @@
     inset-inline-start: 0;
     inset-block-start: 100%;
 
+    /* Explicit `height` is set/kept in sync by overlay-interop.js's observeAutoHeight (see
+       FluentAutoSuggestBox.razor.cs's OnAfterRenderAsync) rather than left as the browser's normal
+       auto/intrinsic sizing — CSS can only transition between two concrete values, not to/from
+       `auto`, so without a script pinning it to the content's actual scrollHeight on every list-size
+       change, this `transition` would have nothing to animate and item-count changes would keep
+       snapping instantly even with everything else here in place. `max-height` still caps the
+       visible/rendered size the normal way regardless of what the JS-set `height` says, so long
+       lists still scroll instead of growing past 320px. */
+    transition: height var(--duration-normal) var(--easing-standard);
+
     /* Same enter/exit approach as OverlaySurface (see that file's comments for the full rationale,
        including why this animates the standalone `scale`/`translate` properties instead of writing
        to `transform` directly — avoids clobbering any positioning transform, even though this
        particular element doesn't currently have one). A small downward-into-place translate on top
        of the fade/scale reads better here than a pure scale, since the dropdown always grows out of
        a fixed edge (right under the TextBox) rather than from a point that could be anywhere
-       on-screen the way a generic overlay's anchor can be. */
+       on-screen the way a generic overlay's anchor can be. Uses --duration-normal (250ms), not the
+       buttons/menus --duration-fast (150ms) — this is a noticeably larger, content-bearing surface
+       appearing right under something the person is actively looking at (their own typing), so it
+       reads better a touch slower/more deliberate than a quick hover-feedback fade. */
     transform-origin: top center;
-    animation: fluent-autosuggest-enter var(--duration-fast) var(--easing-decelerate) both;
+    animation: fluent-autosuggest-enter var(--duration-normal) var(--easing-decelerate) both;
 }
 
 /* Applied by FluentAutoSuggestBox.razor.cs's CloseDropdown/_closing the instant a close is
    requested — see that file's FinishClosingAsync for the matching JS-animationend wait that keeps
    the <ul> mounted long enough for this to actually play before it's removed from the DOM. */
 .fluent-autosuggest-dropdown--closing {
-    animation: fluent-autosuggest-exit var(--duration-fast) var(--easing-accelerate) both;
+    animation: fluent-autosuggest-exit var(--duration-normal) var(--easing-accelerate) both;
 }
 
 @keyframes fluent-autosuggest-enter {
     from {
         opacity: 0;
-        scale: 0.96;
-        translate: 0 -4px;
+        scale: 0.94;
+        translate: 0 -8px;
     }
     to {
         opacity: 1;
@@ -70,8 +83,8 @@
     }
     to {
         opacity: 0;
-        scale: 0.96;
-        translate: 0 -4px;
+        scale: 0.94;
+        translate: 0 -8px;
     }
 }
 

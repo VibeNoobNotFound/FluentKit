@@ -28,6 +28,8 @@ public partial class FluentMenuFlyoutItem : ComponentBase, IDisposable
 
     [CascadingParameter] private MenuFlyoutCloseContext? CloseContext { get; set; }
 
+    [CascadingParameter] private MenuFlyoutIconGutterContext? IconGutterContext { get; set; }
+
     [Parameter] public MenuFlyoutItemVariant Variant { get; set; } = MenuFlyoutItemVariant.Standard;
 
     /// <summary>Marks this item as having a cascading submenu, rendering <see cref="Flyout"/> in a
@@ -73,8 +75,19 @@ public partial class FluentMenuFlyoutItem : ComponentBase, IDisposable
     private Guid? _submenuOverlayId;
     private IDisposable? _closeSubscription;
     private CancellationTokenSource? _hoverCts;
+    // Tracks whether THIS item currently counts toward IconGutterContext, so OnParametersSet only
+    // calls Register/Unregister on an actual transition — Icon can be a bound RenderFragment that's
+    // present or absent from one render to the next (not just fixed at construction), and calling
+    // RegisterIcon() again on an already-registered item would over-count it.
+    private bool _iconRegistered;
 
     private bool SubmenuOpen => _submenuOverlayId is not null;
+
+    // Only Standard-variant items ever show the leading icon span at all — Radio/Toggle render
+    // their own bullet/checkmark glyph in that same leading slot instead (see the .razor markup),
+    // so their Icon (if any were even set) never factors into a menu level's gutter decision.
+    private bool ShowIconGutter =>
+        Variant == MenuFlyoutItemVariant.Standard && (IconGutterContext is null || IconGutterContext.HasAnyIcon);
 
     private string VariantClass => Variant switch
     {
@@ -82,6 +95,26 @@ public partial class FluentMenuFlyoutItem : ComponentBase, IDisposable
         MenuFlyoutItemVariant.Toggle => "fluent-menu-flyout-item--toggle",
         _ => "fluent-menu-flyout-item--standard"
     };
+
+    protected override void OnParametersSet()
+    {
+        var hasIcon = Variant == MenuFlyoutItemVariant.Standard && Icon is not null;
+        if (hasIcon == _iconRegistered)
+        {
+            return;
+        }
+
+        if (hasIcon)
+        {
+            IconGutterContext?.RegisterIcon();
+        }
+        else
+        {
+            IconGutterContext?.UnregisterIcon();
+        }
+
+        _iconRegistered = hasIcon;
+    }
 
     private async Task ActivateAsync()
     {
@@ -210,6 +243,11 @@ public partial class FluentMenuFlyoutItem : ComponentBase, IDisposable
         if (_submenuOverlayId is { } id)
         {
             OverlayService.Close(id);
+        }
+
+        if (_iconRegistered)
+        {
+            IconGutterContext?.UnregisterIcon();
         }
     }
 }

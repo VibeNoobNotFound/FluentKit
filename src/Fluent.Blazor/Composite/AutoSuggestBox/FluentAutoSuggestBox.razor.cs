@@ -88,6 +88,11 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
 
     private List<AutoSuggestBoxItem<TValue>> DisplayMatches => _open ? Matches : _lastMatches;
 
+    // Guards observeAutoHeight from being (re)started on every keystroke re-render while already
+    // open — it only needs wiring up once per mount, right after the freshly-created <ul> actually
+    // lands in the DOM (OnAfterRenderAsync), same as OverlaySurface's own _positioned guard.
+    private bool _heightObserved;
+
     private List<AutoSuggestBoxItem<TValue>> Matches
     {
         get
@@ -104,6 +109,28 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
 
     private static bool DefaultFilter(string text, AutoSuggestBoxItem<TValue> item) =>
         item.Name.Contains(text, StringComparison.OrdinalIgnoreCase);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_open || _heightObserved)
+        {
+            return;
+        }
+
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./_content/Fluent.Blazor/Overlay/overlay-interop.js");
+            await _module.InvokeVoidAsync("observeAutoHeight", _dropdownElement);
+            _heightObserved = true;
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+    }
 
     private void OpenDropdown()
     {
@@ -136,6 +163,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
                 "import", "./_content/Fluent.Blazor/Overlay/overlay-interop.js");
             await _module.InvokeVoidAsync("waitForExitAnimation", _dropdownElement);
+            await _module.InvokeVoidAsync("unobserveAutoHeight", _dropdownElement);
         }
         catch (JSDisconnectedException)
         {
@@ -151,6 +179,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
         if (generation == _closeGeneration && _closing)
         {
             _closing = false;
+            _heightObserved = false;
             StateHasChanged();
         }
     }

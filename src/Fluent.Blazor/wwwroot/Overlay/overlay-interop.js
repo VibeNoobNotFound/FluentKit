@@ -240,6 +240,57 @@ export function waitForExitAnimation(popupEl) {
     });
 }
 
+// Keeps a `<ul>` (or any element) whose *content* resizes on its own — items added/removed by the
+// framework, not by this script — animating smoothly on the `height` CSS property instead of
+// snapping instantly. Deliberately a MutationObserver on childList/characterData, not a
+// ResizeObserver on the element itself: once `applyHeight` below pins `el.style.height` to a fixed
+// px value, the element's own border-box stops changing size on its own, so a ResizeObserver
+// watching *it* would never see a follow-up li being added/removed — only watching for the DOM
+// mutations that caused the content to want a new height actually catches that.
+const autoHeightObservers = new Map();
+
+export function observeAutoHeight(el) {
+    if (!el) {
+        return;
+    }
+
+    unobserveAutoHeight(el);
+
+    const applyHeight = (instant) => {
+        const target = el.scrollHeight;
+        if (instant) {
+            // First measurement (element just mounted): snap straight to it, no transition —
+            // otherwise the very first open would visibly grow from 0, on top of the separate
+            // fade/scale entrance animation already handling that opening beat.
+            const prevTransition = el.style.transition;
+            el.style.transition = "none";
+            el.style.height = `${target}px`;
+            void el.offsetHeight; // force reflow so the transition below doesn't get batched with this
+            el.style.transition = prevTransition;
+        } else {
+            el.style.height = `${target}px`;
+        }
+    };
+
+    applyHeight(true);
+
+    const observer = new MutationObserver(() => applyHeight(false));
+    observer.observe(el, { childList: true, subtree: true, characterData: true });
+    autoHeightObservers.set(el, observer);
+}
+
+export function unobserveAutoHeight(el) {
+    if (!el) {
+        return;
+    }
+
+    const observer = autoHeightObservers.get(el);
+    if (observer) {
+        observer.disconnect();
+        autoHeightObservers.delete(el);
+    }
+}
+
 export function unregisterLightDismiss(overlayId) {
     const handler = lightDismissHandlers.get(overlayId);
     if (handler) {
