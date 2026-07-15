@@ -29,17 +29,22 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      # against this preview SDK first.
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
       - name: Restore
         run: dotnet restore FluentKit.slnx
 
-      # Building the .slnx builds every project it references —
-      # src/FluentKit (the library) and samples/FluentKit.Sample.Wasm (the sample) —
-      # so this single step covers "build everything".
+      # Building the .slnx builds every project it references — src/FluentKit
+      # (net10.0, the library), samples/FluentKit.Sample.Wasm (net10.0), and the
+      # Android target of samples/Fluentkit.Sample.Maui (net11.0-android) — so this
+      # single step covers "build everything" that's buildable on a Linux runner.
       - name: Build (Release)
         run: dotnet build FluentKit.slnx -c Release --no-restore
 
       - name: Report
-        run: echo "Build succeeded  library (src/FluentKit) + sample (FluentKit.Sample.Wasm) both compiled clean."
+        run: echo "Build succeeded — library (src/FluentKit) + samples (Wasm, Maui/Android) all compiled clean."
 
   # ─────────────────────────────────────────────
   # Job 2 – Pack & Publish (on [publish-nuget] commits, or manual dispatch)
