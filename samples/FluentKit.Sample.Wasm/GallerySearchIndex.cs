@@ -60,6 +60,8 @@ public static class GallerySearchIndex
         new("ContentDialog", "Flyouts & Menus", "controls/contentdialog"),
 
         new("Card", "Layout", "controls/card"),
+        new("SettingsCard", "Settings", "controls/settingscard"),
+        new("SettingsExpander", "Settings", "controls/settingsexpander"),
         new("PersonPicture", "Layout", "controls/personpicture"),
 
         new("Acrylic", "Effects & Materials", "controls/acrylic"),

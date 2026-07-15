@@ -1,0 +1,184 @@
+.fluent-settings-card {
+    container-type: inline-size;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-rows: auto auto;
+    column-gap: 0;
+    align-items: center;
+    min-inline-size: 148px;
+    min-block-size: 68px;
+    padding: 16px;
+    color: var(--text-fill-color-primary);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    text-align: start;
+    background-color: var(--card-background-default);
+    background-clip: padding-box;
+    border: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-radius: var(--control-corner-radius);
+    outline: none;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-settings-card:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -1px;
+}
+
+/* ── Leading icon ─────────────────────────────────────────────────────── */
+
+.fluent-settings-card-icon {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 20px;
+    block-size: 20px;
+    margin-inline-end: 20px;
+    color: var(--text-fill-color-primary);
+}
+
+/* ── Header + description ────────────────────────────────────────────── */
+
+.fluent-settings-card-header {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    margin-inline-end: 24px;
+}
+
+.fluent-settings-card-title {
+    overflow-wrap: break-word;
+}
+
+.fluent-settings-card-description {
+    margin-block-start: 2px;
+    color: var(--text-fill-color-secondary);
+    font-size: 12px;
+    overflow-wrap: break-word;
+}
+
+/* ── End-aligned content slot ─────────────────────────────────────────── */
+
+.fluent-settings-card-content {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    min-inline-size: 120px;
+}
+
+/* ── Trailing action icon (chevron), only while clickable ────────────── */
+
+.fluent-settings-card-action-icon {
+    grid-column: 4;
+    grid-row: 1 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 13px;
+    block-size: 13px;
+    margin-inline-start: 14px;
+    color: var(--text-fill-color-secondary);
+}
+
+/* ── Clickable states ─────────────────────────────────────────────────── */
+
+.fluent-settings-card--clickable {
+    cursor: pointer;
+}
+
+.fluent-settings-card--clickable:hover {
+    background-color: var(--control-fill-color-secondary);
+    border-color: var(--control-stroke-color-secondary);
+}
+
+.fluent-settings-card--clickable:active {
+    background-color: var(--control-fill-color-tertiary);
+    border-color: var(--control-stroke-color-default);
+}
+
+/* ── Disabled ──────────────────────────────────────────────────────────── */
+
+.fluent-settings-card--disabled {
+    color: var(--text-fill-color-disabled);
+    background-color: var(--control-fill-color-disabled);
+    cursor: default;
+    pointer-events: none;
+}
+
+.fluent-settings-card--disabled .fluent-settings-card-icon,
+.fluent-settings-card--disabled .fluent-settings-card-action-icon,
+.fluent-settings-card--disabled .fluent-settings-card-description {
+    color: var(--text-fill-color-disabled);
+}
+
+/* ── ContentAlignment: Left ───────────────────────────────────────────── */
+/* Header icon/header/description are hidden, ChildContent takes their place — for CheckBoxes,
+   RadioButtons, or other content that already carries its own label. */
+
+.fluent-settings-card--left .fluent-settings-card-icon,
+.fluent-settings-card--left .fluent-settings-card-header {
+    display: none;
+}
+
+.fluent-settings-card--left .fluent-settings-card-content {
+    grid-column: 1 / 4;
+    grid-row: 1 / 3;
+    justify-self: start;
+}
+
+/* ── ContentAlignment: Vertical ───────────────────────────────────────── */
+/* ChildContent stacks below the header/description instead of sitting beside it. */
+
+.fluent-settings-card--vertical {
+    grid-template-rows: auto auto;
+    row-gap: 8px;
+}
+
+.fluent-settings-card--vertical .fluent-settings-card-content {
+    grid-column: 1 / 5;
+    grid-row: 2;
+    justify-self: stretch;
+}
+
+.fluent-settings-card--vertical .fluent-settings-card-header {
+    grid-row: 1;
+}
+
+.fluent-settings-card--vertical .fluent-settings-card-icon {
+    grid-row: 1;
+}
+
+/* ── Responsive wrap (mirrors WCT's ControlSizeTrigger-driven RightWrapped /
+   RightWrappedNoIcon states — 476px / 286px thresholds) ─────────────────── */
+
+@container (max-width: 476px) {
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) {
+        row-gap: 8px;
+    }
+
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) .fluent-settings-card-content {
+        grid-column: 2 / 4;
+        grid-row: 2;
+        justify-self: stretch;
+    }
+
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) .fluent-settings-card-header {
+        margin-inline-end: 0;
+    }
+}
+
+@container (max-width: 286px) {
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) .fluent-settings-card-icon {
+        display: none;
+    }
+
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) .fluent-settings-card-content {
+        grid-column: 1 / 4;
+    }
+}

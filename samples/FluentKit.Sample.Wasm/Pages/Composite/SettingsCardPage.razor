@@ -1,0 +1,100 @@
+@page "/controls/settingscard"
+@using FluentKit.Primitives
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite" Title="SettingsCard" Description="A SettingsCard provides a consistent layout for a single setting: an optional icon, a header/description, an end-aligned control, and — when clickable — a trailing chevron." />
+
+    <ControlExample HeaderText="Basic SettingsCard" RazorCode="@_basicRazor">
+        <Example>
+            <div class="demo-col" style="max-width: 480px;">
+                <FluentSettingsCard Header="Wi-Fi" Description="Connect to a wireless network">
+                    <FluentToggleSwitch @bind-Checked="_wifiOn" />
+                </FluentSettingsCard>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="With a header icon" RazorCode="@_iconRazor">
+        <Example>
+            <div class="demo-col" style="max-width: 480px;">
+                <FluentSettingsCard Header="Bluetooth" Description="Manage paired devices">
+                    <HeaderIcon><FluentIcon Name="ic_fluent_bluetooth_20_regular" /></HeaderIcon>
+                    <ChildContent><FluentToggleSwitch @bind-Checked="_bluetoothOn" /></ChildContent>
+                </FluentSettingsCard>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Clickable, with an action icon" RazorCode="@_clickableRazor" CSharpCode="@_clickableCs">
+        <Example>
+            <div class="demo-col" style="max-width: 480px;">
+                <FluentSettingsCard Header="Battery"
+                                    Description="See battery usage and manage saver settings"
+                                    IsClickEnabled="true"
+                                    OnClick="@(() => _clicks++)">
+                    <HeaderIcon><FluentIcon Name="ic_fluent_battery_10_20_regular" /></HeaderIcon>
+                </FluentSettingsCard>
+                <div class="demo-output">Clicks: @_clicks</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="ContentAlignment.Left" RazorCode="@_leftRazor">
+        <Example>
+            <div class="demo-col" style="max-width: 480px;">
+                <FluentSettingsCard ContentAlignment="SettingsCardContentAlignment.Left">
+                    <FluentCheckBox @bind-Checked="_acceptTerms">I accept the terms and conditions</FluentCheckBox>
+                </FluentSettingsCard>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="ContentAlignment.Vertical" RazorCode="@_verticalRazor">
+        <Example>
+            <div class="demo-col" style="max-width: 480px;">
+                <FluentSettingsCard Header="Display brightness"
+                                    Description="Adjust the brightness of the built-in display"
+                                    ContentAlignment="SettingsCardContentAlignment.Vertical">
+                    <HeaderIcon><FluentIcon Name="ic_fluent_brightness_high_20_regular" /></HeaderIcon>
+                    <ChildContent><FluentSlider @bind-Value="_brightness" Min="0" Max="100" /></ChildContent>
+                </FluentSettingsCard>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _wifiOn = true;
+    private bool _bluetoothOn;
+    private bool _acceptTerms;
+    private int _clicks;
+    private double _brightness = 70;
+
+    private const string _basicRazor = @"<FluentSettingsCard Header=""Wi-Fi"" Description=""Connect to a wireless network"">
+    <FluentToggleSwitch @bind-Checked=""_wifiOn"" />
+</FluentSettingsCard>";
+
+    private const string _iconRazor = @"<FluentSettingsCard Header=""Bluetooth"" Description=""Manage paired devices"">
+    <HeaderIcon><FluentIcon Name=""ic_fluent_bluetooth_20_regular"" /></HeaderIcon>
+    <ChildContent><FluentToggleSwitch @bind-Checked=""_bluetoothOn"" /></ChildContent>
+</FluentSettingsCard>";
+
+    private const string _clickableRazor = @"<FluentSettingsCard Header=""Battery""
+                    Description=""See battery usage and manage saver settings""
+                    IsClickEnabled=""true""
+                    OnClick=""@(() => _clicks++)"">
+    <HeaderIcon><FluentIcon Name=""ic_fluent_battery_10_20_regular"" /></HeaderIcon>
+</FluentSettingsCard>";
+    private const string _clickableCs = @"private int _clicks;";
+
+    private const string _leftRazor = @"<FluentSettingsCard ContentAlignment=""SettingsCardContentAlignment.Left"">
+    <FluentCheckBox @bind-Checked=""_acceptTerms"">I accept the terms and conditions</FluentCheckBox>
+</FluentSettingsCard>";
+
+    private const string _verticalRazor = @"<FluentSettingsCard Header=""Display brightness""
+                    Description=""Adjust the brightness of the built-in display""
+                    ContentAlignment=""SettingsCardContentAlignment.Vertical"">
+    <HeaderIcon><FluentIcon Name=""ic_fluent_brightness_high_20_regular"" /></HeaderIcon>
+    <ChildContent><FluentSlider @bind-Value=""_brightness"" Min=""0"" Max=""100"" /></ChildContent>
+</FluentSettingsCard>";
+}

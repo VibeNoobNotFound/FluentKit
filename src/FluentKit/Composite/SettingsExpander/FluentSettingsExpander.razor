@@ -1,0 +1,46 @@
+@namespace FluentKit.Composite
+
+<div class="fluent-settings-expander" @attributes="AdditionalAttributes">
+    <div class="fluent-settings-expander-header @(IsExpanded ? "fluent-settings-expander-header--expanded" : "")">
+        <FluentSettingsCard Header="@Header"
+                            HeaderContent="@HeaderContent"
+                            Description="@Description"
+                            DescriptionContent="@DescriptionContent"
+                            HeaderIcon="@HeaderIcon"
+                            IsClickEnabled="@HasItems"
+                            IsActionIconVisible="@HasItems"
+                            ActionIcon="@DefaultActionIcon"
+                            OnClick="ToggleAsync"
+                            AdditionalAttributes="@HeaderAttributes">
+            @ChildContent
+        </FluentSettingsCard>
+    </div>
+
+    @if (HasItems)
+    {
+        <div class="fluent-settings-expander-items-anchor @(IsExpanded ? "fluent-settings-expander-items-anchor--expanded" : "")">
+            <div class="fluent-settings-expander-items">
+                @if (ItemsHeader is not null)
+                {
+                    <div class="fluent-settings-expander-items-header">@ItemsHeader</div>
+                }
+                @if (ItemsContent is not null)
+                {
+                    <div class="fluent-settings-expander-items-content">
+                        @ItemsContent
+                    </div>
+                }
+                @if (ItemsFooter is not null)
+                {
+                    <div class="fluent-settings-expander-items-footer">@ItemsFooter</div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private RenderFragment DefaultActionIcon => @<span class="@ChevronClass" aria-hidden="true">
+        <FluentIcon Name="ic_fluent_chevron_down_20_regular" />
+    </span>;
+}
