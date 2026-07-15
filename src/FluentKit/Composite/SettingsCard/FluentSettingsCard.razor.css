@@ -37,28 +37,38 @@
     block-size: 20px;
     margin-inline-end: 20px;
     color: var(--text-fill-color-primary);
+    opacity: 1;
+    overflow: hidden;
+    transition: inline-size var(--duration-slow) var(--easing-standard),
+                margin-inline-end var(--duration-slow) var(--easing-standard),
+                opacity var(--duration-normal) var(--easing-standard);
 }
 
 /* ── Body: header/description + end-aligned content ──────────────────── */
-/* A single flex row by default — the header block grows to fill all leftover
-   space (pushing the content slot flush to the end), and switches to a
-   stacked column once the card is too narrow for both (see the container
-   queries for ContentAlignment.Auto near the bottom of this file). */
+/* A single flex row that wraps — the header claims all leftover space (pushing the content slot
+   flush to the end), and the content slot glides onto its own line once the card is too narrow
+   for both (see the container queries for ContentAlignment.Auto near the bottom of this file).
+   Deliberately NOT a flex-direction row/column toggle: flex-direction can't be interpolated, so
+   switching it snaps instantly. Animating the content slot's flex-basis instead (an
+   interpolatable length-percentage) lets flex-wrap's reflow happen continuously across the
+   transition, producing a real glide rather than a jump-cut whenever the mode changes. */
 
 .fluent-settings-card-body {
     flex: 1 1 auto;
     min-inline-size: 0;
     display: flex;
-    flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     gap: 24px;
+    transition: gap var(--duration-slow) var(--easing-standard);
 }
 
 .fluent-settings-card-header {
-    flex: 1 1 auto;
+    flex: 999 1 220px;
     min-inline-size: 0;
     display: flex;
     flex-direction: column;
+    transition: flex-basis var(--duration-slow) var(--easing-standard);
 }
 
 .fluent-settings-card-title {
@@ -73,10 +83,12 @@
 }
 
 .fluent-settings-card-content {
-    flex: 0 0 auto;
+    flex: 1 1 30%;
     min-inline-size: 120px;
     display: flex;
     justify-content: flex-end;
+    transition: flex-basis var(--duration-slow) var(--easing-standard),
+                min-inline-size var(--duration-slow) var(--easing-standard);
 }
 
 /* ── Trailing action icon (chevron), only while clickable ────────────── */
@@ -139,33 +151,36 @@
 }
 
 /* ── ContentAlignment: Vertical (always stacked) ──────────────────────── */
+/* Forces the same wrap the Auto/narrow-container case reaches organically — content-basis 100%
+   pushes it past whatever room the header leaves, so it always lands on its own line — and it
+   glides there via the same transition as the container-query case below. */
 
 .fluent-settings-card--vertical .fluent-settings-card-body {
-    flex-direction: column;
     align-items: stretch;
     gap: 8px;
 }
 
 .fluent-settings-card--vertical .fluent-settings-card-content {
+    flex-basis: 100%;
     min-inline-size: 0;
     justify-content: stretch;
 }
 
 /* ── ContentAlignment: Auto (default) ─────────────────────────────────── */
 /* Same one-line layout as the base rules above while there's room; once the card's own inline
-   size drops below these thresholds, the content slot drops onto its own line underneath the
+   size drops below these thresholds, the content slot glides onto its own line underneath the
    header/description instead of squeezing them or overflowing. Mirrors WCT's width-driven
    RightWrapped / RightWrappedNoIcon states, minus a hard "Right" opt-out (that mode never wraps —
    see the :not() guards below). */
 
 @container (max-width: 476px) {
     .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-body {
-        flex-direction: column;
         align-items: stretch;
         gap: 8px;
     }
 
     .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-content {
+        flex-basis: 100%;
         min-inline-size: 0;
         justify-content: stretch;
     }
@@ -173,6 +188,8 @@
 
 @container (max-width: 286px) {
     .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-icon {
-        display: none;
+        inline-size: 0;
+        margin-inline-end: 0;
+        opacity: 0;
     }
 }
