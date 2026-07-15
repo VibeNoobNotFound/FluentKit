@@ -1,6 +1,6 @@
 using Microsoft.JSInterop;
 
-namespace FluentKit.Sample.Wasm.Shared;
+namespace FluentKit.Sample.Shared.Shared;
 
 /// <summary>
 /// Thin wrapper around the JS helpers declared in index.html for Prism.js

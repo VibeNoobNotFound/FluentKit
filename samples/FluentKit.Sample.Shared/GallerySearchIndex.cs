@@ -1,6 +1,6 @@
 using FluentKit.Composite;
 
-namespace FluentKit.Sample.Wasm;
+namespace FluentKit.Sample.Shared;
 
 /// <summary>
 /// One searchable entry — mirrors what WinUI Gallery's search index shows: a control/page name,

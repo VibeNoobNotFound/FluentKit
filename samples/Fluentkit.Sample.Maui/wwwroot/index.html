@@ -2,22 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FluentKit Gallery</title>
-    <meta name="description" content="Interactive gallery showcasing FluentKit components — a WinUI-style Blazor component library." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Fluentkit.Sample.Maui</title>
     <base href="/" />
     <link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
     <link rel="stylesheet" href="_content/FluentKit/Icons/FluentSystemIcons-Regular.css" />
-    <link href="FluentKit.Sample.Wasm.styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="_content/FluentKit.Sample.Shared/gallery.css" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="Fluentkit.Sample.Maui.styles.css" />
     <!-- Prism.js syntax highlighting (MIT) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
-    <!-- Gallery layout styles -->
-    <link rel="stylesheet" href="_content/FluentKit.Sample.Shared/gallery.css" />
+    <link rel="icon" href="data:,">
 </head>
-<body>
-    <div id="app">Loading…</div>
 
-    <!-- Prism.js: core + autoloader fetches grammars on demand -->
+<body>
+
+    <div class="status-bar-safe-area"></div>
+
+    <div id="app">Loading...</div>
+
+    <div id="blazor-error-ui" data-nosnippet>
+        An unhandled error has occurred.
+        <a href="." class="reload">Reload</a>
+        <span class="dismiss">🗙</span>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script>
@@ -49,6 +58,9 @@
             catch (e) { /* ignore */ }
         };
     </script>
-    <script src="_framework/blazor.webassembly.js"></script>
+
+    <script src="_framework/blazor.webview.js" autostart="false"></script>
+
 </body>
+
 </html>

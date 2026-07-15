@@ -59,7 +59,7 @@
             <HeaderIcon><FluentIcon Name="ic_fluent_image_20_regular" Size="20" /></HeaderIcon>
             <ChildContent>
                 <div class="demo-row" style="align-items:center; gap:12px;">
-                    @if (MainLayout.WallpaperUrlSetting != "wallpaper.jpg")
+                    @if (MainLayout.WallpaperUrlSetting != "_content/FluentKit.Sample.Shared/wallpaper.jpg")
                     {
                         <FluentButton Variant="ButtonVariant.Subtle" OnClick="ResetWallpaper">
                             Reset to default
@@ -180,7 +180,7 @@
 
     private async Task ResetWallpaper()
     {
-        MainLayout.SetWallpaperUrl("wallpaper.jpg");
+        MainLayout.SetWallpaperUrl("_content/FluentKit.Sample.Shared/wallpaper.jpg");
         await GalleryJs.RemoveStorageItemAsync(MainLayout.WallpaperStorageKey);
     }
 }
