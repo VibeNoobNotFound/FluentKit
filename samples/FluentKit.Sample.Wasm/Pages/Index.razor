@@ -21,13 +21,32 @@
                 <span class="home-stat__label">Components</span>
             </div>
             <div class="home-stat">
-                <span class="home-stat__number">38</span>
+                <span class="home-stat__number">39</span>
                 <span class="home-stat__label">Gallery Pages</span>
             </div>
             <div class="home-stat">
                 <span class="home-stat__number">3</span>
                 <span class="home-stat__label">Material Effects</span>
             </div>
+        </div>
+    </div>
+
+    <!-- Design -->
+    <div class="home-section">
+        <div class="home-section__title">Design</div>
+        <div class="control-grid">
+            @foreach (var card in _designCards)
+            {
+                <FluentRevealBackground Bordered style="border-radius:8px;">
+                    <a class="control-card" href="@card.Route">
+                        <div class="control-card__icon">
+                            <FluentIcon Name="@card.Icon" Size="24" />
+                        </div>
+                        <div class="control-card__name">@card.Name</div>
+                        <div class="control-card__category">Design</div>
+                    </a>
+                </FluentRevealBackground>
+            }
         </div>
     </div>
 
@@ -91,6 +110,11 @@
 
 @code {
     private record ControlCardInfo(string Name, string Route, string Icon);
+
+    private readonly ControlCardInfo[] _designCards =
+    [
+        new("Icons", "design/icons", "ic_fluent_icons_20_regular"),
+    ];
 
     private readonly ControlCardInfo[] _primitiveCards =
     [

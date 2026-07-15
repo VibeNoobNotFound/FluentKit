@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="samples/FluentKit.Sample.Wasm/FluentKit.Sample.Wasm.csproj" />
   <Project Path="src/FluentKit/FluentKit.csproj" />
+  <Project Path="src/FluentKit.IconGenerator/FluentKit.IconGenerator.csproj" />
 </Solution>

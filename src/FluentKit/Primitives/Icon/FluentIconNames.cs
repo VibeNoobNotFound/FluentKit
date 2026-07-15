@@ -1,13 +1,12 @@
 namespace FluentKit.Primitives;
 
 /// <summary>
-/// Compile-time-checked constants for commonly used Fluent System Icons glyph names, for use with
-/// <see cref="FluentIcon.Name"/> (e.g. <c>Name="@FluentIconNames.Home"</c>). Not exhaustive — the
-/// font (wwwroot/Icons/FluentSystemIcons-Regular.css) has thousands of glyphs; for anything not
-/// listed here, pass the "icon-" class suffix straight from that file, e.g.
-/// <c>Name="ic_fluent_beaker_20_regular"</c>.
+/// Hand-picked, ergonomic aliases for the most commonly used Fluent System Icons glyphs (e.g.
+/// <c>Name="@FluentIconNames.Home"</c>). For the full, exhaustive set of ~9,600 glyphs (auto-generated
+/// from wwwroot/Icons/FluentSystemIcons-Regular.css by tools/generate-icon-names.py), see the
+/// other partial of this class in <c>FluentIconNames.g.cs</c>, e.g. <c>FluentIconNames.Beaker20</c>.
 /// </summary>
-public static class FluentIconNames
+public static partial class FluentIconNames
 {
     public const string Home = "ic_fluent_home_20_regular";
     public const string Document = "ic_fluent_document_20_regular";

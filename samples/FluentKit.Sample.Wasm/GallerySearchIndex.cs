@@ -66,6 +66,8 @@ public static class GallerySearchIndex
         new("Mica", "Effects & Materials", "controls/mica"),
         new("Reveal", "Effects & Materials", "controls/reveal"),
 
+        new("Icons", "Design", "design/icons"),
+
         new("Settings", "Get Started", "settings"),
     ];
 

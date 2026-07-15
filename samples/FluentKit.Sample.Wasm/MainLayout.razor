@@ -39,6 +39,15 @@
 
             <FluentNavigationViewItemSeparator />
 
+            @* ── Design ─────────────────────────────────────────────── *@
+            <FluentNavigationViewItemHeader Text="Design" />
+
+            <FluentNavigationViewItem Value="@RouteIconBrowser" Text="Icons">
+                <Icon><FluentIcon Name="ic_fluent_icons_20_regular" /></Icon>
+            </FluentNavigationViewItem>
+            
+            <FluentNavigationViewItemSeparator />
+
             @* ── Basic Input ─────────────────────────────────────────── *@
             <FluentNavigationViewItemHeader Text="Basic Input" />
 
@@ -206,6 +215,7 @@
             <FluentNavigationViewItem Value="@RouteReveal" Text="Reveal">
                 <Icon><FluentIcon Name="ic_fluent_sparkle_20_regular" /></Icon>
             </FluentNavigationViewItem>
+
         </MenuItems>
 
         <PaneFooter>
@@ -263,6 +273,7 @@
     public const string RouteAcrylic        = "controls/acrylic";
     public const string RouteMica           = "controls/mica";
     public const string RouteReveal         = "controls/reveal";
+    public const string RouteIconBrowser    = "design/icons";
     public const string RouteSettings       = "settings";
 
     // ── Background material (toggled from Settings page) ───────────

@@ -45,6 +45,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Source generator that emits FluentIconNames.g.cs from the glyph CSS below.
+         ReferenceOutputAssembly=false: consumed only as a Roslyn analyzer, not a runtime dependency. -->
+    <ProjectReference Include="../FluentKit.IconGenerator/FluentKit.IconGenerator.csproj"
+                       OutputItemType="Analyzer"
+                       ReferenceOutputAssembly="false" />
+    <AdditionalFiles Include="wwwroot/Icons/FluentSystemIcons-Regular.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Ensures wwwroot/tokens.css and overlay-interop.js etc. get bundled as static web assets -->
     <SupportedPlatform Include="browser" />
   </ItemGroup>

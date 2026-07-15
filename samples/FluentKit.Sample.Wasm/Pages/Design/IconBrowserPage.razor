@@ -1,0 +1,120 @@
+@page "/design/icons"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Design"
+                Title="Icons"
+                Description="Browse every Fluent System Icons glyph bundled with FluentKit, search by name or glyph, and copy the FluentIcon markup straight into your project." />
+
+    <div class="icon-browser">
+        <div class="icon-browser__search">
+            <div class="icon-browser__search-box">
+                <FluentIcon Name="@FluentIconNames.Search" Size="16" />
+                <FluentTextBox Placeholder="Search icons by name or glyph..."
+                               Value="@_search"
+                               ValueChanged="OnSearchChanged" />
+            </div>
+            <span class="icon-browser__count">
+                @(_filtered.Count == _allIcons.Count ? $"{_allIcons.Count} icons" : $"{_filtered.Count} of {_allIcons.Count} icons")
+            </span>
+        </div>
+
+        <div class="icon-browser__body">
+            <div class="icon-browser__grid" role="listbox" aria-label="Icons">
+                @if (_filtered.Count == 0)
+                {
+                    <div class="icon-browser__empty">No icons found.</div>
+                }
+                else
+                {
+                    @foreach (var icon in _filtered)
+                    {
+                        <FluentButton
+                            Variant="@(icon == _selected ? ButtonVariant.Accent : ButtonVariant.Standard)"
+                            OnClick="() => Select(icon)">
+                            <FluentIcon Name="@icon.Glyph" />
+                        </FluentButton>
+                    }
+                }
+            </div>
+
+            @if (_selected is not null)
+            {
+                <div class="icon-browser__panel" @key="_selected">
+                    <div class="icon-browser__preview">
+                        <FluentIcon Name="@_selected.Glyph" Size="48" />
+                    </div>
+
+                    <span class="icon-browser__label">Constant name</span>
+                    <SampleCodeBlock Code="@_selected.ConstName" Language="csharp" />
+
+                    <span class="icon-browser__label">Glyph class</span>
+                    <SampleCodeBlock Code="@_selected.Glyph" Language="css" />
+
+                    <span class="icon-browser__label">Razor</span>
+                    <SampleCodeBlock Code="@RazorSnippet(_selected)" Language="razor" />
+
+                    <span class="icon-browser__label">C#</span>
+                    <SampleCodeBlock Code="@CSharpSnippet(_selected)" Language="csharp" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>One entry per <c>const string</c> field on <see cref="FluentIconNames"/> — both the
+    /// hand-curated aliases and the generator's ~9,600 exhaustive constants live on the same
+    /// (partial) class, so reflecting over it once here is the whole data source; no separate
+    /// icon list to keep in sync (mirrors WinUI Gallery's IconsDataSource, but generated instead
+    /// of hand-authored).</summary>
+    public sealed record IconEntry(string ConstName, string Glyph);
+
+    private readonly List<IconEntry> _allIcons = typeof(FluentIconNames)
+        .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.FlattenHierarchy)
+        .Where(f => f.FieldType == typeof(string) && f.IsLiteral && !f.IsInitOnly)
+        .Select(f => new IconEntry(f.Name, (string)f.GetRawConstantValue()!))
+        .OrderBy(i => i.ConstName, StringComparer.Ordinal)
+        .ToList();
+
+    private List<IconEntry> _filtered = [];
+    private IconEntry? _selected;
+    private string _search = "";
+
+    protected override void OnInitialized()
+    {
+        _filtered = _allIcons;
+        _selected = _allIcons.FirstOrDefault();
+    }
+
+    private void OnSearchChanged(string? value)
+    {
+        _search = value ?? "";
+
+        if (string.IsNullOrWhiteSpace(_search))
+        {
+            _filtered = _allIcons;
+        }
+        else
+        {
+            // Multiple space-separated terms must all match (name or glyph) — same rule
+            // WinUI Gallery's Iconography page uses for its own name/code/tags filter.
+            var terms = _search.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            _filtered = _allIcons
+                .Where(i => terms.All(term =>
+                    i.ConstName.Contains(term, StringComparison.OrdinalIgnoreCase)
+                    || i.Glyph.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
+
+        _selected = _selected is not null && _filtered.Contains(_selected) ? _selected : _filtered.FirstOrDefault();
+    }
+
+    private void Select(IconEntry icon) => _selected = icon;
+
+    private static string RazorSnippet(IconEntry icon) =>
+        $"<FluentIcon Name=\"@FluentIconNames.{icon.ConstName}\" />";
+
+    private static string CSharpSnippet(IconEntry icon) =>
+        $"FluentIconNames.{icon.ConstName}; // \"{icon.Glyph}\"";
+}
