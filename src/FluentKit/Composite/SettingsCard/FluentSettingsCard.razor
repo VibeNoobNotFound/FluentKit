@@ -14,27 +14,32 @@
         <div class="fluent-settings-card-icon">@HeaderIcon</div>
     }
 
-    <div class="fluent-settings-card-header">
-        @if (HasHeader)
+    <div class="fluent-settings-card-body">
+        @if (HasHeader || HasDescription)
         {
-            <div class="fluent-settings-card-title">
-                @RenderedHeader
+            <div class="fluent-settings-card-header">
+                @if (HasHeader)
+                {
+                    <div class="fluent-settings-card-title">
+                        @RenderedHeader
+                    </div>
+                }
+                @if (HasDescription)
+                {
+                    <div class="fluent-settings-card-description">
+                        @RenderedDescription
+                    </div>
+                }
             </div>
         }
-        @if (HasDescription)
+
+        @if (ChildContent is not null)
         {
-            <div class="fluent-settings-card-description">
-                @RenderedDescription
+            <div class="fluent-settings-card-content">
+                @ChildContent
             </div>
         }
     </div>
-
-    @if (ChildContent is not null)
-    {
-        <div class="fluent-settings-card-content">
-            @ChildContent
-        </div>
-    }
 
     @if (ShowActionIcon)
     {

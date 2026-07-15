@@ -1,10 +1,7 @@
 .fluent-settings-card {
     container-type: inline-size;
     box-sizing: border-box;
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
-    grid-template-rows: auto auto;
-    column-gap: 0;
+    display: flex;
     align-items: center;
     min-inline-size: 148px;
     min-block-size: 68px;
@@ -30,8 +27,7 @@
 /* ── Leading icon ─────────────────────────────────────────────────────── */
 
 .fluent-settings-card-icon {
-    grid-column: 1;
-    grid-row: 1 / 3;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -41,15 +37,26 @@
     color: var(--text-fill-color-primary);
 }
 
-/* ── Header + description ────────────────────────────────────────────── */
+/* ── Body: header/description + end-aligned content ──────────────────── */
+/* A single flex row by default — the header block grows to fill all leftover
+   space (pushing the content slot flush to the end), and switches to a
+   stacked column once the card is too narrow for both (see the container
+   queries for ContentAlignment.Auto near the bottom of this file). */
+
+.fluent-settings-card-body {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+}
 
 .fluent-settings-card-header {
-    grid-column: 2;
-    grid-row: 1 / 3;
+    flex: 1 1 auto;
+    min-inline-size: 0;
     display: flex;
     flex-direction: column;
-    min-inline-size: 0;
-    margin-inline-end: 24px;
 }
 
 .fluent-settings-card-title {
@@ -63,20 +70,17 @@
     overflow-wrap: break-word;
 }
 
-/* ── End-aligned content slot ─────────────────────────────────────────── */
-
 .fluent-settings-card-content {
-    grid-column: 3;
-    grid-row: 1;
-    justify-self: end;
+    flex: 0 0 auto;
     min-inline-size: 120px;
+    display: flex;
+    justify-content: flex-end;
 }
 
 /* ── Trailing action icon (chevron), only while clickable ────────────── */
 
 .fluent-settings-card-action-icon {
-    grid-column: 4;
-    grid-row: 1 / 3;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -127,58 +131,46 @@
 }
 
 .fluent-settings-card--left .fluent-settings-card-content {
-    grid-column: 1 / 4;
-    grid-row: 1 / 3;
-    justify-self: start;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    justify-content: flex-start;
 }
 
-/* ── ContentAlignment: Vertical ───────────────────────────────────────── */
-/* ChildContent stacks below the header/description instead of sitting beside it. */
+/* ── ContentAlignment: Vertical (always stacked) ──────────────────────── */
 
-.fluent-settings-card--vertical {
-    grid-template-rows: auto auto;
-    row-gap: 8px;
+.fluent-settings-card--vertical .fluent-settings-card-body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
 }
 
 .fluent-settings-card--vertical .fluent-settings-card-content {
-    grid-column: 1 / 5;
-    grid-row: 2;
-    justify-self: stretch;
+    min-inline-size: 0;
+    justify-content: stretch;
 }
 
-.fluent-settings-card--vertical .fluent-settings-card-header {
-    grid-row: 1;
-}
-
-.fluent-settings-card--vertical .fluent-settings-card-icon {
-    grid-row: 1;
-}
-
-/* ── Responsive wrap (mirrors WCT's ControlSizeTrigger-driven RightWrapped /
-   RightWrappedNoIcon states — 476px / 286px thresholds) ─────────────────── */
+/* ── ContentAlignment: Auto (default) ─────────────────────────────────── */
+/* Same one-line layout as the base rules above while there's room; once the card's own inline
+   size drops below these thresholds, the content slot drops onto its own line underneath the
+   header/description instead of squeezing them or overflowing. Mirrors WCT's width-driven
+   RightWrapped / RightWrappedNoIcon states, minus a hard "Right" opt-out (that mode never wraps —
+   see the :not() guards below). */
 
 @container (max-width: 476px) {
-    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) {
-        row-gap: 8px;
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-body {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
     }
 
-    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) .fluent-settings-card-content {
-        grid-column: 2 / 4;
-        grid-row: 2;
-        justify-self: stretch;
-    }
-
-    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) .fluent-settings-card-header {
-        margin-inline-end: 0;
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-content {
+        min-inline-size: 0;
+        justify-content: stretch;
     }
 }
 
 @container (max-width: 286px) {
-    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) .fluent-settings-card-icon {
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-icon {
         display: none;
-    }
-
-    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--vertical) .fluent-settings-card-content {
-        grid-column: 1 / 4;
     }
 }

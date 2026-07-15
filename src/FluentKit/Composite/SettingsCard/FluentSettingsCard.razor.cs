@@ -62,8 +62,12 @@ public partial class FluentSettingsCard : ComponentBase
     /// <summary>Fires when the card is activated (click, or Enter/Space while focused) and <see cref="IsClickEnabled"/> is true.</summary>
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
 
-    /// <summary>The alignment of ChildContent. Mirrors WCT's ContentAlignment.</summary>
-    [Parameter] public SettingsCardContentAlignment ContentAlignment { get; set; } = SettingsCardContentAlignment.Right;
+    /// <summary>
+    /// The alignment of ChildContent. Defaults to <see cref="SettingsCardContentAlignment.Auto"/>,
+    /// which keeps content end-aligned on one line and drops it below the header/description once
+    /// the card gets too narrow for both to fit side by side.
+    /// </summary>
+    [Parameter] public SettingsCardContentAlignment ContentAlignment { get; set; } = SettingsCardContentAlignment.Auto;
 
     /// <summary>Disables the card — dims foreground/icons, same as WinUI's Disabled visual state.</summary>
     [Parameter] public bool Disabled { get; set; }
@@ -87,9 +91,10 @@ public partial class FluentSettingsCard : ComponentBase
         + (Disabled ? " fluent-settings-card--disabled" : "")
         + (ContentAlignment switch
         {
+            SettingsCardContentAlignment.Right => " fluent-settings-card--right",
             SettingsCardContentAlignment.Left => " fluent-settings-card--left",
             SettingsCardContentAlignment.Vertical => " fluent-settings-card--vertical",
-            _ => "",
+            _ => "", // Auto — no modifier class, base + container-query rules handle it.
         });
 
     private async Task HandleClickAsync(MouseEventArgs args)
@@ -116,10 +121,20 @@ public partial class FluentSettingsCard : ComponentBase
     }
 }
 
-/// <summary>The alignment of a FluentSettingsCard's ChildContent. Mirrors WCT's ContentAlignment enum.</summary>
+/// <summary>The alignment of a FluentSettingsCard's ChildContent.</summary>
 public enum SettingsCardContentAlignment
 {
-    /// <summary>ChildContent is end-aligned. Default state.</summary>
+    /// <summary>
+    /// Default. ChildContent is end-aligned on one line with the header/description when there's
+    /// room; once the card becomes too narrow to fit both comfortably, ChildContent drops below
+    /// the header/description instead of clipping or squeezing them.
+    /// </summary>
+    Auto,
+
+    /// <summary>
+    /// ChildContent is always end-aligned on the same line as the header/description, regardless
+    /// of available width. Mirrors WCT's ContentAlignment.Right, without the automatic wrap.
+    /// </summary>
     Right,
 
     /// <summary>
@@ -128,6 +143,6 @@ public enum SettingsCardContentAlignment
     /// </summary>
     Left,
 
-    /// <summary>ChildContent is stacked below the header/description.</summary>
+    /// <summary>ChildContent is always stacked below the header/description, regardless of available width.</summary>
     Vertical,
 }
