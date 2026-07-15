@@ -267,6 +267,7 @@
 }
 
 .fluent-nav-view-pane-items {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -274,6 +275,29 @@
     overflow-y: auto;
     padding: 8px 8px;
     width: 100%;
+}
+
+/* Ribbon selection indicator: a single shared pill that slides + squash/stretches
+   between nav items on selection change (see PyQt-Fluent-Widgets' ScaleSlideAnimation /
+   WinUI 3 NavigationView selection indicator). Position is driven purely via JS
+   (navview-interop.js) using transform (translateY) + height, so the CSS here only
+   sets up the static box; the container needs position:relative (set above) and the
+   indicator needs pointer-events:none so it never intercepts item clicks. */
+.fluent-nav-view-ribbon-indicator {
+    position: absolute;
+    inset-inline-start: 8px;
+    top: 0;
+    inline-size: 3px;
+    block-size: 16px;
+    border-radius: var(--control-corner-radius);
+    background-color: var(--nav-view-selection-indicator);
+    opacity: 0;
+    pointer-events: none;
+    /* JS (navview-interop.js) only ever sets `transform: translateY() scaleY()` - block-size
+       stays fixed at 16px always, and scaleY stretches/shrinks from the top edge because of
+       this transform-origin, matching how the JS computes its translateY anchor. */
+    transform-origin: top center;
+    will-change: transform;
 }
 
 .fluent-nav-view-pane-footer {
