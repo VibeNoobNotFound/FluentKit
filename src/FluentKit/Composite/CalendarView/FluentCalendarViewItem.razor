@@ -2,7 +2,7 @@
 
 <button type="button"
         @ref="ButtonRef"
-        class="fluent-calendar-view-item fluent-calendar-view-item--@(Variant == CalendarViewItemVariant.Day ? "day" : "month-year") @(Selected ? "fluent-calendar-view-item--selected" : null) @(Current ? "fluent-calendar-view-item--current" : null) @(Blackout ? "fluent-calendar-view-item--blackout" : null) @(Disabled ? "fluent-calendar-view-item--disabled" : null) @(OutOfRange ? "fluent-calendar-view-item--out-of-range" : null)"
+        class="fluent-calendar-view-item fluent-calendar-view-item--@(Variant == CalendarViewItemVariant.Day ? "day" : "month-year") @(Selected ? "fluent-calendar-view-item--selected" : null) @(Current ? "fluent-calendar-view-item--current" : null) @(Blackout ? "fluent-calendar-view-item--blackout" : null) @(Disabled ? "fluent-calendar-view-item--disabled" : null) @(OutOfRange ? "fluent-calendar-view-item--out-of-range" : null) @((RangeStart || RangeEnd) ? "fluent-calendar-view-item--range-edge" : null)"
         disabled="@(Disabled || Blackout)"
         aria-selected="@Selected"
         tabindex="@TabIndex"

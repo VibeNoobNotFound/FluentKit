@@ -182,6 +182,12 @@
     position: relative;
     overflow: hidden;
     background-color: var(--card-background-default);
+    /* Lets a vertical touch-drag fall through to the page's native scroll as normal, while a
+       horizontal drag is left for OnTouchMove (FluentCalendarView.razor.cs) to interpret as a
+       prev/next-month swipe — see that handler for why this can't just be an unconditional
+       preventDefault instead. Wheel/trackpad scroll paging (OnWheel) is unaffected by this; wheel
+       events aren't touch gestures and are already hard-prevented via @onwheel:preventDefault. */
+    touch-action: pan-y;
 }
 
 .fluent-calendar-view-table {
@@ -207,6 +213,64 @@
 .fluent-calendar-view-table td,
 .fluent-calendar-view-table th {
     padding: 0;
+}
+
+/* Range-selection band: painted on the <td> (not the FluentCalendarViewItem button) via ::before so
+   it sits in its own layer behind the day button entirely, and so adjacent in-range <td>s can butt
+   directly against each other with zero gap between their ::before rects — the table row's 2px
+   grid-gap is bridged with a negative margin/width trick below, otherwise the "continuous" band
+   would visibly break into dashes at every column gap. Cells cap (round) their edge only at the
+   true range start/end or a row wrap (see FluentCalendarView.razor) so a range spanning multiple
+   weeks reads as one long pill per row instead of one shape awkwardly wrapping across lines. */
+.fluent-calendar-view-td--in-range {
+    position: relative;
+}
+
+.fluent-calendar-view-td--in-range::before {
+    content: "";
+    position: absolute;
+    inset-block: 4px;
+    /* Bridge the 2px grid-gap on both sides so the band reads as one unbroken shape, not per-cell
+       segments with hairline seams. Capped edges stop at the cell boundary instead (no bridge),
+       so the rounded corner has a clean straight edge to round from. */
+    inset-inline-start: -1px;
+    inset-inline-end: -1px;
+    background-color: var(--subtle-fill-color-secondary);
+    border-radius: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.fluent-calendar-view-td--cap-start::before {
+    inset-inline-start: 0;
+    border-start-start-radius: 20px;
+    border-end-start-radius: 20px;
+}
+
+.fluent-calendar-view-td--cap-end::before {
+    inset-inline-end: 0;
+    border-start-end-radius: 20px;
+    border-end-end-radius: 20px;
+}
+
+/* At the true start/end day (as opposed to a mid-range row-wrap cap), tint the band toward the
+   accent color so it visibly hands off into the round accent pill drawn by
+   FluentCalendarViewItem--selected instead of looking like an unrelated neutral fill next to it. */
+.fluent-calendar-view-item--range-edge {
+    z-index: 1;
+}
+
+.fluent-calendar-view-td--cap-start:has(.fluent-calendar-view-item--range-edge)::before,
+.fluent-calendar-view-td--cap-end:has(.fluent-calendar-view-item--range-edge)::before {
+    background-color: color-mix(in srgb, var(--accent-fill-color-default) 16%, var(--subtle-fill-color-secondary));
+}
+
+/* The day button itself must paint above the band, and stay transparent where the band shows
+   through behind it (its own selected/current states already set an explicit background so
+   those take priority as normal — only plain in-range cells rely on the band showing through). */
+.fluent-calendar-view-td--in-range .fluent-calendar-view-item {
+    position: relative;
+    z-index: 1;
 }
 
 .fluent-calendar-view-table th {

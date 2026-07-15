@@ -168,6 +168,117 @@ public partial class FluentCalendarView : ComponentBase
         _renderGeneration++;
     }
 
+    /// <summary>Cooldown gate for wheel/swipe-driven paging: a single trackpad "scroll" gesture fires
+    /// many small onwheel deltas in quick succession, and a single finger swipe likewise fires many
+    /// touchmove events — without this we'd fly through several months per gesture instead of the
+    /// intended "one gesture = one page" feel (matching how a real WinUI/touch calendar's paging
+    /// snap-scroll behaves, not a free-scrolling list). Reset once enough time has passed that a new
+    /// gesture is presumably starting.</summary>
+    private DateTime _lastGesturePage = DateTime.MinValue;
+
+    private static readonly TimeSpan GesturePageCooldown = TimeSpan.FromMilliseconds(350);
+
+    /// <summary>Wheel-to-page: scrolling with the pointer/trackpad over the calendar turns the page
+    /// instead of scrolling the surrounding document. Bound with @onwheel:preventDefault on the table
+    /// wrapper (see FluentCalendarView.razor) so the page behind the calendar never moves at all —
+    /// the browser only lets preventDefault suppress scroll if it's called from a non-passive
+    /// listener, which is what Blazor's :preventDefault modifier wires up for us server/wasm-side.
+    /// Vertical wheel delta (deltaY) is used regardless of axis, since trackpads commonly report
+    /// two-finger vertical scroll as the natural "turn the page" gesture, matching scroll-to-navigate
+    /// UIs elsewhere (e.g. image galleries, PDF viewers).</summary>
+    private void OnWheel(WheelEventArgs e)
+    {
+        if (Math.Abs(e.DeltaY) < 1)
+        {
+            return;
+        }
+
+        GestureGoPage(e.DeltaY > 0 ? 1 : -1);
+    }
+
+    /// <summary>Touch-swipe-to-page companion to <see cref="OnWheel"/>: tracks the first touch point's
+    /// horizontal travel and, once it crosses a small threshold, turns the page the same way a
+    /// left/right swipe would in a native mobile calendar (swipe left = next, swipe right = previous)
+    /// — horizontal rather than vertical here, since a vertical swipe on a touchscreen is much more
+    /// likely to be the user trying to scroll the surrounding page, which we don't want to hijack.</summary>
+    private double? _touchStartX;
+    private double? _touchStartY;
+    private bool _touchIsHorizontalSwipe;
+
+    private const double SwipeThresholdPx = 40;
+
+    private void OnTouchStart(TouchEventArgs e)
+    {
+        _touchStartX = e.Touches.Length > 0 ? e.Touches[0].ClientX : null;
+        _touchStartY = e.Touches.Length > 0 ? e.Touches[0].ClientY : null;
+        _touchIsHorizontalSwipe = false;
+    }
+
+    /// <summary>Deliberately does NOT unconditionally preventDefault touchmove (see markup): Blazor's
+    /// @ontouchmove:preventDefault is a static per-element attribute, not something we can flip per
+    /// gesture, and blocking every touchmove would also swallow a user's ordinary vertical scroll of
+    /// the surrounding page whenever their finger happens to start over the calendar. Instead the
+    /// wrapper is given `touch-action: pan-y` in CSS, which tells the browser up front "let vertical
+    /// scrolling pass through natively, and leave horizontal gestures to JS" — the browser then only
+    /// suppresses its own native scroll on the horizontal axis, exactly the axis this handler cares
+    /// about, without any interop needed to decide per-touch.</summary>
+    private void OnTouchMove(TouchEventArgs e)
+    {
+        if (_touchStartX is not { } startX || _touchStartY is not { } startY || e.Touches.Length == 0)
+        {
+            return;
+        }
+
+        var deltaX = e.Touches[0].ClientX - startX;
+        var deltaY = e.Touches[0].ClientY - startY;
+
+        if (!_touchIsHorizontalSwipe && Math.Abs(deltaX) < SwipeThresholdPx)
+        {
+            return;
+        }
+
+        // Once movement is clearly more vertical than horizontal, treat this touch as a page-scroll
+        // gesture, not a calendar swipe, and stop paying attention to it for the rest of this touch.
+        if (!_touchIsHorizontalSwipe && Math.Abs(deltaY) > Math.Abs(deltaX))
+        {
+            _touchStartX = null;
+            _touchStartY = null;
+            return;
+        }
+
+        _touchIsHorizontalSwipe = true;
+        _touchStartX = null; // consume the swipe so we don't re-trigger every subsequent touchmove tick
+        GestureGoPage(deltaX < 0 ? 1 : -1);
+    }
+
+    private void OnTouchEnd(TouchEventArgs e)
+    {
+        _touchStartX = null;
+        _touchStartY = null;
+        _touchIsHorizontalSwipe = false;
+    }
+
+    /// <summary>Shared by OnWheel/OnTouchMove: same GoPage the prev/next buttons use (so the existing
+    /// slide animation plays), gated by a short cooldown and clamped to Min/Max the same way the
+    /// buttons already are via PrevDisabled/NextDisabled.</summary>
+    private void GestureGoPage(int amount)
+    {
+        var now = DateTime.UtcNow;
+        if (now - _lastGesturePage < GesturePageCooldown)
+        {
+            return;
+        }
+
+        if ((amount < 0 && PrevDisabled) || (amount > 0 && NextDisabled))
+        {
+            return;
+        }
+
+        _lastGesturePage = now;
+        GoPage(amount);
+        StateHasChanged();
+    }
+
     private async Task SetViewAsync(CalendarViewMode view)
     {
         var previous = View;

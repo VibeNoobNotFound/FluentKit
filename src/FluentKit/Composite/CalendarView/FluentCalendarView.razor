@@ -29,7 +29,11 @@
         </div>
     </header>
 
-    <div class="fluent-calendar-view-table-wrapper">
+    <div class="fluent-calendar-view-table-wrapper"
+         @onwheel="OnWheel" @onwheel:preventDefault="true"
+         @ontouchstart="OnTouchStart"
+         @ontouchmove="OnTouchMove"
+         @ontouchend="OnTouchEnd">
         @{
             var viewAnimClass = _viewAnimDirection == "up" ? "fluent-calendar-view-table--anim-up"
                 : _viewAnimDirection == "down" ? "fluent-calendar-view-table--anim-down" : null;
@@ -65,7 +69,21 @@
                                 var disabled = (Min.HasValue && Min.Value > day) || (Max.HasValue && Max.Value < day);
                                 var blackout = IsBlackout(day);
                                 var headerLabel = Headers && day.Day == 1 ? day.ToString("MMM", Culture) : null;
-                                <td role="gridcell">
+                                var rangeStartDay = Mode == CalendarSelectionMode.Range && IsRangeStartDay(day);
+                                var rangeEndDay = Mode == CalendarSelectionMode.Range && IsRangeEndDay(day);
+                                var rangeMiddleDay = Mode == CalendarSelectionMode.Range && IsInRange(day);
+                                // The continuous band is a per-row background painted on the <td> itself (see
+                                // FluentCalendarViewItem.razor.css) rather than per-cell pill shapes, so a multi-day
+                                // selection reads as one long squircle instead of separate circles touching edge-to-edge.
+                                // A cell caps (rounds) its band edge when it's the true range start/end OR sits at a
+                                // row/week boundary, since the band never visually continues past a line wrap.
+                                var inBand = rangeStartDay || rangeEndDay || rangeMiddleDay;
+                                var capStart = rangeStartDay || (inBand && col == 0);
+                                var capEnd = rangeEndDay || (inBand && col == 6);
+                                var bandClass = inBand
+                                    ? $"fluent-calendar-view-td--in-range{(capStart ? " fluent-calendar-view-td--cap-start" : null)}{(capEnd ? " fluent-calendar-view-td--cap-end" : null)}"
+                                    : null;
+                                <td role="gridcell" class="@bandClass">
                                     <FluentCalendarViewItem @ref="_dayItemRefs[capturedIndex]"
                                                              Selected="@IsSelectedDay(day)"
                                                              Current="@SameDay(day, Today)"
@@ -73,6 +91,9 @@
                                                              Blackout="@blackout"
                                                              OutOfRange="@(!inMonth)"
                                                              Header="@headerLabel"
+                                                             InRange="@rangeMiddleDay"
+                                                             RangeStart="@rangeStartDay"
+                                                             RangeEnd="@rangeEndDay"
                                                              TabIndex="@(inMonth && day.Day == 1 ? 0 : -1)"
                                                              OnClick="@(() => SelectDayAsync(day))"
                                                              OnKeyDown="@((KeyboardEventArgs e) => OnGridKeyDownAsync(e, capturedIndex, 7, days.Count, _dayItemRefs))">
