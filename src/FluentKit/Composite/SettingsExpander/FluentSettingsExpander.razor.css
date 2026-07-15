@@ -1,6 +1,7 @@
 .fluent-settings-expander {
     display: flex;
     flex-direction: column;
+    align-self: stretch;
     inline-size: 100%;
 }
 

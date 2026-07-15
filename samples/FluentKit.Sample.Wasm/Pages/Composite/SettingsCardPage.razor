@@ -6,7 +6,7 @@
 
     <ControlExample HeaderText="Basic SettingsCard" RazorCode="@_basicRazor">
         <Example>
-            <div class="demo-col" style="max-width: 480px;">
+            <div class="demo-col">
                 <FluentSettingsCard Header="Wi-Fi" Description="Connect to a wireless network">
                     <FluentToggleSwitch @bind-Checked="_wifiOn" />
                 </FluentSettingsCard>
@@ -16,7 +16,7 @@
 
     <ControlExample HeaderText="With a header icon" RazorCode="@_iconRazor">
         <Example>
-            <div class="demo-col" style="max-width: 480px;">
+            <div class="demo-col">
                 <FluentSettingsCard Header="Bluetooth" Description="Manage paired devices">
                     <HeaderIcon><FluentIcon Name="ic_fluent_bluetooth_20_regular" /></HeaderIcon>
                     <ChildContent><FluentToggleSwitch @bind-Checked="_bluetoothOn" /></ChildContent>
@@ -27,7 +27,7 @@
 
     <ControlExample HeaderText="Clickable, with an action icon" RazorCode="@_clickableRazor" CSharpCode="@_clickableCs">
         <Example>
-            <div class="demo-col" style="max-width: 480px;">
+            <div class="demo-col">
                 <FluentSettingsCard Header="Battery"
                                     Description="See battery usage and manage saver settings"
                                     IsClickEnabled="true"
@@ -41,7 +41,7 @@
 
     <ControlExample HeaderText="ContentAlignment.Left" RazorCode="@_leftRazor">
         <Example>
-            <div class="demo-col" style="max-width: 480px;">
+            <div class="demo-col">
                 <FluentSettingsCard ContentAlignment="SettingsCardContentAlignment.Left">
                     <FluentCheckBox @bind-Checked="_acceptTerms">I accept the terms and conditions</FluentCheckBox>
                 </FluentSettingsCard>
@@ -51,12 +51,24 @@
 
     <ControlExample HeaderText="ContentAlignment.Vertical" RazorCode="@_verticalRazor">
         <Example>
-            <div class="demo-col" style="max-width: 480px;">
+            <div class="demo-col">
                 <FluentSettingsCard Header="Display brightness"
                                     Description="Adjust the brightness of the built-in display"
                                     ContentAlignment="SettingsCardContentAlignment.Vertical">
                     <HeaderIcon><FluentIcon Name="ic_fluent_brightness_high_20_regular" /></HeaderIcon>
                     <ChildContent><FluentSlider @bind-Value="_brightness" Min="0" Max="100" /></ChildContent>
+                </FluentSettingsCard>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="ContentAlignment.Auto in a narrow container" RazorCode="@_narrowRazor">
+        <Example>
+            <div class="demo-col" style="max-width: 260px;">
+                <FluentSettingsCard Header="Airplane mode"
+                                    Description="Turns off all wireless connections">
+                    <HeaderIcon><FluentIcon Name="ic_fluent_airplane_20_regular" /></HeaderIcon>
+                    <ChildContent><FluentToggleSwitch @bind-Checked="_airplaneOn" /></ChildContent>
                 </FluentSettingsCard>
             </div>
         </Example>
@@ -69,6 +81,7 @@
     private bool _acceptTerms;
     private int _clicks;
     private double _brightness = 70;
+    private bool _airplaneOn;
 
     private const string _basicRazor = @"<FluentSettingsCard Header=""Wi-Fi"" Description=""Connect to a wireless network"">
     <FluentToggleSwitch @bind-Checked=""_wifiOn"" />
@@ -96,5 +109,13 @@
                     ContentAlignment=""SettingsCardContentAlignment.Vertical"">
     <HeaderIcon><FluentIcon Name=""ic_fluent_brightness_high_20_regular"" /></HeaderIcon>
     <ChildContent><FluentSlider @bind-Value=""_brightness"" Min=""0"" Max=""100"" /></ChildContent>
+</FluentSettingsCard>";
+
+    private const string _narrowRazor = @"<!-- ContentAlignment.Auto drops the content onto its own line once the
+     card's own width falls below ~476px, and hides the header icon below ~286px. -->
+<FluentSettingsCard Header=""Airplane mode""
+                    Description=""Turns off all wireless connections"">
+    <HeaderIcon><FluentIcon Name=""ic_fluent_airplane_20_regular"" /></HeaderIcon>
+    <ChildContent><FluentToggleSwitch @bind-Checked=""_airplaneOn"" /></ChildContent>
 </FluentSettingsCard>";
 }

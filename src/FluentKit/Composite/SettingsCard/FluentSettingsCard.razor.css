@@ -3,6 +3,8 @@
     box-sizing: border-box;
     display: flex;
     align-items: center;
+    align-self: stretch;
+    inline-size: 100%;
     min-inline-size: 148px;
     min-block-size: 68px;
     padding: 16px;
