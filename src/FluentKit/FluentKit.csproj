@@ -18,7 +18,7 @@
 
     <!-- NuGet metadata -->
     <PackageId>FluentKit.Blazor</PackageId>
-    <Version>0.1.7</Version>
+    <Version>0.1.8</Version>
     <Authors>NoobNotFound</Authors>
     <Description>A token-accurate Fluent Design (WinUI 3) component library for Blazor WASM, Server, and MAUI Blazor Hybrid.</Description>
 

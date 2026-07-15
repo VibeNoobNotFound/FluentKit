@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject IThemeService ThemeService
+@inject GalleryJsInterop GalleryJs
 
 <ThemeProvider>
     @* Background material — switches between Mica (Base) and Mica Alt (Tabbed/BaseAlt) *@
@@ -276,8 +277,17 @@
     public const string RouteIconBrowser    = "design/icons";
     public const string RouteSettings       = "settings";
 
+    // ── Persisted-settings storage keys (browser localStorage) ──────
+    // Only ever written from explicit user actions on the Settings page —
+    // never from defaults — so a first-time visitor's storage stays empty.
+    public const string ThemeModeStorageKey    = "fluentkit-gallery.theme-mode";
+    public const string MicaVariantStorageKey  = "fluentkit-gallery.mica-variant";
+    public const string WallpaperStorageKey    = "fluentkit-gallery.wallpaper-url";
+
     // ── Background material (toggled from Settings page) ───────────
-    internal static MicaVariant BackgroundVariantSetting = MicaVariant.Base;
+    // Defaults to Tabbed (Mica Alt) — overridden at startup if the user has
+    // a saved preference (see LoadPersistedSettingsAsync).
+    internal static MicaVariant BackgroundVariantSetting = MicaVariant.BaseAlt;
     internal static event Action? BackgroundVariantChanged;
     internal static void SetBackgroundVariant(MicaVariant v)
     {
@@ -306,6 +316,45 @@
         Navigation.LocationChanged += OnLocationChanged;
         BackgroundVariantChanged += OnBackgroundVariantChanged;
         WallpaperUrlChanged += OnWallpaperUrlChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadPersistedSettingsAsync();
+        }
+    }
+
+    // Restores theme mode, Mica variant, and wallpaper from localStorage, if the
+    // user previously changed any of them. Silently keeps built-in defaults for
+    // anything that was never saved (or if storage is unavailable/corrupt).
+    private async Task LoadPersistedSettingsAsync()
+    {
+        try
+        {
+            var savedMode = await GalleryJs.GetStorageItemAsync(ThemeModeStorageKey);
+            if (!string.IsNullOrEmpty(savedMode) && Enum.TryParse<ThemeMode>(savedMode, out var mode))
+            {
+                await ThemeService.SetModeAsync(mode);
+            }
+
+            var savedVariant = await GalleryJs.GetStorageItemAsync(MicaVariantStorageKey);
+            if (!string.IsNullOrEmpty(savedVariant) && Enum.TryParse<MicaVariant>(savedVariant, out var variant))
+            {
+                SetBackgroundVariant(variant);
+            }
+
+            var savedWallpaper = await GalleryJs.GetStorageItemAsync(WallpaperStorageKey);
+            if (!string.IsNullOrEmpty(savedWallpaper))
+            {
+                SetWallpaperUrl(savedWallpaper);
+            }
+        }
+        catch
+        {
+            // localStorage unavailable (e.g. private browsing) or a corrupt value — fall back to defaults.
+        }
     }
 
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)

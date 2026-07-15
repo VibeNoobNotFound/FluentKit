@@ -48,5 +48,38 @@ public sealed class GalleryJsInterop : IAsyncDisposable
         catch (TaskCanceledException) { }
     }
 
+    /// <summary>Read a raw string value from localStorage, or null if missing/unavailable.</summary>
+    public async ValueTask<string?> GetStorageItemAsync(string key)
+    {
+        try
+        {
+            return await _js.InvokeAsync<string?>("galleryStorageGet", key);
+        }
+        catch (JSException) { return null; }
+        catch (TaskCanceledException) { return null; }
+    }
+
+    /// <summary>Write a raw string value to localStorage. Silently no-ops on failure (e.g. quota exceeded).</summary>
+    public async ValueTask SetStorageItemAsync(string key, string value)
+    {
+        try
+        {
+            await _js.InvokeVoidAsync("galleryStorageSet", key, value);
+        }
+        catch (JSException) { }
+        catch (TaskCanceledException) { }
+    }
+
+    /// <summary>Remove a key from localStorage.</summary>
+    public async ValueTask RemoveStorageItemAsync(string key)
+    {
+        try
+        {
+            await _js.InvokeVoidAsync("galleryStorageRemove", key);
+        }
+        catch (JSException) { }
+        catch (TaskCanceledException) { }
+    }
+
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

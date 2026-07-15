@@ -31,6 +31,23 @@
         window.galleryScrollTop = function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
+
+        // Thin wrappers around localStorage for persisting gallery settings
+        // (theme mode, Mica variant, custom wallpaper). Failures (private
+        // browsing, quota exceeded, storage disabled) are swallowed here so
+        // callers just see a null/no-op instead of a thrown JSException.
+        window.galleryStorageGet = function (key) {
+            try { return window.localStorage.getItem(key); }
+            catch (e) { return null; }
+        };
+        window.galleryStorageSet = function (key, value) {
+            try { window.localStorage.setItem(key, value); return true; }
+            catch (e) { return false; }
+        };
+        window.galleryStorageRemove = function (key) {
+            try { window.localStorage.removeItem(key); }
+            catch (e) { /* ignore */ }
+        };
     </script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>

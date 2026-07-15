@@ -1,6 +1,7 @@
 @page "/settings"
 @using System.Reflection
 @inject IThemeService ThemeService
+@inject GalleryJsInterop GalleryJs
 
 <div class="gallery-page">
     <PageHeader Eyebrow="Get Started" Title="Settings"
@@ -21,17 +22,17 @@
             </div>
             <div class="demo-row">
                 <FluentButton Variant="ButtonVariant.Standard"
-                              OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Light))">
+                              OnClick="@(() => SetThemeMode(ThemeMode.Light))">
                     <FluentIcon Name="ic_fluent_weather_sunny_20_regular" Size="16" style="margin-right:6px;" />
                     Light
                 </FluentButton>
                 <FluentButton Variant="ButtonVariant.Standard"
-                              OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.Dark))">
+                              OnClick="@(() => SetThemeMode(ThemeMode.Dark))">
                     <FluentIcon Name="ic_fluent_weather_moon_20_regular" Size="16" style="margin-right:6px;" />
                     Dark
                 </FluentButton>
                 <FluentButton Variant="ButtonVariant.Standard"
-                              OnClick="@(() => ThemeService.SetModeAsync(ThemeMode.System))">
+                              OnClick="@(() => SetThemeMode(ThemeMode.System))">
                     <FluentIcon Name="ic_fluent_desktop_20_regular" Size="16" style="margin-right:6px;" />
                     System
                 </FluentButton>
@@ -125,11 +126,18 @@
     private string? version = Assembly.GetAssembly(typeof(FluentKit.Primitives.FluentButton))!
         .GetName()
         .Version?.ToString();
-    private void OnBgVariantChanged(string? value)
+    private async Task SetThemeMode(ThemeMode mode)
+    {
+        await ThemeService.SetModeAsync(mode);
+        await GalleryJs.SetStorageItemAsync(MainLayout.ThemeModeStorageKey, mode.ToString());
+    }
+
+    private async void OnBgVariantChanged(string? value)
     {
         _bgVariantStr = value;
         var variant = value == "basealt" ? MicaVariant.BaseAlt : MicaVariant.Base;
         MainLayout.SetBackgroundVariant(variant);
+        await GalleryJs.SetStorageItemAsync(MainLayout.MicaVariantStorageKey, variant.ToString());
     }
 
     private async Task OnWallpaperUpload(InputFileChangeEventArgs e)
@@ -157,12 +165,18 @@
                 var base64 = Convert.ToBase64String(buffer);
                 var dataUrl = $"data:{format};base64,{base64}";
                 MainLayout.SetWallpaperUrl(dataUrl);
+                // Data-URL wallpapers can be a few MB; localStorage quota is
+                // typically 5-10MB per origin, so this can silently fail to
+                // persist on very large images — the wallpaper still applies
+                // for the current session either way.
+                await GalleryJs.SetStorageItemAsync(MainLayout.WallpaperStorageKey, dataUrl);
             }
         }
     }
 
-    private void ResetWallpaper()
+    private async Task ResetWallpaper()
     {
         MainLayout.SetWallpaperUrl("wallpaper.jpg");
+        await GalleryJs.RemoveStorageItemAsync(MainLayout.WallpaperStorageKey);
     }
 }
