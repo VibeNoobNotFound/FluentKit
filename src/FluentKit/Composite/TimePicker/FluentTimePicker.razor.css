@@ -1,0 +1,303 @@
+/* Brand-new control (no fluent-svelte source), modeled on WinUI 3's TimePicker/TimePickerFlyout.
+   Popout enter/exit + acrylic recipe copied verbatim from FluentCalendarDatePicker.razor.css — same
+   backdrop-filter-vs-opacity-stacking-context caveat applies here (see that file's comments), so the
+   outer .fluent-time-picker-popout stays a pure position anchor and only the inner div animates. */
+
+@keyframes fluent-time-picker-enter {
+    from { scale: 0.92; }
+    to   { scale: 1;    }
+}
+
+@keyframes fluent-time-picker-exit {
+    from { scale: 1;    }
+    to   { scale: 0.92; }
+}
+
+.fluent-time-picker-root {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fluent-time-picker-header {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    color: var(--text-fill-color-primary);
+}
+
+.fluent-time-picker-button {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    min-inline-size: 200px;
+    min-block-size: 30px;
+    padding-inline: 11px;
+    gap: 8px;
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: var(--button-border-brush);
+    background-color: var(--button-background);
+    color: var(--button-foreground);
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    font-variant-numeric: tabular-nums;
+    cursor: default;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-time-picker-button:hover {
+    background-color: var(--button-background-pointer-over);
+}
+
+.fluent-time-picker-button:active {
+    background-color: var(--button-background-pressed);
+}
+
+.fluent-time-picker-button:disabled {
+    background-color: var(--button-background-disabled);
+    color: var(--button-foreground-disabled);
+    cursor: not-allowed;
+}
+
+.fluent-time-picker-button:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-time-picker-label {
+    flex: 1 1 auto;
+    text-align: start;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fluent-time-picker-label--placeholder {
+    color: var(--text-fill-color-secondary);
+}
+
+.fluent-time-picker-button:disabled .fluent-time-picker-label--placeholder {
+    color: var(--text-fill-color-disabled);
+}
+
+.fluent-time-picker-button svg {
+    flex: 0 0 auto;
+    color: var(--text-fill-color-secondary);
+}
+
+/* ===== popout ===== */
+
+.fluent-time-picker-popout {
+    position: absolute;
+    z-index: 100;
+    inset-block-start: calc(100% + 4px);
+    inset-inline-start: 0;
+}
+
+.fluent-time-picker-popout-inner {
+    transform-origin: top center;
+    animation: fluent-time-picker-enter var(--duration-fast) var(--easing-decelerate) both;
+
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    inline-size: 232px;
+
+    border: 1px solid var(--flyout-border);
+    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
+    box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
+    background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
+    overflow: hidden;
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .fluent-time-picker-popout-inner {
+        background-color: transparent;
+        backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+        -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
+    }
+
+    .fluent-time-picker-popout-inner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        pointer-events: none;
+        background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
+        opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-thin-tint-opacity));
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .fluent-time-picker-popout-inner {
+        background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+.fluent-time-picker-popout--closing {
+    animation: fluent-time-picker-exit var(--duration-fast) var(--easing-accelerate) both;
+}
+
+.fluent-time-picker-dismiss-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: transparent;
+    pointer-events: auto;
+    cursor: default;
+}
+
+/* ===== columns ===== */
+
+/* Fixed viewport height showing exactly 5 rows (2 above + selected + 2 below), matching WinUI's
+   TimePickerFlyout column proportions. Each column's own block-size and item-height must agree for
+   the JS interop's nearestIndex()/scrollToIndex() math (scrollTop / itemHeight = index) to line up,
+   so both are defined here as named values rather than duplicated magic numbers. */
+.fluent-time-picker-columns {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    block-size: 200px; /* 5 * 40px item height */
+    padding-inline: 8px;
+    padding-block: 8px;
+}
+
+/* The permanently-centered selection band all columns' selected row lines up with — a plain
+   horizontal strip, not per-column, so multi-column alignment reads as one continuous highlight
+   exactly like WinUI's flyout (not three separate boxes that might drift a pixel apart). */
+.fluent-time-picker-column-highlight {
+    position: absolute;
+    inset-inline: 8px;
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    block-size: 40px;
+    border-radius: var(--control-corner-radius);
+    background-color: var(--subtle-fill-color-secondary);
+    pointer-events: none;
+}
+
+.fluent-time-picker-column {
+    position: relative;
+    flex: 1 1 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body-large);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.fluent-time-picker-column::-webkit-scrollbar {
+    display: none;
+}
+
+.fluent-time-picker-column--period {
+    flex: 0 0 56px;
+}
+
+/* Blank spacer rows above/below the real items — (container height - item height) / 2 each — so the
+   very first and very last real item can still scroll all the way to dead-center against the
+   highlight band, the same way a native LoopingSelector/snap-list pads its ends. Height must match
+   (200px columns block-size - 40px item height) / 2 = 80px for the interop's index math to hold. */
+.fluent-time-picker-column-spacer {
+    block-size: 80px;
+    scroll-snap-align: none;
+}
+
+.fluent-time-picker-column-item {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    block-size: 40px;
+    color: var(--text-fill-color-secondary);
+    scroll-snap-align: center;
+    cursor: default;
+    user-select: none;
+    transition: color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-time-picker-column-item--selected {
+    color: var(--text-fill-color-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.fluent-time-picker-column-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 16px;
+    color: var(--text-fill-color-secondary);
+    font-size: var(--font-size-body-large);
+    pointer-events: none;
+}
+
+/* ===== footer ===== */
+
+.fluent-time-picker-footer {
+    display: flex;
+    align-items: center;
+    border-block-start: 1px solid var(--card-stroke-default);
+    padding: 6px;
+    gap: 4px;
+}
+
+.fluent-time-picker-footer-spacer {
+    flex: 1 1 auto;
+}
+
+.fluent-time-picker-footer-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 32px;
+    block-size: 32px;
+    padding: 0;
+    border: none;
+    border-radius: var(--control-corner-radius);
+    background-color: transparent;
+    color: var(--text-fill-color-secondary);
+    cursor: default;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-time-picker-footer-button:hover {
+    background-color: var(--subtle-fill-color-secondary);
+}
+
+.fluent-time-picker-footer-button:active {
+    background-color: var(--subtle-fill-color-tertiary);
+}
+
+.fluent-time-picker-footer-button:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -2px;
+}
+
+.fluent-time-picker-footer-button--accept {
+    background-color: var(--accent-fill-color-default);
+    color: var(--text-on-accent-fill-color-primary);
+}
+
+.fluent-time-picker-footer-button--accept:hover {
+    background-color: var(--accent-fill-color-secondary);
+}
+
+.fluent-time-picker-footer-button--accept:active {
+    background-color: var(--accent-fill-color-tertiary);
+}

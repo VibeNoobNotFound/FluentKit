@@ -24,6 +24,7 @@ public static class FluentIconNames
     public const string ArrowLeft = "ic_fluent_arrow_left_20_regular";
     public const string ArrowRight = "ic_fluent_arrow_right_20_regular";
     public const string Calendar = "ic_fluent_calendar_20_regular";
+    public const string Clock = "ic_fluent_clock_20_regular";
     public const string Delete = "ic_fluent_delete_20_regular";
     public const string Eye = "ic_fluent_eye_20_regular";
     public const string EyeOff = "ic_fluent_eye_off_20_regular";

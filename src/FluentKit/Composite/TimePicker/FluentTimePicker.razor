@@ -1,0 +1,95 @@
+@namespace FluentKit.Composite
+
+<div @ref="_root"
+     class="fluent-time-picker-root @(Disabled ? "fluent-time-picker-root--disabled" : null)"
+     @onfocusout="OnFocusOutAsync"
+     @onkeydown="OnKeyDownAsync"
+     @attributes="AdditionalAttributes">
+
+    @if (!string.IsNullOrEmpty(Header))
+    {
+        <div class="fluent-time-picker-header">@Header</div>
+    }
+
+    <button type="button"
+            class="fluent-time-picker-button @(_open ? "fluent-time-picker-button--open" : null)"
+            disabled="@Disabled"
+            aria-haspopup="dialog"
+            aria-expanded="@_open"
+            @onclick="ToggleOpenAsync">
+        <span class="fluent-time-picker-label @(SelectedTime is null ? "fluent-time-picker-label--placeholder" : null)">
+            @DisplayLabel
+        </span>
+        <FluentIcon Name="@FluentIconNames.Clock" Size="16" />
+    </button>
+
+    @if (!Disabled && (_open || _closing))
+    {
+        <div class="fluent-time-picker-dismiss-backdrop" @onclick="@(() => ClosePopoutAsync(false))"></div>
+        <div class="fluent-time-picker-popout">
+            <div class="fluent-time-picker-popout-inner @(_closing ? "fluent-time-picker-popout--closing" : "")">
+                <div class="fluent-time-picker-columns">
+                    <div class="fluent-time-picker-column-highlight" aria-hidden="true"></div>
+
+                    <ul @ref="_hourColumnRef" class="fluent-time-picker-column" role="listbox" aria-label="Hour">
+                        <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
+                        @foreach (var h in HourValues)
+                        {
+                            <li class="fluent-time-picker-column-item @(h == _stagedHour ? "fluent-time-picker-column-item--selected" : null)"
+                                role="option"
+                                aria-selected="@(h == _stagedHour)">
+                                @HourLabel(h)
+                            </li>
+                        }
+                        <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
+                    </ul>
+
+                    <div class="fluent-time-picker-column-separator" aria-hidden="true">:</div>
+
+                    <ul @ref="_minuteColumnRef" class="fluent-time-picker-column" role="listbox" aria-label="Minute">
+                        <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
+                        @foreach (var m in MinuteValues)
+                        {
+                            <li class="fluent-time-picker-column-item @(m == _stagedMinute ? "fluent-time-picker-column-item--selected" : null)"
+                                role="option"
+                                aria-selected="@(m == _stagedMinute)">
+                                @MinuteLabel(m)
+                            </li>
+                        }
+                        <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
+                    </ul>
+
+                    @if (!Is24Hour)
+                    {
+                        <ul @ref="_periodColumnRef" class="fluent-time-picker-column fluent-time-picker-column--period" role="listbox" aria-label="AM/PM">
+                            <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
+                            @for (var p = 0; p < PeriodValues.Length; p++)
+                            {
+                                var isPm = p == 1;
+                                <li class="fluent-time-picker-column-item @(isPm == _stagedIsPm ? "fluent-time-picker-column-item--selected" : null)"
+                                    role="option"
+                                    aria-selected="@(isPm == _stagedIsPm)">
+                                    @PeriodValues[p]
+                                </li>
+                            }
+                            <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
+                        </ul>
+                    }
+                </div>
+
+                <div class="fluent-time-picker-footer">
+                    <button type="button" class="fluent-time-picker-footer-button" aria-label="Now" title="Now" @onclick="OnNowClickedAsync" @onmousedown:preventDefault="true">
+                        <FluentIcon Name="@FluentIconNames.Clock" Size="16" />
+                    </button>
+                    <div class="fluent-time-picker-footer-spacer"></div>
+                    <button type="button" class="fluent-time-picker-footer-button fluent-time-picker-footer-button--accept" aria-label="Accept" title="Accept" @onclick="OnAcceptClickedAsync" @onmousedown:preventDefault="true">
+                        <FluentIcon Name="@FluentIconNames.Checkmark" Size="16" />
+                    </button>
+                    <button type="button" class="fluent-time-picker-footer-button" aria-label="Cancel" title="Cancel" @onclick="OnCancelClickedAsync" @onmousedown:preventDefault="true">
+                        <FluentIcon Name="@FluentIconNames.Dismiss" Size="16" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

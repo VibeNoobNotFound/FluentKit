@@ -1,0 +1,43 @@
+@page "/controls/timepicker"
+@using FluentKit.Composite
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite Controls" Title="TimePicker" Description="Lets users pick a time of day from a flyout with scrollable Hour/Minute/AM-PM columns. Not a fluent-svelte port — modeled directly on WinUI 3's TimePicker/TimePickerFlyout." />
+
+    <ControlExample HeaderText="Basic TimePicker" RazorCode="@_basicRazor" CSharpCode="@_basicCs">
+        <Example>
+            <div class="demo-col" style="align-items: flex-start; gap: 8px;">
+                <FluentTimePicker @bind-SelectedTime="_basicTime" />
+                <div class="demo-output" style="font-size: 12px; opacity: 0.8;">Selected: @(_basicTime?.ToString(@"hh\:mm") ?? "none")</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Header, Minute Increment &amp; 24-Hour Clock" RazorCode="@_variantsRazor" CSharpCode="@_variantsCs">
+        <Example>
+            <div style="display:flex; gap:48px; align-items:flex-start; flex-wrap:wrap;">
+                <FluentTimePicker Header="Arrival time" MinuteIncrement="15" @bind-SelectedTime="_arrivalTime" />
+                <FluentTimePicker Header="24 hour clock" ClockIdentifier="TimeClockIdentifier.TwentyFourHour" @bind-SelectedTime="_militaryTime" />
+                <FluentTimePicker Header="Disabled" Disabled="true" SelectedTime="@TimeSpan.FromHours(9)" />
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private TimeSpan? _basicTime;
+    private TimeSpan? _arrivalTime = new(14, 30, 0);
+    private TimeSpan? _militaryTime = DateTime.Now.TimeOfDay;
+
+    private const string _basicRazor = @"<FluentTimePicker @bind-SelectedTime=""_basicTime"" />";
+    private const string _basicCs = @"private TimeSpan? _basicTime;";
+
+    private const string _variantsRazor = @"<FluentTimePicker Header=""Arrival time"" MinuteIncrement=""15"" @bind-SelectedTime=""_arrivalTime"" />
+
+<!-- 24-hour clock, no AM/PM column -->
+<FluentTimePicker Header=""24 hour clock"" ClockIdentifier=""TimeClockIdentifier.TwentyFourHour"" @bind-SelectedTime=""_militaryTime"" />
+
+<FluentTimePicker Header=""Disabled"" Disabled=""true"" SelectedTime=""@TimeSpan.FromHours(9)"" />";
+    private const string _variantsCs = @"private TimeSpan? _arrivalTime = new(14, 30, 0);
+private TimeSpan? _militaryTime = DateTime.Now.TimeOfDay;";
+}
