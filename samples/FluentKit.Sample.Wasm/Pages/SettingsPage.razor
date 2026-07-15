@@ -121,7 +121,7 @@
 </div>
 
 @code {
-    private object? _bgVariantStr = MainLayout.BackgroundVariantSetting == MicaVariant.BaseAlt ? "BaseAlt" : "Base";
+    private object? _bgVariantStr = MainLayout.BackgroundVariantSetting == MicaVariant.BaseAlt ? "basealt" : "base";
     private string? version = Assembly.GetAssembly(typeof(FluentKit.Primitives.FluentButton))!
         .GetName()
         .Version?.ToString();

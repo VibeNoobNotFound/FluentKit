@@ -1,0 +1,51 @@
+@page "/search"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="@ResultCountLabel" Title="@SearchTitle" />
+
+    @if (_results.Count == 0)
+    {
+        <div class="home-section">
+            <FluentTextBlock Variant="TextBlockVariant.Body" style="opacity:0.7;">
+                No pages matched "@Query". Try a different term.
+            </FluentTextBlock>
+        </div>
+    }
+    else
+    {
+        <div class="home-section">
+            <div class="control-grid">
+                @foreach (var result in _results)
+                {
+                    <FluentRevealBackground Bordered style="border-radius:8px;">
+                        <a class="control-card" href="@result.Route">
+                            <div class="control-card__icon">
+                                <FluentIcon Name="ic_fluent_search_20_regular" Size="24" />
+                            </div>
+                            <div class="control-card__name">@result.Name</div>
+                            <div class="control-card__category">@result.Section</div>
+                        </a>
+                    </FluentRevealBackground>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    // Bound straight from the "?q=" query string — Blazor re-supplies this (and re-runs
+    // OnParametersSet) on every in-app navigation to /search?q=..., including repeated searches
+    // from the pane header box, without needing a manual NavigationManager.LocationChanged hookup.
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? Query { get; set; }
+
+    private IReadOnlyList<GallerySearchEntry> _results = [];
+
+    private string ResultCountLabel => _results.Count == 1 ? "1 result" : $"{_results.Count} results";
+    private string SearchTitle => $"Search: {Query}";
+
+    protected override void OnParametersSet()
+    {
+        _results = GallerySearchIndex.Search(Query);
+    }
+}

@@ -1,0 +1,13 @@
+/* FluentAutoSuggestBox composes FluentTextBox, whose root carries a hard-coded
+   max-width: 300px (its default "reasonable text field" cap). That's narrower than the
+   320px nav pane, so the search box was never actually filling the pane width — override
+   both the TextBox root and the AutoSuggestBox's own wrapper here so it stretches edge to edge. */
+.nav-search-box {
+    width: 100%;
+}
+
+.nav-search-box ::deep .fluent-autosuggest-root,
+.nav-search-box ::deep .fluent-textbox-root {
+    width: 100%;
+    max-width: none;
+}

@@ -16,13 +16,18 @@
                           ShowSettingsButton="false">
 
         <PaneHeaderIcon>
-            <FluentIcon Name="ic_fluent_window_dev_tools_20_regular" Size="16" />
+            <FluentIcon Name="ic_fluent_search_20_regular" Size="16" />
         </PaneHeaderIcon>
 
         <PaneHeader>
-            <div style="padding: 4px 2px;">
-                <FluentTextBlock Variant="TextBlockVariant.BodyStrong" style="font-size:15px; line-height:1.2;">FluentKit</FluentTextBlock>
-                <FluentTextBlock Variant="TextBlockVariant.Caption" style="opacity:0.6;">Gallery</FluentTextBlock>
+            <div class="nav-search-box" style="padding: 4px 2px 8px;">
+                <FluentAutoSuggestBox TValue="string"
+                                      Items="@GallerySearchIndex.SuggestionItems"
+                                      @bind-Text="_searchText"
+                                      Placeholder="Search"
+                                      EnableSearchIcon="true"
+                                      SuggestionChosen="OnSearchSuggestionChosen"
+                                      QuerySubmitted="OnSearchQuerySubmitted" />
             </div>
         </PaneHeader>
 
@@ -282,6 +287,7 @@
     private object? _selectedRoute;
     private MicaVariant _backgroundVariant = BackgroundVariantSetting;
     private string _wallpaperUrl = WallpaperUrlSetting;
+    private string? _searchText;
 
     protected override void OnInitialized()
     {
@@ -335,5 +341,25 @@
         Navigation.LocationChanged -= OnLocationChanged;
         BackgroundVariantChanged -= OnBackgroundVariantChanged;
         WallpaperUrlChanged -= OnWallpaperUrlChanged;
+    }
+
+    // Picking a suggestion (click, or Enter while one is highlighted) jumps straight to that page.
+    private void OnSearchSuggestionChosen(AutoSuggestBoxItem<string> item)
+    {
+        _searchText = "";
+        Navigation.NavigateTo(item.Value);
+    }
+
+    // Enter with no suggestion highlighted opens a dedicated results page for the raw query text,
+    // same as WinUI Gallery's "show all results" behavior.
+    private void OnSearchQuerySubmitted(string? query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return;
+        }
+
+        _searchText = "";
+        Navigation.NavigateTo($"search?q={Uri.EscapeDataString(query)}");
     }
 }
