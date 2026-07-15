@@ -52,9 +52,21 @@ export function attachColumn(el, column, dotNetRef) {
     el.addEventListener("scroll", () => onScroll(el), { passive: true });
 }
 
-/** Instantly (no smooth animation — matches WinUI's flyout re-opening already centered) scrolls
- * a column so the item at `index` sits centered against the highlight band. */
-export function scrollToIndex(el, index) {
+/**
+ * Scrolls a column so the item at `index` sits centered against the highlight band.
+ * By default this is instant (no animation) — used when the flyout opens or "Now" is pressed,
+ * matching WinUI's flyout re-opening already centered with no visible scroll. Pass `smooth: true`
+ * when the user clicks a visible-but-off-center row, so the column glides the clicked row into
+ * place instead of teleporting it — this mirrors WinUI's TimePickerFlyout, where tapping any
+ * visible row animates that column to it.
+ */
+export function scrollToIndex(el, index, smooth) {
     if (!el) return;
-    el.scrollTop = index * ITEM_HEIGHT;
+    const top = index * ITEM_HEIGHT;
+
+    if (smooth) {
+        el.scrollTo({ top, behavior: "smooth" });
+    } else {
+        el.scrollTop = top;
+    }
 }

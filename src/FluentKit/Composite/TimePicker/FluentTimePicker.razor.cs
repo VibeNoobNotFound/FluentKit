@@ -211,6 +211,33 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
         await ScrollColumnsToStagedAsync();
     }
 
+    /// <summary>Clicking a visible (but not yet centered) row selects it immediately — the column
+    /// then animates into place so the clicked row ends up centered against the highlight band,
+    /// rather than requiring the user to scroll-drag it there themselves. Matches WinUI's own
+    /// TimePickerFlyout, where tapping any visible row in a column snaps that column to it.</summary>
+    private async Task OnHourItemClickedAsync(int hour)
+    {
+        _stagedHour = hour;
+        var index = Is24Hour ? hour : HourValues.ToList().IndexOf(hour);
+        await EnsureModuleAsync();
+        await _module!.InvokeVoidAsync("scrollToIndex", _hourColumnRef, index, true);
+    }
+
+    private async Task OnMinuteItemClickedAsync(int minute)
+    {
+        _stagedMinute = minute;
+        var index = MinuteValues.ToList().IndexOf(minute);
+        await EnsureModuleAsync();
+        await _module!.InvokeVoidAsync("scrollToIndex", _minuteColumnRef, index, true);
+    }
+
+    private async Task OnPeriodItemClickedAsync(bool isPm)
+    {
+        _stagedIsPm = isPm;
+        await EnsureModuleAsync();
+        await _module!.InvokeVoidAsync("scrollToIndex", _periodColumnRef, isPm ? 1 : 0, true);
+    }
+
     private static int ToTwelveHour(int hour24)
     {
         var h = hour24 % 12;

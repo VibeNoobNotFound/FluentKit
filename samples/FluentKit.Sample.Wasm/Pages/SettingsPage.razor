@@ -1,4 +1,5 @@
 @page "/settings"
+@using System.Reflection
 @inject IThemeService ThemeService
 
 <div class="gallery-page">
@@ -100,7 +101,7 @@
             </div>
             <div class="settings-item__info">
                 <span class="settings-item__label">FluentKit Gallery</span>
-                <span class="settings-item__desc">v0.1-alpha — A WinUI-style Blazor component gallery</span>
+                <span class="settings-item__desc">@version — A WinUI-style Blazor component gallery</span>
             </div>
         </div>
 
@@ -120,8 +121,10 @@
 </div>
 
 @code {
-    private object? _bgVariantStr = MainLayout.BackgroundVariantSetting == MicaVariant.BaseAlt ? "basealt" : "base";
-
+    private object? _bgVariantStr = MainLayout.BackgroundVariantSetting == MicaVariant.BaseAlt ? "BaseAlt" : "Base";
+    private string? version = Assembly.GetAssembly(typeof(FluentKit.Primitives.FluentButton))!
+        .GetName()
+        .Version?.ToString();
     private void OnBgVariantChanged(string? value)
     {
         _bgVariantStr = value;

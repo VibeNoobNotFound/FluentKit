@@ -227,9 +227,13 @@
     block-size: 40px;
     color: var(--text-fill-color-secondary);
     scroll-snap-align: center;
-    cursor: default;
+    cursor: pointer;
     user-select: none;
     transition: color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-time-picker-column-item:hover:not(.fluent-time-picker-column-item--selected) {
+    color: var(--text-fill-color-primary);
 }
 
 .fluent-time-picker-column-item--selected {
@@ -237,13 +241,14 @@
     font-weight: var(--font-weight-semibold);
 }
 
+/* A thin dimmed vertical rule between the Hour and Minute columns — matches WinUI's actual
+   TimePickerFlyout, which separates columns with a plain divider line rather than a literal ":"
+   glyph (the ":" reads as a clock digit format only in the closed trigger-button label). */
 .fluent-time-picker-column-separator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: 16px;
-    color: var(--text-fill-color-secondary);
-    font-size: var(--font-size-body-large);
+    inline-size: 1px;
+    align-self: stretch;
+    margin-block: 8px;
+    background-color: var(--divider-stroke-default, var(--card-stroke-default));
     pointer-events: none;
 }
 

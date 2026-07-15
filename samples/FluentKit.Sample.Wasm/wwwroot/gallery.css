@@ -84,8 +84,15 @@ html, body {
     flex-direction: column;
     border: 1px solid var(--card-stroke-default);
     border-radius: 8px;
-    overflow: hidden;
+    /* Deliberately NOT overflow:hidden here — popouts/flyouts opened inside .control-example__demo
+       (TimePicker, Calendar, ComboBox, Flyout, ...) are absolutely positioned and need to be able to
+       visually escape this box rather than get clipped at its edge. Corner-rounding for the header
+       and code panel is instead handled by giving those two children their own matching radii. */
     background: var(--card-background-default);
+}
+
+.control-example__header {
+    border-radius: 8px 8px 0 0;
 }
 
 .control-example__header {
@@ -114,6 +121,9 @@ html, body {
 
 /* Live demo area */
 .control-example__demo {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
     padding: 28px 24px;
     background: var(--layer-fill-color-alt);
     border-bottom: 1px solid var(--card-stroke-default);

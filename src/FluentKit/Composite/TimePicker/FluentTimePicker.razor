@@ -37,14 +37,16 @@
                         {
                             <li class="fluent-time-picker-column-item @(h == _stagedHour ? "fluent-time-picker-column-item--selected" : null)"
                                 role="option"
-                                aria-selected="@(h == _stagedHour)">
+                                aria-selected="@(h == _stagedHour)"
+                                @onclick="@(() => OnHourItemClickedAsync(h))"
+                                @onmousedown:preventDefault="true">
                                 @HourLabel(h)
                             </li>
                         }
                         <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
                     </ul>
 
-                    <div class="fluent-time-picker-column-separator" aria-hidden="true">:</div>
+                    <div class="fluent-time-picker-column-separator" aria-hidden="true"></div>
 
                     <ul @ref="_minuteColumnRef" class="fluent-time-picker-column" role="listbox" aria-label="Minute">
                         <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
@@ -52,7 +54,9 @@
                         {
                             <li class="fluent-time-picker-column-item @(m == _stagedMinute ? "fluent-time-picker-column-item--selected" : null)"
                                 role="option"
-                                aria-selected="@(m == _stagedMinute)">
+                                aria-selected="@(m == _stagedMinute)"
+                                @onclick="@(() => OnMinuteItemClickedAsync(m))"
+                                @onmousedown:preventDefault="true">
                                 @MinuteLabel(m)
                             </li>
                         }
@@ -61,6 +65,8 @@
 
                     @if (!Is24Hour)
                     {
+                        <div class="fluent-time-picker-column-separator" aria-hidden="true"></div>
+                        
                         <ul @ref="_periodColumnRef" class="fluent-time-picker-column fluent-time-picker-column--period" role="listbox" aria-label="AM/PM">
                             <li class="fluent-time-picker-column-spacer" aria-hidden="true"></li>
                             @for (var p = 0; p < PeriodValues.Length; p++)
@@ -68,7 +74,9 @@
                                 var isPm = p == 1;
                                 <li class="fluent-time-picker-column-item @(isPm == _stagedIsPm ? "fluent-time-picker-column-item--selected" : null)"
                                     role="option"
-                                    aria-selected="@(isPm == _stagedIsPm)">
+                                    aria-selected="@(isPm == _stagedIsPm)"
+                                    @onclick="@(() => OnPeriodItemClickedAsync(isPm))"
+                                    @onmousedown:preventDefault="true">
                                     @PeriodValues[p]
                                 </li>
                             }
