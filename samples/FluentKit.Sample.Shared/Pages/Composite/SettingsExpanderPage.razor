@@ -1,0 +1,99 @@
+@page "/controls/settingsexpander"
+@using FluentKit.Primitives
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Composite" Title="SettingsExpander" Description="A SettingsExpander groups a header SettingsCard with a collapsible list of nested SettingsCard items." />
+
+    <ControlExample HeaderText="Basic SettingsExpander" RazorCode="@_basicRazor" CSharpCode="@_basicCs">
+        <Example>
+            <div class="demo-col">
+                <FluentSettingsExpander Header="Notifications"
+                                        Description="Choose which apps show notifications"
+                                        @bind-IsExpanded="_isExpanded">
+                    <HeaderIcon><FluentIcon Name="ic_fluent_alert_20_regular" /></HeaderIcon>
+                    <ChildContent><FluentToggleSwitch @bind-Checked="_notificationsOn" /></ChildContent>
+                    <ItemsContent>
+                        <FluentSettingsCard Header="Mail">
+                            <FluentToggleSwitch @bind-Checked="_mailOn" />
+                        </FluentSettingsCard>
+                        <FluentSettingsCard Header="Calendar">
+                            <FluentToggleSwitch @bind-Checked="_calendarOn" />
+                        </FluentSettingsCard>
+                        <FluentSettingsCard Header="Messages">
+                            <FluentToggleSwitch @bind-Checked="_messagesOn" />
+                        </FluentSettingsCard>
+                    </ItemsContent>
+                </FluentSettingsExpander>
+                <div class="demo-output">Expanded: @_isExpanded</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="With ItemsHeader and ItemsFooter" RazorCode="@_footerRazor">
+        <Example>
+            <div class="demo-col">
+                <FluentSettingsExpander Header="Accounts" Description="Sign-in options for this device">
+                    <HeaderIcon><FluentIcon Name="ic_fluent_person_20_regular" /></HeaderIcon>
+                    <ItemsHeader>
+                        <FluentTextBlock Variant="TextBlockVariant.Caption">Signed in as jane@contoso.com</FluentTextBlock>
+                    </ItemsHeader>
+                    <ItemsContent>
+                        <FluentSettingsCard Header="Sync settings">
+                            <FluentToggleSwitch @bind-Checked="_syncOn" />
+                        </FluentSettingsCard>
+                    </ItemsContent>
+                    <ItemsFooter>
+                        <FluentButton>Add account</FluentButton>
+                    </ItemsFooter>
+                </FluentSettingsExpander>
+            </div>
+        </Example>
+    </ControlExample>
+</div>
+
+@code {
+    private bool _isExpanded = true;
+    private bool _notificationsOn = true;
+    private bool _mailOn = true;
+    private bool _calendarOn;
+    private bool _messagesOn = true;
+    private bool _syncOn = true;
+
+    private const string _basicRazor = @"<FluentSettingsExpander Header=""Notifications""
+                        Description=""Choose which apps show notifications""
+                        @bind-IsExpanded=""_isExpanded"">
+    <HeaderIcon><FluentIcon Name=""ic_fluent_alert_20_regular"" /></HeaderIcon>
+    <ChildContent><FluentToggleSwitch @bind-Checked=""_notificationsOn"" /></ChildContent>
+    <ItemsContent>
+        <FluentSettingsCard Header=""Mail"">
+            <FluentToggleSwitch @bind-Checked=""_mailOn"" />
+        </FluentSettingsCard>
+        <FluentSettingsCard Header=""Calendar"">
+            <FluentToggleSwitch @bind-Checked=""_calendarOn"" />
+        </FluentSettingsCard>
+        <FluentSettingsCard Header=""Messages"">
+            <FluentToggleSwitch @bind-Checked=""_messagesOn"" />
+        </FluentSettingsCard>
+    </ItemsContent>
+</FluentSettingsExpander>";
+    private const string _basicCs = @"private bool _isExpanded = true;
+private bool _notificationsOn = true;
+private bool _mailOn = true;
+private bool _calendarOn;
+private bool _messagesOn = true;";
+
+    private const string _footerRazor = @"<FluentSettingsExpander Header=""Accounts"" Description=""Sign-in options for this device"">
+    <HeaderIcon><FluentIcon Name=""ic_fluent_person_20_regular"" /></HeaderIcon>
+    <ItemsHeader>
+        <FluentTextBlock Variant=""TextBlockVariant.Caption"">Signed in as jane@contoso.com</FluentTextBlock>
+    </ItemsHeader>
+    <ItemsContent>
+        <FluentSettingsCard Header=""Sync settings"">
+            <FluentToggleSwitch @bind-Checked=""_syncOn"" />
+        </FluentSettingsCard>
+    </ItemsContent>
+    <ItemsFooter>
+        <FluentButton>Add account</FluentButton>
+    </ItemsFooter>
+</FluentSettingsExpander>";
+}

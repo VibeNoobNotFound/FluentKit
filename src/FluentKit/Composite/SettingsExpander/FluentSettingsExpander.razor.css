@@ -1,0 +1,80 @@
+.fluent-settings-expander {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    inline-size: 100%;
+}
+
+/* Flatten the header's bottom corners while items are visible underneath, so the header and the
+   items block read as one continuous surface instead of two separately-rounded rectangles. */
+.fluent-settings-expander-header--expanded ::deep .fluent-settings-card {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+}
+
+.fluent-settings-expander-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    block-size: 100%;
+    transition: transform calc(var(--duration-fast) * 1.2) linear;
+}
+
+.fluent-settings-expander-chevron--expanded {
+    transform: rotate(180deg);
+}
+
+/* Same clip+slide technique as FluentExpander: the anchor clips (overflow:hidden) and its
+   max-block-size jumps to a huge value instantly on expand, only snapping back to 0 after the
+   slide-out animation has finished on collapse — so height never changes mid-animation. */
+.fluent-settings-expander-items-anchor {
+    position: relative;
+    overflow: hidden;
+    max-block-size: 0;
+    transition: 0ms linear var(--duration-slow) max-block-size;
+}
+
+.fluent-settings-expander-items-anchor--expanded {
+    max-block-size: 6.02e23vmax;
+    transition: none;
+}
+
+.fluent-settings-expander-items {
+    box-sizing: border-box;
+    padding-inline: 1px;
+    background-color: var(--card-background-default);
+    background-clip: padding-box;
+    border-inline: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-block-end: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-end-start-radius: var(--control-corner-radius);
+    border-end-end-radius: var(--control-corner-radius);
+    /* Collapsed rest state: shifted fully out of view above its own box, so the anchor's clip
+       hides it completely regardless of the anchor's own height at that instant. */
+    transform: translateY(-100%);
+    transition: var(--duration-fast) cubic-bezier(1, 1, 0, 1) transform;
+}
+
+.fluent-settings-expander-items-anchor--expanded .fluent-settings-expander-items {
+    transform: none;
+    transition: var(--duration-normal) var(--easing-standard) transform;
+}
+
+.fluent-settings-expander-items-header,
+.fluent-settings-expander-items-footer {
+    box-sizing: border-box;
+    padding: 8px 16px;
+}
+
+/* Nested FluentSettingsCard items lose their own border/radius/shadow — the items block already
+   supplies the outer border and corners, and a thin separator line replaces each card's own
+   border between consecutive items. */
+.fluent-settings-expander-items-content ::deep .fluent-settings-card {
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+}
+
+.fluent-settings-expander-items-content ::deep .fluent-settings-card:not(:first-child) {
+    border-block-start: var(--control-stroke-thickness) solid var(--card-stroke-default);
+}

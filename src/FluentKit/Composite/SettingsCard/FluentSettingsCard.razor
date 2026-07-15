@@ -1,0 +1,57 @@
+@namespace FluentKit.Composite
+@using FluentKit.Primitives
+
+<div class="@RootClass"
+     @attributes="AdditionalAttributes"
+     tabindex="@(IsClickEnabled && !Disabled ? "0" : null)"
+     role="@(IsClickEnabled ? "button" : null)"
+     aria-disabled="@(Disabled ? "true" : null)"
+     @onclick="HandleClickAsync"
+     @onkeydown="HandleKeyDownAsync">
+
+    @if (HeaderIcon is not null)
+    {
+        <div class="fluent-settings-card-icon">@HeaderIcon</div>
+    }
+
+    <div class="fluent-settings-card-body">
+        @if (HasHeader || HasDescription)
+        {
+            <div class="fluent-settings-card-header">
+                @if (HasHeader)
+                {
+                    <div class="fluent-settings-card-title">
+                        @RenderedHeader
+                    </div>
+                }
+                @if (HasDescription)
+                {
+                    <div class="fluent-settings-card-description">
+                        @RenderedDescription
+                    </div>
+                }
+            </div>
+        }
+
+        @if (ChildContent is not null)
+        {
+            <div class="fluent-settings-card-content">
+                @ChildContent
+            </div>
+        }
+    </div>
+
+    @if (ShowActionIcon)
+    {
+        <div class="fluent-settings-card-action-icon" title="@ActionIconToolTip">
+            @if (ActionIcon is not null)
+            {
+                @ActionIcon
+            }
+            else
+            {
+                <FluentIcon Name="ic_fluent_chevron_right_20_regular" />
+            }
+        </div>
+    }
+</div>

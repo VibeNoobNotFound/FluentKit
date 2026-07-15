@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Fluentkit.Sample.Maui</title>
     <base href="/" />
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
+    <link rel="stylesheet" href="_content/FluentKit/Icons/FluentSystemIcons-Regular.css" />
+    <link rel="stylesheet" href="_content/FluentKit.Sample.Shared/gallery.css" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="Fluentkit.Sample.Maui.styles.css" />
+    <!-- Prism.js syntax highlighting (MIT) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
     <link rel="icon" href="data:,">
 </head>
 
@@ -22,6 +26,38 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        window.galleryHighlight = function (elementId) {
+            var el = document.getElementById(elementId);
+            if (el && window.Prism) { Prism.highlightElement(el); }
+        };
+        window.galleryHighlightAll = function () {
+            if (window.Prism) Prism.highlightAll();
+        };
+        window.galleryScrollTop = function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Thin wrappers around localStorage for persisting gallery settings
+        // (theme mode, Mica variant, custom wallpaper). Failures (private
+        // browsing, quota exceeded, storage disabled) are swallowed here so
+        // callers just see a null/no-op instead of a thrown JSException.
+        window.galleryStorageGet = function (key) {
+            try { return window.localStorage.getItem(key); }
+            catch (e) { return null; }
+        };
+        window.galleryStorageSet = function (key, value) {
+            try { window.localStorage.setItem(key, value); return true; }
+            catch (e) { return false; }
+        };
+        window.galleryStorageRemove = function (key) {
+            try { window.localStorage.removeItem(key); }
+            catch (e) { /* ignore */ }
+        };
+    </script>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
 

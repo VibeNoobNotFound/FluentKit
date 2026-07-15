@@ -1,0 +1,195 @@
+.fluent-settings-card {
+    container-type: inline-size;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    inline-size: 100%;
+    min-inline-size: 148px;
+    min-block-size: 68px;
+    padding: 16px;
+    color: var(--text-fill-color-primary);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    text-align: start;
+    background-color: var(--card-background-default);
+    background-clip: padding-box;
+    border: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-radius: var(--control-corner-radius);
+    outline: none;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-settings-card:focus-visible {
+    outline: var(--focus-stroke-thickness) solid var(--focus-stroke-color-outer);
+    outline-offset: -1px;
+}
+
+/* ── Leading icon ─────────────────────────────────────────────────────── */
+
+.fluent-settings-card-icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 20px;
+    block-size: 20px;
+    margin-inline-end: 20px;
+    color: var(--text-fill-color-primary);
+    opacity: 1;
+    overflow: hidden;
+    transition: inline-size var(--duration-slow) var(--easing-standard),
+                margin-inline-end var(--duration-slow) var(--easing-standard),
+                opacity var(--duration-normal) var(--easing-standard);
+}
+
+/* ── Body: header/description + end-aligned content ──────────────────── */
+/* A single flex row that wraps — the header claims all leftover space (pushing the content slot
+   flush to the end), and the content slot glides onto its own line once the card is too narrow
+   for both (see the container queries for ContentAlignment.Auto near the bottom of this file).
+   Deliberately NOT a flex-direction row/column toggle: flex-direction can't be interpolated, so
+   switching it snaps instantly. Animating the content slot's flex-basis instead (an
+   interpolatable length-percentage) lets flex-wrap's reflow happen continuously across the
+   transition, producing a real glide rather than a jump-cut whenever the mode changes. */
+
+.fluent-settings-card-body {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+    transition: gap var(--duration-slow) var(--easing-standard);
+}
+
+.fluent-settings-card-header {
+    flex: 999 1 220px;
+    min-inline-size: 0;
+    display: flex;
+    flex-direction: column;
+    transition: flex-basis var(--duration-slow) var(--easing-standard);
+}
+
+.fluent-settings-card-title {
+    overflow-wrap: break-word;
+}
+
+.fluent-settings-card-description {
+    margin-block-start: 2px;
+    color: var(--text-fill-color-secondary);
+    font-size: 12px;
+    overflow-wrap: break-word;
+}
+
+.fluent-settings-card-content {
+    flex: 1 1 30%;
+    min-inline-size: 120px;
+    display: flex;
+    justify-content: flex-end;
+    transition: flex-basis var(--duration-slow) var(--easing-standard),
+                min-inline-size var(--duration-slow) var(--easing-standard);
+}
+
+/* ── Trailing action icon (chevron), only while clickable ────────────── */
+
+.fluent-settings-card-action-icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 13px;
+    block-size: 13px;
+    margin-inline-start: 14px;
+    color: var(--text-fill-color-secondary);
+}
+
+/* ── Clickable states ─────────────────────────────────────────────────── */
+
+.fluent-settings-card--clickable {
+    cursor: pointer;
+}
+
+.fluent-settings-card--clickable:hover {
+    background-color: var(--control-fill-color-secondary);
+    border-color: var(--control-stroke-color-secondary);
+}
+
+.fluent-settings-card--clickable:active {
+    background-color: var(--control-fill-color-tertiary);
+    border-color: var(--control-stroke-color-default);
+}
+
+/* ── Disabled ──────────────────────────────────────────────────────────── */
+
+.fluent-settings-card--disabled {
+    color: var(--text-fill-color-disabled);
+    background-color: var(--control-fill-color-disabled);
+    cursor: default;
+    pointer-events: none;
+}
+
+.fluent-settings-card--disabled .fluent-settings-card-icon,
+.fluent-settings-card--disabled .fluent-settings-card-action-icon,
+.fluent-settings-card--disabled .fluent-settings-card-description {
+    color: var(--text-fill-color-disabled);
+}
+
+/* ── ContentAlignment: Left ───────────────────────────────────────────── */
+/* Header icon/header/description are hidden, ChildContent takes their place — for CheckBoxes,
+   RadioButtons, or other content that already carries its own label. */
+
+.fluent-settings-card--left .fluent-settings-card-icon,
+.fluent-settings-card--left .fluent-settings-card-header {
+    display: none;
+}
+
+.fluent-settings-card--left .fluent-settings-card-content {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    justify-content: flex-start;
+}
+
+/* ── ContentAlignment: Vertical (always stacked) ──────────────────────── */
+/* Forces the same wrap the Auto/narrow-container case reaches organically — content-basis 100%
+   pushes it past whatever room the header leaves, so it always lands on its own line — and it
+   glides there via the same transition as the container-query case below. */
+
+.fluent-settings-card--vertical .fluent-settings-card-body {
+    align-items: stretch;
+    gap: 8px;
+}
+
+.fluent-settings-card--vertical .fluent-settings-card-content {
+    flex-basis: 100%;
+    min-inline-size: 0;
+    justify-content: stretch;
+}
+
+/* ── ContentAlignment: Auto (default) ─────────────────────────────────── */
+/* Same one-line layout as the base rules above while there's room; once the card's own inline
+   size drops below these thresholds, the content slot glides onto its own line underneath the
+   header/description instead of squeezing them or overflowing. Mirrors WCT's width-driven
+   RightWrapped / RightWrappedNoIcon states, minus a hard "Right" opt-out (that mode never wraps —
+   see the :not() guards below). */
+
+@container (max-width: 476px) {
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-body {
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-content {
+        flex-basis: 100%;
+        min-inline-size: 0;
+        justify-content: stretch;
+    }
+}
+
+@container (max-width: 286px) {
+    .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-icon {
+        inline-size: 0;
+        margin-inline-end: 0;
+        opacity: 0;
+    }
+}

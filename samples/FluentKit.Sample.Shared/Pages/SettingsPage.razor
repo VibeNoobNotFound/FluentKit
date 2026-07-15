@@ -12,112 +12,85 @@
         <h2 class="settings-group__title">Personalization</h2>
 
         @* App theme *@
-        <div class="settings-item">
-            <div class="settings-item__icon">
-                <FluentIcon Name="ic_fluent_paint_brush_20_regular" Size="20" />
-            </div>
-            <div class="settings-item__info">
-                <span class="settings-item__label">App theme</span>
-                <span class="settings-item__desc">Choose Light, Dark, or follow the system setting.</span>
-            </div>
-            <div class="demo-row">
-                <FluentButton Variant="ButtonVariant.Standard"
-                              OnClick="@(() => SetThemeMode(ThemeMode.Light))">
-                    <FluentIcon Name="ic_fluent_weather_sunny_20_regular" Size="16" style="margin-right:6px;" />
-                    Light
-                </FluentButton>
-                <FluentButton Variant="ButtonVariant.Standard"
-                              OnClick="@(() => SetThemeMode(ThemeMode.Dark))">
-                    <FluentIcon Name="ic_fluent_weather_moon_20_regular" Size="16" style="margin-right:6px;" />
-                    Dark
-                </FluentButton>
-                <FluentButton Variant="ButtonVariant.Standard"
-                              OnClick="@(() => SetThemeMode(ThemeMode.System))">
-                    <FluentIcon Name="ic_fluent_desktop_20_regular" Size="16" style="margin-right:6px;" />
-                    System
-                </FluentButton>
-            </div>
-        </div>
+        <FluentSettingsCard Header="App theme" Description="Choose Light, Dark, or follow the system setting.">
+            <HeaderIcon><FluentIcon Name="ic_fluent_paint_brush_20_regular" Size="20" /></HeaderIcon>
+            <ChildContent>
+                <FluentComboBox TValue="ThemeMode"
+                                Items="@_themeModeItems"
+                                Value="@_themeMode"
+                                ValueChanged="@OnThemeModeChangedAsync">
+                    <ItemTemplate Context="item">
+                        <FluentIcon Name="@ThemeModeIcon(item.Value)" Size="16" style="margin-right:6px;" />
+                        <span>@item.Name</span>
+                    </ItemTemplate>
+                    <SelectedTemplate Context="item">
+                        <FluentIcon Name="@ThemeModeIcon(item.Value)" Size="16" style="margin-right:6px;" />
+                        <span>@item.Name</span>
+                    </SelectedTemplate>
+                </FluentComboBox>
+            </ChildContent>
+        </FluentSettingsCard>
 
         @* Background material *@
-        <div class="settings-item">
-            <div class="settings-item__icon">
-                <FluentIcon Name="ic_fluent_color_background_20_regular" Size="20" />
-            </div>
-            <div class="settings-item__info">
-                <span class="settings-item__label">Background material</span>
-                <span class="settings-item__desc">
-                    <b>Mica</b> (Base) uses a soft wallpaper-tinted background. <b>Tabbed</b> (Mica Alt) applies stronger tinting for tab-style surfaces — the same material used on WinUI tabbed title bars.
-                </span>
-            </div>
-            <FluentRadioGroup Value="@_bgVariantStr"
-                              ValueChanged="@((object? v) => OnBgVariantChanged(v as string))">
-                <div class="demo-row">
-                    <FluentRadioButton Value='@("base")'>
-                        <FluentIcon Name="ic_fluent_color_background_20_regular" Size="14" style="margin-right:4px;" />
-                        Mica (Base)
-                    </FluentRadioButton>
-                    <FluentRadioButton Value='@("basealt")'>
-                        <FluentIcon Name="ic_fluent_tabs_20_regular" Size="14" style="margin-right:4px;" />
-                        Tabbed (Mica Alt)
-                    </FluentRadioButton>
-                </div>
-            </FluentRadioGroup>
-        </div>
+        <FluentSettingsCard Header="Background material">
+            <HeaderIcon><FluentIcon Name="ic_fluent_color_background_20_regular" Size="20" /></HeaderIcon>
+            <DescriptionContent>
+                <b>Mica</b> (Base) uses a soft wallpaper-tinted background. <b>Tabbed</b> (Mica Alt) applies stronger tinting for tab-style surfaces — the same material used on WinUI tabbed title bars.
+            </DescriptionContent>
+            <ChildContent>
+                <FluentRadioGroup Value="@_bgVariantStr"
+                                  ValueChanged="@((object? v) => OnBgVariantChanged(v as string))">
+                    <div class="demo-row">
+                        <FluentRadioButton Value='@("base")'>
+                            <FluentIcon Name="ic_fluent_color_background_20_regular" Size="14" style="margin-right:4px;" />
+                            Mica (Base)
+                        </FluentRadioButton>
+                        <FluentRadioButton Value='@("basealt")'>
+                            <FluentIcon Name="ic_fluent_tabs_20_regular" Size="14" style="margin-right:4px;" />
+                            Tabbed (Mica Alt)
+                        </FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+            </ChildContent>
+        </FluentSettingsCard>
 
         @* Custom wallpaper upload *@
-        <div class="settings-item">
-            <div class="settings-item__icon">
-                <FluentIcon Name="ic_fluent_image_20_regular" Size="20" />
-            </div>
-            <div class="settings-item__info">
-                <span class="settings-item__label">Custom Wallpaper</span>
-                <span class="settings-item__desc">
-                    Upload your own image to use as the Mica backdrop. Recommended size is 1920x1080.
-                </span>
-            </div>
-            <div class="demo-row" style="align-items:center; gap:12px;">
-                @if (MainLayout.WallpaperUrlSetting != "wallpaper.jpg")
-                {
-                    <FluentButton Variant="ButtonVariant.Subtle" OnClick="ResetWallpaper">
-                        Reset to default
-                    </FluentButton>
-                }
-                <InputFile OnChange="OnWallpaperUpload" id="wallpaper-upload" style="display:none;" accept=".jpg,.jpeg,.png,.webp" />
-                <label for="wallpaper-upload" class="fluent-file-upload-btn">
-                    <FluentIcon Name="ic_fluent_arrow_upload_20_regular" Size="16" style="margin-right:6px;" />
-                    Choose image...
-                </label>
-            </div>
-        </div>
+        <FluentSettingsCard Header="Custom Wallpaper" Description="Upload your own image to use as the Mica backdrop. Recommended size is 1920x1080.">
+            <HeaderIcon><FluentIcon Name="ic_fluent_image_20_regular" Size="20" /></HeaderIcon>
+            <ChildContent>
+                <div class="demo-row" style="align-items:center; gap:12px;">
+                    @if (MainLayout.WallpaperUrlSetting != "_content/FluentKit.Sample.Shared/wallpaper.jpg")
+                    {
+                        <FluentButton Variant="ButtonVariant.Subtle" OnClick="ResetWallpaper">
+                            Reset to default
+                        </FluentButton>
+                    }
+                    <InputFile OnChange="OnWallpaperUpload" id="wallpaper-upload" style="display:none;" accept=".jpg,.jpeg,.png,.webp" />
+                    <label for="wallpaper-upload" class="fluent-file-upload-btn">
+                        <FluentIcon Name="ic_fluent_arrow_upload_20_regular" Size="16" style="margin-right:6px;" />
+                        Choose image...
+                    </label>
+                </div>
+            </ChildContent>
+        </FluentSettingsCard>
     </div>
 
     @* ── About ────────────────────────────────────────────────────────── *@
     <div class="settings-group">
         <h2 class="settings-group__title">About</h2>
 
-        <div class="settings-item">
-            <div class="settings-item__icon">
-                <FluentIcon Name="ic_fluent_info_20_regular" Size="20" />
-            </div>
-            <div class="settings-item__info">
-                <span class="settings-item__label">FluentKit Gallery</span>
-                <span class="settings-item__desc">@version — A WinUI-style Blazor component gallery</span>
-            </div>
-        </div>
+        <FluentSettingsCard Header="FluentKit Gallery" Description="@($"{version} — A WinUI-style Blazor component gallery")">
+            <HeaderIcon><FluentIcon Name="ic_fluent_info_20_regular" Size="20" /></HeaderIcon>
+        </FluentSettingsCard>
 
-        <div class="settings-item">
-            <div class="settings-item__icon">
-                <FluentIcon Name="ic_fluent_open_20_regular" Size="20" />
-            </div>
-            <div class="settings-item__info">
-                <span class="settings-item__label">Source code</span>
-                <span class="settings-item__desc">MIT License — contributions welcome.</span>
-            </div>
-            <FluentButton Variant="ButtonVariant.Hyperlink" Href="https://github.com/VibeNoobNotFound/FluentKit" Target="_blank">
-                View on GitHub
-            </FluentButton>
-        </div>
+        <FluentSettingsCard Header="Source code" Description="MIT License — contributions welcome.">
+            <HeaderIcon><FluentIcon Name="ic_fluent_open_20_regular" Size="20" /></HeaderIcon>
+            <ChildContent>
+                <FluentButton Variant="ButtonVariant.Hyperlink" Href="https://github.com/VibeNoobNotFound/FluentKit" Target="_blank">
+                    View on GitHub
+                </FluentButton>
+            </ChildContent>
+        </FluentSettingsCard>
     </div>
 </div>
 
@@ -126,6 +99,37 @@
     private string? version = Assembly.GetAssembly(typeof(FluentKit.Primitives.FluentButton))!
         .GetName()
         .Version?.ToString();
+
+    private ThemeMode _themeMode;
+
+    private readonly List<ComboBoxItem<ThemeMode>> _themeModeItems = new()
+    {
+        new("Light", ThemeMode.Light),
+        new("Dark", ThemeMode.Dark),
+        new("System", ThemeMode.System),
+    };
+
+    protected override void OnInitialized()
+    {
+        // Seed the ComboBox with whatever theme is already active, so it shows the current
+        // selection on first render instead of defaulting to Light/blank.
+        _themeMode = ThemeService.Mode;
+    }
+
+    private string ThemeModeIcon(ThemeMode mode) => mode switch
+    {
+        ThemeMode.Light => "ic_fluent_weather_sunny_20_regular",
+        ThemeMode.Dark => "ic_fluent_weather_moon_20_regular",
+        ThemeMode.System => "ic_fluent_desktop_20_regular",
+        _ => "ic_fluent_desktop_20_regular",
+    };
+
+    private async Task OnThemeModeChangedAsync(ThemeMode mode)
+    {
+        _themeMode = mode;
+        await SetThemeMode(mode);
+    }
+
     private async Task SetThemeMode(ThemeMode mode)
     {
         await ThemeService.SetModeAsync(mode);
@@ -176,7 +180,7 @@
 
     private async Task ResetWallpaper()
     {
-        MainLayout.SetWallpaperUrl("wallpaper.jpg");
+        MainLayout.SetWallpaperUrl("_content/FluentKit.Sample.Shared/wallpaper.jpg");
         await GalleryJs.RemoveStorageItemAsync(MainLayout.WallpaperStorageKey);
     }
 }

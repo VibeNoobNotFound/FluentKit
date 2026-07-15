@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using FluentKit.Theming;
 using FluentKit.Overlay;
-using FluentKit.Sample.Wasm.Shared;
+using FluentKit.Sample.Shared.Shared;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<FluentKit.Sample.Wasm.App>("#app");

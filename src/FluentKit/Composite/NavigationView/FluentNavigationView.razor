@@ -44,7 +44,8 @@
                 }
             </header>
             <div class="fluent-nav-view-pane-items-wrapper">
-                <div class="fluent-nav-view-pane-items" role="list">
+                <div class="fluent-nav-view-pane-items" role="list" @ref="_itemsContainerElement">
+                    <span class="fluent-nav-view-ribbon-indicator" @ref="_indicatorElement" aria-hidden="true"></span>
                     @if (IsHeaderRail && PaneHeaderIcon is not null)
                     {
                         <button type="button" class="fluent-nav-view-pane-header-icon-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">

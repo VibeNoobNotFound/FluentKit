@@ -63,8 +63,13 @@
     transition: block-size var(--duration-fast) var(--easing-standard);
 }
 
+/* NOTE: block-size intentionally stays 0 here even when selected. Selection is now
+   visualized by the single shared ".fluent-nav-view-ribbon-indicator" element that
+   FluentNavigationView animates between items (see navview-interop.js). Keeping this
+   per-item indicator inert (rather than deleting it) preserves a harmless fallback
+   DOM hook and avoids a double pill flashing on top of the animated ribbon. */
 .fluent-nav-view-item--selected .fluent-nav-view-item-indicator {
-    block-size: 16px;
+    block-size: 0;
 }
 
 .fluent-nav-view-item-icon {

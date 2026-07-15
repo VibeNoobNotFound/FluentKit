@@ -1,6 +1,6 @@
 using FluentKit.Composite;
 
-namespace FluentKit.Sample.Wasm;
+namespace FluentKit.Sample.Shared;
 
 /// <summary>
 /// One searchable entry — mirrors what WinUI Gallery's search index shows: a control/page name,
@@ -60,6 +60,8 @@ public static class GallerySearchIndex
         new("ContentDialog", "Flyouts & Menus", "controls/contentdialog"),
 
         new("Card", "Layout", "controls/card"),
+        new("SettingsCard", "Settings", "controls/settingscard"),
+        new("SettingsExpander", "Settings", "controls/settingsexpander"),
         new("PersonPicture", "Layout", "controls/personpicture"),
 
         new("Acrylic", "Effects & Materials", "controls/acrylic"),

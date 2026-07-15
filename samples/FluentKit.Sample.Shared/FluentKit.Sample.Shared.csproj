@@ -4,63 +4,14 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     </PropertyGroup>
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <AdditionalFiles Include="Pages\Composite\AutoSuggestBoxPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\CalendarPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\ComboBoxPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\ContentDialogPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\ContextMenuPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\DropDownButtonPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\FlyoutPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\MenuBarPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\MenuFlyoutPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\NavigationViewPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\NumberBoxPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\PivotPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\SplitButtonPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\TeachingTipPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\TimePickerPage.razor" />
-      <AdditionalFiles Include="Pages\Composite\TooltipPage.razor" />
-      <AdditionalFiles Include="Pages\Design\IconBrowserPage.razor" />
-      <AdditionalFiles Include="Pages\Effects\AcrylicPage.razor" />
-      <AdditionalFiles Include="Pages\Effects\MicaPage.razor" />
-      <AdditionalFiles Include="Pages\Effects\RevealPage.razor" />
-      <AdditionalFiles Include="Pages\Index.razor" />
-      <AdditionalFiles Include="Pages\Primitives\ButtonPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\CardPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\CheckBoxPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\ExpanderPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\IconButtonPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\InfoBadgePage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\InfoBarPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\ListViewPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\PasswordBoxPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\PersonPicturePage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\ProgressBarPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\ProgressRingPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\RadioButtonPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\SliderPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\TextBlockPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\TextBoxPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\ToggleButtonPage.razor" />
-      <AdditionalFiles Include="Pages\Primitives\ToggleSwitchPage.razor" />
-      <AdditionalFiles Include="Pages\SearchResultsPage.razor" />
-      <AdditionalFiles Include="Pages\SettingsPage.razor" />
-      <AdditionalFiles Include="Shared\ControlExample.razor" />
-      <AdditionalFiles Include="Shared\PageHeader.razor" />
-      <AdditionalFiles Include="Shared\SampleCodeBlock.razor" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.9" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\FluentKit\FluentKit.csproj" />
     </ItemGroup>
-
 
 </Project>

@@ -73,6 +73,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\FluentKit\FluentKit.csproj" />
       <ProjectReference Include="..\FluentKit.Sample.Shared\FluentKit.Sample.Shared.csproj" />
     </ItemGroup>
 

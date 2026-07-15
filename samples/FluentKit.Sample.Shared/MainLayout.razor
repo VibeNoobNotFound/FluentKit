@@ -204,6 +204,18 @@
 
             <FluentNavigationViewItemSeparator />
 
+            @* ── Settings ─────────────────────────────────────────────── *@
+            <FluentNavigationViewItemHeader Text="Settings" />
+
+            <FluentNavigationViewItem Value="@RouteSettingsCard" Text="SettingsCard">
+                <Icon><FluentIcon Name="ic_fluent_settings_20_regular" /></Icon>
+            </FluentNavigationViewItem>
+            <FluentNavigationViewItem Value="@RouteSettingsExpander" Text="SettingsExpander">
+                <Icon><FluentIcon Name="ic_fluent_chevron_circle_down_20_regular" /></Icon>
+            </FluentNavigationViewItem>
+
+            <FluentNavigationViewItemSeparator />
+
             @* ── Effects & Materials ─────────────────────────────────── *@
             <FluentNavigationViewItemHeader Text="Effects &amp; Materials" />
 
@@ -254,6 +266,8 @@
     public const string RoutePersonPicture  = "controls/personpicture";
     public const string RouteIconButton     = "controls/iconbutton";
     public const string RouteCard           = "controls/card";
+    public const string RouteSettingsCard     = "controls/settingscard";
+    public const string RouteSettingsExpander = "controls/settingsexpander";
     public const string RouteListView       = "controls/listview";
     public const string RouteNavigationView = "controls/navigationview";
     public const string RouteComboBox       = "controls/combobox";
@@ -295,7 +309,7 @@
         BackgroundVariantChanged?.Invoke();
     }
 
-    internal static string WallpaperUrlSetting = "wallpaper.jpg";
+    internal static string WallpaperUrlSetting = "_content/FluentKit.Sample.Shared/wallpaper.jpg";
     internal static event Action? WallpaperUrlChanged;
     internal static void SetWallpaperUrl(string url)
     {
