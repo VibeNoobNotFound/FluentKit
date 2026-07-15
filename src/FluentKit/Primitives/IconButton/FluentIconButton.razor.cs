@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using FluentKit.Common;
 
 namespace FluentKit.Primitives;
 
@@ -11,7 +12,7 @@ namespace FluentKit.Primitives;
 /// (Standard/Accent/Subtle/Hyperlink) so icon-only and labeled buttons stay visually consistent —
 /// defaults to Subtle to preserve the original transparent-by-default look.
 /// </summary>
-public partial class FluentIconButton : ComponentBase
+public partial class FluentIconButton : SizableComponentBase
 {
     [Parameter]
     public ButtonVariant Variant { get; set; } = ButtonVariant.Subtle;

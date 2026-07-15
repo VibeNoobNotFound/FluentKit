@@ -19,6 +19,19 @@
             <FluentButton Variant="ButtonVariant.Standard" Disabled="_disabled">Click Me</FluentButton>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Sizing" RazorCode="@_sizingRazor">
+        <Example>
+            <div class="demo-row">
+                <FluentButton Variant="ButtonVariant.Standard">Default</FluentButton>
+                <FluentButton Variant="ButtonVariant.Standard" Padding="new Thickness(24, 4)">Padding(24,4)</FluentButton>
+                <FluentButton Variant="ButtonVariant.Standard" Width="220">Width 220</FluentButton>
+                <FluentButton Variant="ButtonVariant.Standard" Height="48">Height 48</FluentButton>
+                <FluentButton Variant="ButtonVariant.Standard" MinWidth="40" Width="40" Padding="Thickness.Zero">40</FluentButton>
+                <FluentButton Variant="ButtonVariant.Standard" MaxWidth="90">A button with a long label</FluentButton>
+            </div>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {
@@ -30,6 +43,21 @@
 <FluentButton Variant=""ButtonVariant.Hyperlink"" Href=""https://github.com"">Hyperlink Button</FluentButton>";
 
     private const string _interactiveRazor = @"<FluentButton Variant=""ButtonVariant.Standard"" Disabled=""@_disabled"">Click Me</FluentButton>";
+
+    private const string _sizingRazor = @"@* Everything below is on the control's own default until you set it explicitly. *@
+<FluentButton Variant=""ButtonVariant.Standard"">Default</FluentButton>
+
+@* Thickness(horizontal, vertical) — like XAML's Padding=""24,4"" *@
+<FluentButton Padding=""new Thickness(24, 4)"">Padding(24,4)</FluentButton>
+
+<FluentButton Width=""220"">Width 220</FluentButton>
+<FluentButton Height=""48"">Height 48</FluentButton>
+
+@* Width alone won't shrink a button below the stylesheet's min-width:120px default —
+   set MinWidth (and usually Padding=""0"") to actually go smaller, same as WinUI. *@
+<FluentButton MinWidth=""40"" Width=""40"" Padding=""Thickness.Zero"">40</FluentButton>
+
+<FluentButton MaxWidth=""90"">A button with a long label</FluentButton>";
     
     private const string _interactiveCs = @"private bool _disabled;";
 

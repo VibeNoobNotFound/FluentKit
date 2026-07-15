@@ -13,9 +13,37 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Sizing" RazorCode="@_sizingRazor">
+        <Example>
+            <div class="demo-row" style="gap: 16px; align-items: center;">
+                <FluentIconButton Variant="ButtonVariant.Standard"><FluentIcon Name="@FluentIconNames.Settings" /></FluentIconButton>
+                <FluentIconButton Variant="ButtonVariant.Standard" Width="56" Height="56"><FluentIcon Name="@FluentIconNames.Settings" Size="28" /></FluentIconButton>
+                <FluentIconButton Variant="ButtonVariant.Standard" Padding="new Thickness(4)" Width="24" Height="24"><FluentIcon Name="@FluentIconNames.Settings" Size="16" /></FluentIconButton>
+                <FluentIconButton Variant="ButtonVariant.Standard" MaxWidth="40" MaxHeight="40"><FluentIcon Name="@FluentIconNames.Settings" /></FluentIconButton>
+            </div>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {
+    private const string _sizingRazor = @"@* Default is the control's own 40x40 box — nothing below changes unless set. *@
+<FluentIconButton><FluentIcon Name=""@FluentIconNames.Settings"" /></FluentIconButton>
+
+@* Bigger tap target, bigger glyph to match *@
+<FluentIconButton Width=""56"" Height=""56"">
+    <FluentIcon Name=""@FluentIconNames.Settings"" Size=""28"" />
+</FluentIconButton>
+
+@* Smaller box — override Padding too, or the default padding eats the shrunk box *@
+<FluentIconButton Padding=""new Thickness(4)"" Width=""24"" Height=""24"">
+    <FluentIcon Name=""@FluentIconNames.Settings"" Size=""16"" />
+</FluentIconButton>
+
+<FluentIconButton MaxWidth=""40"" MaxHeight=""40"">
+    <FluentIcon Name=""@FluentIconNames.Settings"" />
+</FluentIconButton>";
+
     private const string _iconBtnRazor = @"<FluentIconButton><FluentIcon Name=""@FluentIconNames.Settings"" /></FluentIconButton>
 <FluentIconButton><FluentIcon Name=""@FluentIconNames.Delete"" /></FluentIconButton>
 <FluentIconButton Disabled=""true""><FluentIcon Name=""@FluentIconNames.Dismiss"" /></FluentIconButton>

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using FluentKit.Common;
 
 namespace FluentKit.Primitives;
 
@@ -15,7 +16,11 @@ public enum ButtonVariant
     Hyperlink
 }
 
-public partial class FluentButton : ComponentBase
+/// <summary>
+/// Inherits <see cref="SizableComponentBase"/> for optional XAML-style Padding/Width/Height/
+/// MinWidth/MinHeight/MaxWidth/MaxHeight overrides — see that class for defaults/semantics.
+/// </summary>
+public partial class FluentButton : SizableComponentBase
 {
     [Parameter]
     public ButtonVariant Variant { get; set; } = ButtonVariant.Standard;

@@ -1,4 +1,5 @@
 @namespace FluentKit.Primitives
+@inherits FluentKit.Common.SizableComponentBase
 
 @if (IsLink)
 {
@@ -8,6 +9,7 @@
        rel="@(IsExternalTarget ? "noopener noreferrer" : null)"
        aria-disabled="@(Disabled ? "true" : null)"
        tabindex="@(Disabled ? "-1" : null)"
+       style="@SizingStyle"
        @onclick="OnClick"
        @onclick:preventDefault="Disabled"
        @attributes="AdditionalAttributes">
@@ -19,6 +21,7 @@ else
     <button type="button"
             class="fluent-button @VariantClass"
             disabled="@Disabled"
+            style="@SizingStyle"
             @onclick="OnClick"
             @attributes="AdditionalAttributes">
         @ChildContent

@@ -1,10 +1,12 @@
 @namespace FluentKit.Primitives
+@inherits FluentKit.Common.SizableComponentBase
 
 @if (IsAnchor)
 {
     <a role="button"
        href="@Href"
        class="fluent-icon-button @VariantClass"
+       style="@SizingStyle"
        @onclick="OnClick"
        @attributes="AdditionalAttributes">
         @ChildContent
@@ -15,6 +17,7 @@ else
     <button type="button"
             class="fluent-icon-button @VariantClass @(Disabled ? "fluent-icon-button--disabled" : null)"
             disabled="@Disabled"
+            style="@SizingStyle"
             @onclick="OnClick"
             @attributes="AdditionalAttributes">
         @ChildContent

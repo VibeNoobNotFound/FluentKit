@@ -29,9 +29,10 @@
                     @foreach (var icon in _filtered)
                     {
                         <FluentIconButton
+                            Padding="new(18,18)"
                             Variant="@(icon == _selected ? ButtonVariant.Accent : ButtonVariant.Standard)"
                             OnClick="() => Select(icon)">
-                            <FluentIcon Name="@icon.Glyph" />
+                            <FluentIcon Name="@icon.Glyph" Size="22" />
                         </FluentIconButton>
                     }
                 }
