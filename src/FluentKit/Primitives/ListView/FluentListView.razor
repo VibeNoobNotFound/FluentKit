@@ -1,9 +1,33 @@
 @namespace FluentKit.Primitives
+@typeparam TValue
 
-<CascadingValue Value="this" IsFixed="true">
+<CascadingValue Value="(IListViewHost)this" IsFixed="true">
     <div class="fluent-list-view @Class"
          role="@Role"
          @attributes="AdditionalAttributes">
-        @ChildContent
+        @if (Items is not null)
+        {
+            @foreach (var item in Items)
+            {
+                <FluentListViewItem Selected="@IsSelected(item)"
+                                     Disabled="@item.Disabled"
+                                     ShowCheckmark="@(SelectionMode == ListViewSelectionMode.Multiple)"
+                                     AutoHeight="@(ItemTemplate is not null)"
+                                     OnSelect="@(() => OnItemSelectAsync(item))">
+                    @if (ItemTemplate is not null)
+                    {
+                        @ItemTemplate(item)
+                    }
+                    else
+                    {
+                        @item.Name
+                    }
+                </FluentListViewItem>
+            }
+        }
+        else
+        {
+            @ChildContent
+        }
     </div>
 </CascadingValue>

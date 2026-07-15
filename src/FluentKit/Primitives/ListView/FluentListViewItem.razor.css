@@ -71,3 +71,61 @@
 .fluent-list-view-item--selected .fluent-list-view-item-indicator {
     block-size: 16px;
 }
+
+/* Used when a custom ItemTemplate is in play (e.g. a two-line contact row) — the fixed 34px
+   row height above is a single-line-of-text default and would clip taller custom content. */
+.fluent-list-view-item--auto-height {
+    block-size: auto;
+    min-block-size: 34px;
+    padding-block: 6px;
+}
+
+/* Decorative checkbox glyph shown in Multiple selection mode. Not a real checkbox input — the
+   row's own <button> owns the click, this is purely visual (see FluentListViewItem.razor.cs). */
+.fluent-list-view-item-checkbox {
+    box-sizing: border-box;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    width: 18px;
+    height: 18px;
+
+    border-radius: var(--control-corner-radius);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: var(--toggle-border);
+    background-color: var(--toggle-background);
+    color: var(--toggle-checked-glyph);
+
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard);
+}
+
+.fluent-list-view-item-checkbox--checked {
+    border-color: transparent;
+    background-color: var(--toggle-checked-background);
+    color: var(--toggle-checked-glyph);
+}
+
+.fluent-list-view-item-checkbox__glyph {
+    position: absolute;
+    inset: 0;
+    width: 11px;
+    height: 11px;
+    margin: auto;
+    display: block;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 20.5;
+    stroke-dashoffset: 20.5;
+    transition: stroke-dashoffset var(--duration-slow) var(--easing-decelerate);
+}
+
+.fluent-list-view-item-checkbox--checked .fluent-list-view-item-checkbox__glyph {
+    stroke-dashoffset: 0;
+}

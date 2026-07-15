@@ -1,12 +1,14 @@
 @page "/controls/listview"
 
 <div class="gallery-page">
-    <PageHeader Eyebrow="Primitives" Title="ListView" Description="ListView displays structured data in a vertical single-select list container." />
+    <PageHeader Eyebrow="Primitives" Title="ListView" Description="ListView displays structured data in a vertical list container, with optional single or multiple selection." />
 
-    <ControlExample HeaderText="Basic ListView Selection" RazorCode="@_listRazor" CSharpCode="@_listCs">
+    <ControlExample HeaderText="Basic ListView Selection"
+                    Description="Freeform mode: place FluentListViewItem children directly and drive Selected/OnSelect yourself."
+                    RazorCode="@_listRazor" CSharpCode="@_listCs">
         <Example>
             <div class="demo-col" style="max-width: 280px;">
-                <FluentListView Role="listbox" style="border: 1px solid var(--card-stroke-default); border-radius: 8px; overflow: hidden;">
+                <FluentListView TValue="string" Role="listbox" style="border: 1px solid var(--card-stroke-default); border-radius: 8px; overflow: hidden;">
                     @foreach (var fruit in _fruits)
                     {
                         <FluentListViewItem Selected="@(_selectedFruit == fruit)" OnSelect="@(() => _selectedFruit = fruit)">
@@ -18,13 +20,107 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Custom Item Template"
+                    Description="Data-bound mode: pass Items and an ItemTemplate for full control over each row's content, same shape as ComboBox/AutoSuggestBox."
+                    RazorCode="@_templateRazor" CSharpCode="@_templateCs">
+        <Example>
+            <div class="demo-col" style="max-width: 320px;">
+                <FluentListView TValue="Contact"
+                                Role="listbox"
+                                Items="@_contactItems"
+                                SelectionMode="ListViewSelectionMode.Single"
+                                SelectedValue="@_selectedContact"
+                                SelectedValueChanged="@((Contact? c) => _selectedContact = c)"
+                                style="border: 1px solid var(--card-stroke-default); border-radius: 8px; overflow: hidden;">
+                    <ItemTemplate Context="item">
+                        <FluentPersonPicture Size="32" Alt="@item.Value.Name" />
+                        <div class="demo-col" style="gap:0; margin-left:8px;">
+                            <FluentTextBlock Variant="TextBlockVariant.Body">@item.Value.Name</FluentTextBlock>
+                            <FluentTextBlock Variant="TextBlockVariant.Caption" style="opacity:0.7;">@item.Value.Company</FluentTextBlock>
+                        </div>
+                    </ItemTemplate>
+                </FluentListView>
+                <div class="demo-output">Selected: @(_selectedContact?.Name ?? "none")</div>
+            </div>
+        </Example>
+    </ControlExample>
+
+    <ControlExample HeaderText="Selection Modes"
+                    Description="SelectionMode controls whether rows are selectable at all, and whether one or many can be selected at once — None, Single, or Multiple (with a checkbox affordance per row)."
+                    RazorCode="@_modeRazor" CSharpCode="@_modeCs">
+        <Example>
+            <div class="demo-col" style="max-width: 280px;">
+                <FluentListView TValue="string"
+                                Role="listbox"
+                                Items="@_fruitItems"
+                                SelectionMode="@_selectionMode"
+                                SelectedValue="@_modeSelectedFruit"
+                                SelectedValueChanged="@((string? v) => _modeSelectedFruit = v)"
+                                SelectedValues="@_modeSelectedFruits"
+                                SelectedValuesChanged="@((IReadOnlyList<string> v) => _modeSelectedFruits = v)"
+                                style="border: 1px solid var(--card-stroke-default); border-radius: 8px; overflow: hidden;" />
+                <div class="demo-output">
+                    @if (_selectionMode == ListViewSelectionMode.Multiple)
+                    {
+                        @($"Selected: {(_modeSelectedFruits.Count == 0 ? "none" : string.Join(", ", _modeSelectedFruits))}")
+                    }
+                    else
+                    {
+                        @($"Selected: {_modeSelectedFruit ?? "none"}")
+                    }
+                </div>
+            </div>
+        </Example>
+        <Options>
+            <div class="demo-col">
+                <FluentRadioGroup Value="@_selectionMode.ToString()" ValueChanged="@((object? v) => OnSelectionModeChanged(v as string))">
+                    <div class="demo-row">
+                        <FluentRadioButton Value='@("None")'>None</FluentRadioButton>
+                        <FluentRadioButton Value='@("Single")'>Single</FluentRadioButton>
+                        <FluentRadioButton Value='@("Multiple")'>Multiple</FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+            </div>
+        </Options>
+    </ControlExample>
 </div>
 
 @code {
+    private record Contact(string Name, string Company);
+
+    // ── Basic (freeform) example ──────────────────────────────────────
     private string[] _fruits = { "Apple", "Banana", "Cherry", "Durian", "Elderberry" };
     private string? _selectedFruit = "Apple";
 
-    private const string _listRazor = @"<FluentListView Role=""listbox"" style=""border: 1px solid var(--card-stroke-default); border-radius: 8px; overflow: hidden;"">
+    // ── Custom item template example ────────────────────────────────
+    private readonly List<ListViewItem<Contact>> _contactItems =
+    [
+        new("Ada Lovelace", new Contact("Ada Lovelace", "Analytical Engines Ltd.")),
+        new("Grace Hopper", new Contact("Grace Hopper", "US Navy")),
+        new("Alan Turing", new Contact("Alan Turing", "Bletchley Park")),
+        new("Margaret Hamilton", new Contact("Margaret Hamilton", "NASA")),
+    ];
+    private Contact? _selectedContact;
+
+    // ── Selection modes example ────────────────────────────────────
+    private readonly List<ListViewItem<string>> _fruitItems =
+        new[] { "Apple", "Banana", "Cherry", "Durian", "Elderberry" }
+            .Select(f => new ListViewItem<string>(f, f))
+            .ToList();
+    private ListViewSelectionMode _selectionMode = ListViewSelectionMode.Single;
+    private string? _modeSelectedFruit = "Apple";
+    private IReadOnlyList<string> _modeSelectedFruits = [];
+
+    private void OnSelectionModeChanged(string? value)
+    {
+        if (Enum.TryParse<ListViewSelectionMode>(value, out var mode))
+        {
+            _selectionMode = mode;
+        }
+    }
+
+    private const string _listRazor = @"<FluentListView TValue=""string"" Role=""listbox"" style=""border: 1px solid var(--card-stroke-default); border-radius: 8px; overflow: hidden;"">
     @foreach (var fruit in _fruits)
     {
         <FluentListViewItem Selected=""@(_selectedFruit == fruit)"" OnSelect=""@(() => _selectedFruit = fruit)"">
@@ -34,4 +130,41 @@
 </FluentListView>";
     private const string _listCs = @"private string[] _fruits = { ""Apple"", ""Banana"", ""Cherry"", ""Durian"", ""Elderberry"" };
 private string? _selectedFruit = ""Apple"";";
+
+    private const string _templateRazor = @"<FluentListView TValue=""Contact""
+                Items=""@_contactItems""
+                SelectionMode=""ListViewSelectionMode.Single""
+                SelectedValue=""@_selectedContact""
+                SelectedValueChanged=""@((Contact? c) => _selectedContact = c)"">
+    <ItemTemplate Context=""item"">
+        <FluentPersonPicture Size=""32"" Alt=""@item.Value.Name"" />
+        <div class=""demo-col"" style=""gap:0; margin-left:8px;"">
+            <FluentTextBlock Variant=""TextBlockVariant.Body"">@item.Value.Name</FluentTextBlock>
+            <FluentTextBlock Variant=""TextBlockVariant.Caption"">@item.Value.Company</FluentTextBlock>
+        </div>
+    </ItemTemplate>
+</FluentListView>";
+    private const string _templateCs = @"private record Contact(string Name, string Company);
+
+private readonly List<ListViewItem<Contact>> _contactItems =
+[
+    new(""Ada Lovelace"", new Contact(""Ada Lovelace"", ""Analytical Engines Ltd."")),
+    new(""Grace Hopper"", new Contact(""Grace Hopper"", ""US Navy"")),
+];
+private Contact? _selectedContact;";
+
+    private const string _modeRazor = @"<FluentListView TValue=""string""
+                Items=""@_fruitItems""
+                SelectionMode=""@_selectionMode""
+                SelectedValue=""@_modeSelectedFruit""
+                SelectedValueChanged=""@((string? v) => _modeSelectedFruit = v)""
+                SelectedValues=""@_modeSelectedFruits""
+                SelectedValuesChanged=""@((IReadOnlyList<string> v) => _modeSelectedFruits = v)"" />";
+    private const string _modeCs = @"private readonly List<ListViewItem<string>> _fruitItems =
+    new[] { ""Apple"", ""Banana"", ""Cherry"", ""Durian"", ""Elderberry"" }
+        .Select(f => new ListViewItem<string>(f, f))
+        .ToList();
+private ListViewSelectionMode _selectionMode = ListViewSelectionMode.Single;
+private string? _modeSelectedFruit = ""Apple"";
+private IReadOnlyList<string> _modeSelectedFruits = [];";
 }

@@ -14,13 +14,26 @@ namespace FluentKit.Primitives;
 public partial class FluentListViewItem : ComponentBase, IFocusableListItem, IDisposable
 {
     [CascadingParameter]
-    private FluentListView? List { get; set; }
+    private IListViewHost? List { get; set; }
 
     [Parameter]
     public bool Selected { get; set; }
 
     [Parameter]
     public bool Disabled { get; set; }
+
+    /// <summary>Shows a decorative checkbox glyph at the start of the row, reflecting
+    /// <see cref="Selected"/>. Set by FluentListView&lt;TValue&gt; when SelectionMode is
+    /// Multiple — purely visual, the row's own button still owns the click (no nested
+    /// interactive element), same reasoning FluentComboBoxItem's checkmark uses.</summary>
+    [Parameter]
+    public bool ShowCheckmark { get; set; }
+
+    /// <summary>Switches the row from ListView's default fixed 34px height to auto-height with a
+    /// min-height floor — set by FluentListView&lt;TValue&gt; whenever a custom ItemTemplate is in
+    /// play, since template content (e.g. a two-line contact row) is rarely exactly one line tall.</summary>
+    [Parameter]
+    public bool AutoHeight { get; set; }
 
     [Parameter]
     public EventCallback OnSelect { get; set; }
