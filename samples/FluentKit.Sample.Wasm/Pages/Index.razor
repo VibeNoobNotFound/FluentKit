@@ -17,15 +17,15 @@
         </p>
         <div class="home-hero__stats">
             <div class="home-stat">
-                <span class="home-stat__number">39</span>
+                <span class="home-stat__number">@_componentsCount</span>
                 <span class="home-stat__label">Components</span>
             </div>
             <div class="home-stat">
-                <span class="home-stat__number">39</span>
+                <span class="home-stat__number">@_PagesCount</span>
                 <span class="home-stat__label">Gallery Pages</span>
             </div>
             <div class="home-stat">
-                <span class="home-stat__number">3</span>
+                <span class="home-stat__number">@_effectsCount</span>
                 <span class="home-stat__label">Material Effects</span>
             </div>
         </div>
@@ -110,7 +110,10 @@
 
 @code {
     private record ControlCardInfo(string Name, string Route, string Icon);
-
+    private string _PagesCount => GallerySearchIndex.Entries.Count.ToString();
+    private string _componentsCount => (_primitiveCards.Length + _compositeCards.Length).ToString();
+    private string _effectsCount => (_effectCards.Length).ToString();
+    
     private readonly ControlCardInfo[] _designCards =
     [
         new("Icons", "design/icons", "ic_fluent_icons_20_regular"),
