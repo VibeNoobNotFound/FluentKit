@@ -6,9 +6,12 @@ namespace FluentKit.Composite;
 
 /// <summary>
 /// Ported from fluent-svelte's CalendarView.svelte — lets a user browse and pick a date across three
-/// drill levels (days/months/years). Supports both single-select (<see cref="Value"/>) and
-/// multi-select (<see cref="Multiple"/> + <see cref="Values"/>), matching the svelte source's
-/// <c>value</c>/<c>multiple</c> props.
+/// drill levels (days/months/years). Supports single-select (<see cref="Value"/>), multi-select
+/// (<see cref="Values"/>), and range-select (also <see cref="Values"/>, interpreted as a chronological
+/// [start, end] pair) via <see cref="SelectionMode"/> — svelte's source only ever had a boolean
+/// <c>multiple</c> prop; <see cref="Multiple"/> is kept as a back-compat alias for
+/// <c>SelectionMode="CalendarSelectionMode.Multiple"</c>, and Range is a net-new addition on top of
+/// the ported behavior.
 ///
 /// Animations: fluent-svelte uses Svelte transition directives (fadeScale on view switch, fly on
 /// page turn). Blazor has no direct equivalent, so the same visual effect is reproduced with plain
@@ -33,15 +36,24 @@ public partial class FluentCalendarView : ComponentBase
     [Parameter] public EventCallback<DateTime?> Change { get; set; }
 
     /// <summary>Enables multi-date selection, matching fluent-svelte's <c>multiple</c> prop. When true,
-    /// clicking days toggles membership in <see cref="Values"/> instead of setting <see cref="Value"/>.</summary>
+    /// clicking days toggles membership in <see cref="Values"/> instead of setting <see cref="Value"/>.
+    /// Superseded by <see cref="SelectionMode"/> — kept for back-compat; setting this true without
+    /// touching <see cref="SelectionMode"/> is equivalent to <c>SelectionMode="CalendarSelectionMode.Multiple"</c>.</summary>
     [Parameter] public bool Multiple { get; set; }
 
-    /// <summary>The currently selected dates when <see cref="Multiple"/> is true. Two-way bindable.</summary>
+    /// <summary>Single (default), Multiple, or Range. Net-new on top of fluent-svelte's original
+    /// single/multiple-only API. See <see cref="CalendarSelectionMode"/> for what each does.</summary>
+    [Parameter] public CalendarSelectionMode SelectionMode { get; set; } = CalendarSelectionMode.Single;
+
+    /// <summary>The currently selected dates when <see cref="Mode"/> is Multiple or Range. Two-way
+    /// bindable. In Range mode this holds at most two entries, always chronologically ordered:
+    /// <c>[start]</c> while a range is being picked, or <c>[start, end]</c> once complete.</summary>
     [Parameter] public IReadOnlyList<DateTime> Values { get; set; } = Array.Empty<DateTime>();
 
     [Parameter] public EventCallback<IReadOnlyList<DateTime>> ValuesChanged { get; set; }
 
-    /// <summary>Mirrors fluent-svelte's <c>on:change</c> payload for multi-select mode.</summary>
+    /// <summary>Mirrors fluent-svelte's <c>on:change</c> payload for multi-select mode; also used for
+    /// Range mode, firing after both the start and (later) the completing end click.</summary>
     [Parameter] public EventCallback<IReadOnlyList<DateTime>> ValuesChange { get; set; }
 
     [Parameter] public DateTime? Min { get; set; }
@@ -97,7 +109,7 @@ public partial class FluentCalendarView : ComponentBase
 
     protected override void OnInitialized()
     {
-        var anchor = Value ?? (Multiple && Values.Count > 0 ? Values[0] : (DateTime?)null) ?? Today;
+        var anchor = Value ?? (Mode != CalendarSelectionMode.Single && Values.Count > 0 ? Values[0] : (DateTime?)null) ?? Today;
         if (Min.HasValue && anchor < Min.Value)
         {
             anchor = Min.Value;
@@ -109,6 +121,17 @@ public partial class FluentCalendarView : ComponentBase
 
         Page = new DateTime(anchor.Year, anchor.Month, 1);
     }
+
+    /// <summary>Resolves the legacy <see cref="Multiple"/> bool and the newer <see cref="SelectionMode"/>
+    /// enum into one effective mode: an explicit non-default SelectionMode always wins; otherwise
+    /// Multiple=true maps to Multiple, and everything else is Single.</summary>
+    private CalendarSelectionMode Mode => SelectionMode != CalendarSelectionMode.Single
+        ? SelectionMode
+        : (Multiple ? CalendarSelectionMode.Multiple : CalendarSelectionMode.Single);
+
+    private DateTime? RangeStart => Values.Count > 0 ? Values[0] : null;
+
+    private DateTime? RangeEnd => Values.Count > 1 ? Values[1] : null;
 
     private CultureInfo Culture => string.IsNullOrEmpty(Locale) ? CultureInfo.CurrentCulture : new CultureInfo(Locale);
 
@@ -281,9 +304,21 @@ public partial class FluentCalendarView : ComponentBase
 
     private bool IsBlackout(DateTime day) => Blackout is not null && Blackout.Any(b => SameDay(b, day));
 
-    private bool IsSelectedDay(DateTime day) => Multiple
-        ? Values.Any(v => SameDay(v, day))
-        : Value.HasValue && SameDay(Value.Value, day);
+    private bool IsSelectedDay(DateTime day) => Mode switch
+    {
+        CalendarSelectionMode.Multiple => Values.Any(v => SameDay(v, day)),
+        CalendarSelectionMode.Range => IsRangeStartDay(day) || IsRangeEndDay(day),
+        _ => Value.HasValue && SameDay(Value.Value, day)
+    };
+
+    private bool IsRangeStartDay(DateTime day) => RangeStart.HasValue && SameDay(RangeStart.Value, day);
+
+    private bool IsRangeEndDay(DateTime day) => RangeEnd.HasValue && SameDay(RangeEnd.Value, day);
+
+    /// <summary>Strictly between start and end, exclusive of both edges (edges get the round pill
+    /// via IsRangeStartDay/IsRangeEndDay + the --range-start/--range-end CSS instead).</summary>
+    private bool IsInRange(DateTime day) =>
+        RangeStart.HasValue && RangeEnd.HasValue && day.Date > RangeStart.Value.Date && day.Date < RangeEnd.Value.Date;
 
     private async Task SelectDayAsync(DateTime day)
     {
@@ -292,7 +327,7 @@ public partial class FluentCalendarView : ComponentBase
             return;
         }
 
-        if (Multiple)
+        if (Mode == CalendarSelectionMode.Multiple)
         {
             var next = Values.Any(v => SameDay(v, day))
                 ? Values.Where(v => !SameDay(v, day)).ToList()
@@ -304,9 +339,38 @@ public partial class FluentCalendarView : ComponentBase
             return;
         }
 
+        if (Mode == CalendarSelectionMode.Range)
+        {
+            await SelectRangeDayAsync(day);
+            return;
+        }
+
         Value = Value.HasValue && SameDay(Value.Value, day) ? null : day;
         await ValueChanged.InvokeAsync(Value);
         await Change.InvokeAsync(Value);
+    }
+
+    /// <summary>Click 1 (no range yet, or a completed [start, end] already on the books): starts a
+    /// fresh range at that day. Click 2 (only a start is set): completes the range, swapping the two
+    /// dates first if the user picked an end earlier than the start.</summary>
+    private async Task SelectRangeDayAsync(DateTime day)
+    {
+        List<DateTime> next;
+
+        if (!RangeStart.HasValue || RangeEnd.HasValue)
+        {
+            next = new List<DateTime> { day };
+        }
+        else
+        {
+            next = day.Date < RangeStart.Value.Date
+                ? new List<DateTime> { day, RangeStart.Value }
+                : new List<DateTime> { RangeStart.Value, day };
+        }
+
+        Values = next;
+        await ValuesChanged.InvokeAsync(next);
+        await ValuesChange.InvokeAsync(next);
     }
 
     private void SelectMonth(DateTime month)

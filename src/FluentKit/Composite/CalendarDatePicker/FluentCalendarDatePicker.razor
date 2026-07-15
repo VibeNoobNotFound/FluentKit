@@ -12,8 +12,8 @@
             aria-haspopup="dialog"
             aria-expanded="@_open"
             @onclick="ToggleOpenAsync">
-        <span class="fluent-calendar-date-picker-label @(Value is null ? "fluent-calendar-date-picker-label--placeholder" : null)">
-            @(Value?.ToString("d", Culture) ?? Placeholder)
+        <span class="fluent-calendar-date-picker-label @(!HasSelection ? "fluent-calendar-date-picker-label--placeholder" : null)">
+            @DisplayLabel
         </span>
         <FluentIcon Name="@FluentIconNames.Calendar" Size="16" />
     </button>
@@ -25,6 +25,9 @@
             <div class="fluent-calendar-date-picker-popout-inner @(_closing ? "fluent-calendar-date-picker-popout--closing" : "")">
                 <FluentCalendarView Value="@Value"
                                     ValueChanged="@OnDateChangedAsync"
+                                    SelectionMode="@SelectionMode"
+                                    Values="@Values"
+                                    ValuesChanged="@OnValuesChangedAsync"
                                     Min="@Min"
                                     Max="@Max"
                                     Blackout="@Blackout"

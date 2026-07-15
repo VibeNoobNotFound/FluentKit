@@ -23,6 +23,17 @@ public partial class FluentCalendarViewItem : ComponentBase
 
     [Parameter] public bool OutOfRange { get; set; }
 
+    /// <summary>Range-selection mode only: true when this cell lies strictly between the range's
+    /// start and end (exclusive of both edges), rendered with a continuous band background instead
+    /// of the round single/multiple selection pill.</summary>
+    [Parameter] public bool InRange { get; set; }
+
+    /// <summary>Range-selection mode only: true when this cell is the range's start date.</summary>
+    [Parameter] public bool RangeStart { get; set; }
+
+    /// <summary>Range-selection mode only: true when this cell is the range's end date.</summary>
+    [Parameter] public bool RangeEnd { get; set; }
+
     [Parameter] public CalendarViewItemVariant Variant { get; set; } = CalendarViewItemVariant.Day;
 
     /// <summary>Small overline label shown above the cell content — the month abbreviation on the

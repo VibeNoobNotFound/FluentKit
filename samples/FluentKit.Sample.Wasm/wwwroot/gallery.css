@@ -185,7 +185,7 @@ html, body {
     margin: 0;
     padding: 16px 20px;
     border-radius: 0;
-    background: #1e1e1e !important;
+    background: var(--card-background-default) !important;
     font-size: 13px;
     line-height: 1.6;
     tab-size: 2;
