@@ -1,20 +1,34 @@
-/* Ported from fluent-svelte IconButton.scss, re-mapped onto our token names. */
+/* Ported from fluent-svelte IconButton.scss, re-mapped onto our token names.
+   Fixed (not min-*) width/height is the important bit: a size expressed only as
+   min-inline-size/min-block-size lets a flex/grid parent's default "stretch" alignment grow the
+   box past its content in either axis — e.g. a wide CSS-grid column stretches it horizontally
+   while its auto height gets clipped by the row, producing a chopped rectangle instead of a
+   square. A fixed width+height opts the box out of stretch sizing entirely, same fix FluentButton
+   doesn't need only because it's meant to be a wider label button in the first place. */
 .fluent-icon-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex: none;
     outline: none;
-    border: none;
     box-sizing: border-box;
-    min-inline-size: 30px;
-    min-block-size: 30px;
-    padding: 8px;
-    color: var(--text-fill-color-primary);
+    width: 40px;
+    height: 40px;
+    padding: 0;
+
     border-radius: var(--control-corner-radius);
-    background-color: var(--subtle-fill-color-transparent);
+    border-width: var(--control-stroke-thickness);
+    border-style: solid;
+    border-color: transparent;
+
     text-decoration: none;
-    cursor: default;
+    cursor: pointer;
+    user-select: none;
     font-family: var(--font-family-base);
+
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                border-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
 }
 
 .fluent-icon-button:focus-visible {
@@ -22,22 +36,89 @@
     outline-offset: -2px;
 }
 
-.fluent-icon-button:hover {
-    background-color: var(--subtle-fill-color-secondary);
-}
-
-.fluent-icon-button:active {
-    color: var(--text-fill-color-secondary);
-    background-color: var(--subtle-fill-color-tertiary);
-}
-
 .fluent-icon-button:disabled,
 .fluent-icon-button--disabled {
-    background-color: var(--subtle-fill-color-disabled);
-    color: var(--text-fill-color-disabled);
     pointer-events: none;
+    cursor: not-allowed;
 }
 
-.fluent-icon-button svg {
+.fluent-icon-button svg,
+.fluent-icon-button .fluent-icon {
     color: inherit;
+}
+
+/* ---------- Subtle (default — matches the component's original transparent-by-default look) ---------- */
+.fluent-icon-button--subtle {
+    background-color: var(--subtle-button-background);
+    color: var(--text-fill-color-primary);
+}
+.fluent-icon-button--subtle:hover:not(:disabled):not(.fluent-icon-button--disabled) {
+    background-color: var(--subtle-button-background-pointer-over);
+}
+.fluent-icon-button--subtle:active:not(:disabled):not(.fluent-icon-button--disabled) {
+    background-color: var(--subtle-button-background-pressed);
+}
+.fluent-icon-button--subtle:disabled,
+.fluent-icon-button--subtle.fluent-icon-button--disabled {
+    background-color: var(--subtle-button-background-disabled);
+    color: var(--text-fill-color-disabled);
+}
+
+/* ---------- Standard ---------- */
+.fluent-icon-button--standard {
+    background-color: var(--button-background);
+    color: var(--button-foreground);
+    border-color: var(--button-border-brush);
+}
+.fluent-icon-button--standard:hover:not(:disabled):not(.fluent-icon-button--disabled) {
+    background-color: var(--button-background-pointer-over);
+    color: var(--button-foreground-pointer-over);
+    border-color: var(--button-border-brush-pointer-over);
+}
+.fluent-icon-button--standard:active:not(:disabled):not(.fluent-icon-button--disabled) {
+    background-color: var(--button-background-pressed);
+    color: var(--button-foreground-pressed);
+    border-color: var(--button-border-brush-pressed);
+}
+.fluent-icon-button--standard:disabled,
+.fluent-icon-button--standard.fluent-icon-button--disabled {
+    background-color: var(--button-background-disabled);
+    color: var(--button-foreground-disabled);
+    border-color: var(--button-border-brush-disabled);
+}
+
+/* ---------- Accent ---------- */
+.fluent-icon-button--accent {
+    background-color: var(--accent-button-background);
+    color: var(--accent-button-foreground);
+}
+.fluent-icon-button--accent:hover:not(:disabled):not(.fluent-icon-button--disabled) {
+    background-color: var(--accent-button-background-pointer-over);
+    color: var(--accent-button-foreground-pointer-over);
+}
+.fluent-icon-button--accent:active:not(:disabled):not(.fluent-icon-button--disabled) {
+    background-color: var(--accent-button-background-pressed);
+    color: var(--accent-button-foreground-pressed);
+}
+.fluent-icon-button--accent:disabled,
+.fluent-icon-button--accent.fluent-icon-button--disabled {
+    background-color: var(--accent-button-background-disabled);
+    color: var(--accent-button-foreground-disabled);
+}
+
+/* ---------- Hyperlink ---------- */
+.fluent-icon-button--hyperlink {
+    background-color: transparent;
+    color: var(--accent-fill-color-default);
+}
+.fluent-icon-button--hyperlink:hover:not(:disabled):not(.fluent-icon-button--disabled) {
+    background-color: var(--subtle-fill-color-secondary);
+}
+.fluent-icon-button--hyperlink:active:not(:disabled):not(.fluent-icon-button--disabled) {
+    background-color: var(--subtle-fill-color-tertiary);
+    color: var(--accent-fill-color-tertiary);
+}
+.fluent-icon-button--hyperlink:disabled,
+.fluent-icon-button--hyperlink.fluent-icon-button--disabled {
+    color: var(--text-fill-color-disabled);
 }

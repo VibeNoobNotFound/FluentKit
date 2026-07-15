@@ -28,11 +28,11 @@
                 {
                     @foreach (var icon in _filtered)
                     {
-                        <FluentButton
+                        <FluentIconButton
                             Variant="@(icon == _selected ? ButtonVariant.Accent : ButtonVariant.Standard)"
                             OnClick="() => Select(icon)">
                             <FluentIcon Name="@icon.Glyph" />
-                        </FluentButton>
+                        </FluentIconButton>
                     }
                 }
             </div>

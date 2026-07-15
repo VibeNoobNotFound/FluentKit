@@ -4,7 +4,7 @@
 {
     <a role="button"
        href="@Href"
-       class="fluent-icon-button"
+       class="fluent-icon-button @VariantClass"
        @onclick="OnClick"
        @attributes="AdditionalAttributes">
         @ChildContent
@@ -13,7 +13,7 @@
 else
 {
     <button type="button"
-            class="fluent-icon-button @(Disabled ? "fluent-icon-button--disabled" : null)"
+            class="fluent-icon-button @VariantClass @(Disabled ? "fluent-icon-button--disabled" : null)"
             disabled="@Disabled"
             @onclick="OnClick"
             @attributes="AdditionalAttributes">
