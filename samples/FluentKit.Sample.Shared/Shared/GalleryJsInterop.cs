@@ -48,6 +48,36 @@ public sealed class GalleryJsInterop : IAsyncDisposable
         catch (TaskCanceledException) { }
     }
 
+    /// <summary>
+    /// Push raw source text into a &lt;code&gt; element and re-run Prism on it — used to
+    /// keep a live editor's highlighted overlay in sync with a plain-text &lt;textarea&gt;
+    /// on every keystroke.
+    /// </summary>
+    public async ValueTask LiveHighlightAsync(string codeElementId, string code)
+    {
+        try
+        {
+            await _js.InvokeVoidAsync("liveHighlight", codeElementId, code);
+        }
+        catch (JSException) { }
+        catch (TaskCanceledException) { }
+    }
+
+    /// <summary>
+    /// Wires up scroll-position syncing between a live editor's &lt;textarea&gt; and the
+    /// highlighted &lt;pre&gt; stacked beneath it. Safe to call on every render — the JS
+    /// side only attaches its listener once per textarea.
+    /// </summary>
+    public async ValueTask LiveHighlightSyncScrollAsync(string textareaId, string preId)
+    {
+        try
+        {
+            await _js.InvokeVoidAsync("liveHighlightSyncScroll", textareaId, preId);
+        }
+        catch (JSException) { }
+        catch (TaskCanceledException) { }
+    }
+
     /// <summary>Read a raw string value from localStorage, or null if missing/unavailable.</summary>
     public async ValueTask<string?> GetStorageItemAsync(string key)
     {

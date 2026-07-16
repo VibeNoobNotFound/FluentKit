@@ -2,7 +2,9 @@
 @using FluentKit.Composite
 @using FluentKit.Primitives
 @using FluentKit.Sample.Shared.Services
+@using FluentKit.Sample.Shared.Shared
 @inject IRazorPlaygroundCompiler Compiler
+@inject GalleryJsInterop GalleryJs
 
 <div class="gallery-page">
     <PageHeader Eyebrow="Design" Title="Playground"
@@ -38,11 +40,15 @@
         </div>
 
         <div class="playground__code-panel">
-            <textarea class="playground__textarea"
-                      spellcheck="false"
-                      @bind="_source"
-                      @bind:event="oninput"
-                      aria-label="Razor component source"></textarea>
+            <div class="playground__editor">
+                <pre class="playground__highlight" aria-hidden="true"><code id="@_codeElementId" class="language-markup"></code></pre>
+                <textarea id="@_textareaId"
+                          class="playground__textarea"
+                          spellcheck="false"
+                          value="@_source"
+                          @oninput="OnSourceInput"
+                          aria-label="Razor component source"></textarea>
+            </div>
         </div>
 
         @if (_diagnostics.Count > 0)
@@ -65,12 +71,37 @@
     private string? _status;
     private List<string> _diagnostics = [];
 
+    private readonly string _textareaId = $"playground-src-{Guid.NewGuid():N}";
+    private readonly string _codeElementId = $"playground-code-{Guid.NewGuid():N}";
+
     protected override async Task OnInitializedAsync()
     {
         // Warm the compiler (fetches metadata references) in the background so the first
         // real "Run" click doesn't eat the fetch cost.
         _ = Compiler.WarmUpAsync();
         await RunAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Paint the initial default source into the highlighted overlay and wire up
+            // scroll sync — same "highlight the <code>, sync scroll of the <pre> to the
+            // <textarea> on top of it" pattern used by SampleCodeBlock, just live instead
+            // of static.
+            await GalleryJs.LiveHighlightAsync(_codeElementId, _source);
+            await GalleryJs.LiveHighlightSyncScrollAsync(_textareaId, _codeElementId);
+        }
+    }
+
+    private async Task OnSourceInput(ChangeEventArgs args)
+    {
+        _source = args.Value?.ToString() ?? "";
+        // Re-highlight on every keystroke. This only touches the <code> element directly
+        // via JS (textContent + Prism.highlightElement) — it doesn't go through Blazor's
+        // render pipeline, so it stays responsive even for larger snippets.
+        await GalleryJs.LiveHighlightAsync(_codeElementId, _source);
     }
 
     private async Task RunAsync()
@@ -105,6 +136,7 @@
     private async Task ResetToDefault()
     {
         _source = DefaultSource;
+        await GalleryJs.LiveHighlightAsync(_codeElementId, _source);
         await RunAsync();
     }
 
