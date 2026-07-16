@@ -1,0 +1,153 @@
+.color-section {
+    margin-top: 8px;
+}
+
+.color-section__subtitle {
+    font-size: var(--font-size-body-large, 18px);
+    font-weight: var(--font-weight-semibold);
+    margin: 20px 0 8px;
+}
+
+.color-section__desc {
+    color: var(--text-fill-color-secondary);
+    max-width: 720px;
+    margin: 0 0 16px;
+}
+
+.color-section__note {
+    color: var(--text-fill-color-secondary);
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.control-example-spacer {
+    height: 24px;
+}
+
+.swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.swatch-grid--7 {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+    .swatch-grid--7 {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+/* ── Accent picker ─────────────────────────────────────────────────── */
+
+.accent-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    border-radius: var(--overlay-corner-radius);
+    background: var(--card-background-default);
+    border: 1px solid var(--card-stroke-default);
+    margin-bottom: 16px;
+}
+
+.accent-picker__presets {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.accent-picker__swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--control-stroke-color-default);
+    cursor: pointer;
+    padding: 0;
+}
+
+.accent-picker__swatch:hover {
+    transform: scale(1.08);
+}
+
+.accent-picker__custom {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px dashed var(--control-strong-stroke-color-default);
+    overflow: hidden;
+    cursor: pointer;
+    display: inline-flex;
+}
+
+.accent-picker__custom input[type="color"] {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.accent-picker__wallpapers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.accent-picker__label {
+    font-size: 12px;
+    color: var(--text-fill-color-secondary);
+}
+
+.accent-picker__hint {
+    font-size: 11px;
+    color: var(--text-fill-color-tertiary);
+}
+
+.demo-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* ── Material preview tiles ────────────────────────────────────────── */
+
+.material-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.material-tile {
+    position: relative;
+    width: 160px;
+    height: 90px;
+    border-radius: var(--overlay-corner-radius);
+    border: 1px solid var(--card-stroke-default);
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 8px;
+    font-size: 12px;
+    color: var(--text-fill-color-primary);
+}
+
+.material-tile span {
+    position: relative;
+    z-index: 1;
+    /* Always-dark caption backdrop over a live material preview (like the swatch grid's
+       always-black caution text, this doesn't flip with theme, so it isn't one of the
+       theme-swapped tokens) — reuses the same scrim color the Smoke/Default token defines. */
+    background: var(--smoke-background-default);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fff;
+}

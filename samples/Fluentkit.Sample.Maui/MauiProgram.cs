@@ -18,6 +18,7 @@ public static class MauiProgram
 
         // Core FluentKit services (same registrations as the Wasm sample's Program.cs)
         builder.Services.AddScoped<IThemeService, ThemeService>();
+        builder.Services.AddScoped<IAccentColorService, AccentColorService>();
         builder.Services.AddScoped<IOverlayService, OverlayService>();
 
         // Gallery-level JS interop (Prism highlighting, clipboard, localStorage helpers)

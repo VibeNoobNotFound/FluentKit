@@ -50,6 +50,33 @@
   --font-size-display: 68px;
   --font-weight-normal: 400;
   --font-weight-semibold: 600;
+
+  /*
+   * Accent ramp — DEFAULT/FALLBACK VALUES ONLY.
+   * FluentKit.Theming.IAccentColorService overwrites these on :root at runtime (see
+   * Theming/accent-interop.js's applyAccentPalette) as soon as it initializes — either with the
+   * Windows-default blue below, an explicit color, or one derived from a wallpaper image (see
+   * AccentColorService.SetAccentFromImageAsync). These hardcoded values exist purely so components
+   * don't render with an *undefined* accent for the one frame before JS interop runs; they were
+   * generated with the exact same tint/shade algorithm as AccentPalette.FromColor, from the same
+   * base color (#0078D4), so there's no visible "jump" once the real value lands.
+   * Each entry has both a hex form and a "-rgb" comma-triplet form, so semantic tokens can build
+   * translucent fills with rgba(var(--accent-x-rgb), alpha) where a flat hex won't do.
+   */
+  --accent-base: #0078d4;
+  --accent-base-rgb: 0, 120, 212;
+  --accent-light-1: #298ede;
+  --accent-light-1-rgb: 41, 142, 222;
+  --accent-light-2: #52a3e3;
+  --accent-light-2-rgb: 82, 163, 227;
+  --accent-light-3: #7ab9e9;
+  --accent-light-3-rgb: 122, 185, 233;
+  --accent-dark-1: #0065b2;
+  --accent-dark-1-rgb: 0, 101, 178;
+  --accent-dark-2: #005290;
+  --accent-dark-2-rgb: 0, 82, 144;
+  --accent-dark-3: #003e6e;
+  --accent-dark-3-rgb: 0, 62, 110;
 }
 
 /* Respect the OS-level reduced motion preference everywhere, not per-component */
