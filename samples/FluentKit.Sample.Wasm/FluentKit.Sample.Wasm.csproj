@@ -19,7 +19,6 @@
 
     <!-- Live Playground: compiles Razor markup + C# to a real component Type, in-browser. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Razor" Version="6.0.36" />
   </ItemGroup>
 
   <ItemGroup>

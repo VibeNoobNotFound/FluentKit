@@ -7,8 +7,7 @@
 @inject GalleryJsInterop GalleryJs
 
 <div class="gallery-page">
-    <PageHeader Eyebrow="Design" Title="Playground"
-                Description="Write a Razor component — markup and an optional @@code block — and see it rendered live. Everything runs in your browser: the same Razor engine and Roslyn compiler the SDK uses at build time, just running client-side instead. Nothing is sent to a server." />
+    <PageHeader Eyebrow="Design" Title="Playground" Description="@PageDescription" />
 
     <div class="playground">
         <div class="playground__preview">
@@ -64,6 +63,18 @@
 </div>
 
 @code {
+    // NOTE: this used to be inlined directly as the PageHeader's Description="..." attribute
+    // value, containing a literal "@@code" (Razor's escape for a literal @). Component
+    // attributes only support a single expression or a plain literal — they don't support
+    // "complex content" (a mix of literal text and an @-escape/expression), which is exactly
+    // what that string was. Razor's compiler flags that as RZ9986 and fails the build. A plain
+    // C# field has no such restriction (a single "@" isn't special in a C# string), so the text
+    // moves here and the attribute becomes a simple single-expression binding instead.
+    private const string PageDescription =
+        "Write a Razor component — markup and an optional @code block — and see it rendered " +
+        "live. Everything runs in your browser: the same Razor engine and Roslyn compiler the " +
+        "SDK uses at build time, just running client-side instead. Nothing is sent to a server.";
+
     private string _source = DefaultSource;
     private Type? _compiledType;
     private bool _isCompiling;

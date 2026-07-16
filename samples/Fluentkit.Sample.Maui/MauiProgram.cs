@@ -2,6 +2,8 @@
 using FluentKit.Theming;
 using FluentKit.Overlay;
 using FluentKit.Sample.Shared.Shared;
+using FluentKit.Sample.Shared.Services;
+using Fluentkit.Sample.Maui.Services;
 
 namespace Fluentkit.Sample.Maui;
 
@@ -23,6 +25,13 @@ public static class MauiProgram
 
         // Gallery-level JS interop (Prism highlighting, clipboard, localStorage helpers)
         builder.Services.AddScoped<GalleryJsInterop>();
+
+        // a Wasm implementation (which fetches its own assemblies over HTTP from "_framework/",
+        // an approach specific to Blazor WebAssembly), so PlaygroundPage's
+        // @inject IRazorPlaygroundCompiler Compiler had nothing to resolve and threw as soon as
+        // the page loaded. See Services/RazorPlaygroundCompiler.cs for the on-disk-assembly
+        // implementation used here instead.
+        builder.Services.AddScoped<IRazorPlaygroundCompiler, RazorPlaygroundCompiler>();
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
