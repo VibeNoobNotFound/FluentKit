@@ -212,29 +212,35 @@ git clone https://github.com/VibeNoobNotFound/FluentKit.git
 </ItemGroup>
 ```
 
-**2. Link the token stylesheet**
+**2. Link the Token & Icon stylesheets**
 
 `wwwroot/index.html` (WASM) or `Pages/_Host.cshtml` / `App.razor` (Server):
 
 ```html
 <link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
+<link rel="stylesheet" href="_content/FluentKit/Icons/FluentSystemIcons-Regular.css" />
 ```
 
-**3. Register theming**
+**3. Register Core FluentKit services**
 
 `Program.cs`:
 
 ```csharp
 builder.Services.AddScoped<IThemeService, ThemeService>();
+builder.Services.AddScoped<IAccentColorService, AccentColorService>();
+builder.Services.AddScoped<IOverlayService, OverlayService>(); // For Flyouts, Tooltips etc...
 ```
 
 **4. Wrap your root component**
 
 ```razor
 <ThemeProvider>
-    <FluentOverlayHost>
+      @*For Mica Background
+        <FluentMicaPanel Variant="@_backgroundVariant"
+              BackgroundImageUrl="@_wallpaperUrl"
+              style="position:fixed; inset:0; z-index:-1; opacity:0.72;" /> *@
         @Body
-    </FluentOverlayHost>
+    <FluentOverlayHost />
 </ThemeProvider>
 ```
 
