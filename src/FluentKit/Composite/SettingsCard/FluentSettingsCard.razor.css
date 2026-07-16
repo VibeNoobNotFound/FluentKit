@@ -7,7 +7,7 @@
     inline-size: 100%;
     min-inline-size: 148px;
     min-block-size: 68px;
-    padding: 16px;
+    padding: var(--spacing-m);
     color: var(--text-fill-color-primary);
     font-family: var(--font-family-base);
     font-size: var(--font-size-body);
@@ -35,7 +35,7 @@
     justify-content: center;
     inline-size: 20px;
     block-size: 20px;
-    margin-inline-end: 20px;
+    margin-inline-end: var(--spacing-m);
     color: var(--text-fill-color-primary);
     opacity: 1;
     overflow: hidden;
@@ -59,7 +59,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 24px;
+    gap: var(--spacing-l);
     transition: gap var(--duration-slow) var(--easing-standard);
 }
 
@@ -76,7 +76,7 @@
 }
 
 .fluent-settings-card-description {
-    margin-block-start: 2px;
+    margin-block-start: var(--spacing-xxs);
     color: var(--text-fill-color-secondary);
     font-size: 12px;
     overflow-wrap: break-word;
@@ -100,7 +100,7 @@
     justify-content: center;
     inline-size: 13px;
     block-size: 13px;
-    margin-inline-start: 14px;
+    margin-inline-start: var(--spacing-s);
     color: var(--text-fill-color-secondary);
 }
 
@@ -157,7 +157,7 @@
 
 .fluent-settings-card--vertical .fluent-settings-card-body {
     align-items: stretch;
-    gap: 8px;
+    gap: var(--spacing-xs);
 }
 
 .fluent-settings-card--vertical .fluent-settings-card-content {
@@ -176,7 +176,7 @@
 @container (max-width: 476px) {
     .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-body {
         align-items: stretch;
-        gap: 8px;
+        gap: var(--spacing-xs);
     }
 
     .fluent-settings-card:not(.fluent-settings-card--left):not(.fluent-settings-card--right):not(.fluent-settings-card--vertical) .fluent-settings-card-content {

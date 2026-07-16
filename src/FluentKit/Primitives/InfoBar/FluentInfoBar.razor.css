@@ -4,7 +4,7 @@
     align-items: center;
     box-sizing: border-box;
     min-block-size: 48px;
-    padding-inline-start: 15px;
+    padding-inline-start: var(--spacing-m);
     user-select: none;
     font-family: var(--font-family-base);
     background-clip: padding-box;
@@ -36,7 +36,7 @@
     align-self: flex-start;
     flex: 0 0 auto;
     display: flex;
-    margin-block-start: 16px;
+    margin-block-start: var(--spacing-m);
 }
 
 .fluent-info-bar-content {
@@ -46,13 +46,13 @@
     position: relative;
     box-sizing: border-box;
     flex: 1 1 auto;
-    margin-inline-start: 13px;
-    margin-block: 7px;
+    margin-inline-start: var(--spacing-s);
+    margin-block: var(--spacing-xs);
 }
 
 .fluent-info-bar-title {
     margin: 0;
-    margin-inline-end: 12px;
+    margin-inline-end: var(--spacing-s);
     color: var(--text-fill-color-primary);
     font-size: var(--font-size-body);
     font-weight: var(--font-weight-semibold);
@@ -62,7 +62,7 @@
 .fluent-info-bar-message {
     flex: 1 1 auto;
     margin: 0;
-    margin-inline-end: 15px;
+    margin-inline-end: var(--spacing-m);
     color: var(--text-fill-color-primary);
     font-size: var(--font-size-body);
     font-weight: var(--font-weight-normal);
@@ -73,7 +73,7 @@
     display: flex;
     align-items: center;
     align-self: flex-start;
-    margin-inline-end: 4px;
+    margin-inline-end: var(--spacing-xxs);
 }
 
 .fluent-info-bar-close-button {
@@ -85,7 +85,7 @@
     box-sizing: border-box;
     inline-size: 38px;
     block-size: 38px;
-    margin: 4px;
+    margin: var(--spacing-xxs);
     border: none;
     outline: none;
     appearance: none;

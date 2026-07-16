@@ -7,8 +7,8 @@
 .fluent-flyout-content {
     /* OverlaySurface already contributes 8px of chrome padding; expand back out to the
        WinUI Flyout's own 16px/320px so nested flyouts don't inherit a cramped default. */
-    margin: -8px;
-    padding: 16px;
+    margin: calc(var(--spacing-xs) * -1);
+    padding: var(--spacing-m);
     min-inline-size: 320px;
     box-sizing: border-box;
     color: var(--text-fill-color-primary);

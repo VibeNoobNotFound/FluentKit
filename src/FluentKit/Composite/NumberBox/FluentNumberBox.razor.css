@@ -11,7 +11,7 @@
     flex-direction: row;
     align-items: stretch;
     height: 100%;
-    gap: 2px;
+    gap: var(--spacing-xxs);
 }
 
 .fluent-numberbox-compact ::deep .fluent-textbox-button {
@@ -24,14 +24,14 @@
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: 100%;
-    margin-inline-start: 4px;
+    margin-inline-start: var(--spacing-xxs);
     width: 36px;
     height: 52px;
 
     display: flex;
     flex-direction: column;
-    gap: 1px;
-    padding: 3px;
+    gap: var(--spacing-xxs);
+    padding: var(--spacing-xxs);
 
     border-radius: var(--overlay-corner-radius);
     border: 1px solid var(--flyout-border);

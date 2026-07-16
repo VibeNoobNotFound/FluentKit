@@ -16,7 +16,7 @@
 .fluent-checkbox-container {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-xs);
     min-height: 32px;
     cursor: pointer;
     user-select: none;
@@ -86,7 +86,7 @@
     display: block;
     width: 0;
     height: 2px;
-    border-radius: 1px;
+    border-radius: var(--pill-corner-radius); /* round cap on a thin bar, per WinUI capsule convention */
     background-color: currentColor;
     /* Lengthened from --duration-normal to match the checkmark's draw-in timing. */
     transition: width var(--duration-slow) var(--easing-decelerate);

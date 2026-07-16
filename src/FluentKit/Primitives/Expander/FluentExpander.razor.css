@@ -11,7 +11,7 @@
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    padding: 8px;
+    padding: var(--spacing-xs);
     font-family: var(--font-family-base);
     font-size: var(--font-size-body);
     text-align: start;
@@ -40,7 +40,7 @@
     display: flex;
     inline-size: 16px;
     block-size: 16px;
-    margin-inline-end: 16px;
+    margin-inline-end: var(--spacing-m);
     color: var(--text-fill-color-primary);
 }
 
@@ -55,7 +55,7 @@
     flex: 0 0 auto;
     inline-size: 32px;
     block-size: 32px;
-    margin-inline-start: 20px;
+    margin-inline-start: var(--spacing-m);
     border-radius: var(--control-corner-radius);
     color: var(--text-fill-color-primary);
 }
@@ -98,7 +98,7 @@
 
 .fluent-expander-content {
     box-sizing: border-box;
-    padding: 16px;
+    padding: var(--spacing-m);
     font-family: var(--font-family-base);
     font-size: var(--font-size-body);
     background-color: var(--card-background-default);

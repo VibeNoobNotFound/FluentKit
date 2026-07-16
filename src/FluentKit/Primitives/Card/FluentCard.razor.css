@@ -1,6 +1,6 @@
 .fluent-card {
     box-sizing: border-box;
-    padding: 16px;
+    padding: var(--spacing-m);
     color: var(--text-fill-color-primary);
     background-color: var(--card-background-default);
     background-clip: padding-box;

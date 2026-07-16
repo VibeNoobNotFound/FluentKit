@@ -7,7 +7,7 @@
 .fluent-toggleswitch-root {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--spacing-xxs);
 }
 
 .fluent-toggleswitch-header {
@@ -19,7 +19,7 @@
 .fluent-toggleswitch-container {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--spacing-s);
     cursor: pointer;
     user-select: none;
 }
@@ -33,7 +33,7 @@
 
     width: 40px;
     height: 20px;
-    border-radius: 999px;
+    border-radius: var(--pill-corner-radius);
 
     border-width: var(--control-stroke-thickness);
     border-style: solid;
@@ -60,10 +60,10 @@
 
 .fluent-toggleswitch__thumb {
     position: absolute;
-    inset-inline-start: 3px;
+    inset-inline-start: var(--spacing-xxs);
     width: 12px;
     height: 12px;
-    border-radius: 999px;
+    border-radius: var(--pill-corner-radius);
     background-color: var(--toggle-foreground);
     transition: transform var(--duration-fast) var(--easing-standard),
                 width var(--duration-fast) var(--easing-standard),

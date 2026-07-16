@@ -15,7 +15,7 @@
     border: var(--control-stroke-thickness) solid var(--flyout-border);
     border-radius: var(--overlay-corner-radius);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-    padding: 8px;
+    padding: var(--spacing-xs);
 
     /* `both` so the surface holds its from-state before the animation starts (no flash-in at full
        opacity on the frame before this kicks off) and its to-state after it ends, rather than

@@ -112,7 +112,7 @@
     pointer-events: none;
     border-radius: inherit;
     opacity: var(--reveal-opacity);
-    padding: 1px;
+    padding: var(--control-stroke-thickness);
     background: radial-gradient(var(--reveal-border-radius) circle at var(--reveal-x) var(--reveal-y),
         rgba(255, 255, 255, var(--reveal-border-alpha)), transparent 70%);
     transition: opacity 180ms var(--easing-standard),

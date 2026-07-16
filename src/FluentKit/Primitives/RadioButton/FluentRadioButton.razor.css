@@ -6,7 +6,7 @@
 .fluent-radio-container {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-xs);
     min-height: 32px;
     cursor: pointer;
     user-select: none;
@@ -22,7 +22,7 @@
 
     width: 20px;
     height: 20px;
-    border-radius: 999px;
+    border-radius: var(--pill-corner-radius);
 
     border-width: var(--control-stroke-thickness);
     border-style: solid;
@@ -50,7 +50,7 @@
 .fluent-radio__dot {
     width: 10px;
     height: 10px;
-    border-radius: 999px;
+    border-radius: var(--pill-corner-radius);
     background-color: var(--toggle-checked-glyph);
     transition: width var(--duration-fast) var(--easing-standard),
                 height var(--duration-fast) var(--easing-standard);

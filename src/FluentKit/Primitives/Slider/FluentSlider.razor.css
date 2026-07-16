@@ -6,7 +6,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: var(--spacing-xs);
     touch-action: none;
 }
 
@@ -28,14 +28,14 @@
 .fluent-slider--horizontal .fluent-slider-rail {
     inline-size: 100%;
     block-size: 4px;
-    border-radius: 2px;
+    border-radius: var(--pill-corner-radius);
     background-color: var(--slider-rail-fill);
 }
 
 .fluent-slider--vertical .fluent-slider-rail {
     inline-size: 4px;
     block-size: 100%;
-    border-radius: 2px;
+    border-radius: var(--pill-corner-radius);
     background-color: var(--slider-rail-fill);
 }
 
@@ -48,7 +48,7 @@
 .fluent-slider-track-fill {
     position: absolute;
     background-color: var(--slider-track-fill);
-    border-radius: 2px;
+    border-radius: var(--pill-corner-radius);
     pointer-events: none;
 }
 
@@ -103,7 +103,7 @@
 
 .fluent-slider-ticks--outside.fluent-slider-ticks--outside {
     inset-block-start: 100%;
-    margin-block-start: 4px;
+    margin-block-start: var(--spacing-xxs);
 }
 
 /* Thumb: outer ring is the one genuinely-new opaque base color (ControlSolidFillColorDefault);
@@ -183,7 +183,7 @@
     border: var(--control-stroke-thickness) solid var(--flyout-border);
     border-radius: var(--overlay-corner-radius);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-    padding: 2px 8px;
+    padding: var(--spacing-xxs) 8px;
     font-size: var(--font-size-caption);
     color: var(--text-fill-color-primary);
     white-space: nowrap;

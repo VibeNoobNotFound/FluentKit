@@ -31,19 +31,19 @@ html, body {
 
 /* Page content wrapper — adds consistent padding and max-width */
 .gallery-page {
-    padding: 28px 36px 48px;
+    padding: var(--spacing-l) var(--spacing-xl) var(--spacing-xxl);
     max-width: 1200px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: var(--spacing-l);
 }
 
 /* ── Page Header ───────────────────────────────────────────────── */
 .page-header {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-bottom: 24px;
+    gap: var(--spacing-xs);
+    padding-bottom: var(--spacing-l);
     border-bottom: 1px solid var(--card-stroke-default);
 }
 
@@ -68,13 +68,13 @@ html, body {
     line-height: 1.6;
     color: var(--text-fill-color-secondary);
     max-width: 720px;
-    margin: 4px 0 0;
+    margin: var(--spacing-xxs) 0 0;
 }
 
 .page-header__links {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-xs);
     flex-wrap: wrap;
 }
 
@@ -83,7 +83,7 @@ html, body {
     display: flex;
     flex-direction: column;
     border: 1px solid var(--card-stroke-default);
-    border-radius: 8px;
+    border-radius: var(--overlay-corner-radius);
     /* Deliberately NOT overflow:hidden here — popouts/flyouts opened inside .control-example__demo
        (TimePicker, Calendar, ComboBox, Flyout, ...) are absolutely positioned and need to be able to
        visually escape this box rather than get clipped at its edge. Corner-rounding for the header
@@ -92,11 +92,11 @@ html, body {
 }
 
 .control-example__header {
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--overlay-corner-radius) var(--overlay-corner-radius) 0 0;
 }
 
 .control-example__header {
-    padding: 16px 20px 12px;
+    padding: var(--spacing-m) var(--spacing-m) var(--spacing-s);
     border-bottom: 1px solid var(--card-stroke-default);
 }
 
@@ -110,7 +110,7 @@ html, body {
 .control-example__header-desc {
     font-size: 12px;
     color: var(--text-fill-color-secondary);
-    margin: 4px 0 0;
+    margin: var(--spacing-xxs) 0 0;
     line-height: 1.5;
 }
 
@@ -124,19 +124,19 @@ html, body {
     position: relative;
     z-index: 1;
     overflow: visible;
-    padding: 28px 24px;
+    padding: var(--spacing-l) var(--spacing-l);
     background: var(--layer-fill-color-alt);
     border-bottom: 1px solid var(--card-stroke-default);
 }
 
 /* Options row (optional interactive tweaks panel) */
 .control-example__options {
-    padding: 16px 20px;
+    padding: var(--spacing-m) var(--spacing-m);
     background: var(--card-background-secondary, var(--subtle-fill-color-secondary));
     border-bottom: 1px solid var(--card-stroke-default);
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: var(--spacing-m);
     align-items: center;
 }
 
@@ -146,13 +146,13 @@ html, body {
     color: var(--text-fill-color-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-right: 4px;
+    margin-right: var(--spacing-xxs);
 }
 
 /* Code panel */
 .control-example__code-panel {
     background: #1e1e1e;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--overlay-corner-radius) var(--overlay-corner-radius);
     overflow: hidden;
 }
 
@@ -160,12 +160,12 @@ html, body {
 .control-example__code-panel .fluent-pivot-header {
     background: #1e1e1e;
     border-bottom-color: #333;
-    padding: 0 8px;
+    padding: 0 var(--spacing-xs);
 }
 
 .control-example__code-panel .fluent-pivot-tab {
     font-size: 12px;
-    padding: 8px 12px;
+    padding: var(--spacing-xs) var(--spacing-s);
     color: #aaa;
 }
 
@@ -193,7 +193,7 @@ html, body {
 
 .sample-code-block pre[class*="language-"] {
     margin: 0;
-    padding: 16px 20px;
+    padding: var(--spacing-m) var(--spacing-m);
     border-radius: 0;
     background: var(--card-background-default) !important;
     font-size: 13px;
@@ -211,7 +211,7 @@ html, body {
     position: absolute;
     top: 8px;
     right: 10px;
-    padding: 5px 12px;
+    padding: var(--spacing-xxs) var(--spacing-s);
     font-size: 11px;
     font-weight: 500;
     
@@ -220,7 +220,7 @@ html, body {
     backdrop-filter: blur(12px) saturate(1.25);
     -webkit-backdrop-filter: blur(12px) saturate(1.25);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
+    border-radius: var(--control-corner-radius);
     color: #e2e2e2;
     cursor: pointer;
     transition: 
@@ -252,9 +252,9 @@ html, body {
 /* ── Home Page ─────────────────────────────────────────────────── */
 .home-hero {
     position: relative;
-    padding: 56px 48px;
+    padding: var(--spacing-xxl) var(--spacing-xxl);
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: var(--overlay-corner-radius);
     background: linear-gradient(135deg, #0e162d 0%, #1c0e2a 45%, #2a0b27 75%, #18193f 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: #ffffff;
@@ -291,15 +291,15 @@ html[data-theme="light"] .home-hero::before {
 .home-hero__badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 14px;
+    gap: var(--spacing-xxs);
+    padding: var(--spacing-xxs) var(--spacing-s);
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 20px;
+    border-radius: var(--pill-corner-radius);
     font-size: 12px;
     font-weight: 600;
     color: #ffffff;
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-m);
 }
 
 html[data-theme="light"] .home-hero__badge {
@@ -313,7 +313,7 @@ html[data-theme="light"] .home-hero__badge {
     font-weight: 700;
     line-height: 1.1;
     color: inherit;
-    margin: 0 0 12px;
+    margin: 0 0 var(--spacing-s);
     letter-spacing: -0.5px;
 }
 
@@ -336,7 +336,7 @@ html[data-theme="light"] .home-hero__title span {
     color: rgba(255, 255, 255, 0.85);
     line-height: 1.6;
     max-width: 620px;
-    margin: 0 0 32px;
+    margin: 0 0 var(--spacing-xl);
 }
 
 html[data-theme="light"] .home-hero__subtitle {
@@ -345,14 +345,14 @@ html[data-theme="light"] .home-hero__subtitle {
 
 .home-hero__stats {
     display: flex;
-    gap: 36px;
+    gap: var(--spacing-xl);
     flex-wrap: wrap;
 }
 
 .home-stat {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--spacing-xxs);
 }
 
 .home-stat__number {
@@ -379,28 +379,28 @@ html[data-theme="light"] .home-stat__label {
 .home-section {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--spacing-s);
 }
 
 .home-section__title {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-fill-color-primary);
-    padding: 0 2px;
+    padding: 0 var(--spacing-xxs);
 }
 
 .control-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
+    gap: var(--spacing-m);
 }
 
 .control-card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 20px;
-    border-radius: 8px;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-m);
+    border-radius: var(--overlay-corner-radius);
     cursor: pointer;
     text-decoration: none;
     color: inherit;
@@ -440,7 +440,7 @@ html[data-theme="dark"] .control-card:hover {
     align-items: center;
     justify-content: center;
     background: rgba(128, 128, 128, 0.08);
-    border-radius: 8px;
+    border-radius: var(--overlay-corner-radius);
     color: var(--accent-fill-color-default);
 }
 
@@ -470,7 +470,7 @@ html[data-theme="dark"] .control-card:hover {
         transform var(--duration-normal) var(--easing-decelerate),
         box-shadow var(--duration-normal) var(--easing-standard);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-    border-radius: 8px;
+    border-radius: var(--overlay-corner-radius);
 }
 
 .fluent-reveal:has(.control-card):hover {
@@ -501,21 +501,21 @@ html[data-theme="dark"] .fluent-reveal:has(.control-card):hover {
 .settings-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--spacing-xs);
 }
 
 .settings-group__title {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-fill-color-primary);
-    margin: 0 0 8px;
+    margin: 0 0 var(--spacing-xs);
 }
 
 .fluent-file-upload-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 5px 12px;
+    padding: var(--spacing-xxs) var(--spacing-s);
     background: var(--control-fill-color-default);
     border: 1px solid var(--control-stroke-default);
     border-radius: var(--control-corner-radius);
@@ -538,7 +538,7 @@ html[data-theme="dark"] .fluent-reveal:has(.control-card):hover {
 /* ── Demo layout helpers ───────────────────────────────────────── */
 .demo-row {
     display: flex;
-    gap: 16px;
+    gap: var(--spacing-m);
     align-items: center;
     flex-wrap: wrap;
 }
@@ -546,20 +546,20 @@ html[data-theme="dark"] .fluent-reveal:has(.control-card):hover {
 .demo-col {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--spacing-xs);
 }
 
 .demo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+    gap: var(--spacing-m);
 }
 
 .demo-output {
-    margin-top: 12px;
-    padding: 8px 12px;
+    margin-top: var(--spacing-s);
+    padding: var(--spacing-xs) var(--spacing-s);
     background: var(--subtle-fill-color-secondary);
-    border-radius: 6px;
+    border-radius: var(--control-corner-radius);
     font-size: 12px;
     color: var(--text-fill-color-secondary);
     font-family: monospace;
@@ -567,8 +567,8 @@ html[data-theme="dark"] .fluent-reveal:has(.control-card):hover {
 
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-    .gallery-page { padding: 16px 16px 40px; }
-    .home-hero { padding: 28px 20px; }
+    .gallery-page { padding: var(--spacing-m) var(--spacing-m) var(--spacing-xl); }
+    .home-hero { padding: var(--spacing-l) var(--spacing-l); }
     .home-hero__title { font-size: 28px; }
     .control-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     .page-header__title { font-size: 26px; }

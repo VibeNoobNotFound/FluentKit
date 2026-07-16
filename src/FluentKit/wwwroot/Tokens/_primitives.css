@@ -6,9 +6,42 @@
  */
 
 :root {
-  /* corner radius */
+  /* corner radius
+   * Traced from WinUI-Gallery/WinUIGallery/Samples/Geometry/GeometryPage.xaml, which documents
+   * exactly three rounding levels (verified against the source-of-truth resource dictionary at
+   * microsoft-ui-xaml/controls/dev/CommonStyles/CornerRadius_themeresources.xaml):
+   *   - OverlayCornerRadius = 8px  -> top-level containers (app windows, flyouts, cards, dialogs)
+   *   - ControlCornerRadius = 4px  -> in-page elements (controls, list backplates)
+   *   - 0                          -> straight edges that intersect other straight edges (no token)
+   * Every corner-radius in this library must resolve to one of these two variables (or 0/inherit).
+   * Fully-round "capsule" shapes (toggle rails, thin bars/dots with round caps, pill badges) are a
+   * distinct WinUI convention of their own (radius >= half the element's own thickness) and are
+   * expressed with --pill-corner-radius below rather than a one-off pixel value per component. */
   --control-corner-radius: 4px;
   --overlay-corner-radius: 8px;
+  --pill-corner-radius: 999px;
+
+  /* spacing
+   * Traced from WinUI-Gallery/WinUIGallery/Samples/Spacing/SpacingPage.xaml — the gallery's own
+   * "Spacing" design page, which lists exactly these 7 values on the 4px grid along with their
+   * documented usage. Names below follow a t-shirt scale from smallest (4) to largest (48);
+   * every spacing/gap/padding/margin default in this library must resolve to one of these
+   * variables — no independently-chosen spacing values.
+   *   4  (--spacing-xxs) - Spacing used for compact sizing.
+   *   8  (--spacing-xs)  - Spacing between UI controls, control + label.
+   *   12 (--spacing-s)   - Spacing between control + header, surface and edge text, text sections.
+   *   16 (--spacing-m)   - Padding used in list styles, cards.
+   *   24 (--spacing-l)   - Spacing between content sections.
+   *   36 (--spacing-xl)  - Padding on pages.
+   *   48 (--spacing-xxl) - Spacing between page sections with title.
+   */
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-s: 12px;
+  --spacing-m: 16px;
+  --spacing-l: 24px;
+  --spacing-xl: 36px;
+  --spacing-xxl: 48px;
 
   /* stroke thickness */
   --control-stroke-thickness: 1px;

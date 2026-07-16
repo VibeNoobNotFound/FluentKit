@@ -1,7 +1,7 @@
 .fluent-list-view {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--spacing-xxs);
 
     margin: 0;
     padding: 0;

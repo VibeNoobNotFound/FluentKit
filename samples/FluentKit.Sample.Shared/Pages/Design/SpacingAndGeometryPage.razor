@@ -1,0 +1,113 @@
+@page "/design/spacing-geometry"
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Design"
+                Title="Spacing &amp; geometry"
+                Description="The values in this page are traced 1:1 from WinUI Gallery's own 'Spacing' and 'Geometry' design pages — same numbers, same usage guidance, mirrored here as the FluentKit design tokens every component defaults to." />
+
+    <section class="sg-section">
+        <h2 class="sg-section__title">Spacing</h2>
+        <p class="sg-section__lead">
+            Consistently sized spacing and gutters semantically group an experience into separate
+            components. A best practice in design is to use a 4px grid — any spacing or sizing
+            should be a multiple of 4, which keeps a layout consistent, harmonious, and easy to
+            scale. Below are the seven spacing values FluentKit exposes as <code>--spacing-*</code>
+            tokens, each shown at its actual pixel width.
+        </p>
+
+        <div class="sg-table">
+            <div class="sg-table__header">
+                <span>Value</span>
+                <span>Token</span>
+                <span>Usage</span>
+            </div>
+            @foreach (var row in SpacingRows)
+            {
+                <div class="sg-table__row">
+                    <span class="sg-table__value">@row.Label</span>
+                    <span class="sg-swatch-cell">
+                        <span class="sg-swatch" style="inline-size: @(row.Px)px;"></span>
+                    </span>
+                    <span class="sg-table__token"><code>var(--spacing-@row.Token)</code></span>
+                    <span class="sg-table__usage">@row.Usage</span>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="sg-section">
+        <h2 class="sg-section__title">Geometry</h2>
+        <p class="sg-section__lead">
+            Geometry describes the shape, size, and position of UI elements on screen. FluentKit
+            uses the same two levels of rounding WinUI does, depending on what's being rounded and
+            how it sits relative to neighboring elements — plus a fully-round "pill" convention for
+            capsule-shaped elements like toggle rails and round-capped bars.
+        </p>
+
+        <div class="sg-geometry-demo">
+            <div class="sg-geometry-demo__swatch sg-geometry-demo__swatch--overlay">
+                <span class="sg-geometry-demo__label">OverlayCornerRadius</span>
+                <span class="sg-geometry-demo__value">8px</span>
+            </div>
+            <div class="sg-geometry-demo__swatch sg-geometry-demo__swatch--control">
+                <span class="sg-geometry-demo__label">ControlCornerRadius</span>
+                <span class="sg-geometry-demo__value">4px</span>
+            </div>
+            <div class="sg-geometry-demo__swatch sg-geometry-demo__swatch--flat">
+                <span class="sg-geometry-demo__label">Straight edge</span>
+                <span class="sg-geometry-demo__value">0px</span>
+            </div>
+            <div class="sg-geometry-demo__swatch sg-geometry-demo__swatch--pill">
+                <span class="sg-geometry-demo__label">Pill / capsule</span>
+                <span class="sg-geometry-demo__value">999px</span>
+            </div>
+        </div>
+
+        <div class="sg-table sg-table--geometry">
+            <div class="sg-table__header sg-table__header--geometry">
+                <span>Corner radius</span>
+                <span>Usage</span>
+                <span>Style</span>
+            </div>
+            @foreach (var row in GeometryRows)
+            {
+                <div class="sg-table__row sg-table__row--geometry">
+                    <span class="sg-swatch-cell">
+                        <span class="sg-corner-swatch" style="border-radius: @(row.Radius);"></span>
+                        <span class="sg-table__value">@row.Label</span>
+                    </span>
+                    <span class="sg-table__usage">@row.Usage</span>
+                    <span class="sg-table__token"><code>@row.Token</code></span>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    private sealed record SpacingRow(string Label, string Token, int Px, string Usage);
+    private sealed record GeometryRow(string Label, string Radius, string Token, string Usage);
+
+    // Traced from WinUI-Gallery/WinUIGallery/Samples/Spacing/SpacingPage.xaml
+    private static readonly SpacingRow[] SpacingRows =
+    [
+        new("4epx",  "xxs", 4,  "Spacing used for compact sizing."),
+        new("8epx",  "xs",  8,  "Spacing between UI controls, control + label."),
+        new("12epx", "s",   12, "Spacing between control + header, surface and edge text, text sections."),
+        new("16epx", "m",   16, "Padding used in list styles, cards."),
+        new("24epx", "l",   24, "Spacing between content sections."),
+        new("36epx", "xl",  36, "Padding on pages."),
+        new("48epx", "xxl", 48, "Spacing between page sections with title."),
+    ];
+
+    // Traced from WinUI-Gallery/WinUIGallery/Samples/Geometry/GeometryPage.xaml
+    private static readonly GeometryRow[] GeometryRows =
+    [
+        new("8px", "var(--overlay-corner-radius)", "OverlayCornerRadius",
+            "Top-level containers such as app windows, flyouts, cards and dialogs."),
+        new("4px", "var(--control-corner-radius)", "ControlCornerRadius",
+            "In-page elements such as controls and list backplates."),
+        new("0px", "0", "N/a",
+            "Straight edges that intersect with other straight edges."),
+    ];
+}

@@ -1,0 +1,169 @@
+.sg-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-m);
+    padding-block-start: var(--spacing-xxl);
+}
+
+.sg-section:first-of-type {
+    padding-block-start: 0;
+}
+
+.sg-section__title {
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+    color: var(--text-fill-color-primary);
+}
+
+.sg-section__lead {
+    max-width: 760px;
+    font-size: var(--font-size-body);
+    line-height: 1.6;
+    color: var(--text-fill-color-secondary);
+    margin: 0;
+}
+
+.sg-section__lead code {
+    font-family: monospace;
+}
+
+/* ── Shared row/table ─────────────────────────────────────────── */
+.sg-table {
+    display: flex;
+    flex-direction: column;
+    border: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-radius: var(--overlay-corner-radius);
+    overflow: hidden;
+}
+
+.sg-table__header {
+    display: grid;
+    grid-template-columns: 96px 160px 1fr;
+    gap: var(--spacing-m);
+    padding: var(--spacing-s) var(--spacing-m);
+    font-size: var(--font-size-caption);
+    color: var(--text-fill-color-secondary);
+    background: var(--subtle-fill-color-secondary);
+}
+
+.sg-table__header--geometry {
+    grid-template-columns: 220px 1fr 220px;
+}
+
+.sg-table__row {
+    display: grid;
+    grid-template-columns: 96px 160px 1fr;
+    align-items: center;
+    gap: var(--spacing-m);
+    padding: var(--spacing-s) var(--spacing-m);
+    border-block-start: var(--control-stroke-thickness) solid var(--card-stroke-default);
+}
+
+.sg-table__row--geometry {
+    grid-template-columns: 220px 1fr 220px;
+}
+
+.sg-table__row:nth-of-type(even) {
+    background: var(--subtle-fill-color-tertiary, transparent);
+}
+
+.sg-table__value {
+    font-size: var(--font-size-body);
+    color: var(--text-fill-color-primary);
+}
+
+.sg-table__token code,
+.sg-table__usage code {
+    font-family: monospace;
+}
+
+.sg-table__token {
+    font-size: var(--font-size-caption);
+    color: var(--text-fill-color-secondary);
+}
+
+.sg-table__usage {
+    font-size: var(--font-size-caption);
+    color: var(--text-fill-color-secondary);
+}
+
+/* ── Spacing swatches ─────────────────────────────────────────── */
+.sg-swatch-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s);
+}
+
+.sg-swatch {
+    block-size: var(--spacing-s);
+    border-radius: var(--control-corner-radius);
+    background: var(--accent-fill-color-default);
+}
+
+/* ── Geometry hero swatches ───────────────────────────────────── */
+.sg-geometry-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-l);
+    padding: var(--spacing-l);
+    border: var(--control-stroke-thickness) solid var(--card-stroke-default);
+    border-radius: var(--overlay-corner-radius);
+    background: var(--card-background-default);
+}
+
+.sg-geometry-demo__swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    inline-size: 128px;
+    block-size: 96px;
+    background: var(--accent-fill-color-default);
+    color: var(--text-on-accent-fill-color-primary);
+}
+
+.sg-geometry-demo__swatch--overlay {
+    border-radius: var(--overlay-corner-radius);
+}
+
+.sg-geometry-demo__swatch--control {
+    border-radius: var(--control-corner-radius);
+}
+
+.sg-geometry-demo__swatch--flat {
+    border-radius: 0;
+}
+
+.sg-geometry-demo__swatch--pill {
+    border-radius: var(--pill-corner-radius);
+}
+
+.sg-geometry-demo__label {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+}
+
+.sg-geometry-demo__value {
+    font-size: var(--font-size-caption);
+    opacity: 0.85;
+}
+
+/* ── Geometry table corner swatch ─────────────────────────────── */
+.sg-corner-swatch {
+    inline-size: 20px;
+    block-size: 20px;
+    background: var(--accent-fill-color-default);
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .sg-table__header,
+    .sg-table__row,
+    .sg-table__header--geometry,
+    .sg-table__row--geometry {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xxs);
+    }
+}
