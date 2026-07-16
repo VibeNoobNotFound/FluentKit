@@ -1,43 +1,64 @@
-// Blazor WASM caches every boot resource it downloads (including the fingerprinted
-// _framework/*.dll files) in the browser's Cache Storage API. Since .NET 10 removed
-// blazor.boot.json (the manifest is now inlined into dotnet.js instead), there's no
-// static file left to read to discover the *.dll fingerprinted filenames. Rather than
-// guessing names or re-fetching over HTTP, we read the exact bytes Blazor itself already
-// downloaded and cached at startup — no network round trip, no fingerprint matching.
+// .NET 10 removed blazor.boot.json as a separate static file — the boot manifest is now
+// inlined directly into dotnet.js as a literal JSON blob (wrapped in /*json-start*/ ...
+// /*json-end*/ markers) passed to `ft.withConfig({...})`. Rather than fetching a manifest
+// file that no longer exists, we fetch dotnet.js itself (already loaded by the page, so
+// it's guaranteed reachable) and read the fingerprinted assembly filenames straight out of
+// its embedded config.
 
-export async function listCachedFrameworkAssemblies() {
-    const urls = [];
-    try {
-        const cacheNames = await caches.keys();
-        for (const cacheName of cacheNames) {
-            const cache = await caches.open(cacheName);
-            const requests = await cache.keys();
-            for (const req of requests) {
-                if (req.url.indexOf("/_framework/") !== -1 && req.url.endsWith(".dll")) {
-                    urls.push(req.url);
-                }
-            }
-        }
-    } catch (e) {
-        // Cache Storage API unavailable (e.g. private browsing) — caller falls back.
-        console.warn("[Playground] Cache Storage read failed:", e);
-    }
-    return urls;
+const JSON_START = "/*json-start*/";
+const JSON_END = "/*json-end*/";
+
+function findDotnetJsCandidates() {
+    // Dynamic imports (which is how dotnet.js is loaded) show up in the Resource Timing
+    // API even though they never appear as a <script> tag in the DOM.
+    const fromTiming = performance.getEntriesByType("resource")
+        .map(e => e.name)
+        .filter(u =>
+            /\/dotnet(\.[A-Za-z0-9_-]+)?\.js(\?.*)?$/.test(u) &&
+            u.indexOf("dotnet.native") === -1 &&
+            u.indexOf("dotnet.runtime") === -1);
+
+    // Fallback in case the timing buffer was cleared or missed it: the conventional
+    // unfingerprinted path also works on hosts that don't fingerprint this file.
+    return [...new Set([...fromTiming, "_framework/dotnet.js"])];
 }
 
-export async function getCachedAssemblyBytes(url) {
-    try {
-        const cacheNames = await caches.keys();
-        for (const cacheName of cacheNames) {
-            const cache = await caches.open(cacheName);
-            const response = await cache.match(url);
-            if (response) {
-                const buffer = await response.arrayBuffer();
-                return new Uint8Array(buffer);
+export async function getFrameworkAssemblyManifest() {
+    for (const url of findDotnetJsCandidates()) {
+        try {
+            const response = await fetch(url, { cache: "force-cache" });
+            if (!response.ok) {
+                continue;
             }
+
+            const text = await response.text();
+            const start = text.indexOf(JSON_START);
+            const end = text.indexOf(JSON_END);
+            if (start === -1 || end === -1) {
+                continue;
+            }
+
+            const config = JSON.parse(text.substring(start + JSON_START.length, end));
+            const fileNames = [];
+            const buckets = ["coreAssembly", "assembly"];
+            for (const bucket of buckets) {
+                const entries = config.resources && config.resources[bucket];
+                if (Array.isArray(entries)) {
+                    for (const entry of entries) {
+                        if (entry && typeof entry.name === "string" && entry.name.endsWith(".dll")) {
+                            fileNames.push(entry.name);
+                        }
+                    }
+                }
+            }
+
+            if (fileNames.length > 0) {
+                return fileNames;
+            }
+        } catch (e) {
+            console.warn("[Playground] Failed to read manifest from", url, e);
         }
-    } catch (e) {
-        console.warn("[Playground] Cache Storage read failed for", url, e);
     }
-    return null;
+
+    return [];
 }

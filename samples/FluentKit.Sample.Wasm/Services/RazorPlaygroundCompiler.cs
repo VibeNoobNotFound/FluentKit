@@ -18,11 +18,9 @@ namespace FluentKit.Sample.Wasm.Services;
 /// Blazor and Thinktecture's WASM Razor template engine: nothing is sent to a server, the
 /// .NET runtime already sitting in the page does the compiling.
 ///
-/// NOTE: this file was written and reasoned about carefully, but could not be built/run in
-/// the environment it was authored in (no .NET SDK available there — see the fluentkit skill
-/// notes). Please do a first `dotnet build` locally; the riskiest surface is the exact Razor
-/// design-time API shape (RazorProjectEngine/CompilerFeatures), which has shifted slightly
-/// across `Microsoft.CodeAnalysis.Razor` versions.
+/// For .NET 10, the boot manifest is embedded inside dotnet.js; this compiler fetches that
+/// JS file, extracts the fingerprinted assembly filenames, and then downloads each assembly
+/// via HttpClient (browser cache handles the rest).
 /// </summary>
 public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
 {
@@ -44,27 +42,13 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
     public async Task WarmUpAsync()
     {
         if (_isWarm)
-        {
             return;
-        }
 
-        // Every assembly the running app already needed is sitting right here in the WASM
-        // runtime. We just need its raw bytes again so Roslyn can treat it as a reference
-        // (loaded assemblies don't expose a real on-disk Location in the browser).
-        //
-        // As of .NET 10, blazor.boot.json no longer exists as a static file (the boot
-        // manifest is inlined into dotnet.js instead), so there's nothing to fetch that lists
-        // the exact fingerprinted _framework/*.dll filenames. Guessing "{name}.dll" doesn't
-        // work either since publish fingerprints these filenames with a content hash
-        // (e.g. "System.Private.CoreLib.a1b2c3d4.dll").
-        //
-        // Instead: Blazor's own bootstrapper already downloaded and cached every one of these
-        // files in the browser's Cache Storage API at startup. We read the exact bytes back
-        // from that cache — no filename guessing, no manifest, no extra network fetch.
-        var fetchedFromCache = await TryWarmUpFromCacheStorageAsync();
-
-        if (!fetchedFromCache)
+        // Try the new manifest‑based approach first (works for .NET 10+).
+        var manifestOk = await TryWarmUpFromManifestAsync();
+        if (!manifestOk)
         {
+            // Fallback: guess filenames (works when no fingerprinting, e.g. local dev).
             await WarmUpByGuessingFileNamesAsync();
         }
 
@@ -72,55 +56,48 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
 
         if (_referenceCache.Count == 0)
         {
-            // Leave IsWarm = true (no point retrying forever) but the empty cache will surface
-            // as a clear pipeline error on the next CompileAsync call rather than a wall of
-            // confusing "System could not be found" C# diagnostics.
             Console.Error.WriteLine(
-                "[Playground] Warm-up fetched zero assembly references. Check that the browser's " +
-                "Cache Storage API is available (not private browsing) and that " +
-                "playgroundAssemblyCache.js loaded correctly.");
+                "[Playground] Warm-up fetched zero assembly references. Check that " +
+                "dotnet.js can be fetched and contains the manifest, or that the " +
+                "fallback can locate the assemblies.");
         }
     }
 
     /// <summary>
-    /// Reads already-downloaded _framework/*.dll bytes straight out of the browser's Cache
-    /// Storage API via JS interop, using the exact fingerprinted URLs Blazor itself cached
-    /// at startup — no manifest file needed.
+    /// Reads the fingerprinted assembly filenames from the dotnet.js boot manifest
+    /// (embedded in the file as /*json-start*/ ... /*json-end*/), then downloads each
+    /// assembly via HttpClient. The browser's own cache will serve the bytes if they
+    /// were already downloaded at startup.
     /// </summary>
-    private async Task<bool> TryWarmUpFromCacheStorageAsync()
+    private async Task<bool> TryWarmUpFromManifestAsync()
     {
         try
         {
             await using var module = await _js.InvokeAsync<IJSObjectReference>("import", CacheModulePath);
+            var fileNames = await module.InvokeAsync<string[]>("getFrameworkAssemblyManifest");
 
-            var urls = await module.InvokeAsync<string[]>("listCachedFrameworkAssemblies");
-            if (urls.Length == 0)
-            {
+            if (fileNames == null || fileNames.Length == 0)
                 return false;
-            }
 
-            var fetches = urls.Select(async url =>
+            var tasks = fileNames.Select(async fileName =>
             {
-                if (_referenceCache.ContainsKey(url))
-                {
+                if (_referenceCache.ContainsKey(fileName))
                     return;
-                }
 
                 try
                 {
-                    var bytes = await module.InvokeAsync<byte[]?>("getCachedAssemblyBytes", url);
+                    var bytes = await _http.GetByteArrayAsync($"_framework/{fileName}");
                     if (bytes is { Length: > 0 })
-                    {
-                        _referenceCache[url] = MetadataReference.CreateFromImage(bytes);
-                    }
+                        _referenceCache[fileName] = MetadataReference.CreateFromImage(bytes);
                 }
                 catch
                 {
-                    // One missing/unreadable cache entry shouldn't block the rest.
+                    // Ignore – if an assembly can't be fetched, Roslyn will later report
+                    // "type not found" errors for types that depend on it.
                 }
             });
 
-            await Task.WhenAll(fetches);
+            await Task.WhenAll(tasks);
             return _referenceCache.Count > 0;
         }
         catch
@@ -130,10 +107,10 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
     }
 
     /// <summary>
-    /// Fallback used if Cache Storage can't be read (e.g. private browsing, or a host like
-    /// MAUI/local dev server where the runtime hasn't populated the cache the same way):
-    /// guess "{assembly name}.dll" for every loaded assembly. Works when filenames aren't
-    /// fingerprinted (e.g. local `dotnet run`), fails harmlessly otherwise.
+    /// Fallback used when the manifest cannot be read (e.g. dotnet.js is not reachable,
+    /// or the host doesn't use fingerprinting). Guesses "{assembly name}.dll" for every
+    /// loaded assembly. Works when filenames aren't fingerprinted (e.g. local `dotnet run`),
+    /// fails silently otherwise.
     /// </summary>
     private async Task WarmUpByGuessingFileNamesAsync()
     {
@@ -141,13 +118,11 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
             .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.GetName().Name))
             .ToList();
 
-        var fetches = assemblies.Select(async asm =>
+        var tasks = assemblies.Select(async asm =>
         {
             var name = asm.GetName().Name!;
             if (_referenceCache.ContainsKey(name))
-            {
                 return;
-            }
 
             try
             {
@@ -156,13 +131,11 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
             }
             catch
             {
-                // Not every loaded assembly is fetchable this way. Missing a reference here
-                // only matters if user code actually needs it, in which case Roslyn will
-                // surface a normal "type or namespace not found" diagnostic.
+                // Silently ignore – missing references will surface as compilation errors.
             }
         });
 
-        await Task.WhenAll(fetches);
+        await Task.WhenAll(tasks);
     }
 
     public async Task<RazorPlaygroundResult> CompileAsync(string razorSource)
@@ -170,16 +143,13 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
         try
         {
             if (!_isWarm)
-            {
                 await WarmUpAsync();
-            }
 
             if (_referenceCache.Count == 0)
             {
                 return RazorPlaygroundResult.Fail(pipelineError:
                     "No metadata references available — the compiler couldn't read any of this " +
-                    "app's own assemblies from the browser cache. Check the browser console for " +
-                    "the warm-up warning.");
+                    "app's own assemblies. Check the browser console for warm-up warnings.");
             }
 
             var className = $"LiveComponent_{Guid.NewGuid():N}";
@@ -200,12 +170,8 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
                 builder.Features.Add(new CompilationTagHelperFeature());
                 builder.Features.Add(new DefaultMetadataReferenceFeature { References = references });
 
-                // Without this, short component tags like <FluentButton> aren't recognized as
-                // components at all — the FluentButton namespace is never "in scope", so Razor
-                // falls back to treating it as a plain, unknown HTML element (renders literally
-                // as <fluentbutton>, no styling, parameters/@onclick become dead HTML attributes).
-                // This mirrors the app's own _Imports.razor so playground snippets don't need to
-                // repeat these @using lines themselves.
+                // This mirrors the app's _Imports.razor so playground snippets don't need
+                // to repeat @using lines.
                 builder.AddDefaultImports(DefaultImports);
             });
 
@@ -218,12 +184,8 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
                 .ToList();
 
             if (razorErrors.Count > 0)
-            {
                 return RazorPlaygroundResult.Fail(razorDiagnostics: razorErrors);
-            }
 
-            // Razor generates the class named after the file (LiveComponent_xxxx); rename
-            // isn't needed since we already picked the file name to match.
             var generatedCode = csharpDocument.GeneratedCode;
 
             var syntaxTree = CSharpSyntaxTree.ParseText(
@@ -272,8 +234,7 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
 
     /// <summary>
     /// Mirrors samples/FluentKit.Sample.Shared/_Imports.razor so components in that namespace
-    /// set (FluentButton, FluentPivot, etc.) resolve as components in playground snippets without
-    /// the user having to add @using lines themselves — same experience as any other page.
+    /// set (FluentButton, FluentPivot, etc.) resolve as components in playground snippets.
     /// </summary>
     private const string DefaultImports =
 """
