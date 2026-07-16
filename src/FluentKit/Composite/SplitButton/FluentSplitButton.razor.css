@@ -30,8 +30,8 @@
 .fluent-splitbutton-action {
     flex: 1;
     min-width: 88px;
-    padding: 0 12px;
-    gap: 8px;
+    padding: 0 var(--spacing-s);
+    gap: var(--spacing-xs);
     justify-content: flex-start;
     border-right-width: var(--control-stroke-thickness);
     border-right-style: solid;

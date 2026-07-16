@@ -5,8 +5,8 @@
     box-sizing: border-box;
     flex: 0 0 auto;
     inline-size: calc(100% - 8px);
-    margin: 2px 4px;
-    padding-inline: 12px;
+    margin: var(--spacing-xxs) 4px;
+    padding-inline: var(--spacing-s);
     border-radius: var(--control-corner-radius);
     outline: none;
     background-color: transparent;
@@ -26,7 +26,7 @@
     inset-inline-start: 0;
     inline-size: 3px;
     block-size: 0;
-    border-radius: 3px;
+    border-radius: var(--pill-corner-radius);
     background-color: var(--accent-fill-color-default);
     opacity: 0;
     transition: transform var(--duration-fast) var(--easing-standard);
@@ -67,7 +67,7 @@
 }
 
 .fluent-menu-flyout-item--indented {
-    padding-inline-start: 40px;
+    padding-inline-start: var(--spacing-xl);
 }
 
 .fluent-menu-flyout-item-icon {
@@ -76,7 +76,7 @@
     justify-content: center;
     inline-size: 16px;
     block-size: 16px;
-    margin-inline-end: 12px;
+    margin-inline-end: var(--spacing-s);
     flex: 0 0 auto;
 }
 
@@ -88,7 +88,7 @@
 
 .fluent-menu-flyout-item-hint {
     flex: 0 0 auto;
-    margin-inline-start: 24px;
+    margin-inline-start: var(--spacing-l);
     font-size: var(--font-size-caption);
     color: var(--text-fill-color-secondary);
 }
@@ -104,7 +104,7 @@
     inline-size: 12px;
     block-size: 12px;
     margin-inline-start: auto;
-    padding-inline-start: 24px;
+    padding-inline-start: var(--spacing-l);
     flex: 0 0 auto;
 }
 
@@ -114,9 +114,9 @@
     display: inline-block;
     inline-size: 4px;
     block-size: 4px;
-    border-radius: 4px;
-    margin-inline-start: 6px;
-    margin-inline-end: 18px;
+    border-radius: var(--pill-corner-radius);
+    margin-inline-start: var(--spacing-xxs);
+    margin-inline-end: var(--spacing-m);
     background-color: transparent;
     flex: 0 0 auto;
 }
@@ -131,7 +131,7 @@
     justify-content: center;
     inline-size: 12px;
     block-size: 12px;
-    margin-inline-start: 2px;
-    margin-inline-end: 14px;
+    margin-inline-start: var(--spacing-xxs);
+    margin-inline-end: var(--spacing-s);
     flex: 0 0 auto;
 }

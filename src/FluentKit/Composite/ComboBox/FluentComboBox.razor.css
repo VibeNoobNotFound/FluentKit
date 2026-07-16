@@ -40,8 +40,8 @@
     flex: 1 1 auto;
     inline-size: 100%;
     min-block-size: 30px;
-    padding-inline: 11px;
-    gap: 8px;
+    padding-inline: var(--spacing-s);
+    gap: var(--spacing-xs);
 
     border-radius: var(--control-corner-radius);
     border-width: var(--control-stroke-thickness);
@@ -80,7 +80,7 @@
 .fluent-combo-box-label {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-xs);
     flex: 1 1 auto;
     text-align: start;
     min-block-size: 20px;
@@ -148,8 +148,8 @@
     flex: 1 1 auto;
     inline-size: 100%;
     min-block-size: 30px;
-    padding-inline-start: 10px;
-    padding-inline-end: 4px;
+    padding-inline-start: var(--spacing-xs);
+    padding-inline-end: var(--spacing-xxs);
 
     border: none;
     outline: none;
@@ -301,7 +301,7 @@
     position: relative;
     box-sizing: border-box;
     margin: 0;
-    padding: 1px;
+    padding: var(--spacing-xxs);
     list-style: none;
     overflow: auto;
     inline-size: 100%;
@@ -335,12 +335,12 @@
 .fluent-combo-box-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-xs);
     position: relative;
     box-sizing: border-box;
     flex: 0 0 auto;
-    margin: 4px;
-    padding-inline: 11px;
+    margin: var(--spacing-xxs);
+    padding-inline: var(--spacing-s);
     border-radius: var(--control-corner-radius);
     outline: none;
     background-color: transparent;
@@ -357,7 +357,7 @@
 .fluent-combo-box-item::before {
     content: "";
     position: absolute;
-    border-radius: 3px;
+    border-radius: var(--pill-corner-radius);
     background-color: var(--accent-fill-color-default);
     transition: transform var(--duration-fast) var(--easing-standard);
     opacity: 0;

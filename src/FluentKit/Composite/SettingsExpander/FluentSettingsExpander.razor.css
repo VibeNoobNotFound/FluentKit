@@ -42,7 +42,7 @@
 
 .fluent-settings-expander-items {
     box-sizing: border-box;
-    padding-inline: 1px;
+    padding-inline: var(--spacing-xxs);
     background-color: var(--card-background-default);
     background-clip: padding-box;
     border-inline: var(--control-stroke-thickness) solid var(--card-stroke-default);
@@ -63,7 +63,7 @@
 .fluent-settings-expander-items-header,
 .fluent-settings-expander-items-footer {
     box-sizing: border-box;
-    padding: 8px 16px;
+    padding: var(--spacing-xs) var(--spacing-m);
 }
 
 /* Nested FluentSettingsCard items lose their own border/radius/shadow — the items block already

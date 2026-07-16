@@ -3,7 +3,7 @@
     inline-size: 100%;
     block-size: 3px;
     overflow: hidden;
-    border-radius: 3px;
+    border-radius: var(--pill-corner-radius);
 }
 
 .fluent-progress-bar-track {
@@ -17,7 +17,7 @@
     inset-block: 0;
     inset-inline-start: 0;
     background-color: var(--progress-fill);
-    border-radius: 3px;
+    border-radius: var(--pill-corner-radius);
     transition: inline-size var(--duration-normal) var(--easing-standard);
 }
 

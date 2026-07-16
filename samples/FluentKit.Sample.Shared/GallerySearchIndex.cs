@@ -71,6 +71,7 @@ public static class GallerySearchIndex
         new("Icons", "Design", "design/icons"),
         new("Colors", "Colors", "design/colors"),
         new("Playground", "Design", "design/playground"),
+        new("Spacing & geometry", "Design", "design/spacing-geometry"),
 
         new("Settings", "Get Started", "settings"),
     ];

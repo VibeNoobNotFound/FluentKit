@@ -5,8 +5,8 @@
     justify-content: center;
     min-inline-size: 16px;
     min-block-size: 16px;
-    padding: 2px 4px;
-    border-radius: 16px;
+    padding: var(--spacing-xxs) 4px;
+    border-radius: var(--pill-corner-radius);
     color: var(--text-on-accent-fill-color-primary);
     font-family: var(--font-family-base);
     font-size: var(--font-size-caption);

@@ -145,7 +145,7 @@
 .fluent-nav-view--compact .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item,
 .fluent-nav-view--minimal .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item {
     justify-content: flex-start !important;
-    padding-inline: 12px !important;
+    padding-inline: var(--spacing-s) !important;
 }
 
 .fluent-nav-view--compact .fluent-nav-view-pane-overlay ::deep .fluent-nav-view-item-icon,
@@ -164,22 +164,22 @@
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
-    padding-block-start: 4px;
-    padding-inline: 8px;
+    padding-block-start: var(--spacing-xxs);
+    padding-inline: var(--spacing-xs);
     border-bottom: 1px solid var(--card-stroke-default);
 }
 
 .fluent-nav-view-pane-header-buttons {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--spacing-xxs);
     min-height: 40px;
 }
 
 .fluent-nav-view-pane-custom-header {
     display: flex;
     align-items: center;
-    padding-block-end: 8px;
+    padding-block-end: var(--spacing-xs);
     box-sizing: border-box;
     width: 100%;
 }
@@ -190,9 +190,9 @@
 
 .fluent-nav-view-pane-header--rail {
     flex-direction: column;
-    gap: 4px;
-    padding-inline: 4px;
-    padding-block: 4px;
+    gap: var(--spacing-xxs);
+    padding-inline: var(--spacing-xxs);
+    padding-block: var(--spacing-xxs);
     min-height: 36px;
     justify-content: flex-start;
     align-items: center;
@@ -204,7 +204,7 @@
     justify-content: center;
     inline-size: 100%;
     min-height: 36px;
-    padding-inline: 12px;
+    padding-inline: var(--spacing-s);
     box-sizing: border-box;
     border: none;
     background-color: transparent;
@@ -212,7 +212,7 @@
     cursor: pointer;
     border-radius: var(--control-corner-radius);
     transition: background-color var(--duration-fast) var(--easing-standard);
-    margin-block-end: 4px;
+    margin-block-end: var(--spacing-xxs);
 }
 
 .fluent-nav-view-pane-header-icon-button:hover {
@@ -270,10 +270,10 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--spacing-xxs);
     flex: 1 1 auto;
     overflow-y: auto;
-    padding: 8px 8px;
+    padding: var(--spacing-xs) 8px;
     width: 100%;
 }
 
@@ -285,7 +285,7 @@
    indicator needs pointer-events:none so it never intercepts item clicks. */
 .fluent-nav-view-ribbon-indicator {
     position: absolute;
-    inset-inline-start: 8px;
+    inset-inline-start: var(--spacing-xs);
     top: 0;
     inline-size: 3px;
     block-size: 16px;
@@ -303,9 +303,9 @@
 .fluent-nav-view-pane-footer {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--spacing-xxs);
     flex: 0 0 auto;
-    padding: 4px 8px 8px;
+    padding: var(--spacing-xxs) 8px 8px;
     border-top: 1px solid var(--card-stroke-default);
 }
 
@@ -317,8 +317,8 @@
 .fluent-nav-view-settings-button {
     inline-size: 100%;
     justify-content: flex-start;
-    gap: 12px;
-    padding-inline: 12px;
+    gap: var(--spacing-s);
+    padding-inline: var(--spacing-s);
 }
 
 /* --- Content area --- */
@@ -327,23 +327,23 @@
     block-size: 100%;
     overflow: auto;
     background-color: var(--nav-view-content-background);
-    padding-inline: 24px;
-    padding-block: 24px;
+    padding-inline: var(--spacing-l);
+    padding-block: var(--spacing-l);
     min-width: 0;
     position: relative;
     z-index: 1;
 }
 
 .fluent-nav-view-content--minimal-closed {
-    padding-block-start: 8px;
+    padding-block-start: var(--spacing-xs);
 }
 
 .fluent-nav-view-content-top-bar {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding-block: 4px;
-    margin-bottom: 4px;
+    gap: var(--spacing-xxs);
+    padding-block: var(--spacing-xxs);
+    margin-bottom: var(--spacing-xxs);
     min-height: 44px;
 }
 
@@ -351,11 +351,11 @@
     font-size: var(--font-size-subtitle);
     font-weight: var(--font-weight-semibold);
     color: var(--text-fill-color-primary);
-    margin-left: 4px;
+    margin-left: var(--spacing-xxs);
 }
 
 .fluent-nav-view-header {
-    margin-bottom: 16px;
+    margin-bottom: var(--spacing-m);
     font-size: var(--font-size-title);
     font-weight: var(--font-weight-semibold);
     color: var(--text-fill-color-primary);
@@ -399,7 +399,7 @@
 }
 
 .fluent-nav-view--top .fluent-nav-view-content {
-    padding-top: 12px;
+    padding-top: var(--spacing-s);
 }
 
 .fluent-nav-view-dismiss-backdrop {

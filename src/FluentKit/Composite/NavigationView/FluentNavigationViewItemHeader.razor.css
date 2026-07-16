@@ -1,9 +1,9 @@
 .fluent-nav-view-item-header {
     display: flex;
     align-items: center;
-    padding-inline: 12px;
-    padding-block-start: 12px;
-    padding-block-end: 4px;
+    padding-inline: var(--spacing-s);
+    padding-block-start: var(--spacing-s);
+    padding-block-end: var(--spacing-xxs);
     box-sizing: border-box;
     user-select: none;
     min-height: 28px;

@@ -2,11 +2,11 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--spacing-s);
     inline-size: 100%;
     min-height: 36px;
-    padding-inline: 12px;
-    padding-block: 6px;
+    padding-inline: var(--spacing-s);
+    padding-block: var(--spacing-xxs);
     box-sizing: border-box;
     border: none;
     border-radius: var(--control-corner-radius);
@@ -106,8 +106,8 @@
 .fluent-nav-view-item-children {
     display: flex;
     flex-direction: column;
-    gap: 1px;
-    padding-left: 12px;
+    gap: var(--spacing-xxs);
+    padding-left: var(--spacing-s);
     animation: slideDown var(--duration-normal) var(--easing-standard);
 }
 
@@ -132,7 +132,7 @@
 }
 
 .fluent-nav-view--compact .fluent-nav-view-item {
-    padding-inline: 8px;
+    padding-inline: var(--spacing-xs);
     justify-content: center;
 }
 

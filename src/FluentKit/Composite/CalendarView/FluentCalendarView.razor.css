@@ -101,7 +101,7 @@
 .fluent-calendar-view-pagination-controls button {
     padding: 0;
     inline-size: 30px;
-    margin-inline-start: 4px;
+    margin-inline-start: var(--spacing-xxs);
 }
 
 .fluent-calendar-view-header {
@@ -121,7 +121,7 @@
     box-sizing: border-box;
     border-block-end: 1px solid var(--card-stroke-default);
     inline-size: 100%;
-    padding: 7px;
+    padding: var(--spacing-xs);
 }
 
 .fluent-calendar-view-header button {
@@ -171,7 +171,7 @@
 
 .fluent-calendar-view-header-text button {
     inline-size: 100%;
-    padding-inline: 9px;
+    padding-inline: var(--spacing-xs);
     justify-content: flex-start;
     flex: 1 1 auto;
 }
@@ -198,14 +198,14 @@
     box-sizing: border-box;
     inline-size: calc(100% - 6px);
     block-size: calc(100% - 6px);
-    margin: 3px;
+    margin: var(--spacing-xxs);
     font-size: var(--font-size-caption);
     border-collapse: collapse;
 }
 
 .fluent-calendar-view-table--months,
 .fluent-calendar-view-table--years {
-    margin: 11px;
+    margin: var(--spacing-s);
     inline-size: calc(100% - 22px);
     block-size: calc(100% - 22px);
 }
@@ -294,8 +294,8 @@
     display: grid;
     inline-size: 100%;
     grid-template-columns: repeat(7, 1fr);
-    grid-gap: 2px;
-    margin-block-end: 2px;
+    grid-gap: var(--spacing-xxs);
+    margin-block-end: var(--spacing-xxs);
 }
 
 .fluent-calendar-view-table--months tr,
