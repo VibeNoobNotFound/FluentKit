@@ -52,6 +52,10 @@
                 <Icon><FluentIcon Name="ic_fluent_color_background_20_regular" /></Icon>
             </FluentNavigationViewItem>
 
+            <FluentNavigationViewItem Value="@RoutePlayground" Text="Playground">
+                <Icon><FluentIcon Name="ic_fluent_code_20_regular" /></Icon>
+            </FluentNavigationViewItem>
+
             <FluentNavigationViewItemSeparator />
 
             @* ── Basic Input ─────────────────────────────────────────── *@
@@ -295,6 +299,7 @@
     public const string RouteReveal         = "controls/reveal";
     public const string RouteIconBrowser    = "design/icons";
     public const string RouteColors         = "design/colors";
+    public const string RoutePlayground     = "design/playground";
     public const string RouteSettings       = "settings";
 
     // ── Persisted-settings storage keys (browser localStorage) ──────

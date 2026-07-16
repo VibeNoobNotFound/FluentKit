@@ -1,0 +1,77 @@
+.playground {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--card-stroke-default);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.playground__preview {
+    min-height: 160px;
+    padding: 20px;
+    background: var(--layer-fill-color-alt, var(--layer-background-default));
+    border-bottom: 1px solid var(--card-stroke-default);
+    display: flex;
+    align-items: center;
+}
+
+.playground__preview-empty {
+    color: var(--text-fill-color-secondary);
+    font-size: 13px;
+}
+
+.playground__editor-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--solid-background-fill-color-base);
+    border-bottom: 1px solid var(--divider-stroke-color-default);
+}
+
+.playground__status {
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.playground__status--ok {
+    color: var(--system-fill-color-success);
+}
+
+.playground__status--error {
+    color: var(--system-fill-color-critical);
+}
+
+.playground__code-panel {
+    background: var(--solid-background-fill-color-base);
+}
+
+.playground__textarea {
+    width: 100%;
+    min-height: 280px;
+    resize: vertical;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    padding: 16px 20px;
+    background: transparent;
+    color: var(--text-fill-color-primary);
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    tab-size: 4;
+}
+
+.playground__diagnostics {
+    padding: 12px 20px;
+    background: var(--system-fill-color-critical-background);
+    border-top: 1px solid var(--card-stroke-default);
+}
+
+.playground__diagnostic {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--system-fill-color-critical);
+    white-space: pre-wrap;
+    padding: 2px 0;
+}

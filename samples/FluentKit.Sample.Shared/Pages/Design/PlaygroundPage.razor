@@ -1,0 +1,123 @@
+@page "/design/playground"
+@using FluentKit.Composite
+@using FluentKit.Primitives
+@using FluentKit.Sample.Shared.Services
+@inject IRazorPlaygroundCompiler Compiler
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Design" Title="Playground"
+                Description="Write a Razor component — markup and an optional @@code block — and see it rendered live. Everything runs in your browser: the same Razor engine and Roslyn compiler the SDK uses at build time, just running client-side instead. Nothing is sent to a server." />
+
+    <div class="playground">
+        <div class="playground__preview">
+            @if (_compiledType is not null)
+            {
+                <DynamicComponent Type="_compiledType" />
+            }
+            else
+            {
+                <div class="playground__preview-empty">
+                    Click <strong>Run</strong> to render the component below.
+                </div>
+            }
+        </div>
+
+        <div class="playground__editor-bar">
+            <FluentButton Variant="ButtonVariant.Accent" OnClick="RunAsync" Disabled="_isCompiling">
+                @(_isCompiling ? "Running…" : "Run")
+            </FluentButton>
+            <FluentButton Variant="ButtonVariant.Standard" OnClick="ResetToDefault">
+                Reset
+            </FluentButton>
+            @if (_status is not null)
+            {
+                <span class="playground__status @(_lastRunFailed ? "playground__status--error" : "playground__status--ok")">
+                    @_status
+                </span>
+            }
+        </div>
+
+        <div class="playground__code-panel">
+            <textarea class="playground__textarea"
+                      spellcheck="false"
+                      @bind="_source"
+                      @bind:event="oninput"
+                      aria-label="Razor component source"></textarea>
+        </div>
+
+        @if (_diagnostics.Count > 0)
+        {
+            <div class="playground__diagnostics">
+                @foreach (var diagnostic in _diagnostics)
+                {
+                    <div class="playground__diagnostic">@diagnostic</div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string _source = DefaultSource;
+    private Type? _compiledType;
+    private bool _isCompiling;
+    private bool _lastRunFailed;
+    private string? _status;
+    private List<string> _diagnostics = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Warm the compiler (fetches metadata references) in the background so the first
+        // real "Run" click doesn't eat the fetch cost.
+        _ = Compiler.WarmUpAsync();
+        await RunAsync();
+    }
+
+    private async Task RunAsync()
+    {
+        _isCompiling = true;
+        _diagnostics = [];
+        StateHasChanged();
+
+        var result = await Compiler.CompileAsync(_source);
+
+        if (result.Success)
+        {
+            _compiledType = result.ComponentType;
+            _lastRunFailed = false;
+            _status = "Run successful.";
+        }
+        else
+        {
+            _lastRunFailed = true;
+            _status = "Run failed — see errors below.";
+            _diagnostics = [.. result.RazorDiagnostics, .. result.CSharpDiagnostics];
+            if (result.PipelineError is not null)
+            {
+                _diagnostics.Add(result.PipelineError);
+            }
+        }
+
+        _isCompiling = false;
+        StateHasChanged();
+    }
+
+    private async Task ResetToDefault()
+    {
+        _source = DefaultSource;
+        await RunAsync();
+    }
+
+    private const string DefaultSource =
+"""
+<div style="padding:12px; border:1px solid var(--card-stroke-default); border-radius:8px;">
+    <p>This is a live FluentKit Playground component.</p>
+    <FluentButton Variant="ButtonVariant.Accent" OnClick="Increment">Clicked @count times</FluentButton>
+</div>
+
+@code {
+    private int count = 0;
+    private void Increment() => count++;
+}
+""";
+}

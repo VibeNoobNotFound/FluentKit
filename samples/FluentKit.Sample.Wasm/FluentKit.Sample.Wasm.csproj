@@ -4,11 +4,22 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- The Playground (see Services/RazorPlaygroundCompiler.cs) re-fetches this app's own
+         assemblies from _framework/ at runtime so Roslyn can use them as metadata references.
+         Since .NET 8, Blazor WASM wraps framework/app assemblies in the "webcil" container
+         (.wasm instead of .dll) by default, which is NOT a plain PE image Roslyn/Assembly.Load
+         can read directly. Disabling it here keeps them as ordinary .dll PE files. -->
+    <WasmEnableWebcil>false</WasmEnableWebcil>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.10" PrivateAssets="all" />
+
+    <!-- Live Playground: compiles Razor markup + C# to a real component Type, in-browser. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Razor" Version="6.0.36" />
   </ItemGroup>
 
   <ItemGroup>
