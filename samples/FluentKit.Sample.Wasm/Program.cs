@@ -10,6 +10,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // Core FluentKit services
 builder.Services.AddScoped<IThemeService, ThemeService>();
+builder.Services.AddScoped<IAccentColorService, AccentColorService>();
 builder.Services.AddScoped<IOverlayService, OverlayService>();
 
 // Gallery-level JS interop (Prism highlighting, clipboard)

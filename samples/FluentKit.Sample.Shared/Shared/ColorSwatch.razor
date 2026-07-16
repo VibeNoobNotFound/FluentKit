@@ -1,0 +1,39 @@
+@using FluentKit.Composite
+
+<div class="color-swatch" style="@($"background: {Background}; color: {Foreground};")">
+    <button class="color-swatch__copy" @onclick="CopyVarAsync" title="Copy CSS variable"
+            aria-label="Copy CSS variable">
+        <FluentIcon Name="ic_fluent_copy_16_regular" Size="14" />
+    </button>
+
+    <div class="color-swatch__name">@Name</div>
+    @if (!string.IsNullOrEmpty(Explanation))
+    {
+        <div class="color-swatch__explanation">@Explanation</div>
+    }
+    <div class="color-swatch__var">--@Variable</div>
+</div>
+
+@code {
+    /// <summary>Display name, e.g. "Accent / Default".</summary>
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+
+    /// <summary>The CSS custom property backing this swatch, WITHOUT the leading "--" (e.g. "accent-fill-color-default").</summary>
+    [Parameter, EditorRequired] public string Variable { get; set; } = "";
+
+    /// <summary>What this token is used for, e.g. "Rest" / "Hover" / "Pressed".</summary>
+    [Parameter] public string? Explanation { get; set; }
+
+    /// <summary>CSS background value — usually <c>var(--{Variable})</c>, passed explicitly so callers can also preview raw colors.</summary>
+    [Parameter, EditorRequired] public string Background { get; set; } = "";
+
+    /// <summary>Foreground/text color for the label — defaults to the primary text token.</summary>
+    [Parameter] public string Foreground { get; set; } = "var(--text-fill-color-primary)";
+
+    [Inject] private GalleryJsInterop GalleryJs { get; set; } = default!;
+
+    private async Task CopyVarAsync()
+    {
+        await GalleryJs.CopyToClipboardAsync($"var(--{Variable})");
+    }
+}

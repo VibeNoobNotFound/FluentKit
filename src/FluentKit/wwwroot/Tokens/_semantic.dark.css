@@ -3,9 +3,10 @@
  * Source: microsoft-ui-xaml/controls/dev/CommonStyles/Common_themeresources_any.xaml,
  * the ResourceDictionary keyed x:Key="Default" (WinUI's "Default" dictionary IS the dark theme).
  * Hex ARGB values converted to rgba() by hand-verified script, not eyeballed.
- * TODO: AccentFillColor* below is a placeholder (Windows default blue). Real WinUI aliases these to
- * SystemAccentColorLight2/Light3 which come from the user's OS accent color — wire that up in
- * ThemeService once you build the accent-color pipeline (not needed for v1 Button).
+ * AccentFillColor* / AccentTextFillColor* below alias to the --accent-light-* / --accent-dark-* ramp
+ * that FluentKit.Theming.IAccentColorService computes and pushes onto :root at runtime (see
+ * Theming/AccentPalette.cs and Tokens/_primitives.css) — the accent-color pipeline referenced by
+ * the old TODO here now exists.
  */
 
 :root[data-theme="dark"] {
@@ -36,11 +37,22 @@
   --subtle-fill-color-tertiary: rgba(255, 255, 255, 0.0392);
   --subtle-fill-color-disabled: rgba(255, 255, 255, 0);
 
-  /* accent fill — PLACEHOLDER, see TODO above */
-  --accent-fill-color-default: #60cdff;
-  --accent-fill-color-secondary: rgba(96, 205, 255, 0.9);
-  --accent-fill-color-tertiary: rgba(96, 205, 255, 0.8);
+  /*
+   * accent fill — derived live from FluentKit.Theming.IAccentColorService's ramp (see
+   * Tokens/_primitives.css). Dark theme surfaces are dark, so fills/text need to get *lighter*
+   * than the raw accent color to read well — "Light" steps here, mirroring the light-theme file's
+   * use of "Dark" steps for the opposite reason.
+   */
+  --accent-fill-color-default: var(--accent-light-2);
+  --accent-fill-color-secondary: rgba(var(--accent-light-2-rgb), 0.9);
+  --accent-fill-color-tertiary: rgba(var(--accent-light-2-rgb), 0.8);
   --accent-fill-color-disabled: rgba(255, 255, 255, 0.1569);
+
+  /* accent text — used for links and other accent-colored text on a dark background */
+  --accent-text-fill-color-primary: var(--accent-light-3);
+  --accent-text-fill-color-secondary: var(--accent-light-2);
+  --accent-text-fill-color-tertiary: var(--accent-light-1);
+  --accent-text-fill-color-disabled: rgba(255, 255, 255, 0.4);
 
   /* focus + dividers */
   --focus-stroke-color-outer: #ffffff;
@@ -201,6 +213,11 @@
   --system-fill-color-neutral: rgba(255, 255, 255, 0.5442);
   --system-fill-color-attention: var(--accent-fill-color-default);
 
+  /* Caution badges/surfaces are the same yellow in both themes, so the readable text color on top
+     of them doesn't flip with theme either (unlike --text-on-accent-fill-color-primary) — kept as
+     its own token instead of an inline hardcoded value so it still traces back to this file. */
+  --system-fill-color-caution-foreground: #000000;
+
   --system-fill-color-success-background: rgba(108, 203, 95, 0.15);
   --system-fill-color-caution-background: rgba(252, 225, 0, 0.15);
   --system-fill-color-critical-background: rgba(255, 153, 164, 0.15);
@@ -226,4 +243,57 @@
   --slider-thumb-inner-pressed: var(--accent-fill-color-tertiary);
   --slider-tick-fill: var(--control-strong-stroke-color-default);
   --slider-disabled-fill: var(--control-fill-color-disabled);
+
+  /* ===== Expanded WinUI color set — traced against WinUI-Gallery's Design > Color page ===== */
+
+  /* Solid Background — full ramp, from bottom-most app layer (Base) to topmost content (Senary) */
+  --solid-background-fill-color-base: #202020;
+  --solid-background-fill-color-base-alt: #101010;
+  --solid-background-fill-color-secondary: #1c1c1c;
+  --solid-background-fill-color-tertiary: #282828;
+  --solid-background-fill-color-quarternary: #2c2c2c;
+  --solid-background-fill-color-quinary: #2f2f2f;
+  --solid-background-fill-color-senary: #333333;
+
+  /* Control Fill (Quarternary) — rest state for pill-style controls (e.g. ToggleSwitch pill) */
+  --control-fill-color-quarternary: rgba(255, 255, 255, 0.0714);
+
+  /* Control Solid Fill — opaque, used e.g. as the Slider thumb's outer ring so it covers the track */
+  --control-solid-fill-color-default: #454545;
+
+  /* Control Stroke / On Accent — linework drawn on top of accent-colored surfaces */
+  --control-stroke-color-on-accent-default: rgba(0, 0, 0, 0.14);
+  --control-stroke-color-on-accent-secondary: rgba(0, 0, 0, 0.66);
+  --control-stroke-color-on-accent-tertiary: rgba(0, 0, 0, 0.4392);
+  --control-stroke-color-on-accent-disabled: rgba(255, 255, 255, 0.14);
+  --control-stroke-color-for-strong-fill-when-on-image: rgba(255, 255, 255, 0.35);
+
+  /* Card Stroke (solid) — opaque equivalent of --card-stroke-default, used by CommandBar expansion */
+  --card-stroke-color-default-solid: #1c1c1c;
+
+  /* Surface Stroke — window/dialog/flyout borders */
+  --surface-stroke-color-default: rgba(117, 117, 117, 0.4);
+  --surface-stroke-color-flyout: rgba(0, 0, 0, 0.2);
+
+  /* System fill — solid neutral (badges placed directly over arbitrary content) + solid attention */
+  --system-fill-color-solid-neutral: #9d9d9d;
+  --system-fill-color-solid-neutral-background: #2e2e2e;
+  --system-fill-color-solid-attention-background: #2e2e2e;
+
+  /* Control On Image Fill — controls drawn on top of photographic content (e.g. a media overlay button) */
+  --control-on-image-fill-color-default: rgba(255, 255, 255, 0.1667);
+  --control-on-image-fill-color-secondary: rgba(255, 255, 255, 0.0833);
+  --control-on-image-fill-color-tertiary: rgba(255, 255, 255, 0.0417);
+  --control-on-image-fill-color-disabled: rgba(255, 255, 255, 0);
+
+  /* Layer On Acrylic / Layer On Mica Base Alt — content layers drawn on top of those materials */
+  --layer-on-acrylic-fill-color-default: rgba(255, 255, 255, 0.0349);
+  --layer-on-mica-base-alt-fill-color-default: rgba(255, 255, 255, 0.0359);
+  --layer-on-mica-base-alt-fill-color-secondary: rgba(255, 255, 255, 0.0083);
+  --layer-on-mica-base-alt-fill-color-tertiary: #292929;
+  --layer-on-mica-base-alt-fill-color-transparent: rgba(255, 255, 255, 0);
+
+  /* Accent selected-text background — highlighted/selected text in inputs */
+  --accent-fill-color-selected-text-background: var(--accent-fill-color-default);
+  --text-on-accent-fill-color-selected-text: #000000;
 }

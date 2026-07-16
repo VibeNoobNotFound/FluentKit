@@ -78,7 +78,7 @@
     border-color: transparent;
 }
 .fluent-splitbutton--accent .fluent-splitbutton-action {
-    border-right-color: rgba(0, 0, 0, 0.15);
+    border-right-color: var(--control-stroke-color-on-accent-default);
 }
 .fluent-splitbutton--accent .fluent-splitbutton-action:hover:not(:disabled),
 .fluent-splitbutton--accent .fluent-splitbutton-chevron:hover:not(:disabled) {

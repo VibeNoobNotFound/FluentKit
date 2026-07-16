@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject IThemeService ThemeService
+@inject IAccentColorService AccentColorService
 @inject GalleryJsInterop GalleryJs
 
 <ThemeProvider>
@@ -51,6 +52,10 @@
                 <Icon><FluentIcon Name="ic_fluent_ruler_20_regular" /></Icon>
             </FluentNavigationViewItem>
             
+            <FluentNavigationViewItem Value="@RouteColors" Text="Colors">
+                <Icon><FluentIcon Name="ic_fluent_color_background_20_regular" /></Icon>
+            </FluentNavigationViewItem>
+
             <FluentNavigationViewItemSeparator />
 
             @* ── Basic Input ─────────────────────────────────────────── *@
@@ -294,6 +299,7 @@
     public const string RouteMica           = "controls/mica";
     public const string RouteReveal         = "controls/reveal";
     public const string RouteIconBrowser    = "design/icons";
+    public const string RouteColors         = "design/colors";
     public const string RouteSettings       = "settings";
 
     // ── Persisted-settings storage keys (browser localStorage) ──────
@@ -342,6 +348,11 @@
         if (firstRender)
         {
             await LoadPersistedSettingsAsync();
+
+            // "Automatically pick an accent color from my background" — derive the accent ramp
+            // from whatever wallpaper ended up active (default or a restored custom one) so the
+            // very first paint already reflects it, not just subsequent wallpaper changes.
+            await AccentColorService.SetAccentFromImageAsync(_wallpaperUrl);
         }
     }
 
@@ -392,6 +403,9 @@
     {
         _wallpaperUrl = WallpaperUrlSetting;
         InvokeAsync(StateHasChanged);
+        // Re-derive the accent ramp every time the wallpaper changes — this is the live
+        // "wallpaper -> accent color" pipeline the Colors design page demonstrates.
+        InvokeAsync(() => AccentColorService.SetAccentFromImageAsync(_wallpaperUrl));
     }
 
     private void SyncSelectionFromUrl(string uri)
