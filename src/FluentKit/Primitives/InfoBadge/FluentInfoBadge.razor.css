@@ -32,7 +32,7 @@
 
 .fluent-info-badge--caution {
     background-color: var(--system-fill-color-caution);
-    color: #000000; /* caution yellow is too light for white text at any theme */
+    color: var(--system-fill-color-caution-foreground); /* caution yellow is too light for white text at any theme */
 }
 
 .fluent-info-badge--critical {

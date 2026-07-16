@@ -17,41 +17,53 @@
             links, the ring under this page) updates live, with no page reload.
         </p>
 
-        <div class="accent-picker">
-            <div class="accent-picker__presets">
-                @foreach (var preset in _presets)
-                {
-                    <button class="accent-picker__swatch" style="@($"background:{preset};")"
-                            title="@preset" @onclick="() => SetAccentAsync(preset)" />
-                }
-                <label class="accent-picker__custom" style="@($"background:{_hexInput};")">
-                    <input type="color" value="@_hexInput" @oninput="OnColorInputAsync" />
-                </label>
-            </div>
-
-            <div class="accent-picker__wallpapers">
-                <span class="accent-picker__label">Or derive it from a wallpaper:</span>
-                <div class="demo-row">
-                    <FluentButton Variant="ButtonVariant.Standard" OnClick="UseDefaultWallpaperAsync">
-                        <FluentIcon Name="ic_fluent_image_20_regular" Size="16" style="margin-right:6px;" />
-                        Default wallpaper
-                    </FluentButton>
-                    <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#2e5339")'>
-                        Forest green
-                    </FluentButton>
-                    <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#7a1f3d")'>
-                        Deep magenta
-                    </FluentButton>
-                    <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#d98324")'>
-                        Amber
-                    </FluentButton>
+        <ControlExample HeaderText="Set an explicit accent color"
+                         Description="Pick a swatch, or type a hex code — both call IAccentColorService.SetAccentAsync directly."
+                         RazorCode="@_setAccentRazor" CSharpCode="@_setAccentCs">
+            <Example>
+                <div class="accent-picker__presets">
+                    @foreach (var preset in _presets)
+                    {
+                        <button class="accent-picker__swatch" style="@($"background:{preset};")"
+                                title="@preset" @onclick="() => SetAccentAsync(preset)" />
+                    }
+                    <label class="accent-picker__custom" style="@($"background:{_hexInput};")">
+                        <input type="color" value="@_hexInput" @oninput="OnColorInputAsync" />
+                    </label>
                 </div>
-                <span class="accent-picker__hint">
-                    (These re-use the same <code>SetWallpaperUrl</code> the Settings page's wallpaper
-                    picker uses — changing it there changes the accent here too.)
-                </span>
-            </div>
-        </div>
+            </Example>
+        </ControlExample>
+
+        <ControlExample HeaderText="Derive the accent from an image"
+                         Description="Each button below calls IAccentColorService.SetAccentFromImageAsync with a different image URL, which samples the image's pixels and applies the resulting color as the accent."
+                         RazorCode="@_setAccentFromImageRazor" CSharpCode="@_setAccentFromImageCs">
+            <Example>
+                <div class="accent-picker__wallpapers">
+                    <div class="demo-row">
+                        <FluentButton Variant="ButtonVariant.Standard" OnClick="UseDefaultWallpaperAsync">
+                            <FluentIcon Name="ic_fluent_image_20_regular" Size="16" style="margin-right:6px;" />
+                            Default wallpaper
+                        </FluentButton>
+                        <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#2e5339")'>
+                            Forest green
+                        </FluentButton>
+                        <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#7a1f3d")'>
+                            Deep magenta
+                        </FluentButton>
+                        <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#d98324")'>
+                            Amber
+                        </FluentButton>
+                    </div>
+                    <span class="accent-picker__hint">
+                        (This example re-uses the same <code>SetWallpaperUrl</code> the Settings page's
+                        wallpaper picker uses, purely so this page's buttons and the Settings page stay in
+                        sync for the demo — changing the wallpaper there changes the accent here too.
+                        <code>SetAccentFromImageAsync</code> itself just takes any image URL and doesn't
+                        require a "wallpaper" concept at all.)
+                    </span>
+                </div>
+            </Example>
+        </ControlExample>
 
         <div class="swatch-grid swatch-grid--7">
             <ColorSwatch Name="Base" Variable="accent-base" Background="var(--accent-base)" Foreground="#fff" />
@@ -204,6 +216,45 @@
 
     private string _hexInput = "#0078d4";
     private string _currentHex = "#0078d4";
+
+    private const string _setAccentRazor = @"<button style=""background:#0078d4;"" @onclick='() => SetAccentAsync(""#0078d4"")' />
+
+<input type=""color"" value=""@_hexInput"" @oninput=""OnColorInputAsync"" />";
+
+    private const string _setAccentCs = @"[Inject] private IAccentColorService AccentColorService { get; set; } = default!;
+
+// Explicit color, e.g. from a swatch button
+private Task SetAccentAsync(string hex) => AccentColorService.SetAccentAsync(hex);
+
+// Explicit color, from a native <input type=""color""> picker
+private async Task OnColorInputAsync(ChangeEventArgs e)
+{
+    if (e.Value is string hex && !string.IsNullOrWhiteSpace(hex))
+    {
+        await AccentColorService.SetAccentAsync(hex);
+    }
+}";
+
+    private const string _setAccentFromImageRazor = @"<FluentButton Variant=""ButtonVariant.Standard"" OnClick=""UseDefaultWallpaperAsync"">
+    Default wallpaper
+</FluentButton>
+<FluentButton Variant=""ButtonVariant.Standard"" OnClick='() => UseSolidWallpaperAsync(""#2e5339"")'>
+    Forest green
+</FluentButton>";
+
+    private const string _setAccentFromImageCs = @"[Inject] private IAccentColorService AccentColorService { get; set; } = default!;
+
+// Derives the accent from any image URL FluentKit can load into an <img> and sample —
+// a real photo, a relative asset path, or (as here) a plain data: URL.
+private Task UseDefaultWallpaperAsync()
+    => AccentColorService.SetAccentFromImageAsync(""_content/FluentKit.Sample.Shared/wallpaper.jpg"");
+
+private Task UseSolidWallpaperAsync(string hex)
+{
+    var svg = $""<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='{hex}'/></svg>"";
+    var dataUrl = ""data:image/svg+xml;utf8,"" + Uri.EscapeDataString(svg);
+    return AccentColorService.SetAccentFromImageAsync(dataUrl);
+}";
 
     protected override void OnInitialized()
     {

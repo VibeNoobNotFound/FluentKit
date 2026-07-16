@@ -192,6 +192,11 @@
   --system-fill-color-neutral: rgba(0, 0, 0, 0.4458);
   --system-fill-color-attention: var(--accent-fill-color-default);
 
+  /* Caution badges/surfaces are the same yellow in both themes, so the readable text color on top
+     of them doesn't flip with theme either (unlike --text-on-accent-fill-color-primary) — kept as
+     its own token instead of an inline hardcoded value so it still traces back to this file. */
+  --system-fill-color-caution-foreground: #000000;
+
   --system-fill-color-success-background: rgba(15, 123, 15, 0.1);
   --system-fill-color-caution-background: rgba(157, 93, 0, 0.1);
   --system-fill-color-critical-background: rgba(196, 43, 28, 0.1);
