@@ -58,7 +58,7 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Restore
-        run: dotnet restore FluentKit.slnx
+        run: dotnet restore samples/FluentKit.Sample.Wasm/FluentKit.Sample.Wasm.csproj   # was: FluentKit.slnx
 
       - name: Publish WASM sample (Release)
         run: >
