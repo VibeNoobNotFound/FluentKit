@@ -34,11 +34,23 @@
   --subtle-fill-color-tertiary: rgba(0, 0, 0, 0.0235);
   --subtle-fill-color-disabled: rgba(255, 255, 255, 0);
 
-  /* accent fill — PLACEHOLDER, same caveat as dark file */
-  --accent-fill-color-default: #005fb8;
-  --accent-fill-color-secondary: rgba(0, 95, 184, 0.9);
-  --accent-fill-color-tertiary: rgba(0, 95, 184, 0.8);
+  /*
+   * accent fill — derived live from FluentKit.Theming.IAccentColorService's ramp (see
+   * Tokens/_primitives.css for where --accent-dark-1 etc. come from). WinUI's own convention:
+   * light theme surfaces are pale, so fills/text need to get *darker* than the raw accent color to
+   * stay legible — hence "Dark" steps here, while the dark-theme file below uses "Light" steps for
+   * the same reason in reverse.
+   */
+  --accent-fill-color-default: var(--accent-dark-1);
+  --accent-fill-color-secondary: rgba(var(--accent-dark-1-rgb), 0.9);
+  --accent-fill-color-tertiary: rgba(var(--accent-dark-1-rgb), 0.8);
   --accent-fill-color-disabled: rgba(0, 0, 0, 0.2157);
+
+  /* accent text — used for links and other accent-colored text on a light background */
+  --accent-text-fill-color-primary: var(--accent-dark-2);
+  --accent-text-fill-color-secondary: var(--accent-dark-3);
+  --accent-text-fill-color-tertiary: var(--accent-dark-1);
+  --accent-text-fill-color-disabled: rgba(0, 0, 0, 0.3608);
 
   /* focus + dividers */
   --focus-stroke-color-outer: rgba(0, 0, 0, 0.8941);
@@ -200,4 +212,57 @@
   --slider-thumb-inner-pressed: var(--accent-fill-color-tertiary);
   --slider-tick-fill: var(--control-strong-stroke-color-default);
   --slider-disabled-fill: var(--control-fill-color-disabled);
+
+  /* ===== Expanded WinUI color set — traced against WinUI-Gallery's Design > Color page ===== */
+
+  /* Solid Background — full ramp, from bottom-most app layer (Base) to topmost content (Senary) */
+  --solid-background-fill-color-base: #f3f3f3;
+  --solid-background-fill-color-base-alt: #dadada;
+  --solid-background-fill-color-secondary: #eeeeee;
+  --solid-background-fill-color-tertiary: #f9f9f9;
+  --solid-background-fill-color-quarternary: #ffffff;
+  --solid-background-fill-color-quinary: #fdfdfd;
+  --solid-background-fill-color-senary: #ffffff;
+
+  /* Control Fill (Quarternary) — rest state for pill-style controls (e.g. ToggleSwitch pill) */
+  --control-fill-color-quarternary: rgba(249, 249, 249, 0.3);
+
+  /* Control Solid Fill — opaque, used e.g. as the Slider thumb's outer ring so it covers the track */
+  --control-solid-fill-color-default: #ffffff;
+
+  /* Control Stroke / On Accent — linework drawn on top of accent-colored surfaces */
+  --control-stroke-color-on-accent-default: rgba(255, 255, 255, 0.08);
+  --control-stroke-color-on-accent-secondary: rgba(0, 0, 0, 0.4);
+  --control-stroke-color-on-accent-tertiary: rgba(0, 0, 0, 0.2169);
+  --control-stroke-color-on-accent-disabled: rgba(0, 0, 0, 0.0578);
+  --control-stroke-color-for-strong-fill-when-on-image: rgba(255, 255, 255, 0.35);
+
+  /* Card Stroke (solid) — opaque equivalent of --card-stroke-default, used by CommandBar expansion */
+  --card-stroke-color-default-solid: #ebebeb;
+
+  /* Surface Stroke — window/dialog/flyout borders */
+  --surface-stroke-color-default: rgba(117, 117, 117, 0.4);
+  --surface-stroke-color-flyout: rgba(0, 0, 0, 0.0578);
+
+  /* System fill — solid neutral (badges placed directly over arbitrary content) + solid attention */
+  --system-fill-color-solid-neutral: #8a8a8a;
+  --system-fill-color-solid-neutral-background: #f3f3f3;
+  --system-fill-color-solid-attention-background: #f6f6f6;
+
+  /* Control On Image Fill — controls drawn on top of photographic content (e.g. a media overlay button) */
+  --control-on-image-fill-color-default: rgba(255, 255, 255, 0.79);
+  --control-on-image-fill-color-secondary: #f3f3f3;
+  --control-on-image-fill-color-tertiary: #ebebeb;
+  --control-on-image-fill-color-disabled: rgba(255, 255, 255, 0);
+
+  /* Layer On Acrylic / Layer On Mica Base Alt — content layers drawn on top of those materials */
+  --layer-on-acrylic-fill-color-default: rgba(255, 255, 255, 0.25);
+  --layer-on-mica-base-alt-fill-color-default: rgba(255, 255, 255, 0.7);
+  --layer-on-mica-base-alt-fill-color-secondary: rgba(0, 0, 0, 0.0373);
+  --layer-on-mica-base-alt-fill-color-tertiary: #f9f9f9;
+  --layer-on-mica-base-alt-fill-color-transparent: rgba(255, 255, 255, 0);
+
+  /* Accent selected-text background — highlighted/selected text in inputs */
+  --accent-fill-color-selected-text-background: var(--accent-fill-color-default);
+  --text-on-accent-fill-color-selected-text: #ffffff;
 }

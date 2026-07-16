@@ -1,0 +1,35 @@
+.color-swatch {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 2px;
+    min-height: 84px;
+    border-radius: var(--control-corner-radius);
+    border: 1px solid var(--control-stroke-color-default);
+    padding: 10px 12px;
+    overflow: hidden;
+}
+
+.color-swatch__name {
+    font-size: 13px;
+    font-weight: var(--font-weight-semibold);
+}
+
+.color-swatch__explanation {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.color-swatch__var {
+    margin-top: 6px;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11px;
+    opacity: 0.7;
+    cursor: pointer;
+    width: fit-content;
+}
+
+.color-swatch__var:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,257 @@
+@page "/design/colors"
+@inject IAccentColorService AccentColorService
+@implements IDisposable
+
+<div class="gallery-page">
+    <PageHeader Eyebrow="Design" Title="Colors"
+                Description="FluentKit's full WinUI-style color system — background, fill, stroke, and text tokens, plus the live accent-color pipeline that derives a 7-step accent ramp from a single base color (or straight from your wallpaper)." />
+
+    @* ── Accent color — the "especial thing" ─────────────────────────── *@
+    <section class="color-section">
+        <h2 class="color-section__title">Accent color</h2>
+        <p class="color-section__desc">
+            FluentKit derives a whole accent ramp — <code>Light1-3</code> for dark theme,
+            <code>Dark1-3</code> for light theme — from a single base color, the same way Windows
+            derives its accent palette from your system accent color. Pick a swatch, type a hex
+            code, or choose a wallpaper below: the whole app's accent (buttons, toggles, selection,
+            links, the ring under this page) updates live, with no page reload.
+        </p>
+
+        <div class="accent-picker">
+            <div class="accent-picker__presets">
+                @foreach (var preset in _presets)
+                {
+                    <button class="accent-picker__swatch" style="@($"background:{preset};")"
+                            title="@preset" @onclick="() => SetAccentAsync(preset)" />
+                }
+                <label class="accent-picker__custom" style="@($"background:{_hexInput};")">
+                    <input type="color" value="@_hexInput" @oninput="OnColorInputAsync" />
+                </label>
+            </div>
+
+            <div class="accent-picker__wallpapers">
+                <span class="accent-picker__label">Or derive it from a wallpaper:</span>
+                <div class="demo-row">
+                    <FluentButton Variant="ButtonVariant.Standard" OnClick="UseDefaultWallpaperAsync">
+                        <FluentIcon Name="ic_fluent_image_20_regular" Size="16" style="margin-right:6px;" />
+                        Default wallpaper
+                    </FluentButton>
+                    <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#2e5339")'>
+                        Forest green
+                    </FluentButton>
+                    <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#7a1f3d")'>
+                        Deep magenta
+                    </FluentButton>
+                    <FluentButton Variant="ButtonVariant.Standard" OnClick='() => UseSolidWallpaperAsync("#d98324")'>
+                        Amber
+                    </FluentButton>
+                </div>
+                <span class="accent-picker__hint">
+                    (These re-use the same <code>SetWallpaperUrl</code> the Settings page's wallpaper
+                    picker uses — changing it there changes the accent here too.)
+                </span>
+            </div>
+        </div>
+
+        <div class="swatch-grid swatch-grid--7">
+            <ColorSwatch Name="Base" Variable="accent-base" Background="var(--accent-base)" Foreground="#fff" />
+            <ColorSwatch Name="Light 1" Variable="accent-light-1" Background="var(--accent-light-1)" Foreground="#fff" />
+            <ColorSwatch Name="Light 2" Variable="accent-light-2" Background="var(--accent-light-2)" Foreground="#000" />
+            <ColorSwatch Name="Light 3" Variable="accent-light-3" Background="var(--accent-light-3)" Foreground="#000" />
+            <ColorSwatch Name="Dark 1" Variable="accent-dark-1" Background="var(--accent-dark-1)" Foreground="#fff" />
+            <ColorSwatch Name="Dark 2" Variable="accent-dark-2" Background="var(--accent-dark-2)" Foreground="#fff" />
+            <ColorSwatch Name="Dark 3" Variable="accent-dark-3" Background="var(--accent-dark-3)" Foreground="#fff" />
+        </div>
+        <p class="color-section__note">Current base: <code>@_currentHex</code></p>
+    </section>
+
+    @* ── Background ────────────────────────────────────────────────────── *@
+    <section class="color-section">
+        <h2 class="color-section__title">Background</h2>
+        <p class="color-section__desc">Solid, card, layer, and material (Mica/Acrylic) backgrounds used to create depth.</p>
+
+        <h3 class="color-section__subtitle">Solid background</h3>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Base" Variable="solid-background-fill-color-base" Background="var(--solid-background-fill-color-base)" Explanation="Bottom-most layer" />
+            <ColorSwatch Name="Base Alt" Variable="solid-background-fill-color-base-alt" Background="var(--solid-background-fill-color-base-alt)" />
+            <ColorSwatch Name="Secondary" Variable="solid-background-fill-color-secondary" Background="var(--solid-background-fill-color-secondary)" />
+            <ColorSwatch Name="Tertiary" Variable="solid-background-fill-color-tertiary" Background="var(--solid-background-fill-color-tertiary)" />
+            <ColorSwatch Name="Quarternary" Variable="solid-background-fill-color-quarternary" Background="var(--solid-background-fill-color-quarternary)" />
+            <ColorSwatch Name="Quinary" Variable="solid-background-fill-color-quinary" Background="var(--solid-background-fill-color-quinary)" />
+            <ColorSwatch Name="Senary" Variable="solid-background-fill-color-senary" Background="var(--solid-background-fill-color-senary)" />
+        </div>
+
+        <h3 class="color-section__subtitle">Card &amp; layer</h3>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Card / Default" Variable="card-background-default" Background="var(--card-background-default)" />
+            <ColorSwatch Name="Layer / Default" Variable="layer-background-default" Background="var(--layer-background-default)" />
+            <ColorSwatch Name="Layer On Acrylic" Variable="layer-on-acrylic-fill-color-default" Background="var(--layer-on-acrylic-fill-color-default)" />
+            <ColorSwatch Name="Layer On Mica Base Alt" Variable="layer-on-mica-base-alt-fill-color-default" Background="var(--layer-on-mica-base-alt-fill-color-default)" />
+            <ColorSwatch Name="Smoke / Default" Variable="smoke-background-default" Background="var(--smoke-background-default)" Foreground="#fff" Explanation="Dims content behind dialogs" />
+        </div>
+
+        <h3 class="color-section__subtitle">Material (live preview)</h3>
+        <div class="material-row">
+            <div class="material-tile">
+                <FluentMicaPanel Variant="MicaVariant.Base" style="position:absolute; inset:0; border-radius:inherit;" />
+                <span>Mica (Base)</span>
+            </div>
+            <div class="material-tile">
+                <FluentMicaPanel Variant="MicaVariant.BaseAlt" style="position:absolute; inset:0; border-radius:inherit;" />
+                <span>Mica (Base Alt)</span>
+            </div>
+            <div class="material-tile">
+                <FluentAcrylicBrush Kind="AcrylicKind.Base" style="position:absolute; inset:0; border-radius:inherit;" />
+                <span>Acrylic</span>
+            </div>
+        </div>
+    </section>
+
+    @* ── Fill ──────────────────────────────────────────────────────────── *@
+    <section class="color-section">
+        <h2 class="color-section__title">Fill</h2>
+
+        <h3 class="color-section__subtitle">Control fill</h3>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Default" Variable="control-fill-color-default" Background="var(--control-fill-color-default)" Explanation="Rest" />
+            <ColorSwatch Name="Secondary" Variable="control-fill-color-secondary" Background="var(--control-fill-color-secondary)" Explanation="Hover" />
+            <ColorSwatch Name="Tertiary" Variable="control-fill-color-tertiary" Background="var(--control-fill-color-tertiary)" Explanation="Pressed" />
+            <ColorSwatch Name="Quarternary" Variable="control-fill-color-quarternary" Background="var(--control-fill-color-quarternary)" Explanation="Rest (pill controls)" />
+            <ColorSwatch Name="Disabled" Variable="control-fill-color-disabled" Background="var(--control-fill-color-disabled)" />
+            <ColorSwatch Name="Input Active" Variable="control-fill-color-input-active" Background="var(--control-fill-color-input-active)" Explanation="Focused text input" />
+        </div>
+
+        <h3 class="color-section__subtitle">Control alt fill</h3>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Transparent" Variable="control-alt-fill-color-transparent" Background="var(--control-alt-fill-color-transparent)" />
+            <ColorSwatch Name="Secondary" Variable="control-alt-fill-color-secondary" Background="var(--control-alt-fill-color-secondary)" Explanation="Rest" />
+            <ColorSwatch Name="Tertiary" Variable="control-alt-fill-color-tertiary" Background="var(--control-alt-fill-color-tertiary)" Explanation="Hover" />
+            <ColorSwatch Name="Quarternary" Variable="control-alt-fill-color-quarternary" Background="var(--control-alt-fill-color-quarternary)" Explanation="Pressed" />
+        </div>
+
+        <h3 class="color-section__subtitle">Accent fill</h3>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Default" Variable="accent-fill-color-default" Background="var(--accent-fill-color-default)" Foreground="var(--text-on-accent-fill-color-primary)" Explanation="Rest" />
+            <ColorSwatch Name="Secondary" Variable="accent-fill-color-secondary" Background="var(--accent-fill-color-secondary)" Foreground="var(--text-on-accent-fill-color-primary)" Explanation="Hover" />
+            <ColorSwatch Name="Tertiary" Variable="accent-fill-color-tertiary" Background="var(--accent-fill-color-tertiary)" Foreground="var(--text-on-accent-fill-color-primary)" Explanation="Pressed" />
+            <ColorSwatch Name="Disabled" Variable="accent-fill-color-disabled" Background="var(--accent-fill-color-disabled)" />
+        </div>
+
+        <h3 class="color-section__subtitle">Subtle fill</h3>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Transparent" Variable="subtle-fill-color-transparent" Background="var(--subtle-fill-color-transparent)" Explanation="Rest" />
+            <ColorSwatch Name="Secondary" Variable="subtle-fill-color-secondary" Background="var(--subtle-fill-color-secondary)" Explanation="Hover" />
+            <ColorSwatch Name="Tertiary" Variable="subtle-fill-color-tertiary" Background="var(--subtle-fill-color-tertiary)" Explanation="Pressed" />
+            <ColorSwatch Name="Disabled" Variable="subtle-fill-color-disabled" Background="var(--subtle-fill-color-disabled)" />
+        </div>
+
+        <h3 class="color-section__subtitle">System fill (status)</h3>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Success" Variable="system-fill-color-success" Background="var(--system-fill-color-success)" Foreground="#fff" />
+            <ColorSwatch Name="Caution" Variable="system-fill-color-caution" Background="var(--system-fill-color-caution)" Foreground="#fff" />
+            <ColorSwatch Name="Critical" Variable="system-fill-color-critical" Background="var(--system-fill-color-critical)" Foreground="#fff" />
+            <ColorSwatch Name="Attention" Variable="system-fill-color-attention" Background="var(--system-fill-color-attention)" Foreground="#fff" Explanation="= accent" />
+            <ColorSwatch Name="Neutral" Variable="system-fill-color-neutral" Background="var(--system-fill-color-neutral)" Foreground="#fff" />
+            <ColorSwatch Name="Solid Neutral" Variable="system-fill-color-solid-neutral" Background="var(--system-fill-color-solid-neutral)" Foreground="#fff" Explanation="Badges over content" />
+        </div>
+    </section>
+
+    @* ── Stroke ────────────────────────────────────────────────────────── *@
+    <section class="color-section">
+        <h2 class="color-section__title">Stroke</h2>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Card / Default" Variable="card-stroke-default" Background="var(--card-stroke-default)" />
+            <ColorSwatch Name="Card / Default Solid" Variable="card-stroke-color-default-solid" Background="var(--card-stroke-color-default-solid)" />
+            <ColorSwatch Name="Control / Default" Variable="control-stroke-color-default" Background="var(--control-stroke-color-default)" />
+            <ColorSwatch Name="Control / Secondary" Variable="control-stroke-color-secondary" Background="var(--control-stroke-color-secondary)" />
+            <ColorSwatch Name="Control Strong / Default" Variable="control-strong-stroke-color-default" Background="var(--control-strong-stroke-color-default)" Foreground="#fff" />
+            <ColorSwatch Name="Control Strong / Disabled" Variable="control-strong-stroke-color-disabled" Background="var(--control-strong-stroke-color-disabled)" />
+            <ColorSwatch Name="Surface / Default" Variable="surface-stroke-color-default" Background="var(--surface-stroke-color-default)" Foreground="#fff" />
+            <ColorSwatch Name="Surface / Flyout" Variable="surface-stroke-color-flyout" Background="var(--surface-stroke-color-flyout)" />
+            <ColorSwatch Name="Divider / Default" Variable="divider-stroke-color-default" Background="var(--divider-stroke-color-default)" />
+            <ColorSwatch Name="Focus / Outer" Variable="focus-stroke-color-outer" Background="var(--focus-stroke-color-outer)" Foreground="#fff" />
+            <ColorSwatch Name="Focus / Inner" Variable="focus-stroke-color-inner" Background="var(--focus-stroke-color-inner)" />
+        </div>
+    </section>
+
+    @* ── Text ──────────────────────────────────────────────────────────── *@
+    <section class="color-section">
+        <h2 class="color-section__title">Text</h2>
+        <div class="swatch-grid">
+            <ColorSwatch Name="Primary" Variable="text-fill-color-primary" Background="var(--text-fill-color-primary)" Foreground="var(--text-on-accent-fill-color-primary)" />
+            <ColorSwatch Name="Secondary" Variable="text-fill-color-secondary" Background="var(--text-fill-color-secondary)" Foreground="var(--text-on-accent-fill-color-primary)" />
+            <ColorSwatch Name="Tertiary" Variable="text-fill-color-tertiary" Background="var(--text-fill-color-tertiary)" Foreground="var(--text-on-accent-fill-color-primary)" />
+            <ColorSwatch Name="Disabled" Variable="text-fill-color-disabled" Background="var(--text-fill-color-disabled)" Foreground="var(--text-fill-color-primary)" />
+            <ColorSwatch Name="Accent Text / Primary" Variable="accent-text-fill-color-primary" Background="var(--accent-text-fill-color-primary)" Foreground="#fff" Explanation="Recommended for links" />
+            <ColorSwatch Name="Accent Text / Secondary" Variable="accent-text-fill-color-secondary" Background="var(--accent-text-fill-color-secondary)" Foreground="#fff" />
+            <ColorSwatch Name="Text On Accent / Primary" Variable="text-on-accent-fill-color-primary" Background="var(--accent-fill-color-default)" Foreground="var(--text-on-accent-fill-color-primary)" Explanation="Shown on accent fill" />
+        </div>
+    </section>
+</div>
+
+@code {
+    private readonly string[] _presets =
+    [
+        "#0078d4", // Windows default blue
+        "#e74856", // red
+        "#ff8c00", // orange
+        "#fce100", // yellow
+        "#107c10", // green
+        "#00b7c3", // teal
+        "#5c2d91", // purple
+        "#e3008c", // magenta
+    ];
+
+    private string _hexInput = "#0078d4";
+    private string _currentHex = "#0078d4";
+
+    protected override void OnInitialized()
+    {
+        _currentHex = AccentColorService.CurrentAccent.ToHex();
+        _hexInput = _currentHex;
+        AccentColorService.AccentChanged += OnAccentChanged;
+    }
+
+    private void OnAccentChanged()
+    {
+        _currentHex = AccentColorService.CurrentAccent.ToHex();
+        _hexInput = _currentHex;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private Task SetAccentAsync(string hex) => AccentColorService.SetAccentAsync(hex);
+
+    private async Task OnColorInputAsync(ChangeEventArgs e)
+    {
+        if (e.Value is string hex && !string.IsNullOrWhiteSpace(hex))
+        {
+            _hexInput = hex;
+            await AccentColorService.SetAccentAsync(hex);
+        }
+    }
+
+    // Reuses MainLayout's static wallpaper API — the same one Settings' wallpaper picker calls —
+    // so this page is just a second entry point into the same live pipeline, not a separate one.
+    private Task UseDefaultWallpaperAsync()
+    {
+        FluentKit.Sample.Shared.MainLayout.SetWallpaperUrl("_content/FluentKit.Sample.Shared/wallpaper.jpg");
+        return Task.CompletedTask;
+    }
+
+    private Task UseSolidWallpaperAsync(string hex)
+    {
+        // A flat-color SVG data URL stands in for a "wallpaper" here so this demo doesn't depend on
+        // shipping extra image assets — extractDominantColor (accent-interop.js) draws any <img> it
+        // can load onto a canvas and samples it, and a data:image/svg+xml URL works exactly like a
+        // real photo there, it just happens to be a single color throughout.
+        var svg = $"<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='{hex}'/></svg>";
+        var dataUrl = "data:image/svg+xml;utf8," + Uri.EscapeDataString(svg);
+        FluentKit.Sample.Shared.MainLayout.SetWallpaperUrl(dataUrl);
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        AccentColorService.AccentChanged -= OnAccentChanged;
+    }
+}
