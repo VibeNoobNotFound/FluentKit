@@ -29,8 +29,8 @@ styling, or token values were sourced from.
 
 ## Contents
 
-- [What's in here](#whats-in-here)
 - [Getting started](#getting-started)
+- [What's in here](#whats-in-here)
 - [Running the sample](#running-the-sample)
 - [Theming](#theming)
 - [Project layout](#project-layout)
@@ -38,6 +38,64 @@ styling, or token values were sourced from.
 - [Known gaps / next up](#known-gaps--next-up)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Getting started
+
+**1. Install**
+
+Recommended — from NuGet:
+
+```bash
+dotnet add package FluentKit.Blazor
+```
+
+```xml
+<PackageReference Include="FluentKit.Blazor" Version="0.2.0" /> <!-- should match the nuget badge above -->
+```
+
+Alternatively, to track `main` directly, consume it as a project or repository reference instead:
+
+**2. Link the Token & Icon stylesheets**
+
+`wwwroot/index.html` (WASM) or `Pages/_Host.cshtml` / `App.razor` (Server):
+
+```html
+<link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
+<link rel="stylesheet" href="_content/FluentKit/Icons/FluentSystemIcons-Regular.css" />
+```
+
+**3. Register Core FluentKit services**
+
+`Program.cs`:
+
+```csharp
+builder.Services.AddScoped<IThemeService, ThemeService>();
+builder.Services.AddScoped<IAccentColorService, AccentColorService>();
+builder.Services.AddScoped<IOverlayService, OverlayService>(); // For Flyouts, Tooltips etc...
+```
+
+**4. Wrap your root component**
+
+```razor
+<ThemeProvider>
+      @*For Mica Background
+        <FluentMicaPanel Variant="@_backgroundVariant"
+              BackgroundImageUrl="@_wallpaperUrl"
+              style="position:fixed; inset:0; z-index:-1; opacity:0.72;" /> *@
+        @Body
+    <FluentOverlayHost />
+</ThemeProvider>
+```
+
+`ThemeProvider` resolves and applies the theme on first render; `FluentOverlayHost` is required by
+any composite control built on the overlay service (tooltips, flyouts, menus, dialogs, teaching tips).
+
+**5. Use components**
+
+```razor
+<FluentButton Variant="FluentButtonVariant.Accent">Save changes</FluentButton>
+```
+
 
 ## What's in here
 
@@ -181,77 +239,6 @@ outside its parent's layout flow (tooltips, flyouts, context menus, teaching tip
 </td>
 </tr>
 </table>
-
-## Getting started
-
-**1. Install**
-
-Recommended — from NuGet:
-
-```bash
-dotnet add package FluentKit.Blazor
-```
-
-`dotnet add package` pins the exact current version automatically — the current published version
-is always shown in the NuGet badge at the top of this README. If editing your `.csproj` by hand,
-pin a specific version rather than using a floating wildcard, for reproducible builds:
-
-```xml
-<PackageReference Include="FluentKit.Blazor" Version="0.2.0" /> <!-- match the badge above -->
-```
-
-Alternatively, to track `main` directly, consume it as a project or repository reference instead:
-
-```bash
-git clone https://github.com/VibeNoobNotFound/FluentKit.git
-```
-
-```xml
-<ItemGroup>
-  <ProjectReference Include="..\FluentKit\src\FluentKit\FluentKit.csproj" />
-</ItemGroup>
-```
-
-**2. Link the Token & Icon stylesheets**
-
-`wwwroot/index.html` (WASM) or `Pages/_Host.cshtml` / `App.razor` (Server):
-
-```html
-<link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
-<link rel="stylesheet" href="_content/FluentKit/Icons/FluentSystemIcons-Regular.css" />
-```
-
-**3. Register Core FluentKit services**
-
-`Program.cs`:
-
-```csharp
-builder.Services.AddScoped<IThemeService, ThemeService>();
-builder.Services.AddScoped<IAccentColorService, AccentColorService>();
-builder.Services.AddScoped<IOverlayService, OverlayService>(); // For Flyouts, Tooltips etc...
-```
-
-**4. Wrap your root component**
-
-```razor
-<ThemeProvider>
-      @*For Mica Background
-        <FluentMicaPanel Variant="@_backgroundVariant"
-              BackgroundImageUrl="@_wallpaperUrl"
-              style="position:fixed; inset:0; z-index:-1; opacity:0.72;" /> *@
-        @Body
-    <FluentOverlayHost />
-</ThemeProvider>
-```
-
-`ThemeProvider` resolves and applies the theme on first render; `FluentOverlayHost` is required by
-any composite control built on the overlay service (tooltips, flyouts, menus, dialogs, teaching tips).
-
-**5. Use components**
-
-```razor
-<FluentButton Variant="FluentButtonVariant.Accent">Save changes</FluentButton>
-```
 
 ## Running the sample
 
