@@ -58,7 +58,6 @@ styling, or token values were sourced from.
 
 - `FluentTextBox`
 - `FluentPasswordBox`
-- `FluentNumberBox`
 - `FluentCheckBox` (incl. indeterminate)
 - `FluentRadioButton` / `FluentRadioGroup`
 - `FluentToggleSwitch`
@@ -109,7 +108,9 @@ styling, or token values were sourced from.
 
 - `FluentComboBox`
 - `FluentAutoSuggestBox`
+- `FluentNumberBox`
 - `FluentCalendarView` / `FluentCalendarDatePicker`
+- `FluentTimePicker`
 
 </td>
 </tr>
@@ -129,6 +130,29 @@ styling, or token values were sourced from.
 - `FluentNavigationView`
 - `FluentMenuBar`
 - `FluentPivot`
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Composite — Settings UI
+
+- `FluentSettingsCard`
+- `FluentSettingsExpander`
+
+1:1 ports of the Windows Community Toolkit's `SettingsCard` / `SettingsExpander` — see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md#windows-community-toolkit).
+
+</td>
+<td width="50%" valign="top">
+
+### Tooling
+
+**`FluentKit.IconGenerator`** — a Roslyn source generator (referenced as an analyzer, not a
+runtime dependency) that emits strongly-typed `FluentIconNames` constants from the bundled
+`FluentSystemIcons-Regular.css`, used by the sample app's icon browser and available to consumers
+for compile-time-checked `FluentIcon` glyph names.
 
 </td>
 </tr>
@@ -173,7 +197,7 @@ is always shown in the NuGet badge at the top of this README. If editing your `.
 pin a specific version rather than using a floating wildcard, for reproducible builds:
 
 ```xml
-<PackageReference Include="FluentKit.Blazor" Version="0.1.0-alpha" /> <!-- match the badge above -->
+<PackageReference Include="FluentKit.Blazor" Version="0.2.0" /> <!-- match the badge above -->
 ```
 
 Alternatively, to track `main` directly, consume it as a project or repository reference instead:
@@ -225,18 +249,35 @@ any composite control built on the overlay service (tooltips, flyouts, menus, di
 
 ## Running the sample
 
-`samples/FluentKit.Sample.Wasm` demos every component above, including theme switching, the page
-background rendered through `FluentMicaPanel` over a real wallpaper image, Mica Base vs. Base Alt
-side by side, and `FluentAcrylicBrush` cards live-blurring that Mica background behind them.
+The demo pages themselves live in `samples/FluentKit.Sample.Shared` (a Razor class library) and
+are hosted by two thin platform entry points, so the exact same pages run on both WASM and MAUI:
+
+- `samples/FluentKit.Sample.Wasm` — Blazor WASM host, deployed to GitHub Pages
+- `samples/Fluentkit.Sample.Maui` — MAUI Blazor Hybrid host (Android by default; iOS/MacCatalyst
+  on macOS runners, Windows on Windows runners — see the `TargetFrameworks` conditions in its
+  `.csproj`)
+
+Both demo every component above, including theme switching (persisted to `localStorage`), the
+page background rendered through `FluentMicaPanel` over a real wallpaper image, Mica Base vs. Base
+Alt side by side, `FluentAcrylicBrush` cards live-blurring that Mica background behind them, and an
+icon browser (`Pages/Design/IconBrowserPage.razor`) generated from the same icon names
+`FluentKit.IconGenerator` emits at compile time.
 
 ```bash
 git clone https://github.com/VibeNoobNotFound/FluentKit.git
 cd FluentKit
-dotnet restore
+dotnet restore FluentKit.slnx
 dotnet run --project samples/FluentKit.Sample.Wasm
 ```
 
-Requires the **.NET 10 SDK**. A hosted build is also published to
+To run the MAUI sample instead (requires the MAUI workload — `dotnet workload install maui-android`
+at minimum):
+
+```bash
+dotnet run --project samples/Fluentkit.Sample.Maui --framework net10.0-android
+```
+
+Requires the **.NET 10 SDK**. A hosted WASM build is also published to
 [vibenoobnotfound.github.io/FluentKit](https://vibenoobnotfound.github.io/FluentKit/).
 
 ## Theming
@@ -260,15 +301,22 @@ The token layer is split so consumers only ever need to link one file:
 ## Project layout
 
 ```
-src/FluentKit/
-  Theming/       IThemeService, ThemeProvider, theme-interop.js
-  Primitives/    One folder per primitive component (.razor / .razor.cs / .razor.css)
-  Composite/     One folder per composite control, built on Overlay/ where applicable
-  Overlay/       IOverlayService, FluentOverlayHost, OverlaySurface
-  Effects/       Mica, Acrylic, Reveal
-  wwwroot/       Tokens, per-component JS interop modules, icon webfont
+src/
+  FluentKit/                    The library (Microsoft.NET.Sdk.Razor, RCL)
+    Theming/                    IThemeService, ThemeProvider, theme-interop.js
+    Primitives/                 One folder per primitive component (.razor / .razor.cs / .razor.css)
+    Composite/                  One folder per composite control, built on Overlay/ where applicable
+    Overlay/                    IOverlayService, FluentOverlayHost, OverlaySurface
+    Effects/                    Mica, Acrylic, Reveal
+    wwwroot/                    Tokens, per-component JS interop modules, icon webfont
+  FluentKit.IconGenerator/      Roslyn source generator, referenced as an analyzer only
+                                 (emits FluentIconNames.g.cs from wwwroot/Icons/*.css)
 samples/
-  FluentKit.Sample.Wasm/   Blazor WASM host demoing every component
+  FluentKit.Sample.Shared/      Razor class library holding every demo page — Primitives/,
+                                 Composite/, Effects/, Design/ (icon browser) — plus the shared
+                                 nav shell/settings page, referenced by both hosts below
+  FluentKit.Sample.Wasm/        Blazor WASM host for FluentKit.Sample.Shared, deployed to Pages
+  Fluentkit.Sample.Maui/        MAUI Blazor Hybrid host for FluentKit.Sample.Shared
 ```
 
 Each component folder follows the same three-file convention: `.razor` for markup, `.razor.cs` for
@@ -282,7 +330,10 @@ A Razor Class Library's own component-scoped stylesheet (`_content/FluentKit/Flu
 is not meant to be linked directly and will 404 if you try. The host app's build generates its own
 bundle (`{HostAssemblyName}.styles.css`, served flat from the app's own root) which internally
 `@import`s every referenced RCL's bundle. Only link the host app's own generated stylesheet — see
-`samples/FluentKit.Sample.Wasm/wwwroot/index.html` for a working example.
+`samples/FluentKit.Sample.Wasm/wwwroot/index.html` for a working example. (This is a WASM/Server
+concern only — the MAUI Blazor Hybrid host, `samples/Fluentkit.Sample.Maui`, doesn't build a
+`.styles.css` bundle the same way; its `BlazorWebView` resolves `_content/...` static web assets
+directly.)
 
 > **Related:** any markup built via `RenderTreeBuilder` in a `.cs` file does not get a component's
 > CSS isolation scope attribute, so `.razor.css` styles silently won't apply to it. Define
@@ -316,4 +367,4 @@ are derived from an external source.
 
 MIT — see [LICENSE](LICENSE). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution
 of design tokens, ported component structure, and bundled assets (fluent-svelte, microsoft-ui-xaml,
-Fluent System Icons).
+Windows Community Toolkit, Fluent System Icons).
