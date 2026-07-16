@@ -125,14 +125,14 @@ html, body {
     z-index: 1;
     overflow: visible;
     padding: var(--spacing-l) var(--spacing-l);
-    background: var(--layer-fill-color-alt);
+    background: var(--card-background-default);
     border-bottom: 1px solid var(--card-stroke-default);
 }
 
 /* Options row (optional interactive tweaks panel) */
 .control-example__options {
     padding: var(--spacing-m) var(--spacing-m);
-    background: var(--card-background-secondary, var(--subtle-fill-color-secondary));
+    background: var(--layer-background-default, var(--subtle-fill-color-secondary));
     border-bottom: 1px solid var(--card-stroke-default);
     display: flex;
     flex-wrap: wrap;
@@ -153,30 +153,18 @@ html, body {
    (pivot header/tabs) and the code itself always agree with each other and
    with the active app theme, instead of a static dark hex. */
 .control-example__code-panel {
-    background: #1e1e1e;
     border-radius: 0 0 var(--overlay-corner-radius) var(--overlay-corner-radius);
     overflow: hidden;
 }
 
 /* Pivot inside code panel — blend header into the panel background, remove content padding */
 .control-example__code-panel .fluent-pivot-header {
-    background: #1e1e1e;
-    border-bottom-color: #333;
     padding: 0 var(--spacing-xs);
 }
 
 .control-example__code-panel .fluent-pivot-tab {
     font-size: 12px;
     padding: var(--spacing-xs) var(--spacing-s);
-    color: #aaa;
-}
-
-.control-example__code-panel .fluent-pivot-tab:hover:not(:disabled):not(.fluent-pivot-tab--selected) {
-    color: var(--text-fill-color-primary);
-}
-
-.control-example__code-panel .fluent-pivot-tab--selected {
-    color: var(--text-fill-color-primary);
 }
 
 .control-example__code-panel .fluent-pivot-content {
@@ -580,7 +568,7 @@ html[data-theme="dark"] .fluent-reveal:has(.control-card):hover {
     justify-content: center;
     padding: var(--spacing-xxs) var(--spacing-s);
     background: var(--control-fill-color-default);
-    border: 1px solid var(--control-stroke-default);
+    border: 1px solid var(--control-stroke-color-default);
     border-radius: var(--control-corner-radius);
     color: var(--text-fill-color-primary);
     font-size: var(--font-size-body);

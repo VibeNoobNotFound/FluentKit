@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Razor;
+using Microsoft.JSInterop;
 using FluentKit.Sample.Shared.Services;
 
 namespace FluentKit.Sample.Wasm.Services;
@@ -25,13 +26,17 @@ namespace FluentKit.Sample.Wasm.Services;
 /// </summary>
 public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
 {
+    private const string CacheModulePath = "./playgroundAssemblyCache.js";
+
     private readonly HttpClient _http;
+    private readonly IJSRuntime _js;
     private readonly Dictionary<string, MetadataReference> _referenceCache = new();
     private bool _isWarm;
 
-    public RazorPlaygroundCompiler(HttpClient http)
+    public RazorPlaygroundCompiler(HttpClient http, IJSRuntime js)
     {
         _http = http;
+        _js = js;
     }
 
     public bool IsWarm => _isWarm;
@@ -45,17 +50,20 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
 
         // Every assembly the running app already needed is sitting right here in the WASM
         // runtime. We just need its raw bytes again so Roslyn can treat it as a reference
-        // (loaded assemblies don't expose a real on-disk Location in the browser). Blazor WASM
-        // publishes each one as a static file under _framework/, so we re-fetch them over HTTP
-        // from the app's own origin — no network access outside the page itself.
+        // (loaded assemblies don't expose a real on-disk Location in the browser).
         //
-        // We ask blazor.boot.json for the *exact* filenames rather than guessing "{name}.dll":
-        // asset filenames can be content-fingerprinted (e.g. "System.Private.CoreLib.a1b2c3d4.dll")
-        // depending on project settings, and guessing wrong means every single fetch 404s and
-        // compilation fails with "System could not be found" (no references at all).
-        var fetchedFromBootConfig = await TryWarmUpFromBootConfigAsync();
+        // As of .NET 10, blazor.boot.json no longer exists as a static file (the boot
+        // manifest is inlined into dotnet.js instead), so there's nothing to fetch that lists
+        // the exact fingerprinted _framework/*.dll filenames. Guessing "{name}.dll" doesn't
+        // work either since publish fingerprints these filenames with a content hash
+        // (e.g. "System.Private.CoreLib.a1b2c3d4.dll").
+        //
+        // Instead: Blazor's own bootstrapper already downloaded and cached every one of these
+        // files in the browser's Cache Storage API at startup. We read the exact bytes back
+        // from that cache — no filename guessing, no manifest, no extra network fetch.
+        var fetchedFromCache = await TryWarmUpFromCacheStorageAsync();
 
-        if (!fetchedFromBootConfig)
+        if (!fetchedFromCache)
         {
             await WarmUpByGuessingFileNamesAsync();
         }
@@ -68,69 +76,47 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
             // as a clear pipeline error on the next CompileAsync call rather than a wall of
             // confusing "System could not be found" C# diagnostics.
             Console.Error.WriteLine(
-                "[Playground] Warm-up fetched zero assembly references from _framework/. " +
-                "Check that <WasmEnableWebcil>false</WasmEnableWebcil> is set and that " +
-                "_framework/blazor.boot.json is reachable.");
+                "[Playground] Warm-up fetched zero assembly references. Check that the browser's " +
+                "Cache Storage API is available (not private browsing) and that " +
+                "playgroundAssemblyCache.js loaded correctly.");
         }
     }
 
-    /// <summary>Reads _framework/blazor.boot.json and fetches exactly the assembly files it lists.</summary>
-    private async Task<bool> TryWarmUpFromBootConfigAsync()
+    /// <summary>
+    /// Reads already-downloaded _framework/*.dll bytes straight out of the browser's Cache
+    /// Storage API via JS interop, using the exact fingerprinted URLs Blazor itself cached
+    /// at startup — no manifest file needed.
+    /// </summary>
+    private async Task<bool> TryWarmUpFromCacheStorageAsync()
     {
         try
         {
-            using var bootStream = await _http.GetStreamAsync("_framework/blazor.boot.json");
-            using var bootDoc = await System.Text.Json.JsonDocument.ParseAsync(bootStream);
+            await using var module = await _js.InvokeAsync<IJSObjectReference>("import", CacheModulePath);
 
-            if (!bootDoc.RootElement.TryGetProperty("resources", out var resources))
+            var urls = await module.InvokeAsync<string[]>("listCachedFrameworkAssemblies");
+            if (urls.Length == 0)
             {
                 return false;
             }
 
-            // Assembly filenames live under one or more of these buckets depending on SDK
-            // version ("assembly" is the common one; "coreAssembly" shows up when the runtime
-            // splits framework assemblies out separately).
-            var fileNames = new List<string>();
-            foreach (var bucketName in new[] { "assembly", "coreAssembly", "lazyAssembly" })
+            var fetches = urls.Select(async url =>
             {
-                if (resources.TryGetProperty(bucketName, out var bucket) &&
-                    bucket.ValueKind == System.Text.Json.JsonValueKind.Object)
-                {
-                    foreach (var entry in bucket.EnumerateObject())
-                    {
-                        fileNames.Add(entry.Name);
-                    }
-                }
-            }
-
-            if (fileNames.Count == 0)
-            {
-                return false;
-            }
-
-            var fetches = fileNames.Select(async fileName =>
-            {
-                if (!fileName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Still webcil (.wasm) despite the csproj setting, or some other asset type
-                    // (e.g. a satellite resources dll we don't need) — skip rather than fail.
-                    return;
-                }
-
-                var cacheKey = fileName[..^".dll".Length];
-                if (_referenceCache.ContainsKey(cacheKey))
+                if (_referenceCache.ContainsKey(url))
                 {
                     return;
                 }
 
                 try
                 {
-                    var bytes = await _http.GetByteArrayAsync($"_framework/{fileName}");
-                    _referenceCache[cacheKey] = MetadataReference.CreateFromImage(bytes);
+                    var bytes = await module.InvokeAsync<byte[]?>("getCachedAssemblyBytes", url);
+                    if (bytes is { Length: > 0 })
+                    {
+                        _referenceCache[url] = MetadataReference.CreateFromImage(bytes);
+                    }
                 }
                 catch
                 {
-                    // One missing/unfetchable asset shouldn't block the rest.
+                    // One missing/unreadable cache entry shouldn't block the rest.
                 }
             });
 
@@ -143,7 +129,12 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
         }
     }
 
-    /// <summary>Fallback used if blazor.boot.json can't be read: guess "{assembly name}.dll" for every loaded assembly.</summary>
+    /// <summary>
+    /// Fallback used if Cache Storage can't be read (e.g. private browsing, or a host like
+    /// MAUI/local dev server where the runtime hasn't populated the cache the same way):
+    /// guess "{assembly name}.dll" for every loaded assembly. Works when filenames aren't
+    /// fingerprinted (e.g. local `dotnet run`), fails harmlessly otherwise.
+    /// </summary>
     private async Task WarmUpByGuessingFileNamesAsync()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()
@@ -186,11 +177,9 @@ public sealed class RazorPlaygroundCompiler : IRazorPlaygroundCompiler
             if (_referenceCache.Count == 0)
             {
                 return RazorPlaygroundResult.Fail(pipelineError:
-                    "No metadata references available — the compiler couldn't fetch any of this " +
-                    "app's own assemblies from _framework/. Check the browser console for the " +
-                    "warm-up warning, and confirm <WasmEnableWebcil>false</WasmEnableWebcil> is " +
-                    "set in the Wasm project (webcil-wrapped .wasm assemblies can't be used as " +
-                    "Roslyn metadata references directly).");
+                    "No metadata references available — the compiler couldn't read any of this " +
+                    "app's own assemblies from the browser cache. Check the browser console for " +
+                    "the warm-up warning.");
             }
 
             var className = $"LiveComponent_{Guid.NewGuid():N}";
