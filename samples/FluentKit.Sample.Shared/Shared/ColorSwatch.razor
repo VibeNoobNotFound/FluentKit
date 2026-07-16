@@ -1,10 +1,17 @@
+@using FluentKit.Composite
+
 <div class="color-swatch" style="@($"background: {Background}; color: {Foreground};")">
+    <button class="color-swatch__copy" @onclick="CopyVarAsync" title="Copy CSS variable"
+            aria-label="Copy CSS variable">
+        <FluentIcon Name="ic_fluent_copy_16_regular" Size="14" />
+    </button>
+
     <div class="color-swatch__name">@Name</div>
     @if (!string.IsNullOrEmpty(Explanation))
     {
         <div class="color-swatch__explanation">@Explanation</div>
     }
-    <div class="color-swatch__var" @onclick="CopyVarAsync" title="Click to copy">--@Variable</div>
+    <div class="color-swatch__var">--@Variable</div>
 </div>
 
 @code {

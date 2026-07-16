@@ -11,9 +11,38 @@
     overflow: hidden;
 }
 
+.color-swatch__copy {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: var(--control-corner-radius);
+    background: transparent;
+    color: currentColor;
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.color-swatch__copy:hover {
+    opacity: 1;
+    background: var(--control-on-image-fill-color-tertiary);
+}
+
+.color-swatch__copy:active {
+    opacity: 1;
+    background: var(--control-on-image-fill-color-default);
+}
+
 .color-swatch__name {
     font-size: 13px;
     font-weight: var(--font-weight-semibold);
+    padding-right: 22px;
 }
 
 .color-swatch__explanation {
@@ -26,10 +55,5 @@
     font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
     font-size: 11px;
     opacity: 0.7;
-    cursor: pointer;
     width: fit-content;
-}
-
-.color-swatch__var:hover {
-    text-decoration: underline;
 }
