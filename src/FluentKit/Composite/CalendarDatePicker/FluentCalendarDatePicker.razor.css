@@ -27,8 +27,8 @@
     align-items: center;
     min-inline-size: 200px;
     min-block-size: 30px;
-    padding-inline: 11px;
-    gap: 8px;
+    padding-inline: var(--spacing-s);
+    gap: var(--spacing-xs);
 
     border-radius: var(--control-corner-radius);
     border-width: var(--control-stroke-thickness);

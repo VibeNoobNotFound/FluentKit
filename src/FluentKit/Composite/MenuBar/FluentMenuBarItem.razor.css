@@ -3,8 +3,8 @@
     display: inline-flex;
     align-items: center;
     position: relative;
-    padding: 5px 11px;
-    margin: 4px;
+    padding: var(--spacing-xxs) 11px;
+    margin: var(--spacing-xxs);
     cursor: default;
     color: var(--text-fill-color-primary);
     background-color: var(--subtle-fill-color-transparent);

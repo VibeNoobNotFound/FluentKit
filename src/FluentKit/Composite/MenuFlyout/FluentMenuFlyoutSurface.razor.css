@@ -5,8 +5,8 @@
     display: flex;
     flex-direction: column;
     list-style: none;
-    margin: -8px;
-    padding: 2px 0;
+    margin: calc(var(--spacing-xs) * -1);
+    padding: var(--spacing-xxs) 0;
     min-inline-size: 120px;
     max-inline-size: 100%;
     max-block-size: 100vh;

@@ -1,6 +1,6 @@
 .fluent-nav-view-item-separator {
-    margin-block: 4px;
-    margin-inline: 12px;
+    margin-block: var(--spacing-xxs);
+    margin-inline: var(--spacing-s);
     border: none;
     border-block-start: var(--control-stroke-thickness, 1px) solid var(--card-stroke-default, #e5e5e5);
 }

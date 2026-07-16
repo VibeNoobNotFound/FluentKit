@@ -10,11 +10,11 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: var(--spacing-xs);
 
     min-width: 120px;
     height: 32px;
-    padding: 0 12px;
+    padding: 0 var(--spacing-s);
 
     font-family: var(--font-family-base);
     font-size: var(--font-size-body);

@@ -69,6 +69,7 @@ public static class GallerySearchIndex
         new("Reveal", "Effects & Materials", "controls/reveal"),
 
         new("Icons", "Design", "design/icons"),
+        new("Spacing & geometry", "Design", "design/spacing-geometry"),
 
         new("Settings", "Get Started", "settings"),
     ];

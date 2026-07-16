@@ -48,6 +48,10 @@
                 <Icon><FluentIcon Name="ic_fluent_icons_20_regular" /></Icon>
             </FluentNavigationViewItem>
 
+            <FluentNavigationViewItem Value="@RouteSpacingGeometry" Text="Spacing &amp; geometry">
+                <Icon><FluentIcon Name="ic_fluent_ruler_20_regular" /></Icon>
+            </FluentNavigationViewItem>
+            
             <FluentNavigationViewItem Value="@RouteColors" Text="Colors">
                 <Icon><FluentIcon Name="ic_fluent_color_background_20_regular" /></Icon>
             </FluentNavigationViewItem>
@@ -254,6 +258,7 @@
 @code {
     // ── Route constants ────────────────────────────────────────────
     public const string RouteHome           = "";
+    public const string RouteSpacingGeometry = "design/spacing-geometry";
     public const string RouteButton         = "controls/button";
     public const string RouteTextBlock      = "controls/textblock";
     public const string RouteCheckBox       = "controls/checkbox";
