@@ -3,7 +3,7 @@
  * Source: microsoft-ui-xaml/controls/dev/CommonStyles/Common_themeresources_any.xaml,
  * the ResourceDictionary keyed x:Key="Default" (WinUI's "Default" dictionary IS the dark theme).
  * Hex ARGB values converted to rgba() by hand-verified script, not eyeballed.
- * AccentFillColor*/AccentTextFillColor* below alias to the --accent-light-*/--accent-dark-* ramp
+ * AccentFillColor* / AccentTextFillColor* below alias to the --accent-light-* / --accent-dark-* ramp
  * that FluentKit.Theming.IAccentColorService computes and pushes onto :root at runtime (see
  * Theming/AccentPalette.cs and Tokens/_primitives.css) — the accent-color pipeline referenced by
  * the old TODO here now exists.
