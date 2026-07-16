@@ -149,14 +149,16 @@ html, body {
     margin-right: var(--spacing-xxs);
 }
 
-/* Code panel */
+/* Code panel — uses the same generic surface token everywhere so the chrome
+   (pivot header/tabs) and the code itself always agree with each other and
+   with the active app theme, instead of a static dark hex. */
 .control-example__code-panel {
     background: #1e1e1e;
     border-radius: 0 0 var(--overlay-corner-radius) var(--overlay-corner-radius);
     overflow: hidden;
 }
 
-/* Pivot inside code panel — blend header into dark background, remove content padding */
+/* Pivot inside code panel — blend header into the panel background, remove content padding */
 .control-example__code-panel .fluent-pivot-header {
     background: #1e1e1e;
     border-bottom-color: #333;
@@ -170,11 +172,11 @@ html, body {
 }
 
 .control-example__code-panel .fluent-pivot-tab:hover:not(:disabled):not(.fluent-pivot-tab--selected) {
-    color: #fff;
+    color: var(--text-fill-color-primary);
 }
 
 .control-example__code-panel .fluent-pivot-tab--selected {
-    color: #fff;
+    color: var(--text-fill-color-primary);
 }
 
 .control-example__code-panel .fluent-pivot-content {
@@ -195,7 +197,7 @@ html, body {
     margin: 0;
     padding: var(--spacing-m) var(--spacing-m);
     border-radius: 0;
-    background: var(--card-background-default) !important;
+    background: var(--solid-background-fill-color-base) !important;
     font-size: 13px;
     line-height: 1.6;
     tab-size: 2;
@@ -204,6 +206,67 @@ html, body {
 .sample-code-block code[class*="language-"] {
     font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
     font-size: 13px;
+}
+
+/* Prism.js only ships the "tomorrow" (dark) theme (see index.html), so its
+   token colors are tuned for a dark background. Once the panel background
+   above follows the light-mode token it turns light, and the dark theme's
+   pale token colors become unreadable ("cursed"). Re-map just the token
+   colors — not layout — to a legible light-mode palette, scoped to the
+   light theme so dark mode is untouched. */
+html[data-theme="light"] .sample-code-block pre[class*="language-"],
+html[data-theme="light"] .sample-code-block code[class*="language-"] {
+    color: var(--text-fill-color-primary);
+    text-shadow: none;
+}
+
+html[data-theme="light"] .sample-code-block .token.comment,
+html[data-theme="light"] .sample-code-block .token.prolog,
+html[data-theme="light"] .sample-code-block .token.doctype,
+html[data-theme="light"] .sample-code-block .token.cdata {
+    color: var(--text-fill-color-tertiary);
+}
+
+html[data-theme="light"] .sample-code-block .token.punctuation {
+    color: var(--text-fill-color-secondary);
+}
+
+html[data-theme="light"] .sample-code-block .token.tag,
+html[data-theme="light"] .sample-code-block .token.keyword,
+html[data-theme="light"] .sample-code-block .token.selector,
+html[data-theme="light"] .sample-code-block .token.deleted {
+    color: #a626a4;
+}
+
+html[data-theme="light"] .sample-code-block .token.attr-name,
+html[data-theme="light"] .sample-code-block .token.function-variable,
+html[data-theme="light"] .sample-code-block .token.function,
+html[data-theme="light"] .sample-code-block .token.class-name {
+    color: #4078f2;
+}
+
+html[data-theme="light"] .sample-code-block .token.attr-value,
+html[data-theme="light"] .sample-code-block .token.string,
+html[data-theme="light"] .sample-code-block .token.char,
+html[data-theme="light"] .sample-code-block .token.regex,
+html[data-theme="light"] .sample-code-block .token.inserted,
+html[data-theme="light"] .sample-code-block .token.builtin {
+    color: #50a14f;
+}
+
+html[data-theme="light"] .sample-code-block .token.number,
+html[data-theme="light"] .sample-code-block .token.boolean,
+html[data-theme="light"] .sample-code-block .token.constant,
+html[data-theme="light"] .sample-code-block .token.symbol,
+html[data-theme="light"] .sample-code-block .token.property {
+    color: #986801;
+}
+
+html[data-theme="light"] .sample-code-block .token.operator,
+html[data-theme="light"] .sample-code-block .token.entity,
+html[data-theme="light"] .sample-code-block .token.url,
+html[data-theme="light"] .sample-code-block .token.variable {
+    color: #383a42;
 }
 
 /* Copy button inside code block */

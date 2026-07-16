@@ -32,6 +32,34 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
+        // Live editor: transparent <textarea> stacked on top of a real <pre><code>.
+        // On every keystroke we push the raw text into the <code> element (as
+        // textContent, so it's safely escaped) and re-run Prism on just that
+        // element — cheap enough to do per-keystroke for the snippet sizes this
+        // editor is meant for.
+        window.liveHighlight = function (codeElementId, code) {
+            var el = document.getElementById(codeElementId);
+            if (!el || !window.Prism) return;
+            el.textContent = code;
+            Prism.highlightElement(el);
+        };
+
+        // Keeps the highlighted <pre> scrolled to match the (invisible-text)
+        // <textarea> on top of it, since the textarea is what actually receives
+        // scroll/wheel/keyboard-driven scroll. Attaches its listener once per
+        // textarea (guarded via a dataset flag) since Blazor re-renders don't
+        // recreate the DOM node here (same element, value patched in place).
+        window.liveHighlightSyncScroll = function (textareaId, preId) {
+            var ta = document.getElementById(textareaId);
+            var pre = document.getElementById(preId);
+            if (!ta || !pre || ta.dataset.liveSyncAttached) return;
+            ta.dataset.liveSyncAttached = "1";
+            ta.addEventListener('scroll', function () {
+                pre.scrollTop = ta.scrollTop;
+                pre.scrollLeft = ta.scrollLeft;
+            });
+        };
+
         // Thin wrappers around localStorage for persisting gallery settings
         // (theme mode, Mica variant, custom wallpaper). Failures (private
         // browsing, quota exceeded, storage disabled) are swallowed here so

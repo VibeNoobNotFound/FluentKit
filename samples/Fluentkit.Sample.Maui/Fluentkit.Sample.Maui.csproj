@@ -71,6 +71,10 @@
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.10" />
+
+        <!-- Live Playground: compiles Razor markup + C# to a real component Type, on-device.
+             Versions match samples/FluentKit.Sample.Wasm/FluentKit.Sample.Wasm.csproj. -->
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
     </ItemGroup>
 
     <ItemGroup>

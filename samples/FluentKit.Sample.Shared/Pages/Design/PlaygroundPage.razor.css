@@ -1,0 +1,118 @@
+.playground {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--card-stroke-default);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.playground__preview {
+    min-height: 160px;
+    padding: 20px;
+    background: var(--layer-fill-color-alt, var(--layer-background-default));
+    border-bottom: 1px solid var(--card-stroke-default);
+    display: flex;
+    align-items: center;
+}
+
+.playground__preview-empty {
+    color: var(--text-fill-color-secondary);
+    font-size: 13px;
+}
+
+.playground__editor-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--solid-background-fill-color-base);
+    border-bottom: 1px solid var(--divider-stroke-color-default);
+}
+
+.playground__status {
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.playground__status--ok {
+    color: var(--system-fill-color-success);
+}
+
+.playground__status--error {
+    color: var(--system-fill-color-critical);
+}
+
+.playground__code-panel {
+    background: var(--solid-background-fill-color-base);
+}
+
+/* Live highlighted editor: a real, invisible-text <textarea> stacked exactly on top of
+   a Prism-highlighted <pre><code>. The textarea receives all input/caret/selection/scroll;
+   the <pre> beneath only ever displays colored, non-interactive text. Every layout-affecting
+   property (font, size, line-height, padding, tab-size, wrapping) must match between the two
+   or the caret drifts from the character it's actually over. */
+.playground__editor {
+    position: relative;
+    min-height: 280px;
+}
+
+.playground__highlight,
+.playground__textarea {
+    margin: 0;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 280px;
+    padding: 16px 20px;
+    border: none;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    tab-size: 4;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: auto;
+}
+
+.playground__highlight {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: transparent !important;
+    overflow: hidden;
+}
+
+.playground__highlight code {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.playground__textarea {
+    position: relative;
+    resize: vertical;
+    outline: none;
+    background: transparent;
+    /* Text itself is invisible — only the Prism-colored copy underneath is seen — but the
+       caret must stay visible, and selection highlight should still show through. */
+    color: transparent;
+    caret-color: var(--text-fill-color-primary);
+}
+
+.playground__textarea::selection {
+    background: var(--accent-fill-color-default, #0078d4);
+    color: transparent;
+    opacity: 0.35;
+}
+
+.playground__diagnostics {
+    padding: 12px 20px;
+    background: var(--system-fill-color-critical-background);
+    border-top: 1px solid var(--card-stroke-default);
+}
+
+.playground__diagnostic {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--system-fill-color-critical);
+    white-space: pre-wrap;
+    padding: 2px 0;
+}
