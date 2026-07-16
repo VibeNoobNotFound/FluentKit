@@ -8,6 +8,7 @@ practice of full attribution for anything not written from scratch.
 
 - [fluent-svelte](#fluent-svelte) — component markup/CSS structure and visual-state conventions
 - [microsoft-ui-xaml](#microsoft-ui-xaml) — design token values
+- [Windows Community Toolkit](#windows-community-toolkit) — SettingsCard / SettingsExpander
 - [Fluent System Icons](#fluent-system-icons) — icon webfont
 
 ---
@@ -50,6 +51,7 @@ implementations, built on its existing patterns where noted):
 - `FluentPivot` / `FluentPivotItem` — horizontal tab strip, one visible pane, arrow-key/Home/End roving nav between headers; built on the same item-self-registers-with-shared-context pattern `MenuBarContext` already established
 - `FluentTeachingTip` — anchor-relative persistent callout (title/subtitle, optional action-button row, explicit close, beak toward anchor); built directly on `IOverlayService`/`FluentOverlayHost` the same shape as `FluentFlyout`, rendered `bare` since it supplies its own card chrome and beak
 - `FluentRevealBackground` (`Effects/Reveal`) — pointer-tracked radial-gradient spotlight, same effects layer as Mica/Acrylic. The JS module (`wwwroot/Effects/Reveal/reveal-interop.js`) only measures pointer position via `pointermove`/`pointerleave` and writes it into two CSS custom properties; all rendering is a CSS radial-gradient in `FluentRevealBackground.razor.css`
+- `FluentTimePicker` — fluent-svelte has no TimePicker, so this is modeled directly on WinUI 3's own `TimePicker`/`TimePickerFlyout` (see [microsoft-ui-xaml](#microsoft-ui-xaml) below), not ported from any web precedent. WinUI's flyout uses a `LoopingSelector` per column (Hour/Minute/AM-PM); the web has no equivalent primitive, so each column is a plain `scroll-snap-align: center` list with selection tracked by comparing scroll offsets in `wwwroot/Composite/TimePicker/FluentTimePicker-interop.js`
 
 ---
 
@@ -60,6 +62,24 @@ implementations, built on its existing patterns where noted):
 
 Design token values — colors, corner radius, component state aliases — are transcribed directly
 from this repository into `_semantic.light.css` / `_semantic.dark.css`.
+
+---
+
+## Windows Community Toolkit
+
+**[CommunityToolkit/Windows](https://github.com/CommunityToolkit/Windows)** — MIT License,
+© .NET Foundation and Contributors.
+
+`FluentSettingsCard` and `FluentSettingsExpander` are 1:1 ports of the toolkit's
+`CommunityToolkit.WinUI.Controls.SettingsCard` and `SettingsExpander` — these aren't core WinUI 3
+controls, they're WCT's own convention for building consistent Settings-app-style UI (icon +
+header/description + end-aligned content, optionally made clickable with a trailing chevron; the
+expander nests a list of cards underneath a collapsible header).
+
+| FluentKit component | Ported from | What carried over / what didn't |
+|---|---|---|
+| `FluentSettingsCard` | `SettingsCard` | Leading icon, header/description stack, end-aligned content slot, optional trailing action icon + click behavior, and the `ContentAlignment` modes (`Auto`/`Right`/`Left`/`Vertical`). WinUI's version reacts to available width via three extra `VisualState`s (`RightWrapped`, `RightWrappedNoIcon`, `Vertical`) driven by a `ControlSizeTrigger`; Blazor has no equivalent, so the same breakpoints are reproduced as CSS container queries on the card's own inline size in `FluentSettingsCard.razor.css` instead of C#-side layout code |
+| `FluentSettingsExpander` | `SettingsExpander` | The collapsible header (itself a `FluentSettingsCard`-shaped surface) revealing nested `FluentSettingsCard` items, plus `ItemsHeader`/`ItemsFooter` slots. WCT hosts its items via an `ItemsRepeater` bound to an `Items`/`ItemsSource` pair; Blazor has no `ItemsRepeater` equivalent worth reproducing, so items are instead passed as ordinary child markup (`ItemsContent`), the same pattern every other FluentKit composite uses for its children. The expand/collapse animation reuses `FluentExpander`'s clip+slide technique rather than WCT's own transition |
 
 ---
 
