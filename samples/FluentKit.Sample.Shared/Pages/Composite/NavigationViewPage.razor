@@ -14,7 +14,9 @@
                                        IsBackButtonEnabled="_navBackButtonEnabled"
                                        BackRequested="OnNavBack"
                                        ShowSettingsButton="_navShowSettingsButton"
-                                       SettingsRequested="OnNavSettings">
+                                       SettingsRequested="OnNavSettings"
+                                       FullScreenOrigin="_navFullScreenOrigin"
+                                       EnableSwipeToOpen="_navEnableSwipeToOpen">
                     <PaneHeaderIcon>
                         <FluentIcon Name="@FluentIconNames.Search" Size="16" />
                     </PaneHeaderIcon>
@@ -77,6 +79,8 @@
     private bool _navBackButtonVisible = true;
     private bool _navBackButtonEnabled = true;
     private bool _navShowSettingsButton = true;
+    private NavigationViewFullScreenOrigin _navFullScreenOrigin = NavigationViewFullScreenOrigin.Left;
+    private bool _navEnableSwipeToOpen = true;
 
     private void OnNavBack() => _navLastAction = "Back pressed";
     private void OnNavSettings() => _navLastAction = "Settings requested";
@@ -88,7 +92,9 @@
                        IsBackButtonEnabled=""_navBackButtonEnabled""
                        BackRequested=""OnNavBack""
                        ShowSettingsButton=""_navShowSettingsButton""
-                       SettingsRequested=""OnNavSettings"">
+                       SettingsRequested=""OnNavSettings""
+                       FullScreenOrigin=""_navFullScreenOrigin""
+                       EnableSwipeToOpen=""_navEnableSwipeToOpen"">
     <PaneHeaderIcon>
         <FluentIcon Name=""@FluentIconNames.Search"" Size=""16"" />
     </PaneHeaderIcon>
@@ -165,9 +171,43 @@ private void OnNavSettings() => _navLastAction = ""Settings requested"";";
                 <FluentCheckBox @bind-Checked="_navBackButtonVisible">Back Button Visible</FluentCheckBox>
                 <FluentCheckBox @bind-Checked="_navBackButtonEnabled">Back Button Enabled</FluentCheckBox>
                 <FluentCheckBox @bind-Checked="_navShowSettingsButton">Settings Button Visible</FluentCheckBox>
+                <FluentCheckBox @bind-Checked="_navEnableSwipeToOpen">Swipe To Open (mobile)</FluentCheckBox>
             </div>
+
+            @if (_navMode is NavigationViewPaneDisplayMode.LeftFullScreen or NavigationViewPaneDisplayMode.Auto)
+            {
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size: 11px; opacity: 0.7;">Full Screen Origin (mobile width, or Full Screen mode)</span>
+                    <FluentRadioGroup @bind-Value="_navFullScreenOriginString">
+                        <div class="demo-row">
+                            <FluentRadioButton Value='@("left")'>Left</FluentRadioButton>
+                            <FluentRadioButton Value='@("top")'>Top</FluentRadioButton>
+                            <FluentRadioButton Value='@("right")'>Right</FluentRadioButton>
+                        </div>
+                    </FluentRadioGroup>
+                </div>
+            }
         </div>
     };
+
+    private object? _navFullScreenOriginString
+    {
+        get => _navFullScreenOrigin switch
+        {
+            NavigationViewFullScreenOrigin.Top => "top",
+            NavigationViewFullScreenOrigin.Right => "right",
+            _ => "left"
+        };
+        set
+        {
+            _navFullScreenOrigin = (value as string) switch
+            {
+                "top" => NavigationViewFullScreenOrigin.Top,
+                "right" => NavigationViewFullScreenOrigin.Right,
+                _ => NavigationViewFullScreenOrigin.Left
+            };
+        }
+    }
 
     private object? _navModeString
     {

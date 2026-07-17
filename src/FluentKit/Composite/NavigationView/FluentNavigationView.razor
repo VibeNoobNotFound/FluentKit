@@ -73,8 +73,9 @@
                 <div class="fluent-nav-view-dismiss-backdrop" @onclick="TogglePaneAsync"></div>
             }
 
-            <div class="fluent-nav-view-pane-overlay @(_activePaneDisplayMode == NavigationViewPaneDisplayMode.LeftFullScreen ? "fluent-nav-view-pane-overlay--fullscreen" : "") @(IsPaneOpen ? "fluent-nav-view-pane-overlay--open" : "")"
-                 aria-hidden="@(!IsPaneOpen)">
+            <div class="fluent-nav-view-pane-overlay @(_activePaneDisplayMode == NavigationViewPaneDisplayMode.LeftFullScreen ? "fluent-nav-view-pane-overlay--fullscreen" : "") fluent-nav-view-pane-overlay--from-@(EffectiveSwipeEdge.ToString().ToLowerInvariant()) @(IsPaneOpen ? "fluent-nav-view-pane-overlay--open" : "")"
+                 aria-hidden="@(!IsPaneOpen)"
+                 @ref="_overlayElement">
                 @* Real DOM nesting instead of ::before/::after + z-index for backdrop-filter reliability *@
                 <div class="fluent-nav-view-pane-overlay-material" aria-hidden="true"></div>
                 <div class="fluent-nav-view-pane-overlay-content">

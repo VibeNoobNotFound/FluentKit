@@ -13,6 +13,15 @@ public enum NavigationViewPaneDisplayMode
     LeftFullScreen
 }
 
+/// <summary>Which edge the full-screen overlay pane slides in from (and which edge the swipe-to-open
+/// gesture listens on) when <see cref="NavigationViewPaneDisplayMode.LeftFullScreen"/> is active.</summary>
+public enum NavigationViewFullScreenOrigin
+{
+    Left,
+    Top,
+    Right
+}
+
 public enum NavigationViewDisplayMode
 {
     Minimal,
@@ -91,6 +100,20 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     [Parameter]
     public bool AlwaysShowHeader { get; set; } = true;
 
+    /// <summary>Which edge the overlay pane slides in from, and which edge the swipe-to-open
+    /// gesture listens on, while <see cref="PaneDisplayMode"/> is
+    /// <see cref="NavigationViewPaneDisplayMode.LeftFullScreen"/> (including when Auto lands on
+    /// it at the narrowest width tier). Ignored in Compact/Minimal, which always swipe/slide
+    /// from the left rail.</summary>
+    [Parameter]
+    public NavigationViewFullScreenOrigin FullScreenOrigin { get; set; } = NavigationViewFullScreenOrigin.Left;
+
+    /// <summary>Enables the edge swipe-to-open gesture for the overlay pane in Compact, Minimal,
+    /// and FullScreen modes. The pane tracks the finger 1:1 while dragging (dragging halfway
+    /// opens it halfway) and snaps open or closed on release based on distance/velocity.</summary>
+    [Parameter]
+    public bool EnableSwipeToOpen { get; set; } = true;
+
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
@@ -100,6 +123,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     private ElementReference _rootElement;
     private ElementReference _itemsContainerElement;
     private ElementReference _indicatorElement;
+    private ElementReference _overlayElement;
     private NavigationViewContext? _context;
     private IJSObjectReference? _module;
     private DotNetObjectReference<FluentNavigationView>? _selfReference;
@@ -118,12 +142,27 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     private bool _isTransitioning;
     private System.Threading.CancellationTokenSource? _transitionCts;
 
+    // What the JS-side swipe watcher was last configured for, so OnAfterRenderAsync only pays
+    // for a re-arm (stop + start) when something it actually depends on changed, not on every
+    // render (e.g. unrelated ChildContent updates while the pane sits idle).
+    private bool _swipeWatcherActive;
+    private bool _swipeWatcherIsOpen;
+    private NavigationViewFullScreenOrigin _swipeWatcherEdge;
+    private bool _swipeWatcherCompactOrMinimal;
+
     public NavigationViewDisplayMode DisplayMode { get; private set; } = NavigationViewDisplayMode.Expanded;
 
     private bool IsCompactOrMinimal =>
         _activePaneDisplayMode is NavigationViewPaneDisplayMode.LeftCompact
             or NavigationViewPaneDisplayMode.LeftMinimal
             or NavigationViewPaneDisplayMode.LeftFullScreen;
+
+    /// <summary>The edge the swipe-open gesture should watch and the overlay should slide from.
+    /// Compact/Minimal are always left-anchored rails; only FullScreen honors FullScreenOrigin.</summary>
+    private NavigationViewFullScreenOrigin EffectiveSwipeEdge =>
+        _activePaneDisplayMode == NavigationViewPaneDisplayMode.LeftFullScreen
+            ? FullScreenOrigin
+            : NavigationViewFullScreenOrigin.Left;
 
     private string PaneDisplayModeClass => _activePaneDisplayMode switch
     {
@@ -168,6 +207,8 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             // (no slide-in from nowhere on first paint).
             await UpdateIndicatorAsync(animate: false);
             _hasPendingIndicatorAnimation = false;
+
+            await SyncSwipeGestureAsync();
         }
         else if (_hasPendingIndicatorAnimation)
         {
@@ -176,6 +217,12 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             _hasPendingIndicatorAnimation = false;
             await UpdateIndicatorAsync(animate: true);
         }
+
+        if (!firstRender)
+        {
+            await SyncSwipeGestureAsync();
+        }
+
         await base.OnAfterRenderAsync(firstRender);
     }
 
@@ -323,6 +370,68 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         StateHasChanged();
     }
 
+    /// <summary>(Re)configures the JS-side edge-swipe watcher whenever something it depends on has
+    /// actually changed since the last render — the current mode class, open/closed state, or the
+    /// origin edge. JS owns the live drag (finger-tracked transform on <c>_overlayElement</c>) so
+    /// it stays at input latency instead of round-tripping every pointer move through .NET; only
+    /// the final open/closed decision comes back via <see cref="OnSwipeCommit"/>.</summary>
+    private async Task SyncSwipeGestureAsync()
+    {
+        if (_module is null) return;
+
+        var shouldBeActive = EnableSwipeToOpen && IsCompactOrMinimal;
+        var edge = EffectiveSwipeEdge;
+
+        if (!shouldBeActive)
+        {
+            if (_swipeWatcherActive)
+            {
+                try { await _module.InvokeVoidAsync("stopSwipeWatcher", _rootElement); }
+                catch (JSException) { }
+                _swipeWatcherActive = false;
+            }
+            return;
+        }
+
+        var unchanged = _swipeWatcherActive
+            && _swipeWatcherIsOpen == IsPaneOpen
+            && _swipeWatcherEdge == edge
+            && _swipeWatcherCompactOrMinimal == IsCompactOrMinimal;
+        if (unchanged) return;
+
+        try
+        {
+            await _module.InvokeVoidAsync(
+                "startSwipeWatcher",
+                _rootElement,
+                _overlayElement,
+                _selfReference,
+                IsPaneOpen,
+                edge.ToString().ToLowerInvariant());
+            _swipeWatcherActive = true;
+            _swipeWatcherIsOpen = IsPaneOpen;
+            _swipeWatcherEdge = edge;
+            _swipeWatcherCompactOrMinimal = IsCompactOrMinimal;
+        }
+        catch (JSException)
+        {
+            _swipeWatcherActive = false;
+        }
+    }
+
+    /// <summary>Called by the JS swipe watcher once a drag ends (or a tap outside during an
+    /// in-progress drag cancels it) with the final decision already made client-side (past the
+    /// distance/velocity threshold or not). Blazor only needs to commit the resulting state —
+    /// the drag itself never touched .NET.</summary>
+    [JSInvokable]
+    public async Task OnSwipeCommit(bool isOpen)
+    {
+        if (IsPaneOpen == isOpen) return;
+        IsPaneOpen = isOpen;
+        await IsPaneOpenChanged.InvokeAsync(IsPaneOpen);
+        StateHasChanged();
+    }
+
     [JSInvokable]
     public async Task OnResize(double width)
     {
@@ -459,6 +568,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         {
             try
             {
+                if (_swipeWatcherActive)
+                {
+                    _module.InvokeVoidAsync("stopSwipeWatcher", _rootElement);
+                }
                 _module.InvokeVoidAsync("stopObservingResize", _rootElement);
                 _module.DisposeAsync().AsTask().Wait();
             }

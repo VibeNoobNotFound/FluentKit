@@ -143,6 +143,59 @@
     box-shadow: none;
 }
 
+/* --- Swipe origin edge (Left/Top/Right) --- */
+/* Only meaningful in FullScreen (Compact/Minimal are always left rails, see
+   EffectiveSwipeEdge); default --from-left needs no override since the base rule above is
+   already left-anchored. Each variant only needs its own *closed* transform - the shared
+   --open rule's translateX(0)/translateY(0)-equivalent target is the same "no offset" state
+   regardless of which axis it travelled in on, so --open doesn't need per-edge variants. */
+.fluent-nav-view-pane-overlay--from-top {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--nav-view-open-width, 320px);
+    transform: translateY(-100%);
+}
+
+.fluent-nav-view-pane-overlay--from-top.fluent-nav-view-pane-overlay--fullscreen {
+    height: 100%;
+}
+
+.fluent-nav-view-pane-overlay--from-top.fluent-nav-view-pane-overlay--open {
+    transform: translateY(0);
+}
+
+.fluent-nav-view-pane-overlay--from-right {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+    border-inline-end: none;
+    border-inline-start: var(--control-stroke-thickness) solid var(--flyout-border);
+}
+
+.fluent-nav-view-pane-overlay--from-right.fluent-nav-view-pane-overlay--fullscreen {
+    border-inline-start: none;
+}
+
+.fluent-nav-view-pane-overlay--from-right.fluent-nav-view-pane-overlay--open {
+    transform: translateX(0);
+}
+
+/* While the JS swipe watcher owns the drag, it sets transform via inline style every pointermove
+   frame and toggles this class on to kill the CSS transition (which would otherwise fight/lag
+   behind the finger); it's removed again once the drag ends and the snap animation should take
+   over via the normal --open/closed transition above. */
+.fluent-nav-view-pane-overlay--dragging {
+    transition: none !important;
+}
+
+/* touch-action: none so a drag on the overlay isn't hijacked as a page scroll before pointermove
+   fires; the open-drag's edge-zone start (before the overlay is visible/open) is additionally
+   protected by e.preventDefault() in the JS pointermove handler once a drag is confirmed. */
+.fluent-nav-view-pane-overlay {
+    touch-action: none;
+}
+
 /* ============================================================
    OVERRIDE COMPACT/MINIMAL STYLES FOR OVERLAY
    Using ::deep to pierce child component boundaries.
