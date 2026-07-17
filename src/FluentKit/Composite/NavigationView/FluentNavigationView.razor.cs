@@ -9,7 +9,8 @@ public enum NavigationViewPaneDisplayMode
     Left,
     Top,
     LeftCompact,
-    LeftMinimal
+    LeftMinimal,
+    LeftFullScreen
 }
 
 public enum NavigationViewDisplayMode
@@ -120,12 +121,15 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     public NavigationViewDisplayMode DisplayMode { get; private set; } = NavigationViewDisplayMode.Expanded;
 
     private bool IsCompactOrMinimal =>
-        _activePaneDisplayMode is NavigationViewPaneDisplayMode.LeftCompact or NavigationViewPaneDisplayMode.LeftMinimal;
+        _activePaneDisplayMode is NavigationViewPaneDisplayMode.LeftCompact
+            or NavigationViewPaneDisplayMode.LeftMinimal
+            or NavigationViewPaneDisplayMode.LeftFullScreen;
 
     private string PaneDisplayModeClass => _activePaneDisplayMode switch
     {
         NavigationViewPaneDisplayMode.LeftCompact => "compact",
         NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
+        NavigationViewPaneDisplayMode.LeftFullScreen => "minimal",
         NavigationViewPaneDisplayMode.Top => "top",
         NavigationViewPaneDisplayMode.Auto => "auto",
         _ => "expanded"
@@ -348,6 +352,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         {
             displayMode = NavigationViewDisplayMode.Minimal;
         }
+        else if (paneDisplayMode == NavigationViewPaneDisplayMode.LeftFullScreen)
+        {
+            displayMode = NavigationViewDisplayMode.Minimal;
+        }
         else if (paneDisplayMode == NavigationViewPaneDisplayMode.Left)
         {
             displayMode = NavigationViewDisplayMode.Expanded;
@@ -397,8 +405,8 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             }
             else
             {
-                targetMode = NavigationViewPaneDisplayMode.LeftMinimal;
-                if (_activePaneDisplayMode != NavigationViewPaneDisplayMode.LeftMinimal)
+                targetMode = NavigationViewPaneDisplayMode.LeftFullScreen;
+                if (_activePaneDisplayMode != NavigationViewPaneDisplayMode.LeftFullScreen)
                 {
                     targetPaneOpen = false;
                 }

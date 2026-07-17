@@ -133,6 +133,16 @@
     pointer-events: auto;
 }
 
+/* --- Full screen overlay variant (ideal for mobile) --- */
+/* Same slide-in/backdrop-filter mechanics as the standard overlay above, just sized to cover
+   the whole nav view instead of a side sliver. No box-shadow/border needed since there's no
+   visible edge against underlying content once it's fully covering the viewport. */
+.fluent-nav-view-pane-overlay--fullscreen {
+    width: 100%;
+    border-inline-end: none;
+    box-shadow: none;
+}
+
 /* ============================================================
    OVERRIDE COMPACT/MINIMAL STYLES FOR OVERLAY
    Using ::deep to pierce child component boundaries.

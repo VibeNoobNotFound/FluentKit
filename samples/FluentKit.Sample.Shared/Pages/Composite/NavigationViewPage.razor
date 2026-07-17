@@ -156,6 +156,7 @@ private void OnNavSettings() => _navLastAction = ""Settings requested"";";
                         <FluentRadioButton Value='@("expanded")'>Expanded</FluentRadioButton>
                         <FluentRadioButton Value='@("compact")'>Compact</FluentRadioButton>
                         <FluentRadioButton Value='@("minimal")'>Minimal</FluentRadioButton>
+                        <FluentRadioButton Value='@("fullscreen")'>Full Screen</FluentRadioButton>
                     </div>
                 </FluentRadioGroup>
             </div>
@@ -176,6 +177,7 @@ private void OnNavSettings() => _navLastAction = ""Settings requested"";";
             NavigationViewPaneDisplayMode.Left => "expanded",
             NavigationViewPaneDisplayMode.LeftCompact => "compact",
             NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
+            NavigationViewPaneDisplayMode.LeftFullScreen => "fullscreen",
             _ => "auto"
         };
         set
@@ -185,6 +187,7 @@ private void OnNavSettings() => _navLastAction = ""Settings requested"";";
                 "expanded" => NavigationViewPaneDisplayMode.Left,
                 "compact" => NavigationViewPaneDisplayMode.LeftCompact,
                 "minimal" => NavigationViewPaneDisplayMode.LeftMinimal,
+                "fullscreen" => NavigationViewPaneDisplayMode.LeftFullScreen,
                 _ => NavigationViewPaneDisplayMode.Auto
             };
             _navPaneOpen = _navMode == NavigationViewPaneDisplayMode.Left || _navMode == NavigationViewPaneDisplayMode.Auto;
