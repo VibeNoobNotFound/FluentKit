@@ -1,3 +1,5 @@
+> [!IMPORTANT]
+> The development of this project has been paused till end of August.
 <div align="center">
 
 # FluentKit
