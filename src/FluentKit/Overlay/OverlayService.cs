@@ -106,6 +106,52 @@ public sealed class OverlayService : IOverlayService
         }
     }
 
+    public bool RefreshContent(Guid id)
+    {
+        var entry = FindActive(id);
+        if (entry is null || entry.IsClosing)
+        {
+            return false;
+        }
+
+        Changed?.Invoke();
+        return true;
+    }
+
+    public bool Update(Guid id, ElementReference anchor, OverlayPlacement placement, bool lightDismiss,
+        bool matchAnchorWidth = false)
+    {
+        var entry = FindActive(id);
+        if (entry is null || entry.IsClosing)
+        {
+            return false;
+        }
+
+        var anchorChanged = entry.Anchor.Id != anchor.Id;
+        var positionChanged = anchorChanged
+            || entry.PreferredPlacement != placement
+            || entry.MatchAnchorWidth != matchAnchorWidth;
+        var dismissRegistrationChanged = anchorChanged || entry.LightDismiss != lightDismiss;
+
+        if (!positionChanged && !dismissRegistrationChanged)
+        {
+            return false;
+        }
+
+        entry.Anchor = anchor;
+        entry.PreferredPlacement = placement;
+        entry.LightDismiss = lightDismiss;
+        entry.MatchAnchorWidth = matchAnchorWidth;
+        entry.NeedsReposition |= positionChanged;
+        entry.NeedsDismissRegistrationUpdate |= dismissRegistrationChanged;
+        if (positionChanged)
+        {
+            entry.ComputedStyle = "position: fixed; visibility: hidden;";
+        }
+        Changed?.Invoke();
+        return true;
+    }
+
     public void CloseAll()
     {
         if (_active.Count == 0)
@@ -131,4 +177,7 @@ public sealed class OverlayService : IOverlayService
             Changed?.Invoke();
         }
     }
+
+    private OverlayEntry? FindActive(Guid id)
+        => _active.FirstOrDefault(entry => entry.Id == id);
 }

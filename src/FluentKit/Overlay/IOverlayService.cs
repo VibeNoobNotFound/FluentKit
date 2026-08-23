@@ -33,6 +33,22 @@ public interface IOverlayService
     /// calling Close() is still fire-and-forget.</summary>
     void Close(Guid id);
 
+    /// <summary>
+    /// Notifies FluentOverlayHost that an already-shown entry's content needs to be re-rendered.
+    /// This does not reposition the overlay or update its light-dismiss registration. Returns false
+    /// when the entry is missing or already closing.
+    /// </summary>
+    bool RefreshContent(Guid id);
+
+    /// <summary>
+    /// Updates the live positioning and dismissal inputs for an already-shown entry. A changed
+    /// anchor or placement causes OverlaySurface to remeasure after the next render; a changed
+    /// <paramref name="lightDismiss"/> value rebinds the browser-side dismissal handler. Returns
+    /// false when the entry is missing or already closing.
+    /// </summary>
+    bool Update(Guid id, ElementReference anchor, OverlayPlacement placement, bool lightDismiss,
+        bool matchAnchorWidth = false);
+
     /// <summary>Actually removes an entry from <see cref="Active"/>. Called by OverlaySurface once an
     /// entry's exit animation has finished (or immediately, for an entry that was never shown/never
     /// got as far as playing one). Not meant to be called by application code — call

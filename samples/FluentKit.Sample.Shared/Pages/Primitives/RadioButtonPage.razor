@@ -18,6 +18,32 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Custom ItemTemplate" RazorCode="@_templateRazor" CSharpCode="@_templateCs">
+        <Example>
+            <div class="demo-col">
+                <FluentRadioGroup @bind-Value="_selectedView">
+                    <div class="demo-row" style="gap:8px;">
+                        <FluentRadioButton Value='@("list")'>
+                            <ItemTemplate Context="selected">
+                                <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:6px; background:@(selected ? "var(--accent-fill-color-default)" : "transparent"); color:@(selected ? "var(--accent-text-fill-color-primary)" : "inherit");">
+                                    <FluentIcon Name="ic_fluent_list_20_regular" Size="16" /> List
+                                </span>
+                            </ItemTemplate>
+                        </FluentRadioButton>
+                        <FluentRadioButton Value='@("grid")'>
+                            <ItemTemplate Context="selected">
+                                <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:6px; background:@(selected ? "var(--accent-fill-color-default)" : "transparent"); color:@(selected ? "var(--accent-text-fill-color-primary)" : "inherit");">
+                                    <FluentIcon Name="ic_fluent_grid_20_regular" Size="16" /> Grid
+                                </span>
+                            </ItemTemplate>
+                        </FluentRadioButton>
+                    </div>
+                </FluentRadioGroup>
+                <div class="demo-output">View: @_selectedView</div>
+            </div>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {
@@ -33,4 +59,24 @@
 </FluentRadioGroup>";
 
     private const string _radioCs = @"private object? _selectedFlavor = ""Chocolate"";";
+
+    private object? _selectedView = "list";
+
+    private const string _templateRazor = @"<FluentRadioGroup @bind-Value=""_selectedView"">
+    <FluentRadioButton Value='@(""list"")'>
+        <ItemTemplate Context=""selected"">
+            <span class=""view-choice @(selected ? ""view-choice--selected"" : null)"">
+                <FluentIcon Name=""ic_fluent_list_20_regular"" Size=""16"" /> List
+            </span>
+        </ItemTemplate>
+    </FluentRadioButton>
+    <FluentRadioButton Value='@(""grid"")'>
+        <ItemTemplate Context=""selected"">
+            <span class=""view-choice @(selected ? ""view-choice--selected"" : null)"">
+                <FluentIcon Name=""ic_fluent_grid_20_regular"" Size=""16"" /> Grid
+            </span>
+        </ItemTemplate>
+    </FluentRadioButton>
+</FluentRadioGroup>";
+    private const string _templateCs = @"private object? _selectedView = ""list"";";
 }

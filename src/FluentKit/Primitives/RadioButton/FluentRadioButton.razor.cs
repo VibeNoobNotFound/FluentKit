@@ -30,6 +30,20 @@ public partial class FluentRadioButton : ComponentBase
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
+    /// <summary>
+    /// Full custom rendering for this option, replacing the default circle-and-dot indicator and
+    /// <see cref="ChildContent"/> label entirely. Receives whether this option is currently
+    /// selected, so the template can style itself accordingly — e.g. a segmented "chip" row (a
+    /// toolbar's Bold/Italic/Underline group, or a category picker) instead of a classic
+    /// circle-and-label radio. The template still renders inside the same
+    /// role="radio"/tabindex/keydown element as the default indicator, so whatever it renders
+    /// stays keyboard-operable and announced correctly to a screen reader — you're only replacing
+    /// the visual, not the selection semantics (still exactly one selected, never zero, exactly
+    /// like the default indicator).
+    /// </summary>
+    [Parameter]
+    public RenderFragment<bool>? ItemTemplate { get; set; }
+
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 

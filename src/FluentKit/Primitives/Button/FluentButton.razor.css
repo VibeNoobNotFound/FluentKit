@@ -112,7 +112,7 @@ a.fluent-button[aria-disabled="true"] {
 .fluent-button--hyperlink {
     background-color: transparent;
     border-color: transparent;
-    color: var(--accent-fill-color-default);
+    color: var(--accent-text-fill-color-primary);
     text-decoration: none;
 }
 .fluent-button--hyperlink:hover:not(:disabled):not([aria-disabled="true"]) {

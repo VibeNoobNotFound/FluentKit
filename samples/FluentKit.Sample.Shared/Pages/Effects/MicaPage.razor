@@ -22,6 +22,16 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Mica with Child Content" RazorCode="@_contentRazor">
+        <Example>
+            <FluentMicaPanel Variant="@_micaVariant"
+                             BackgroundImageUrl="_content/FluentKit.Sample.Shared/wallpaper.jpg"
+                             style="height:120px; border-radius:8px; border:1px solid var(--card-stroke-default); display:flex; align-items:center; justify-content:center;">
+                <FluentTextBlock Variant="TextBlockVariant.BodyStrong">Content rendered over the Mica surface</FluentTextBlock>
+            </FluentMicaPanel>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {
@@ -31,4 +41,10 @@
     private const string _micaRazor = @"<FluentMicaPanel Variant=""_micaVariant"" BackgroundImageUrl=""_content/FluentKit.Sample.Shared/wallpaper.jpg"" style=""height:120px; border-radius:8px; border:1px solid var(--card-stroke-default);"" />";
     private const string _micaCs = @"private string _selectedVariant = ""base"";
 private MicaVariant _micaVariant => _selectedVariant == ""basealt"" ? MicaVariant.BaseAlt : MicaVariant.Base;";
+
+    private const string _contentRazor = @"<FluentMicaPanel Variant=""_micaVariant""
+                 BackgroundImageUrl=""_content/FluentKit.Sample.Shared/wallpaper.jpg""
+                 style=""height:120px; display:flex; align-items:center; justify-content:center;"">
+    <FluentTextBlock Variant=""TextBlockVariant.BodyStrong"">Content rendered over the Mica surface</FluentTextBlock>
+</FluentMicaPanel>";
 }

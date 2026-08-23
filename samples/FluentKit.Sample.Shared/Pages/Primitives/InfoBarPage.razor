@@ -32,6 +32,15 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Custom Icon and Message Content" RazorCode="@_customRazor">
+        <Example>
+            <FluentInfoBar Severity="InfoBadgeSeverity.Success" Closable="false" Title="Sync complete">
+                <Icon><FluentIcon Name="ic_fluent_cloud_checkmark_20_regular" /></Icon>
+                <ChildContent>All files are up to date. <strong>Last checked just now.</strong></ChildContent>
+            </FluentInfoBar>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {
@@ -48,4 +57,9 @@
     </Action>
 </FluentInfoBar>";
     private const string _dismissCs = @"private bool _isOpen = true;";
+
+    private const string _customRazor = @"<FluentInfoBar Severity=""InfoBadgeSeverity.Success"" Closable=""false"" Title=""Sync complete"">
+    <Icon><FluentIcon Name=""ic_fluent_cloud_checkmark_20_regular"" /></Icon>
+    <ChildContent>All files are up to date. <strong>Last checked just now.</strong></ChildContent>
+</FluentInfoBar>";
 }

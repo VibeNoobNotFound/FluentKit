@@ -29,6 +29,23 @@
             </div>
         </Example>
     </ControlExample>
+    <ControlExample HeaderText="ComboBox with Icons (ItemTemplate + SelectedTemplate)" RazorCode="@_iconRazor" CSharpCode="@_iconCs">
+        <Example>
+            <div class="demo-col" style="max-width: 220px;">
+                <FluentComboBox TValue="string" Items="@_categories" @bind-Value="@_selectedCategory" Placeholder="Category">
+                    <ItemTemplate Context="item">
+                        <FluentIcon Name="@IconFor(item.Value)" Size="16" />
+                        <span>@item.Name</span>
+                    </ItemTemplate>
+                    <SelectedTemplate Context="item">
+                        <FluentIcon Name="@IconFor(item.Value)" Size="16" />
+                        <span>@item.Name</span>
+                    </SelectedTemplate>
+                </FluentComboBox>
+                <div class="demo-output">Selection: @_selectedCategory</div>
+            </div>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {
@@ -48,12 +65,28 @@
     };
     private string? _selectedColor = "blue";
 
+    private List<ComboBoxItem<string>> _categories = new()
+    {
+        new("Bug", "bug"),
+        new("Idea", "idea"),
+        new("Question", "question"),
+    };
+    private string? _selectedCategory = "bug";
+
     private string ColorHexFor(string? value) => value switch
     {
         "red" => "#c42b1c",
         "green" => "#0f7b0f",
         "blue" => "#005fb8",
         _ => "transparent"
+    };
+
+    private string IconFor(string? value) => value switch
+    {
+        "bug" => "ic_fluent_bug_24_regular",
+        "idea" => "ic_fluent_lightbulb_24_regular",
+        "question" => "ic_fluent_question_circle_24_regular",
+        _ => "ic_fluent_circle_24_regular"
     };
 
     private const string _comboRazor = @"<FluentComboBox TValue=""string"" Items=""@_fruits"" @bind-Value=""_selectedFruit"" Placeholder=""Choose fruit"" />";
@@ -72,4 +105,28 @@ private string? _selectedFruit = ""apple"";";
 </FluentComboBox>";
     private const string _editCs = @"private List<ComboBoxItem<string>> _colors = new() { ... };
 private string? _selectedColor = ""blue"";";
+
+    // ItemTemplate customizes each dropdown row; SelectedTemplate (optional, non-editable mode
+    // only) customizes the closed trigger once something is chosen — here both show the same
+    // icon+label pairing, but they don't have to match (e.g. a denser row style in the list vs. a
+    // compact chip in the trigger).
+    private const string _iconRazor = @"<FluentComboBox TValue=""string"" Items=""@_categories"" @bind-Value=""_selectedCategory"" Placeholder=""Category"">
+    <ItemTemplate Context=""item"">
+        <FluentIcon Name=""@IconFor(item.Value)"" Size=""16"" />
+        <span>@item.Name</span>
+    </ItemTemplate>
+    <SelectedTemplate Context=""item"">
+        <FluentIcon Name=""@IconFor(item.Value)"" Size=""16"" />
+        <span>@item.Name</span>
+    </SelectedTemplate>
+</FluentComboBox>";
+    private const string _iconCs = @"private List<ComboBoxItem<string>> _categories = new() { ... };
+private string? _selectedCategory = ""bug"";
+private string IconFor(string? value) => value switch
+{
+    ""bug"" => ""ic_fluent_bug_24_regular"",
+    ""idea"" => ""ic_fluent_lightbulb_24_regular"",
+    ""question"" => ""ic_fluent_question_circle_24_regular"",
+    _ => ""ic_fluent_circle_24_regular""
+};";
 }

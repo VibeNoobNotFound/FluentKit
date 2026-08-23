@@ -13,7 +13,8 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
     private ElementReference _surfaceElement;
     private IJSObjectReference? _module;
     private DotNetObjectReference<OverlaySurface>? _selfReference;
-    private bool _positioned;
+    private bool _needsPositioning = true;
+    private bool _needsDismissRegistrationUpdate;
     // Guards HandleClosingAsync against running twice — Entry.IsClosing stays true across every
     // subsequent render once OverlayService.Close() flips it (the same OverlayEntry instance is kept
     // mounted via FluentOverlayHost's @key="entry.Id" specifically so the exit animation can play),
@@ -23,6 +24,19 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
     protected override void OnParametersSet()
     {
+        if (Entry.NeedsReposition)
+        {
+            Entry.NeedsReposition = false;
+            _needsPositioning = true;
+            Entry.ComputedStyle = "position: fixed; visibility: hidden;";
+        }
+
+        if (Entry.NeedsDismissRegistrationUpdate)
+        {
+            Entry.NeedsDismissRegistrationUpdate = false;
+            _needsDismissRegistrationUpdate = true;
+        }
+
         if (Entry.IsClosing && !_closingHandled)
         {
             _closingHandled = true;
@@ -59,13 +73,19 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || _positioned)
+        if (!firstRender && !_needsPositioning && !_needsDismissRegistrationUpdate)
         {
             return;
         }
 
-        _module = await JS.InvokeAsync<IJSObjectReference>(
+        _module ??= await JS.InvokeAsync<IJSObjectReference>(
             "import", "./_content/FluentKit/Overlay/overlay-interop.js");
+
+        if (_needsDismissRegistrationUpdate)
+        {
+            await SyncDismissRegistrationAsync();
+            _needsDismissRegistrationUpdate = false;
+        }
 
         if (Entry.IsDetached)
         {
@@ -73,15 +93,17 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             // synchronously (plain viewport-relative `position: fixed`), so there's nothing to do
             // here except mark positioning done and, if requested, wire up light-dismiss without an
             // anchor exclusion zone.
-            _positioned = true;
-
-            if (Entry.LightDismiss)
+            _needsPositioning = false;
+            if (firstRender)
             {
-                _selfReference = DotNetObjectReference.Create(this);
-                await _module.InvokeVoidAsync(
-                    "registerLightDismissDetached", Entry.Id.ToString(), _surfaceElement, _selfReference);
+                await RegisterDismissHandlersAsync();
             }
 
+            return;
+        }
+
+        if (!_needsPositioning)
+        {
             return;
         }
 
@@ -100,8 +122,25 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
         var widthStyle = position.Width is { } width ? $"width: {width}px; " : "";
         Entry.ComputedStyle =
             $"position: fixed; top: {position.Top}px; left: {position.Left}px; {widthStyle}z-index: 1000;";
-        _positioned = true;
+        _needsPositioning = false;
+        if (firstRender)
+        {
+            await RegisterDismissHandlersAsync();
+        }
 
+        StateHasChanged();
+    }
+
+    private async Task SyncDismissRegistrationAsync()
+    {
+        await _module!.InvokeVoidAsync("unregisterLightDismiss", Entry.Id.ToString());
+        _selfReference?.Dispose();
+        _selfReference = null;
+        await RegisterDismissHandlersAsync();
+    }
+
+    private async Task RegisterDismissHandlersAsync()
+    {
         if (Entry.LightDismiss || Entry.WatchAnchorRemoved)
         {
             _selfReference = DotNetObjectReference.Create(this);
@@ -109,17 +148,23 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
         if (Entry.LightDismiss)
         {
-            await _module.InvokeVoidAsync(
-                "registerLightDismiss", Entry.Id.ToString(), _surfaceElement, Entry.Anchor, _selfReference);
+            if (Entry.IsDetached)
+            {
+                await _module!.InvokeVoidAsync(
+                    "registerLightDismissDetached", Entry.Id.ToString(), _surfaceElement, _selfReference);
+            }
+            else
+            {
+                await _module!.InvokeVoidAsync(
+                    "registerLightDismiss", Entry.Id.ToString(), _surfaceElement, Entry.Anchor, _selfReference);
+            }
         }
 
         if (Entry.WatchAnchorRemoved)
         {
-            await _module.InvokeVoidAsync(
+            await _module!.InvokeVoidAsync(
                 "watchAnchorRemoved", Entry.Id.ToString(), Entry.Anchor, _selfReference);
         }
-
-        StateHasChanged();
     }
 
     [JSInvokable]
