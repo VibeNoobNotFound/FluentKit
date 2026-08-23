@@ -492,7 +492,7 @@ html[data-theme="dark"] .control-card:hover {
     justify-content: center;
     background: rgba(128, 128, 128, 0.08);
     border-radius: var(--overlay-corner-radius);
-    color: var(--accent-fill-color-default);
+    color: var(--accent-text-fill-color-primary);
 }
 
 
