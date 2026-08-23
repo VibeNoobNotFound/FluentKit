@@ -6,6 +6,13 @@
          @attributes="AdditionalAttributes"
          @ref="_rootElement">
 
+        @if (IsCompactOrMinimal)
+        {
+            <div class="fluent-nav-view-swipe-edge fluent-nav-view-swipe-edge--@EffectiveSwipeEdge.ToString().ToLowerInvariant() @(!IsPaneOpen ? "fluent-nav-view-swipe-edge--active" : "")"
+                 aria-hidden="true"
+                 @ref="_closedSwipeRegion"></div>
+        }
+
         @* Unified Aside: Shared across Left, LeftCompact, and LeftMinimal modes to maintain DOM stability
            and enable smooth width transitions. Top mode hides this via display: none in CSS. *@
         <aside class="fluent-nav-view-pane @AsideModeClass">
@@ -44,8 +51,7 @@
                 }
             </header>
             <div class="fluent-nav-view-pane-items-wrapper">
-                <div class="fluent-nav-view-pane-items" role="list" @ref="_itemsContainerElement">
-                    <span class="fluent-nav-view-ribbon-indicator" @ref="_indicatorElement" aria-hidden="true"></span>
+                <div class="fluent-nav-view-pane-items" role="list">
                     @if (IsHeaderRail && PaneHeaderIcon is not null)
                     {
                         <button type="button" class="fluent-nav-view-pane-header-icon-button" @onclick="TogglePaneAsync" aria-label="Open navigation pane">
@@ -79,7 +85,8 @@
                 @* Real DOM nesting instead of ::before/::after + z-index for backdrop-filter reliability *@
                 <div class="fluent-nav-view-pane-overlay-material" aria-hidden="true"></div>
                 <div class="fluent-nav-view-pane-overlay-content">
-                    <header class="fluent-nav-view-pane-header">
+                    <header class="fluent-nav-view-pane-header fluent-nav-view-pane-header--swipe-origin fluent-nav-view-pane-header--swipe-origin-@EffectiveSwipeEdge.ToString().ToLowerInvariant()"
+                            @ref="_openSwipeRegion">
                         <div class="fluent-nav-view-pane-header-buttons">
                             @if (IsBackButtonVisible)
                             {

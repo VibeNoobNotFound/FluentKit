@@ -40,6 +40,25 @@
                                 <FluentNavigationViewItem Value='@("checkbox")' Text="Checkbox" />
                             </ChildContent>
                         </FluentNavigationViewItem>
+                        <FluentNavigationViewItem Value='@("guides")' Text="Guides">
+                            <Icon><FluentIcon Name="@FluentIconNames.Document" /></Icon>
+                            <ChildContent>
+                                <FluentNavigationViewItem Value='@("getting-started")' Text="Getting started" />
+                                <FluentNavigationViewItem Value='@("patterns")' Text="Patterns">
+                                    <ChildContent>
+                                        <FluentNavigationViewItem Value='@("layout")' Text="Layout" />
+                                        <FluentNavigationViewItem Value='@("navigation")' Text="Navigation" />
+                                        <FluentNavigationViewItem Value='@("theming")' Text="Theming" />
+                                    </ChildContent>
+                                </FluentNavigationViewItem>
+                                <FluentNavigationViewItem Value='@("accessibility")' Text="Accessibility" />
+                            </ChildContent>
+                        </FluentNavigationViewItem>
+                        <FluentNavigationViewItem Value='@("tokens")' Text="Design tokens" />
+                        <FluentNavigationViewItem Value='@("styles")' Text="Styles and themes" />
+                        <FluentNavigationViewItem Value='@("layouts")' Text="Layouts" />
+                        <FluentNavigationViewItem Value='@("overlays")' Text="Overlays" />
+                        <FluentNavigationViewItem Value='@("testing")' Text="Testing" />
                         <FluentNavigationViewItem Value='@("disabled")' Text="Disabled item" Disabled="true">
                             <Icon><FluentIcon Name="@FluentIconNames.Dismiss" /></Icon>
                         </FluentNavigationViewItem>
@@ -118,6 +137,25 @@
                 <FluentNavigationViewItem Value='@(""checkbox"")' Text=""Checkbox"" />
             </ChildContent>
         </FluentNavigationViewItem>
+        <FluentNavigationViewItem Value='@(""guides"")' Text=""Guides"">
+            <Icon><FluentIcon Name=""@FluentIconNames.Document"" /></Icon>
+            <ChildContent>
+                <FluentNavigationViewItem Value='@(""getting-started"")' Text=""Getting started"" />
+                <FluentNavigationViewItem Value='@(""patterns"")' Text=""Patterns"">
+                    <ChildContent>
+                        <FluentNavigationViewItem Value='@(""layout"")' Text=""Layout"" />
+                        <FluentNavigationViewItem Value='@(""navigation"")' Text=""Navigation"" />
+                        <FluentNavigationViewItem Value='@(""theming"")' Text=""Theming"" />
+                    </ChildContent>
+                </FluentNavigationViewItem>
+                <FluentNavigationViewItem Value='@(""accessibility"")' Text=""Accessibility"" />
+            </ChildContent>
+        </FluentNavigationViewItem>
+        <FluentNavigationViewItem Value='@(""tokens"")' Text=""Design tokens"" />
+        <FluentNavigationViewItem Value='@(""styles"")' Text=""Styles and themes"" />
+        <FluentNavigationViewItem Value='@(""layouts"")' Text=""Layouts"" />
+        <FluentNavigationViewItem Value='@(""overlays"")' Text=""Overlays"" />
+        <FluentNavigationViewItem Value='@(""testing"")' Text=""Testing"" />
         <FluentNavigationViewItem Value='@(""disabled"")' Text=""Disabled item"" Disabled=""true"">
             <Icon><FluentIcon Name=""@FluentIconNames.Dismiss"" /></Icon>
         </FluentNavigationViewItem>
@@ -148,6 +186,8 @@ private string? _navLastAction;
 private bool _navBackButtonVisible = true;
 private bool _navBackButtonEnabled = true;
 private bool _navShowSettingsButton = true;
+private NavigationViewFullScreenOrigin _navFullScreenOrigin = NavigationViewFullScreenOrigin.Left;
+private bool _navEnableSwipeToOpen = true;
 
 private void OnNavBack() => _navLastAction = ""Back pressed"";
 private void OnNavSettings() => _navLastAction = ""Settings requested"";";

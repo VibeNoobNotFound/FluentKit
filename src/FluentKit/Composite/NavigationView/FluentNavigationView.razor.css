@@ -189,11 +189,46 @@
     transition: none !important;
 }
 
-/* touch-action: none so a drag on the overlay isn't hijacked as a page scroll before pointermove
-   fires; the open-drag's edge-zone start (before the overlay is visible/open) is additionally
-   protected by e.preventDefault() in the JS pointermove handler once a drag is confirmed. */
-.fluent-nav-view-pane-overlay {
-    touch-action: none;
+.fluent-nav-view-swipe-edge {
+    position: absolute;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.fluent-nav-view-swipe-edge--active {
+    pointer-events: auto;
+}
+
+.fluent-nav-view-swipe-edge--left,
+.fluent-nav-view-swipe-edge--right {
+    inset-block: 0;
+    inline-size: 32px;
+    touch-action: pan-y;
+}
+
+.fluent-nav-view-swipe-edge--left {
+    inset-inline-start: 0;
+}
+
+.fluent-nav-view-swipe-edge--right {
+    inset-inline-end: 0;
+}
+
+.fluent-nav-view-swipe-edge--top {
+    inset-inline: 0;
+    inset-block-start: 0;
+    block-size: 32px;
+    touch-action: pan-x;
+}
+
+.fluent-nav-view-pane-header--swipe-origin-left,
+.fluent-nav-view-pane-header--swipe-origin-right {
+    touch-action: pan-y;
+}
+
+.fluent-nav-view-pane-header--swipe-origin-top {
+    touch-action: pan-x;
 }
 
 /* ============================================================
@@ -338,29 +373,6 @@
     overflow-y: auto;
     padding: var(--spacing-xs) 8px;
     width: 100%;
-}
-
-/* Ribbon selection indicator: a single shared pill that slides + squash/stretches
-   between nav items on selection change (see PyQt-Fluent-Widgets' ScaleSlideAnimation /
-   WinUI 3 NavigationView selection indicator). Position is driven purely via JS
-   (navview-interop.js) using transform (translateY) + height, so the CSS here only
-   sets up the static box; the container needs position:relative (set above) and the
-   indicator needs pointer-events:none so it never intercepts item clicks. */
-.fluent-nav-view-ribbon-indicator {
-    position: absolute;
-    inset-inline-start: var(--spacing-xs);
-    top: 0;
-    inline-size: 3px;
-    block-size: 16px;
-    border-radius: var(--control-corner-radius);
-    background-color: var(--nav-view-selection-indicator);
-    opacity: 0;
-    pointer-events: none;
-    /* JS (navview-interop.js) only ever sets `transform: translateY() scaleY()` - block-size
-       stays fixed at 16px always, and scaleY stretches/shrinks from the top edge because of
-       this transform-origin, matching how the JS computes its translateY anchor. */
-    transform-origin: top center;
-    will-change: transform;
 }
 
 .fluent-nav-view-pane-footer {

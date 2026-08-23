@@ -121,21 +121,12 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private ElementReference _rootElement;
-    private ElementReference _itemsContainerElement;
-    private ElementReference _indicatorElement;
     private ElementReference _overlayElement;
+    private ElementReference _closedSwipeRegion;
+    private ElementReference _openSwipeRegion;
     private NavigationViewContext? _context;
     private IJSObjectReference? _module;
     private DotNetObjectReference<FluentNavigationView>? _selfReference;
-
-    // A selection change is recorded here (by OnContextSelectionChanged) and only actually
-    // measured/animated from OnAfterRenderAsync, once Blazor has patched the DOM for whatever
-    // triggered it (see OnContextSelectionChanged for why this can't happen synchronously).
-    // Deliberately just a bool, not a remembered "target key": the JS side always re-resolves
-    // the target by querying for .fluent-nav-view-item--selected at animate time, so the
-    // indicator can never be pointed at a stale/wrong element - it always follows whatever the
-    // DOM currently says is selected, not whatever we think we clicked.
-    private bool _hasPendingIndicatorAnimation;
 
     private NavigationViewPaneDisplayMode _activePaneDisplayMode = NavigationViewPaneDisplayMode.Left;
     private NavigationViewPaneDisplayMode _lastPaneDisplayMode = NavigationViewPaneDisplayMode.Left;
@@ -179,6 +170,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         _context = new NavigationViewContext(this);
         _context.SelectionChanged += OnContextSelectionChanged;
         _context.ItemClicked += (object? sender1) => OnItemClicked(sender1);
+        _context.ExpansionChanged += OnContextExpansionChanged;
         _activePaneDisplayMode = PaneDisplayMode;
         _lastPaneDisplayMode = PaneDisplayMode;
         base.OnInitialized();
@@ -202,26 +194,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             }
 
             await UpdateDisplayModeAsync();
-
-            // Place the ribbon indicator on whatever is selected at startup, instantly
-            // (no slide-in from nowhere on first paint).
-            await UpdateIndicatorAsync(animate: false);
-            _hasPendingIndicatorAnimation = false;
-
-            await SyncSwipeGestureAsync();
-        }
-        else if (_hasPendingIndicatorAnimation)
-        {
-            // DOM now reflects whatever expand/collapse the triggering click caused, so it's
-            // safe to measure real positions.
-            _hasPendingIndicatorAnimation = false;
-            await UpdateIndicatorAsync(animate: true);
         }
 
-        if (!firstRender)
-        {
-            await SyncSwipeGestureAsync();
-        }
+        await SyncNavItemAnchorsAsync();
+        await SyncSwipeGestureAsync();
 
         await base.OnAfterRenderAsync(firstRender);
     }
@@ -303,15 +279,6 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     {
         var newValue = _context?.SelectedValue;
 
-        // Don't touch the DOM here: this handler can fire from a click that *also* expands or
-        // collapses a sibling group (e.g. a parent item with Value=null and children), which
-        // inserts/removes rows and shifts everything below it. If we measure positions right
-        // now, we're measuring the *old* layout, before Blazor has patched the DOM for that
-        // change. Defer to OnAfterRenderAsync, and resolve the target there by querying for
-        // .fluent-nav-view-item--selected rather than remembering "the item we clicked" - that
-        // way the indicator always converges on whatever the DOM says is actually selected.
-        _hasPendingIndicatorAnimation = true;
-
         if (!Equals(SelectedValue, newValue))
         {
             SelectedValue = newValue;
@@ -321,16 +288,17 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         StateHasChanged();
     }
 
-    /// <summary>Moves the ribbon indicator onto whichever item currently has
-    /// .fluent-nav-view-item--selected in the DOM. Never told which item to target - it always
-    /// re-resolves that itself, so it can't drift onto a stale/wrong element the way passing a
-    /// remembered "target key" around could.</summary>
-    private async Task UpdateIndicatorAsync(bool animate)
+    private void OnContextExpansionChanged()
+    {
+        StateHasChanged();
+    }
+
+    private async Task SyncNavItemAnchorsAsync()
     {
         if (_module is null) return;
         try
         {
-            await _module.InvokeVoidAsync("updateNavIndicator", _itemsContainerElement, _indicatorElement, animate);
+            await _module.InvokeVoidAsync("syncNavItemAnchors", _rootElement);
         }
         catch (JSException) { }
     }
@@ -405,6 +373,8 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
                 "startSwipeWatcher",
                 _rootElement,
                 _overlayElement,
+                _closedSwipeRegion,
+                _openSwipeRegion,
                 _selfReference,
                 IsPaneOpen,
                 edge.ToString().ToLowerInvariant());
@@ -562,6 +532,11 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     public void Dispose()
     {
+        if (_context is not null)
+        {
+            _context.SelectionChanged -= OnContextSelectionChanged;
+            _context.ExpansionChanged -= OnContextExpansionChanged;
+        }
         _context?.Dispose();
         _selfReference?.Dispose();
         if (_module is not null)
