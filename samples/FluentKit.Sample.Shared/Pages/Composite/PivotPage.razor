@@ -27,6 +27,33 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Custom TabTemplate" RazorCode="@_templateRazor">
+        <Example>
+            <FluentPivot>
+                <FluentPivotItem Title="Overview">
+                    <TabTemplate>
+                        <span style="display:inline-flex; align-items:center; gap:6px;">
+                            <FluentIcon Name="ic_fluent_home_20_regular" Size="16" /> Overview
+                        </span>
+                    </TabTemplate>
+                    <ChildContent>
+                        <FluentTextBlock>Overview content with a custom icon in the tab header.</FluentTextBlock>
+                    </ChildContent>
+                </FluentPivotItem>
+                <FluentPivotItem Title="Activity">
+                    <TabTemplate>
+                        <span style="display:inline-flex; align-items:center; gap:6px;">
+                            <FluentIcon Name="ic_fluent_history_20_regular" Size="16" /> Activity
+                        </span>
+                    </TabTemplate>
+                    <ChildContent>
+                        <FluentTextBlock>Recent activity content.</FluentTextBlock>
+                    </ChildContent>
+                </FluentPivotItem>
+            </FluentPivot>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {
@@ -41,4 +68,23 @@
     </FluentPivotItem>
 </FluentPivot>";
     private const string _pivotCs = @"private int _selectedIdx;";
+
+    private const string _templateRazor = @"<FluentPivot>
+    <FluentPivotItem Title=""Overview"">
+        <TabTemplate>
+            <span style=""display:inline-flex; align-items:center; gap:6px;"">
+                <FluentIcon Name=""ic_fluent_home_20_regular"" Size=""16"" /> Overview
+            </span>
+        </TabTemplate>
+        <ChildContent><FluentTextBlock>Overview content.</FluentTextBlock></ChildContent>
+    </FluentPivotItem>
+    <FluentPivotItem Title=""Activity"">
+        <TabTemplate>
+            <span style=""display:inline-flex; align-items:center; gap:6px;"">
+                <FluentIcon Name=""ic_fluent_history_20_regular"" Size=""16"" /> Activity
+            </span>
+        </TabTemplate>
+        <ChildContent><FluentTextBlock>Recent activity content.</FluentTextBlock></ChildContent>
+    </FluentPivotItem>
+</FluentPivot>";
 }

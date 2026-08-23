@@ -7,6 +7,7 @@
         <Example>
             <div class="demo-col" style="max-width: 480px;">
                 <FluentExpander @bind-IsExpanded="_isExpanded">
+                    <Icon><FluentIcon Name="ic_fluent_info_20_regular" /></Icon>
                     <ChildContent>Click to expand/collapse</ChildContent>
                     <Content>
                         <div style="padding: 4px 0;">
@@ -26,6 +27,7 @@
     private bool _isExpanded;
 
     private const string _expanderRazor = @"<FluentExpander @bind-IsExpanded=""_isExpanded"">
+    <Icon><FluentIcon Name=""ic_fluent_info_20_regular"" /></Icon>
     <ChildContent>Click to expand/collapse</ChildContent>
     <Content>
         <div style=""padding: 4px 0;"">

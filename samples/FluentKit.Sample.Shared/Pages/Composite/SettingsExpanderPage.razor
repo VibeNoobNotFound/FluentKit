@@ -49,6 +49,27 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Custom Header and Description Content" RazorCode="@_customRazor">
+        <Example>
+            <div class="demo-col">
+                <FluentSettingsExpander @bind-IsExpanded="_customExpanded">
+                    <HeaderContent>
+                        <span style="font-weight:600;">Privacy controls</span>
+                    </HeaderContent>
+                    <DescriptionContent>
+                        <span>Choose what other people can see</span>
+                    </DescriptionContent>
+                    <HeaderIcon><FluentIcon Name="ic_fluent_lock_closed_20_regular" /></HeaderIcon>
+                    <ItemsContent>
+                        <FluentSettingsCard Header="Profile visibility">
+                            <FluentToggleSwitch @bind-Checked="_profileVisible" />
+                        </FluentSettingsCard>
+                    </ItemsContent>
+                </FluentSettingsExpander>
+            </div>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {
@@ -58,6 +79,8 @@
     private bool _calendarOn;
     private bool _messagesOn = true;
     private bool _syncOn = true;
+    private bool _customExpanded = true;
+    private bool _profileVisible = true;
 
     private const string _basicRazor = @"<FluentSettingsExpander Header=""Notifications""
                         Description=""Choose which apps show notifications""
@@ -95,5 +118,16 @@ private bool _messagesOn = true;";
     <ItemsFooter>
         <FluentButton>Add account</FluentButton>
     </ItemsFooter>
+</FluentSettingsExpander>";
+
+    private const string _customRazor = @"<FluentSettingsExpander @bind-IsExpanded=""_customExpanded"">
+    <HeaderContent><span style=""font-weight:600;"">Privacy controls</span></HeaderContent>
+    <DescriptionContent><span>Choose what other people can see</span></DescriptionContent>
+    <HeaderIcon><FluentIcon Name=""ic_fluent_lock_closed_20_regular"" /></HeaderIcon>
+    <ItemsContent>
+        <FluentSettingsCard Header=""Profile visibility"">
+            <FluentToggleSwitch @bind-Checked=""_profileVisible"" />
+        </FluentSettingsCard>
+    </ItemsContent>
 </FluentSettingsExpander>";
 }

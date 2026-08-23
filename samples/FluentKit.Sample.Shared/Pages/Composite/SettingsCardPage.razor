@@ -39,6 +39,27 @@
         </Example>
     </ControlExample>
 
+    <ControlExample HeaderText="Custom Header, Description, and ActionIcon" RazorCode="@_customRazor" CSharpCode="@_customCs">
+        <Example>
+            <div class="demo-col">
+                <FluentSettingsCard IsClickEnabled="true"
+                                    ActionIconToolTip="Edit profile"
+                                    OnClick="@(() => _customClicks++)">
+                    <HeaderContent>
+                        <span style="font-weight:600;">Profile settings</span>
+                    </HeaderContent>
+                    <DescriptionContent>
+                        <span>Manage your display name and avatar</span>
+                    </DescriptionContent>
+                    <HeaderIcon><FluentIcon Name="ic_fluent_person_20_regular" /></HeaderIcon>
+                    <ActionIcon><FluentIcon Name="ic_fluent_edit_20_regular" /></ActionIcon>
+                    <ChildContent><FluentToggleSwitch @bind-Checked="_profileOn" /></ChildContent>
+                </FluentSettingsCard>
+                <div class="demo-output">Card activations: @_customClicks</div>
+            </div>
+        </Example>
+    </ControlExample>
+
     <ControlExample HeaderText="ContentAlignment.Left" RazorCode="@_leftRazor">
         <Example>
             <div class="demo-col">
@@ -80,6 +101,8 @@
     private bool _bluetoothOn;
     private bool _acceptTerms;
     private int _clicks;
+    private int _customClicks;
+    private bool _profileOn = true;
     private double _brightness = 70;
     private bool _airplaneOn;
 
@@ -99,6 +122,18 @@
     <HeaderIcon><FluentIcon Name=""ic_fluent_battery_10_20_regular"" /></HeaderIcon>
 </FluentSettingsCard>";
     private const string _clickableCs = @"private int _clicks;";
+
+    private const string _customRazor = @"<FluentSettingsCard IsClickEnabled=""true""
+                    ActionIconToolTip=""Edit profile""
+                    OnClick=""@(() => _customClicks++)"">
+    <HeaderContent><span style=""font-weight:600;"">Profile settings</span></HeaderContent>
+    <DescriptionContent><span>Manage your display name and avatar</span></DescriptionContent>
+    <HeaderIcon><FluentIcon Name=""ic_fluent_person_20_regular"" /></HeaderIcon>
+    <ActionIcon><FluentIcon Name=""ic_fluent_edit_20_regular"" /></ActionIcon>
+    <ChildContent><FluentToggleSwitch @bind-Checked=""_profileOn"" /></ChildContent>
+</FluentSettingsCard>";
+    private const string _customCs = @"private int _customClicks;
+private bool _profileOn = true;";
 
     private const string _leftRazor = @"<FluentSettingsCard ContentAlignment=""SettingsCardContentAlignment.Left"">
     <FluentCheckBox @bind-Checked=""_acceptTerms"">I accept the terms and conditions</FluentCheckBox>
