@@ -106,6 +106,20 @@ public sealed class OverlayService : IOverlayService
         }
     }
 
+    public void Refresh(Guid id)
+    {
+        // Same "does this id still exist" guard as Close() — an id from an entry that's already
+        // gone (closed and removed) has nothing left to refresh.
+        foreach (var entry in _active)
+        {
+            if (entry.Id == id)
+            {
+                Changed?.Invoke();
+                return;
+            }
+        }
+    }
+
     public void CloseAll()
     {
         if (_active.Count == 0)

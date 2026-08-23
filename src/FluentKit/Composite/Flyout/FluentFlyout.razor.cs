@@ -72,6 +72,16 @@ public partial class FluentFlyout : ComponentBase, IDisposable
                 HideInternal();
             }
         }
+        else if (_overlayId is { } id)
+        {
+            // Still open, but this component just received fresh parameters — most commonly
+            // because FlyoutContent's closure now reflects new state from something the person did
+            // INSIDE the still-open flyout (selected an option, typed into a field, ...).
+            // OverlayEntry.Content is only ever invoked once at Show()-time otherwise, so without
+            // this the flyout would keep showing whatever it looked like at the moment it opened
+            // until it was closed and reopened.
+            OverlayService.Refresh(id);
+        }
     }
 
     private Task ToggleAsync() => _overlayId is null ? OpenAsync() : CloseAsync();
