@@ -6,9 +6,9 @@ public sealed class OverlayEntry
 {
     public Guid Id { get; } = Guid.NewGuid();
     public required RenderFragment Content { get; init; }
-    public required ElementReference Anchor { get; init; }
-    public OverlayPlacement PreferredPlacement { get; init; } = OverlayPlacement.Bottom;
-    public bool LightDismiss { get; init; } = true;
+    public ElementReference Anchor { get; internal set; }
+    public OverlayPlacement PreferredPlacement { get; internal set; } = OverlayPlacement.Bottom;
+    public bool LightDismiss { get; internal set; } = true;
 
     /// <summary>When true, OverlaySurface renders with no chrome of its own (no background, blur,
     /// border, shadow, or padding) — for consumers like NavigationView's Compact/Minimal overlay
@@ -21,7 +21,7 @@ public sealed class OverlayEntry
     /// trigger rather than an independently-sized flyout) — set on overlay-interop.js's
     /// <c>computePosition</c> call, since the anchor's width isn't known until the JS side measures
     /// it via <c>getBoundingClientRect</c>.</summary>
-    public bool MatchAnchorWidth { get; init; }
+    public bool MatchAnchorWidth { get; internal set; }
 
     /// <summary>True for overlays created via <see cref="IOverlayService.ShowDetached"/> — no anchor
     /// element, positioned relative to the viewport instead. OverlaySurface uses this to skip the
@@ -58,4 +58,7 @@ public sealed class OverlayEntry
     /// after JS interop reports the anchor's measured position. Empty until first measured, so the
     /// overlay renders off-screen-but-in-the-DOM for one frame rather than flashing at (0,0).</summary>
     public string ComputedStyle { get; set; } = "position: fixed; visibility: hidden;";
+
+    internal bool NeedsReposition { get; set; }
+    internal bool NeedsDismissRegistrationUpdate { get; set; }
 }

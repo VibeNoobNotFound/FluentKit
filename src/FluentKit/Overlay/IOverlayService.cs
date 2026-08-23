@@ -35,15 +35,19 @@ public interface IOverlayService
 
     /// <summary>
     /// Notifies FluentOverlayHost that an already-shown entry's content needs to be re-rendered.
-    /// Unlike <see cref="Show"/>/<see cref="Close"/>, this doesn't add, remove, reposition, or
-    /// animate anything — <see cref="OverlayEntry.Content"/> is captured once at Show()-time and
-    /// otherwise never re-invoked on its own, so a composite built on this service (FluentFlyout,
-    /// FluentTeachingTip, ...) needs to call this whenever its own content might reflect new state
-    /// while the overlay stays open — e.g. the person selected an option or typed into a field
-    /// inside the still-open flyout — or the overlay keeps showing whatever it looked like at the
-    /// moment it opened until it's closed and reopened.
+    /// This does not reposition the overlay or update its light-dismiss registration. Returns false
+    /// when the entry is missing or already closing.
     /// </summary>
-    void Refresh(Guid id);
+    bool RefreshContent(Guid id);
+
+    /// <summary>
+    /// Updates the live positioning and dismissal inputs for an already-shown entry. A changed
+    /// anchor or placement causes OverlaySurface to remeasure after the next render; a changed
+    /// <paramref name="lightDismiss"/> value rebinds the browser-side dismissal handler. Returns
+    /// false when the entry is missing or already closing.
+    /// </summary>
+    bool Update(Guid id, ElementReference anchor, OverlayPlacement placement, bool lightDismiss,
+        bool matchAnchorWidth = false);
 
     /// <summary>Actually removes an entry from <see cref="Active"/>. Called by OverlaySurface once an
     /// entry's exit animation has finished (or immediately, for an entry that was never shown/never

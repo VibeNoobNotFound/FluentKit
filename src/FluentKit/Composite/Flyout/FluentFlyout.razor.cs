@@ -36,6 +36,7 @@ public partial class FluentFlyout : ComponentBase, IDisposable
     private ElementReference _anchor;
     private Guid? _overlayId;
     private bool _lastRenderedIsOpen;
+    private RenderFragment? _renderedFlyoutContent;
 
     protected override void OnInitialized()
     {
@@ -72,7 +73,7 @@ public partial class FluentFlyout : ComponentBase, IDisposable
                 HideInternal();
             }
         }
-        else if (_overlayId is { } id)
+        else if (_overlayId is { } id && !ReferenceEquals(_renderedFlyoutContent, FlyoutContent))
         {
             // Still open, but this component just received fresh parameters — most commonly
             // because FlyoutContent's closure now reflects new state from something the person did
@@ -80,8 +81,21 @@ public partial class FluentFlyout : ComponentBase, IDisposable
             // OverlayEntry.Content is only ever invoked once at Show()-time otherwise, so without
             // this the flyout would keep showing whatever it looked like at the moment it opened
             // until it was closed and reopened.
-            OverlayService.Refresh(id);
+            _renderedFlyoutContent = FlyoutContent;
+            OverlayService.RefreshContent(id);
         }
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_overlayId is { } id)
+        {
+            // On programmatic open, _anchor is not populated until this render has committed.
+            // Update also catches a trigger element being replaced while the flyout stays open.
+            OverlayService.Update(id, _anchor, Placement, LightDismiss);
+        }
+
+        return Task.CompletedTask;
     }
 
     private Task ToggleAsync() => _overlayId is null ? OpenAsync() : CloseAsync();
@@ -106,6 +120,7 @@ public partial class FluentFlyout : ComponentBase, IDisposable
         }
 
         _overlayId = OverlayService.Show(RenderFlyoutContent, _anchor, Placement, LightDismiss);
+        _renderedFlyoutContent = FlyoutContent;
     }
 
     private void HideInternal()
@@ -114,6 +129,7 @@ public partial class FluentFlyout : ComponentBase, IDisposable
         {
             OverlayService.Close(id);
             _overlayId = null;
+            _renderedFlyoutContent = null;
         }
     }
 

@@ -106,18 +106,50 @@ public sealed class OverlayService : IOverlayService
         }
     }
 
-    public void Refresh(Guid id)
+    public bool RefreshContent(Guid id)
     {
-        // Same "does this id still exist" guard as Close() — an id from an entry that's already
-        // gone (closed and removed) has nothing left to refresh.
-        foreach (var entry in _active)
+        var entry = FindActive(id);
+        if (entry is null || entry.IsClosing)
         {
-            if (entry.Id == id)
-            {
-                Changed?.Invoke();
-                return;
-            }
+            return false;
         }
+
+        Changed?.Invoke();
+        return true;
+    }
+
+    public bool Update(Guid id, ElementReference anchor, OverlayPlacement placement, bool lightDismiss,
+        bool matchAnchorWidth = false)
+    {
+        var entry = FindActive(id);
+        if (entry is null || entry.IsClosing)
+        {
+            return false;
+        }
+
+        var anchorChanged = entry.Anchor.Id != anchor.Id;
+        var positionChanged = anchorChanged
+            || entry.PreferredPlacement != placement
+            || entry.MatchAnchorWidth != matchAnchorWidth;
+        var dismissRegistrationChanged = anchorChanged || entry.LightDismiss != lightDismiss;
+
+        if (!positionChanged && !dismissRegistrationChanged)
+        {
+            return false;
+        }
+
+        entry.Anchor = anchor;
+        entry.PreferredPlacement = placement;
+        entry.LightDismiss = lightDismiss;
+        entry.MatchAnchorWidth = matchAnchorWidth;
+        entry.NeedsReposition |= positionChanged;
+        entry.NeedsDismissRegistrationUpdate |= dismissRegistrationChanged;
+        if (positionChanged)
+        {
+            entry.ComputedStyle = "position: fixed; visibility: hidden;";
+        }
+        Changed?.Invoke();
+        return true;
     }
 
     public void CloseAll()
@@ -145,4 +177,7 @@ public sealed class OverlayService : IOverlayService
             Changed?.Invoke();
         }
     }
+
+    private OverlayEntry? FindActive(Guid id)
+        => _active.FirstOrDefault(entry => entry.Id == id);
 }
