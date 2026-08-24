@@ -43,6 +43,12 @@ styling, or token values were sourced from.
 
 ## Getting started
 
+For a separate application, use the [consumer documentation](docs/consumer/README.md). The
+generated [API reference](docs/reference/api.md) and machine-readable
+[`api.json`](docs/reference/api.json) are produced from the compiled FluentKit assembly and
+are kept in sync by CI. Coding agents can use the versioned
+[`fluentkit-consumer`](fluentkit-consumer/SKILL.md) skill bundle.
+
 **1. Install**
 
 Recommended — from NuGet:

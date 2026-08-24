@@ -1,0 +1,104 @@
+name: Release FluentKit
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+env:
+  PACKAGE_PROJECT: src/FluentKit/FluentKit.csproj
+
+jobs:
+  release:
+    name: Validate, package, and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Verify release identity
+        shell: bash
+        run: |
+          package_version="$(dotnet msbuild "$PACKAGE_PROJECT" -getProperty:Version -nologo)"
+          tag_version="${GITHUB_REF_NAME#v}"
+          test "$package_version" = "$tag_version"
+          test "$(jq -r .fluentkitVersion fluentkit-consumer/metadata.json)" = "$package_version"
+          test "$(jq -r .sourceTag fluentkit-consumer/metadata.json)" = "v$package_version"
+
+      - name: Restore
+        run: dotnet restore FluentKit.slnx
+
+      - name: Build and verify public API baseline
+        run: dotnet build FluentKit.slnx -c Release --no-restore -warnaserror:RS0016,RS0017
+
+      - name: Verify generated consumer reference
+        run: |
+          dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
+            -c Release --no-build -- \
+            --assembly src/FluentKit/bin/Release/net10.0/FluentKit.dll \
+            --xml src/FluentKit/bin/Release/net10.0/FluentKit.xml \
+            --manifest docs/consumer/manifest.json \
+            --json docs/reference/api.json \
+            --markdown docs/reference/api.md \
+            --summary-baseline docs/reference/summary-baseline.json \
+            --check-summaries --verify
+          cmp --silent docs/reference/api.json fluentkit-consumer/references/api.json
+
+      - name: Package NuGet
+        run: dotnet pack "$PACKAGE_PROJECT" --no-restore --configuration Release --output ./nupkg
+
+      - name: Package portable consumer skill
+        run: zip -r "fluentkit-consumer-${GITHUB_REF_NAME}.zip" fluentkit-consumer
+
+      - name: NuGet login (Trusted Publishing)
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
+        id: nuget_login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Add GitHub Packages source
+        run: |
+          dotnet nuget add source \
+            --username VibeNoobNotFound \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text \
+            --name github \
+            "https://nuget.pkg.github.com/VibeNoobNotFound/index.json"
+
+      - name: Push to GitHub Packages
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --source github \
+            --skip-duplicate
+
+      - name: Create GitHub Release and attach skill bundle
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "fluentkit-consumer-${GITHUB_REF_NAME}.zip" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "fluentkit-consumer-${GITHUB_REF_NAME}.zip" \
+              --title "FluentKit ${GITHUB_REF_NAME}" --generate-notes
+          fi
