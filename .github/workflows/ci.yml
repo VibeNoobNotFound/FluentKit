@@ -2,7 +2,7 @@ name: CI
 
 # Runs on every commit: any branch push, and any PR targeting main.
 # workflow_dispatch lets you trigger a run manually from the GitHub Actions page —
-# useful to force a NuGet publish without needing a new commit with [publish-nuget] in it.
+# Release publishing is tag-driven; CI validates every commit and pull request.
 on:
   push:
     branches: ["**"]
@@ -41,73 +41,25 @@ jobs:
       # Android target of samples/Fluentkit.Sample.Maui (net11.0-android) — so this
       # single step covers "build everything" that's buildable on a Linux runner.
       - name: Build (Release)
-        run: dotnet build FluentKit.slnx -c Release --no-restore
+        run: dotnet build FluentKit.slnx -c Release --no-restore -warnaserror:RS0016,RS0017
+
+      - name: Verify generated consumer reference
+        shell: bash
+        run: |
+          dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
+            -c Release --no-build -- \
+            --assembly src/FluentKit/bin/Release/net10.0/FluentKit.dll \
+            --xml src/FluentKit/bin/Release/net10.0/FluentKit.xml \
+            --manifest docs/consumer/manifest.json \
+            --json docs/reference/api.json \
+            --markdown docs/reference/api.md \
+            --summary-baseline docs/reference/summary-baseline.json \
+            --check-summaries --verify
+          cmp --silent docs/reference/api.json fluentkit-consumer/references/api.json
+          test "$(dotnet msbuild src/FluentKit/FluentKit.csproj -getProperty:Version -nologo)" = "$(jq -r .fluentkitVersion fluentkit-consumer/metadata.json)"
+
+      - name: Verify generator fixture
+        run: dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj -c Release --no-build -- --self-test
 
       - name: Report
-        run: echo "Build succeeded — library (src/FluentKit) + samples (Wasm, Maui/Android) all compiled clean."
-
-  # ─────────────────────────────────────────────
-  # Job 2 – Pack & Publish (on [publish-nuget] commits, or manual dispatch)
-  # ─────────────────────────────────────────────
-  publish:
-    name: Pack & Publish to NuGet
-    runs-on: ubuntu-latest
-    needs: build
-
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' &&
-       contains(github.event.head_commit.message, '[publish-nuget]'))
-
-    permissions:
-      id-token: write   # required for NuGet Trusted Publishing (OIDC)
-      contents: read
-      packages: write   # required to push to GitHub Packages (NuGet registry)
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Restore
-        run: dotnet restore ${{ env.PACKAGE_PROJECT }}
-
-      - name: Pack
-        run: dotnet pack ${{ env.PACKAGE_PROJECT }} --no-restore --configuration Release --output ./nupkg
-
-      - name: NuGet login (Trusted Publishing)
-        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
-        id: nuget_login
-        with:
-          user: ${{ secrets.NUGET_USER }}
-
-      - name: Push to NuGet.org
-        run: |
-          dotnet nuget push "./nupkg/*.nupkg" \
-            --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }} \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
-
-      # Separate push to GitHub Packages so the package also shows under
-      # https://github.com/VibeNoobNotFound/FluentKit/pkgs — uses the built-in
-      # GITHUB_TOKEN, no extra secret needed. Requires RepositoryUrl in the
-      # .csproj to point at this repo (already set) so GitHub links it correctly.
-      - name: Add GitHub Packages source
-        run: |
-          dotnet nuget add source \
-            --username VibeNoobNotFound \
-            --password ${{ secrets.GITHUB_TOKEN }} \
-            --store-password-in-clear-text \
-            --name github \
-            "https://nuget.pkg.github.com/VibeNoobNotFound/index.json"
-
-      - name: Push to GitHub Packages
-        run: |
-          dotnet nuget push "./nupkg/*.nupkg" \
-            --api-key ${{ secrets.GITHUB_TOKEN }} \
-            --source github \
-            --skip-duplicate
+        run: echo "Build, consumer smoke sample, generated reference, API baseline, and skill metadata verified."
