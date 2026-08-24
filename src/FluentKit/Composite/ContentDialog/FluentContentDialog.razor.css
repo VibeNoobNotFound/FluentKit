@@ -96,7 +96,7 @@
 
 /* Single-button footers get a half-width, end-aligned button rather than stretching full-width —
    same as fluent-svelte's `.button:only-child { inline-size: 50%; justify-self: end }`. ::deep is
-   required here: Footer's content comes from a RenderFragment supplied by the consumer, which
+   required here: Footer's content comes from a RenderFragment supplied by the application, which
    does NOT receive this file's Blazor CSS scope attribute (same gotcha as any other cascading/
    forwarded RenderFragment content — see FluentMenuFlyoutItem's CascadingValue re-wrap notes). */
 .fluent-content-dialog-footer ::deep > :only-child {

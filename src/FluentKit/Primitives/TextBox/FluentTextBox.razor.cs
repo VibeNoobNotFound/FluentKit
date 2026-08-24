@@ -31,7 +31,7 @@ public partial class FluentTextBox : ComponentBase
 
     /// <summary>
     /// Optional right-aligned button slot (mirrors fluent-svelte's TextBox <c>slot="buttons"</c>).
-    /// Used e.g. by NumberBox for its spin up/down buttons, or by consumers for a clear/search icon.
+    /// Used e.g. by NumberBox for its spin up/down buttons, or by applications for a clear/search icon.
     /// </summary>
     [Parameter]
     public RenderFragment? Buttons { get; set; }

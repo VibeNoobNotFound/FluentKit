@@ -1,5 +1,5 @@
 /*
- * Single entry point for the token layer. Consumers only ever reference this file:
+ * Single entry point for the token layer. Applications only ever reference this file:
  *   <link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
  * Everything else in this folder is an implementation detail.
  */

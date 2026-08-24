@@ -32,7 +32,7 @@ public partial class FluentAcrylicBrush : ComponentBase
 
     /// <summary>
     /// Overrides the theme-default tint color (WinUI's AcrylicBrush.TintColor). Accepts any valid
-    /// CSS color — hex, rgb()/rgba(), a named color, whatever the consumer already has on hand —
+    /// CSS color — hex, rgb()/rgba(), a named color, whatever the application already has on hand —
     /// since the actual blending is done with <c>color-mix()</c> rather than requiring an r,g,b triplet.
     /// </summary>
     [Parameter]
@@ -73,7 +73,7 @@ public partial class FluentAcrylicBrush : ComponentBase
     /// <summary>True once a caller opts into the two-layer luminosity approximation described above.</summary>
     private bool HasLuminosityLayer => TintLuminosityOpacity is not null;
 
-    // AdditionalAttributes may itself carry a `style` (every sample/consumer of this component sets
+    // AdditionalAttributes may itself carry a `style` (every sample/application of this component sets
     // one, e.g. position/size on the outer box) — @attributes splatting that dictionary AND writing
     // our own literal `style=` attribute would fight over which one wins, so instead we merge the
     // caller's own style string with our CSS-variable overrides into one computed value, and splat

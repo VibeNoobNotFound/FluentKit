@@ -43,23 +43,23 @@ jobs:
       - name: Build (Release)
         run: dotnet build FluentKit.slnx -c Release --no-restore -warnaserror:RS0016,RS0017
 
-      - name: Verify generated consumer reference
+      - name: Verify generated API reference
         shell: bash
         run: |
           dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
             -c Release --no-build -- \
             --assembly src/FluentKit/bin/Release/net10.0/FluentKit.dll \
             --xml src/FluentKit/bin/Release/net10.0/FluentKit.xml \
-            --manifest docs/consumer/manifest.json \
+            --manifest docs/integration/manifest.json \
             --json docs/reference/api.json \
             --markdown docs/reference/api.md \
             --summary-baseline docs/reference/summary-baseline.json \
             --check-summaries --verify
-          cmp --silent docs/reference/api.json fluentkit-consumer/references/api.json
-          test "$(dotnet msbuild src/FluentKit/FluentKit.csproj -getProperty:Version -nologo)" = "$(jq -r .fluentkitVersion fluentkit-consumer/metadata.json)"
+          cmp --silent docs/reference/api.json fluentkit-api/references/api.json
+          test "$(dotnet msbuild src/FluentKit/FluentKit.csproj -getProperty:Version -nologo)" = "$(jq -r .fluentkitVersion fluentkit-api/metadata.json)"
 
       - name: Verify generator fixture
         run: dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj -c Release --no-build -- --self-test
 
       - name: Report
-        run: echo "Build, consumer smoke sample, generated reference, API baseline, and skill metadata verified."
+        run: echo "Build, application smoke sample, generated reference, API baseline, and skill metadata verified."

@@ -62,6 +62,6 @@ the sample app is listed in [component-selection.md](component-selection.md).
 
 ## Versioning
 
-The consumer skill and generated API reference are released with the same `v{version}` tag
+The API skill and generated API reference are released with the same `v{version}` tag
 as the NuGet package. For an existing app, inspect its `PackageReference` or lock file and
 use the matching release bundle; do not use the latest skill against an older package.

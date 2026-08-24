@@ -48,7 +48,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Overrides the theme-default tint color (WinUI\u0027s AcrylicBrush.TintColor). Accepts any valid CSS color \u2014 hex, rgb()/rgba(), a named color, whatever the consumer already has on hand \u2014 since the actual blending is done with color-mix() rather than requiring an r,g,b triplet.",
+          "summary": "Overrides the theme-default tint color (WinUI\u0027s AcrylicBrush.TintColor). Accepts any valid CSS color \u2014 hex, rgb()/rgba(), a named color, whatever the application already has on hand \u2014 since the actual blending is done with color-mix() rather than requiring an r,g,b triplet.",
           "settable": true
         },
         {
@@ -466,7 +466,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Mirrors fluent-svelte\u0027s on:change \u2014 fires whenever a day is picked/unpicked, same payload as ValueChanged. Kept separate so consumers can distinguish \u0022value changed because the user just clicked a day\u0022 from any other source of a Value update.",
+          "summary": "Mirrors fluent-svelte\u0027s on:change \u2014 fires whenever a day is picked/unpicked, same payload as ValueChanged. Kept separate so applications can distinguish \u0022value changed because the user just clicked a day\u0022 from any other source of a Value update.",
           "settable": true
         },
         {
@@ -1256,7 +1256,7 @@
       "category": "Composite",
       "sample": "/Composite/Flyout",
       "genericParameters": [],
-      "summary": "Generic positioned content flyout (WinUI 3 Flyout). Click/tap the trigger to open, click outside or press Escape to close. Built entirely on IOverlayService/FluentOverlayHost (Phase 3 infra) \u2014 this is the second consumer after FluentTooltip and the base every other overlay composite (MenuFlyout, ComboBox, TeachingTip, DropDownButton...) is expected to follow the same shape of.",
+      "summary": "Generic positioned content flyout (WinUI 3 Flyout). Click/tap the trigger to open, click outside or press Escape to close. Built entirely on IOverlayService/FluentOverlayHost (Phase 3 infra) \u2014 this is the second application after FluentTooltip and the base every other overlay composite (MenuFlyout, ComboBox, TeachingTip, DropDownButton...) is expected to follow the same shape of.",
       "parameters": [
         {
           "name": "ChildContent",
@@ -1319,7 +1319,7 @@
       "category": "Primitives",
       "sample": "/Design/IconBrowser",
       "genericParameters": [],
-      "summary": "Renders a glyph from the MIT-licensed Fluent System Icons webfont (https://github.com/microsoft/fluentui-system-icons, \u00A9 Microsoft Corporation) \u2014 see wwwroot/Icons/FluentSystemIcons-Regular.css. Replaces the earlier approach of wrapping SVG Icon instances from Microsoft.FluentUI.AspNetCore.Components.Icons: that package pulls in the full Microsoft.FluentUI.AspNetCore.Components core RCL as a transitive dependency, which auto-bundles its own scoped CSS into the host app\u0027s .styles.css and visually clashes with our tokens (see git history for the multi-hour static-web-assets fight that caused). The font approach has zero managed dependency and can\u0027t leak component CSS since it\u0027s just a CSS class. Name is the glyph identity as published in the font\u0027s own CSS, minus the \u0022icon-\u0022 prefix \u2014 e.g. \u0022ic_fluent_home_24_regular\u0022, \u0022ic_fluent_settings_20_regular\u0022. Use for compile-time-checked constants covering common glyphs, or copy any class name straight out of wwwroot/Icons/FluentSystemIcons-Regular.css / the font\u0027s own icon gallery (fluentui-system-icons repo) for anything not listed there. The glyph\u0027s own baked-in size suffix (_16/_20/_24/...) only affects which pixel grid it was drawn on \u2014 below independently controls the actual rendered box, any combination works, but picking the closest baked-in size gives the crispest result. Decorative by default (aria-hidden) since icons are almost always paired with visible text (see NavigationViewItem); pass aria-hidden=\u0022false\u0022 plus your own aria-label via AdditionalAttributes for icon-only usage. Consumers must link wwwroot/Icons/FluentSystemIcons-Regular.css once in their host page (e.g. index.html / App.razor), same as tokens.css: \u003Clink rel=\u0022stylesheet\u0022 href=\u0022_content/FluentKit/Icons/FluentSystemIcons-Regular.css\u0022 /\u003E",
+      "summary": "Renders a glyph from the MIT-licensed Fluent System Icons webfont (https://github.com/microsoft/fluentui-system-icons, \u00A9 Microsoft Corporation) \u2014 see wwwroot/Icons/FluentSystemIcons-Regular.css. Replaces the earlier approach of wrapping SVG Icon instances from Microsoft.FluentUI.AspNetCore.Components.Icons: that package pulls in the full Microsoft.FluentUI.AspNetCore.Components core RCL as a transitive dependency, which auto-bundles its own scoped CSS into the host app\u0027s .styles.css and visually clashes with our tokens (see git history for the multi-hour static-web-assets fight that caused). The font approach has zero managed dependency and can\u0027t leak component CSS since it\u0027s just a CSS class. Name is the glyph identity as published in the font\u0027s own CSS, minus the \u0022icon-\u0022 prefix \u2014 e.g. \u0022ic_fluent_home_24_regular\u0022, \u0022ic_fluent_settings_20_regular\u0022. Use for compile-time-checked constants covering common glyphs, or copy any class name straight out of wwwroot/Icons/FluentSystemIcons-Regular.css / the font\u0027s own icon gallery (fluentui-system-icons repo) for anything not listed there. The glyph\u0027s own baked-in size suffix (_16/_20/_24/...) only affects which pixel grid it was drawn on \u2014 below independently controls the actual rendered box, any combination works, but picking the closest baked-in size gives the crispest result. Decorative by default (aria-hidden) since icons are almost always paired with visible text (see NavigationViewItem); pass aria-hidden=\u0022false\u0022 plus your own aria-label via AdditionalAttributes for icon-only usage. Applications must link wwwroot/Icons/FluentSystemIcons-Regular.css once in their host page (e.g. index.html / App.razor), same as tokens.css: \u003Clink rel=\u0022stylesheet\u0022 href=\u0022_content/FluentKit/Icons/FluentSystemIcons-Regular.css\u0022 /\u003E",
       "parameters": [
         {
           "name": "AdditionalAttributes",
@@ -1842,7 +1842,7 @@
       "category": "Composite",
       "sample": "/Composite/MenuFlyout",
       "genericParameters": [],
-      "summary": "Command menu opened from a trigger element (MenuFlyoutWrapper.svelte). Built on the same IOverlayService/FluentOverlayHost infra as FluentFlyout \u2014 this is effectively FluentFlyout with a MenuFlyoutCloseContext threaded through so its FluentMenuFlyoutItem children (and their own cascading submenus) know how to collapse the whole tree on selection. Note: fluent-svelte\u0027s MenuFlyoutWrapper also exposes an \u0060alignment\u0060 (start/center/end) prop alongside placement. That\u0027s not something OverlayPlacement/overlay-interop.js currently model (they only pick which side of the anchor and clamp to the viewport) \u2014 left out here rather than half-implemented; add it to OverlayPlacement/computePosition if a consumer needs it.",
+      "summary": "Command menu opened from a trigger element (MenuFlyoutWrapper.svelte). Built on the same IOverlayService/FluentOverlayHost infra as FluentFlyout \u2014 this is effectively FluentFlyout with a MenuFlyoutCloseContext threaded through so its FluentMenuFlyoutItem children (and their own cascading submenus) know how to collapse the whole tree on selection. Note: fluent-svelte\u0027s MenuFlyoutWrapper also exposes an \u0060alignment\u0060 (start/center/end) prop alongside placement. That\u0027s not something OverlayPlacement/overlay-interop.js currently model (they only pick which side of the anchor and clamp to the viewport) \u2014 left out here rather than half-implemented; add it to OverlayPlacement/computePosition if a application needs it.",
       "parameters": [
         {
           "name": "ChildContent",
@@ -3547,7 +3547,7 @@
           "cascading": false,
           "renderFragment": true,
           "bindable": false,
-          "summary": "Optional right-aligned button slot (mirrors fluent-svelte\u0027s TextBox slot=\u0022buttons\u0022). Used e.g. by NumberBox for its spin up/down buttons, or by consumers for a clear/search icon.",
+          "summary": "Optional right-aligned button slot (mirrors fluent-svelte\u0027s TextBox slot=\u0022buttons\u0022). Used e.g. by NumberBox for its spin up/down buttons, or by applications for a clear/search icon.",
           "settable": true
         },
         {
@@ -3895,7 +3895,7 @@
       "category": "Composite",
       "sample": "/Composite/Tooltip",
       "genericParameters": [],
-      "summary": "Deliberately the simplest possible consumer of IOverlayService/FluentOverlayHost \u2014 this exists to prove the overlay infrastructure end to end (Phase 3 exit criteria), not as the final Tooltip. Missing, on purpose, for now: show/hide delay debouncing, and re-showing on scroll.",
+      "summary": "Deliberately the simplest possible application of IOverlayService/FluentOverlayHost \u2014 this exists to prove the overlay infrastructure end to end (Phase 3 exit criteria), not as the final Tooltip. Missing, on purpose, for now: show/hide delay debouncing, and re-showing on scroll.",
       "parameters": [
         {
           "name": "ChildContent",
@@ -3957,7 +3957,7 @@
       "kind": "class",
       "genericParameters": [],
       "values": [],
-      "summary": "Base class for controls that expose XAML-style Padding/Width/Height/ MinWidth/MinHeight/MaxWidth/MaxHeight overrides (mirrors FrameworkElement\u0027s sizing properties in WPF/WinUI). Every property here is nullable and by default, meaning \u0022unset \u2014 fall back to the control\u0027s own stylesheet default\u0022; only the ones a consumer actually sets get written into . Inheritors render style=\u0022@SizingStyle\u0022 on their root element (in addition to, not instead of, their existing CSS classes) so overrides win via normal inline-style specificity without needing !important or duplicated CSS.",
+      "summary": "Base class for controls that expose XAML-style Padding/Width/Height/ MinWidth/MinHeight/MaxWidth/MaxHeight overrides (mirrors FrameworkElement\u0027s sizing properties in WPF/WinUI). Every property here is nullable and by default, meaning \u0022unset \u2014 fall back to the control\u0027s own stylesheet default\u0022; only the ones a application actually sets get written into . Inheritors render style=\u0022@SizingStyle\u0022 on their root element (in addition to, not instead of, their existing CSS classes) so overrides win via normal inline-style specificity without needing !important or duplicated CSS.",
       "members": [
         {
           "name": "Height",
@@ -4115,7 +4115,7 @@
         "Range",
         "Single"
       ],
-      "summary": "Selection behavior for and . Not part of fluent-svelte\u0027s original API (it only ever exposed a multiple boolean) \u2014 added here as a superset so consumers can opt into a third, common date-range picking pattern (\u00E0 la Fluent UI React\u0027s DatePicker range selection) without overloading a bool.",
+      "summary": "Selection behavior for and . Not part of fluent-svelte\u0027s original API (it only ever exposed a multiple boolean) \u2014 added here as a superset so applications can opt into a third, common date-range picking pattern (\u00E0 la Fluent UI React\u0027s DatePicker range selection) without overloading a bool.",
       "members": []
     },
     {
@@ -4526,7 +4526,7 @@
           "name": "Bare",
           "kind": "property",
           "type": "Boolean",
-          "summary": "When true, OverlaySurface renders with no chrome of its own (no background, blur, border, shadow, or padding) \u2014 for consumers like NavigationView\u0027s Compact/Minimal overlay pane that supply their own surface material (e.g. FluentAcrylicBrush) and would otherwise get a second, redundant blur/background stacked underneath theirs."
+          "summary": "When true, OverlaySurface renders with no chrome of its own (no background, blur, border, shadow, or padding) \u2014 for applications like NavigationView\u0027s Compact/Minimal overlay pane that supply their own surface material (e.g. FluentAcrylicBrush) and would otherwise get a second, redundant blur/background stacked underneath theirs."
         },
         {
           "name": "ComputedStyle",

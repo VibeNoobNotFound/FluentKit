@@ -1,5 +1,5 @@
 {
-  "name": "fluentkit-consumer",
+  "name": "fluentkit-api",
   "fluentkitPackage": "FluentKit.Blazor",
   "fluentkitVersion": "0.2.3",
   "apiReference": "references/api.json",

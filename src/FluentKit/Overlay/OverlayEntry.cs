@@ -11,7 +11,7 @@ public sealed class OverlayEntry
     public bool LightDismiss { get; internal set; } = true;
 
     /// <summary>When true, OverlaySurface renders with no chrome of its own (no background, blur,
-    /// border, shadow, or padding) — for consumers like NavigationView's Compact/Minimal overlay
+    /// border, shadow, or padding) — for applications like NavigationView's Compact/Minimal overlay
     /// pane that supply their own surface material (e.g. FluentAcrylicBrush) and would otherwise
     /// get a second, redundant blur/background stacked underneath theirs.</summary>
     public bool Bare { get; init; }

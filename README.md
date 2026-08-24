@@ -13,7 +13,7 @@ WebAssembly · Server · MAUI Blazor Hybrid — pure Razor and CSS, no third-par
 [![CI](https://github.com/VibeNoobNotFound/FluentKit/actions/workflows/ci.yml/badge.svg)](https://github.com/VibeNoobNotFound/FluentKit/actions/workflows/ci.yml)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
 
-[Live sample](https://vibenoobnotfound.github.io/FluentKit/) · [Getting started](#getting-started) · [Download the consumer skill](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-consumer.zip) · [Known gaps](#known-gaps--next-up) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Live sample](https://vibenoobnotfound.github.io/FluentKit/) · [Getting started](#getting-started) · [Download the API skill](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-api.zip) · [Known gaps](#known-gaps--next-up) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 </div>
 <img width="1912" height="1242" alt="image" src="https://github.com/user-attachments/assets/299a9235-6fc5-4eb4-9c92-64560ebd6cae" />
@@ -44,12 +44,12 @@ styling, or token values were sourced from.
 
 ## Getting started
 
-For a separate application, use the [consumer documentation](docs/consumer/README.md). The
+For a separate application, use the [integration documentation](docs/integration/README.md). The
 generated [API reference](docs/reference/api.md) and machine-readable
 [`api.json`](docs/reference/api.json) are produced from the compiled FluentKit assembly and
 are kept in sync by CI. Coding agents can use the versioned
-[`fluentkit-consumer`](fluentkit-consumer/SKILL.md) skill bundle, or
-[download the latest portable skill ZIP](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-consumer.zip).
+[`fluentkit-api`](fluentkit-api/SKILL.md) skill bundle, or
+[download the latest portable skill ZIP](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-api.zip).
 
 **1. Install**
 
@@ -219,7 +219,7 @@ any composite control built on the overlay service (tooltips, flyouts, menus, di
 
 **`FluentKit.IconGenerator`** — a Roslyn source generator (referenced as an analyzer, not a
 runtime dependency) that emits strongly-typed `FluentIconNames` constants from the bundled
-`FluentSystemIcons-Regular.css`, used by the sample app's icon browser and available to consumers
+`FluentSystemIcons-Regular.css`, used by the sample app's icon browser and available to applications
 for compile-time-checked `FluentIcon` glyph names.
 
 </td>
@@ -293,13 +293,13 @@ Three modes, matching WinUI: `System` (tracks the OS/browser preference live), `
 await ThemeService.SetModeAsync(ThemeMode.Dark);
 ```
 
-The token layer is split so consumers only ever need to link one file:
+The token layer is split so applications only ever need to link one file:
 
 | File | Purpose |
 |---|---|
 | `_primitives.css` | Theme-independent primitive values (raw color ramps, spacing, corner radius) |
 | `_semantic.light.css` / `_semantic.dark.css` | Semantic aliases transcribed from WinUI's own XAML resource dictionaries, mirrored property-for-property |
-| `tokens.css` | Single entry point importing both layers — **the only file consumers should link directly** |
+| `tokens.css` | Single entry point importing both layers — **the only file applications should link directly** |
 
 ## Project layout
 
@@ -365,9 +365,9 @@ directly.)
 The `Release FluentKit` workflow runs automatically for a `vMAJOR.MINOR.PATCH` tag. It can also
 be started from the GitHub Actions page: enter an existing tag in **tag** to republish that
 immutable version, or leave **tag** blank and enter a version to create and publish a new tag
-from the selected branch. The project version and `fluentkit-consumer/metadata.json` must already
+from the selected branch. The project version and `fluentkit-api/metadata.json` must already
 match that version. Each release publishes NuGet and a standalone
-[`fluentkit-consumer.zip`](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-consumer.zip)
+[`fluentkit-api.zip`](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-api.zip)
 containing only the portable skill folder.
 
 ## Contributing

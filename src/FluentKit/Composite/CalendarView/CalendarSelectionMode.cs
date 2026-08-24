@@ -3,7 +3,7 @@ namespace FluentKit.Composite;
 /// <summary>
 /// Selection behavior for <see cref="FluentCalendarView"/> and <see cref="FluentCalendarDatePicker"/>.
 /// Not part of fluent-svelte's original API (it only ever exposed a <c>multiple</c> boolean) — added
-/// here as a superset so consumers can opt into a third, common date-range picking pattern (à la
+/// here as a superset so applications can opt into a third, common date-range picking pattern (à la
 /// Fluent UI React's DatePicker range selection) without overloading a bool.
 /// </summary>
 public enum CalendarSelectionMode

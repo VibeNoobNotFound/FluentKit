@@ -95,8 +95,8 @@ jobs:
           package_version="$(dotnet msbuild "$PACKAGE_PROJECT" -getProperty:Version -nologo)"
           tag_version="${RELEASE_TAG#v}"
           test "$package_version" = "$tag_version"
-          test "$(jq -r .fluentkitVersion fluentkit-consumer/metadata.json)" = "$package_version"
-          test "$(jq -r .sourceTag fluentkit-consumer/metadata.json)" = "$RELEASE_TAG"
+          test "$(jq -r .fluentkitVersion fluentkit-api/metadata.json)" = "$package_version"
+          test "$(jq -r .sourceTag fluentkit-api/metadata.json)" = "$RELEASE_TAG"
 
       - name: Create requested release tag
         if: env.CREATE_TAG == 'true'
@@ -118,33 +118,33 @@ jobs:
       - name: Build and verify public API baseline
         run: dotnet build FluentKit.slnx -c Release --no-restore -warnaserror:RS0016,RS0017
 
-      - name: Verify generated consumer reference
+      - name: Verify generated API reference
         run: |
           dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
             -c Release --no-build -- \
             --assembly src/FluentKit/bin/Release/net10.0/FluentKit.dll \
             --xml src/FluentKit/bin/Release/net10.0/FluentKit.xml \
-            --manifest docs/consumer/manifest.json \
+            --manifest docs/integration/manifest.json \
             --json docs/reference/api.json \
             --markdown docs/reference/api.md \
             --summary-baseline docs/reference/summary-baseline.json \
             --check-summaries --verify
-          cmp --silent docs/reference/api.json fluentkit-consumer/references/api.json
+          cmp --silent docs/reference/api.json fluentkit-api/references/api.json
 
       - name: Package NuGet
         run: dotnet pack "$PACKAGE_PROJECT" --no-restore --configuration Release --output ./nupkg
 
-      - name: Package portable consumer skill
+      - name: Package portable API skill
         shell: bash
         run: |
           set -euo pipefail
-          skill_archive="fluentkit-consumer.zip"
+          skill_archive="fluentkit-api.zip"
           rm -f "$skill_archive"
-          zip -qr "$skill_archive" fluentkit-consumer
+          zip -qr "$skill_archive" fluentkit-api
           test -s "$skill_archive"
-          unexpected_entries="$(unzip -Z1 "$skill_archive" | grep -vE '^fluentkit-consumer(/|$)' || true)"
+          unexpected_entries="$(unzip -Z1 "$skill_archive" | grep -vE '^fluentkit-api(/|$)' || true)"
           if [[ -n "$unexpected_entries" ]]; then
-            echo "Skill archive contains files outside fluentkit-consumer/." >&2
+            echo "Skill archive contains files outside fluentkit-api/." >&2
             exit 1
           fi
 
@@ -182,8 +182,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" fluentkit-consumer.zip --clobber
+            gh release upload "$RELEASE_TAG" fluentkit-api.zip --clobber
           else
-            gh release create "$RELEASE_TAG" fluentkit-consumer.zip \
+            gh release create "$RELEASE_TAG" fluentkit-api.zip \
               --title "FluentKit ${RELEASE_TAG}" --generate-notes
           fi

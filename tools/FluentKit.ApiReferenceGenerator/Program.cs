@@ -10,7 +10,7 @@ return await ApiReferenceGenerator.RunAsync(args);
 internal static class ApiReferenceGenerator
 {
     // Keep generated JSON stable so it can be compared in CI and copied byte-for-byte into
-    // the versioned consumer skill bundle.
+    // the versioned API skill bundle.
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -72,7 +72,7 @@ internal static class ApiReferenceGenerator
             var undocumented = model.MissingSummaries.Except(allowed, StringComparer.Ordinal).OrderBy(x => x, StringComparer.Ordinal).ToArray();
             if (undocumented.Length > 0)
             {
-                Console.Error.WriteLine("New public consumer API is missing XML summaries:");
+                Console.Error.WriteLine("New public application API is missing XML summaries:");
                 foreach (var item in undocumented) Console.Error.WriteLine($"  {item}");
                 return 1;
             }
@@ -99,7 +99,7 @@ internal static class ApiReferenceGenerator
     {
         // Load the built assembly instead of source files: Razor-generated component classes,
         // inherited parameters, generic types, and compiler output are then represented exactly
-        // as consumers see them at runtime.
+        // as applications see them at runtime.
         var assembly = Assembly.LoadFrom(Path.GetFullPath(assemblyPath));
         var xml = LoadXml(xmlPath);
         var manifest = JsonSerializer.Deserialize<Manifest>(File.ReadAllText(manifestPath), JsonOptions)
@@ -114,7 +114,7 @@ internal static class ApiReferenceGenerator
             .ToArray();
 
         // Components are documented separately because their Blazor parameters and sample route
-        // are more useful to consumers than a normal CLR type/member listing.
+        // are more useful to applications than a normal CLR type/member listing.
         var components = publicTypes
             .Where(IsComponent)
             .Select(t => DescribeComponent(t, xml, manifest.Components))
@@ -171,7 +171,7 @@ internal static class ApiReferenceGenerator
 
     private static ComponentReference DescribeComponent(Type type, XmlDocs xml, IReadOnlyDictionary<string, ManifestEntry> manifest)
     {
-        // Generic arity is a CLR implementation detail; Razor consumers use the friendly type
+        // Generic arity is a CLR implementation detail; Razor applications use the friendly type
         // name (for example FluentComboBox<TValue> becomes FluentComboBox).
         var name = type.Name.Split('`')[0];
         var entry = manifest.TryGetValue(name, out var manifestEntry)

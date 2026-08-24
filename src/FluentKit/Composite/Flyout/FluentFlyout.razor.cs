@@ -7,7 +7,7 @@ namespace FluentKit.Composite;
 /// <summary>
 /// Generic positioned content flyout (WinUI 3 Flyout). Click/tap the trigger to open, click outside
 /// or press Escape to close. Built entirely on IOverlayService/FluentOverlayHost (Phase 3 infra) —
-/// this is the second consumer after FluentTooltip and the base every other overlay composite
+/// this is the second application after FluentTooltip and the base every other overlay composite
 /// (MenuFlyout, ComboBox, TeachingTip, DropDownButton...) is expected to follow the same shape of.
 /// </summary>
 public partial class FluentFlyout : ComponentBase, IDisposable

@@ -1,9 +1,9 @@
 ---
-name: fluentkit-consumer
+name: fluentkit-api
 description: Use FluentKit.Blazor correctly when building a separate Blazor WASM, Server, or MAUI Blazor Hybrid product. Versioned with the FluentKit package.
 ---
 
-# FluentKit consumer
+# FluentKit application
 
 This skill is for consuming FluentKit from another application. It is not the repository
 maintainer workflow. The bundle version in `metadata.json` must match the installed

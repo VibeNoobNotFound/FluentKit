@@ -25,7 +25,7 @@ namespace FluentKit.Primitives;
 /// NavigationViewItem); pass aria-hidden="false" plus your own aria-label via
 /// AdditionalAttributes for icon-only usage.
 ///
-/// Consumers must link wwwroot/Icons/FluentSystemIcons-Regular.css once in their host page
+/// Applications must link wwwroot/Icons/FluentSystemIcons-Regular.css once in their host page
 /// (e.g. index.html / App.razor), same as tokens.css:
 /// &lt;link rel="stylesheet" href="_content/FluentKit/Icons/FluentSystemIcons-Regular.css" /&gt;
 /// </summary>

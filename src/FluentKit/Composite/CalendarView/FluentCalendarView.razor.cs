@@ -31,7 +31,7 @@ public partial class FluentCalendarView : ComponentBase
     [Parameter] public EventCallback<DateTime?> ValueChanged { get; set; }
 
     /// <summary>Mirrors fluent-svelte's <c>on:change</c> — fires whenever a day is picked/unpicked,
-    /// same payload as ValueChanged. Kept separate so consumers can distinguish "value changed
+    /// same payload as ValueChanged. Kept separate so applications can distinguish "value changed
     /// because the user just clicked a day" from any other source of a Value update.</summary>
     [Parameter] public EventCallback<DateTime?> Change { get; set; }
 

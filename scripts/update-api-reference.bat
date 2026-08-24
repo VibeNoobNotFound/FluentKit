@@ -13,35 +13,35 @@ if errorlevel 1 goto :fail
 dotnet run --project tools\FluentKit.ApiReferenceGenerator -c "%CONFIGURATION%" -- ^
   --assembly "src\FluentKit\bin\%CONFIGURATION%\net10.0\FluentKit.dll" ^
   --xml "src\FluentKit\bin\%CONFIGURATION%\net10.0\FluentKit.xml" ^
-  --manifest docs\consumer\manifest.json ^
+  --manifest docs\integration\manifest.json ^
   --json docs\reference\api.json ^
   --markdown docs\reference\api.md
 if errorlevel 1 goto :fail
 
-copy /Y docs\reference\api.json fluentkit-consumer\references\api.json >nul
+copy /Y docs\reference\api.json fluentkit-api\references\api.json >nul
 if errorlevel 1 goto :fail
 
 dotnet run --project tools\FluentKit.ApiReferenceGenerator -c "%CONFIGURATION%" -- ^
   --assembly "src\FluentKit\bin\%CONFIGURATION%\net10.0\FluentKit.dll" ^
   --xml "src\FluentKit\bin\%CONFIGURATION%\net10.0\FluentKit.xml" ^
-  --manifest docs\consumer\manifest.json ^
+  --manifest docs\integration\manifest.json ^
   --json docs\reference\api.json ^
   --markdown docs\reference\api.md ^
   --summary-baseline docs\reference\summary-baseline.json ^
   --check-summaries --verify
 if errorlevel 1 goto :fail
 
-fc /b docs\reference\api.json fluentkit-consumer\references\api.json >nul
+fc /b docs\reference\api.json fluentkit-api\references\api.json >nul
 if errorlevel 1 goto :fail
 
 for /f "delims=" %%V in ('dotnet msbuild src\FluentKit\FluentKit.csproj -getProperty:Version -nologo') do set "PACKAGE_VERSION=%%V"
-for /f "delims=" %%V in ('powershell -NoProfile -Command "(Get-Content -Raw ''fluentkit-consumer/metadata.json'' | ConvertFrom-Json).fluentkitVersion"') do set "SKILL_VERSION=%%V"
+for /f "delims=" %%V in ('powershell -NoProfile -Command "(Get-Content -Raw ''fluentkit-api/metadata.json'' | ConvertFrom-Json).fluentkitVersion"') do set "SKILL_VERSION=%%V"
 if /I not "%PACKAGE_VERSION%"=="%SKILL_VERSION%" (
   echo Version mismatch: package=%PACKAGE_VERSION% skill=%SKILL_VERSION%
   goto :fail
 )
 
-echo Consumer reference is current for FluentKit %PACKAGE_VERSION%.
+echo API reference is current for FluentKit %PACKAGE_VERSION%.
 popd
 exit /b 0
 
