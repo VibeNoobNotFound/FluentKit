@@ -54,7 +54,7 @@
 
   <ItemGroup>
     <!-- Source generator that emits FluentIconNames.g.cs from the glyph CSS below.
-         ReferenceOutputAssembly=false: consumed only as a Roslyn analyzer, not a runtime dependency. -->
+         ReferenceOutputAssembly=false: used only as a Roslyn analyzer, not a runtime dependency. -->
     <ProjectReference Include="../FluentKit.IconGenerator/FluentKit.IconGenerator.csproj"
                        OutputItemType="Analyzer"
                        ReferenceOutputAssembly="false" />

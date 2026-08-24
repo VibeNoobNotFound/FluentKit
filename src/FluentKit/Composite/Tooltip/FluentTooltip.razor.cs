@@ -4,7 +4,7 @@ using FluentKit.Overlay;
 namespace FluentKit.Composite;
 
 /// <summary>
-/// Deliberately the simplest possible application of IOverlayService/FluentOverlayHost — this exists
+/// Deliberately the simplest possible use of IOverlayService/FluentOverlayHost — this exists
 /// to prove the overlay infrastructure end to end (Phase 3 exit criteria), not as the final Tooltip.
 /// Missing, on purpose, for now: show/hide delay debouncing, and re-showing on scroll.
 /// </summary>

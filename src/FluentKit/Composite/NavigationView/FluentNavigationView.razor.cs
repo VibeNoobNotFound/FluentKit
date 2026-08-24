@@ -294,7 +294,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         // Settings behaves like any other selectable item (see SettingsItemValue's own doc comment)
         // right up until the "what happens on click" step, where it fires SettingsRequested instead
         // of ItemInvoked — same split WinUI itself makes between its own SettingsInvoked and
-        // ItemInvoked events, so a application can route "open settings" differently from ordinary
+        // ItemInvoked events, so an application can route "open settings" differently from ordinary
         // navigation without needing to special-case the Value on their own end.
         if (Equals(value, SettingsItemValue))
         {

@@ -7,7 +7,7 @@ namespace FluentKit.Common;
 /// <c>MinWidth</c>/<c>MinHeight</c>/<c>MaxWidth</c>/<c>MaxHeight</c> overrides (mirrors
 /// FrameworkElement's sizing properties in WPF/WinUI). Every property here is nullable and
 /// <see langword="null"/> by default, meaning "unset — fall back to the control's own stylesheet
-/// default"; only the ones a application actually sets get written into <see cref="SizingStyle"/>.
+/// default"; only the ones an application actually sets get written into <see cref="SizingStyle"/>.
 /// Inheritors render <c>style="@SizingStyle"</c> on their root element (in addition to, not instead
 /// of, their existing CSS classes) so overrides win via normal inline-style specificity without
 /// needing !important or duplicated CSS.

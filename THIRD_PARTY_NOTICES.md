@@ -95,6 +95,6 @@ MIT License, © Microsoft Corporation.
 > brief intermediate approach using the `Microsoft.FluentUI.AspNetCore.Components.Icons` NuGet
 > package (SVG-based) — that package transitively depends on the full
 > `Microsoft.FluentUI.AspNetCore.Components` core library, which auto-bundles its own scoped CSS
-> into any consuming app's `.styles.css` via Blazor's static web asset pipeline, with no way to
+> into any host app's `.styles.css` via Blazor's static web asset pipeline, with no way to
 > reference only the icon data without pulling that CSS along. The webfont has no managed
 > dependency at all, so it can't leak component styling.

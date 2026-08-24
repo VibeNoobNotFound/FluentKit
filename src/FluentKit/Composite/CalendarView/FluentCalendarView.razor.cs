@@ -247,7 +247,7 @@ public partial class FluentCalendarView : ComponentBase
         }
 
         _touchIsHorizontalSwipe = true;
-        _touchStartX = null; // consume the swipe so we don't re-trigger every subsequent touchmove tick
+        _touchStartX = null; // handle the swipe so we don't re-trigger every subsequent touchmove tick
         GestureGoPage(deltaX < 0 ? 1 : -1);
     }
 

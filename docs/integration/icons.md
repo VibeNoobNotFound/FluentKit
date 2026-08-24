@@ -7,7 +7,7 @@ Link the icon font from the fixed RCL route:
 ```
 
 Use `FluentIcon` and the generated `FluentIconNames` constants when a compile-time checked
-glyph name is useful. Do not copy the icon font into the consuming app.
+glyph name is useful. Do not copy the icon font into the host app.
 
 All library assets use `_content/FluentKit/...`; this route is intentionally independent of
 the `FluentKit.Blazor` package id.

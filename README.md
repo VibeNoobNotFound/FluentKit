@@ -63,7 +63,7 @@ dotnet add package FluentKit.Blazor
 <PackageReference Include="FluentKit.Blazor" Version="0.2.0" /> <!-- should match the nuget badge above -->
 ```
 
-Alternatively, to track `main` directly, consume it as a project or repository reference instead:
+Alternatively, to track `main` directly, use it as a project or repository reference instead:
 
 **2. Link the Token & Icon stylesheets**
 
@@ -325,7 +325,7 @@ samples/
 Each component folder follows the same three-file convention: `.razor` for markup, `.razor.cs` for
 the code-behind, `.razor.css` for CSS-isolated styles. Components that need pointer/DOM measurement
 (drag tracking, overlay positioning, pointer-relative gradients) pair with a small JS interop module
-under `wwwroot/`, matched folder-for-folder with the component that consumes it.
+under `wwwroot/`, matched folder-for-folder with the component that uses it.
 
 ## CSS isolation gotcha
 

@@ -266,7 +266,7 @@ Expander — header + collapsible content area, header click/Enter/Space toggles
 ### `FluentFlyout`
 
 Category: **Composite** · Sample: `/Composite/Flyout`
-Generic positioned content flyout (WinUI 3 Flyout). Click/tap the trigger to open, click outside or press Escape to close. Built entirely on IOverlayService/FluentOverlayHost (Phase 3 infra) — this is the second application after FluentTooltip and the base every other overlay composite (MenuFlyout, ComboBox, TeachingTip, DropDownButton...) is expected to follow the same shape of.
+Generic positioned content flyout (WinUI 3 Flyout). Click/tap the trigger to open, click outside or press Escape to close. Built entirely on IOverlayService/FluentOverlayHost (Phase 3 infra) — this is the second overlay composite after FluentTooltip and the base every other overlay composite (MenuFlyout, ComboBox, TeachingTip, DropDownButton...) is expected to follow the same shape of.
 
 
 | Parameter | Type | Cascading | RenderFragment | Bindable | Description |
@@ -406,7 +406,7 @@ A single top-level entry in a FluentMenuBar (MenuBarItem.svelte) — e.g. "File"
 ### `FluentMenuFlyout`
 
 Category: **Composite** · Sample: `/Composite/MenuFlyout`
-Command menu opened from a trigger element (MenuFlyoutWrapper.svelte). Built on the same IOverlayService/FluentOverlayHost infra as FluentFlyout — this is effectively FluentFlyout with a MenuFlyoutCloseContext threaded through so its FluentMenuFlyoutItem children (and their own cascading submenus) know how to collapse the whole tree on selection. Note: fluent-svelte's MenuFlyoutWrapper also exposes an `alignment` (start/center/end) prop alongside placement. That's not something OverlayPlacement/overlay-interop.js currently model (they only pick which side of the anchor and clamp to the viewport) — left out here rather than half-implemented; add it to OverlayPlacement/computePosition if a application needs it.
+Command menu opened from a trigger element (MenuFlyoutWrapper.svelte). Built on the same IOverlayService/FluentOverlayHost infra as FluentFlyout — this is effectively FluentFlyout with a MenuFlyoutCloseContext threaded through so its FluentMenuFlyoutItem children (and their own cascading submenus) know how to collapse the whole tree on selection. Note: fluent-svelte's MenuFlyoutWrapper also exposes an `alignment` (start/center/end) prop alongside placement. That's not something OverlayPlacement/overlay-interop.js currently model (they only pick which side of the anchor and clamp to the viewport) — left out here rather than half-implemented; add it to OverlayPlacement/computePosition if an application needs it.
 
 
 | Parameter | Type | Cascading | RenderFragment | Bindable | Description |
@@ -886,7 +886,7 @@ Mirrors WinUI's ToggleSwitch, including the optional Header/OnContent/OffContent
 ### `FluentTooltip`
 
 Category: **Composite** · Sample: `/Composite/Tooltip`
-Deliberately the simplest possible application of IOverlayService/FluentOverlayHost — this exists to prove the overlay infrastructure end to end (Phase 3 exit criteria), not as the final Tooltip. Missing, on purpose, for now: show/hide delay debouncing, and re-showing on scroll.
+Deliberately the simplest possible use of IOverlayService/FluentOverlayHost — this exists to prove the overlay infrastructure end to end (Phase 3 exit criteria), not as the final Tooltip. Missing, on purpose, for now: show/hide delay debouncing, and re-showing on scroll.
 
 
 | Parameter | Type | Cascading | RenderFragment | Bindable | Description |
@@ -916,7 +916,7 @@ Category: **Infrastructure** · Sample: `/Design/Colors`
 
 | Type | Kind | Members | Description |
 | --- | --- | --- | --- |
-| `SizableComponentBase` | class | `Height`, `MaxHeight`, `MaxWidth`, `MinHeight`, `MinWidth`, `Padding`, `Width` | Base class for controls that expose XAML-style Padding/Width/Height/ MinWidth/MinHeight/MaxWidth/MaxHeight overrides (mirrors FrameworkElement's sizing properties in WPF/WinUI). Every property here is nullable and by default, meaning "unset — fall back to the control's own stylesheet default"; only the ones a application actually sets get written into . Inheritors render style="@SizingStyle" on their root element (in addition to, not instead of, their existing CSS classes) so overrides win via normal inline-style specificity without needing !important or duplicated CSS. |
+| `SizableComponentBase` | class | `Height`, `MaxHeight`, `MaxWidth`, `MinHeight`, `MinWidth`, `Padding`, `Width` | Base class for controls that expose XAML-style Padding/Width/Height/ MinWidth/MinHeight/MaxWidth/MaxHeight overrides (mirrors FrameworkElement's sizing properties in WPF/WinUI). Every property here is nullable and by default, meaning "unset — fall back to the control's own stylesheet default"; only the ones an application actually sets get written into . Inheritors render style="@SizingStyle" on their root element (in addition to, not instead of, their existing CSS classes) so overrides win via normal inline-style specificity without needing !important or duplicated CSS. |
 | `Thickness` | struct | `Bottom`, `Equals`, `Equals`, `GetHashCode`, `Left`, `Right`, `ToCss`, `Top`, `Zero` | Mirrors XAML's Thickness (used for Padding/Margin in WPF/WinUI) — same three constructor shapes (uniform, horizontal/vertical, four-value), same Left/Top/Right/Bottom field names. Values are CSS pixels. Renders to a CSS padding shorthand via — note CSS shorthand order is top/right/bottom/left, not left/top/right/bottom, so the constructor argument order and the emitted order intentionally differ; that's a CSS convention mismatch inherited from the platform, not a bug here. |
 | `AutoSuggestBoxItem`1` | class | `Deconstruct`, `Disabled`, `Equals`, `Equals`, `GetHashCode`, `Name`, `ToString`, `Value` | One suggestion row in a . Same shape as (Name/Value/Disabled) — kept as its own type rather than reusing ComboBoxItem directly since AutoSuggestBox's "Value" is conceptually a query result payload rather than a fixed option, even though the record looks identical today. |
 | `CalendarSelectionMode` | enum | `Multiple`, `Range`, `Single` | Selection behavior for and . Not part of fluent-svelte's original API (it only ever exposed a multiple boolean) — added here as a superset so applications can opt into a third, common date-range picking pattern (à la Fluent UI React's DatePicker range selection) without overloading a bool. |

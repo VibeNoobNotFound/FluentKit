@@ -13,7 +13,7 @@ namespace FluentKit.Composite;
 /// Note: fluent-svelte's MenuFlyoutWrapper also exposes an `alignment` (start/center/end) prop
 /// alongside placement. That's not something OverlayPlacement/overlay-interop.js currently model
 /// (they only pick which side of the anchor and clamp to the viewport) — left out here rather than
-/// half-implemented; add it to OverlayPlacement/computePosition if a application needs it.
+/// half-implemented; add it to OverlayPlacement/computePosition if an application needs it.
 /// </summary>
 public partial class FluentMenuFlyout : ComponentBase, IDisposable
 {

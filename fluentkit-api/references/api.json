@@ -1256,7 +1256,7 @@
       "category": "Composite",
       "sample": "/Composite/Flyout",
       "genericParameters": [],
-      "summary": "Generic positioned content flyout (WinUI 3 Flyout). Click/tap the trigger to open, click outside or press Escape to close. Built entirely on IOverlayService/FluentOverlayHost (Phase 3 infra) \u2014 this is the second application after FluentTooltip and the base every other overlay composite (MenuFlyout, ComboBox, TeachingTip, DropDownButton...) is expected to follow the same shape of.",
+      "summary": "Generic positioned content flyout (WinUI 3 Flyout). Click/tap the trigger to open, click outside or press Escape to close. Built entirely on IOverlayService/FluentOverlayHost (Phase 3 infra) \u2014 this is the second overlay composite after FluentTooltip and the base every other overlay composite (MenuFlyout, ComboBox, TeachingTip, DropDownButton...) is expected to follow the same shape of.",
       "parameters": [
         {
           "name": "ChildContent",
@@ -1842,7 +1842,7 @@
       "category": "Composite",
       "sample": "/Composite/MenuFlyout",
       "genericParameters": [],
-      "summary": "Command menu opened from a trigger element (MenuFlyoutWrapper.svelte). Built on the same IOverlayService/FluentOverlayHost infra as FluentFlyout \u2014 this is effectively FluentFlyout with a MenuFlyoutCloseContext threaded through so its FluentMenuFlyoutItem children (and their own cascading submenus) know how to collapse the whole tree on selection. Note: fluent-svelte\u0027s MenuFlyoutWrapper also exposes an \u0060alignment\u0060 (start/center/end) prop alongside placement. That\u0027s not something OverlayPlacement/overlay-interop.js currently model (they only pick which side of the anchor and clamp to the viewport) \u2014 left out here rather than half-implemented; add it to OverlayPlacement/computePosition if a application needs it.",
+      "summary": "Command menu opened from a trigger element (MenuFlyoutWrapper.svelte). Built on the same IOverlayService/FluentOverlayHost infra as FluentFlyout \u2014 this is effectively FluentFlyout with a MenuFlyoutCloseContext threaded through so its FluentMenuFlyoutItem children (and their own cascading submenus) know how to collapse the whole tree on selection. Note: fluent-svelte\u0027s MenuFlyoutWrapper also exposes an \u0060alignment\u0060 (start/center/end) prop alongside placement. That\u0027s not something OverlayPlacement/overlay-interop.js currently model (they only pick which side of the anchor and clamp to the viewport) \u2014 left out here rather than half-implemented; add it to OverlayPlacement/computePosition if an application needs it.",
       "parameters": [
         {
           "name": "ChildContent",
@@ -3895,7 +3895,7 @@
       "category": "Composite",
       "sample": "/Composite/Tooltip",
       "genericParameters": [],
-      "summary": "Deliberately the simplest possible application of IOverlayService/FluentOverlayHost \u2014 this exists to prove the overlay infrastructure end to end (Phase 3 exit criteria), not as the final Tooltip. Missing, on purpose, for now: show/hide delay debouncing, and re-showing on scroll.",
+      "summary": "Deliberately the simplest possible use of IOverlayService/FluentOverlayHost \u2014 this exists to prove the overlay infrastructure end to end (Phase 3 exit criteria), not as the final Tooltip. Missing, on purpose, for now: show/hide delay debouncing, and re-showing on scroll.",
       "parameters": [
         {
           "name": "ChildContent",
@@ -3957,7 +3957,7 @@
       "kind": "class",
       "genericParameters": [],
       "values": [],
-      "summary": "Base class for controls that expose XAML-style Padding/Width/Height/ MinWidth/MinHeight/MaxWidth/MaxHeight overrides (mirrors FrameworkElement\u0027s sizing properties in WPF/WinUI). Every property here is nullable and by default, meaning \u0022unset \u2014 fall back to the control\u0027s own stylesheet default\u0022; only the ones a application actually sets get written into . Inheritors render style=\u0022@SizingStyle\u0022 on their root element (in addition to, not instead of, their existing CSS classes) so overrides win via normal inline-style specificity without needing !important or duplicated CSS.",
+      "summary": "Base class for controls that expose XAML-style Padding/Width/Height/ MinWidth/MinHeight/MaxWidth/MaxHeight overrides (mirrors FrameworkElement\u0027s sizing properties in WPF/WinUI). Every property here is nullable and by default, meaning \u0022unset \u2014 fall back to the control\u0027s own stylesheet default\u0022; only the ones an application actually sets get written into . Inheritors render style=\u0022@SizingStyle\u0022 on their root element (in addition to, not instead of, their existing CSS classes) so overrides win via normal inline-style specificity without needing !important or duplicated CSS.",
       "members": [
         {
           "name": "Height",
@@ -4526,7 +4526,7 @@
           "name": "Bare",
           "kind": "property",
           "type": "Boolean",
-          "summary": "When true, OverlaySurface renders with no chrome of its own (no background, blur, border, shadow, or padding) \u2014 for applications like NavigationView\u0027s Compact/Minimal overlay pane that supply their own surface material (e.g. FluentAcrylicBrush) and would otherwise get a second, redundant blur/background stacked underneath theirs."
+          "summary": "When true, OverlaySurface renders with no chrome of its own (no background, blur, border, shadow, or padding) \u2014 for components like NavigationView\u0027s Compact/Minimal overlay pane that supply their own surface material (e.g. FluentAcrylicBrush) and would otherwise get a second, redundant blur/background stacked underneath theirs."
         },
         {
           "name": "ComputedStyle",

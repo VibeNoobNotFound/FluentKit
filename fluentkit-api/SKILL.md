@@ -5,13 +5,13 @@ description: Use FluentKit.Blazor correctly when building a separate Blazor WASM
 
 # FluentKit application
 
-This skill is for consuming FluentKit from another application. It is not the repository
+This skill is for using FluentKit from another application. It is not the repository
 maintainer workflow. The bundle version in `metadata.json` must match the installed
 `FluentKit.Blazor` package exactly.
 
 ## Required workflow
 
-1. Inspect the consuming app's project files and package lock/assets to identify its
+1. Inspect the app's project files and package lock/assets to identify its
    `FluentKit.Blazor` version and hosting model.
 2. Read `references/api.json` for the exact component parameters, callbacks, slots, enums,
    and services in this bundle's version. Do not invent a parameter from a newer release.
@@ -21,7 +21,7 @@ maintainer workflow. The bundle version in `metadata.json` must match the instal
    one `FluentOverlayHost` for overlays.
 5. Prefer token variables and existing component parameters over app-local hard-coded Fluent
    values. Use the sample route in the API JSON to find a runnable example.
-6. After changes, build the consuming app and verify static assets and interactive overlays.
+6. After changes, build the app and verify static assets and interactive overlays.
 
 ## References
 
