@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to publish (for example, v0.2.3). Leave blank to create a tag."
+        required: false
+        type: string
+      version:
+        description: "New package version without the v prefix (used only when tag is blank)."
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -20,6 +30,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          # A manual run starts from the selected branch. The resolve step below checks out
+          # an existing input tag, or leaves this commit checked out to create a new tag.
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1
@@ -29,14 +43,74 @@ jobs:
       - name: Install MAUI Android workload
         run: dotnet workload install maui-android
 
+      - name: Resolve release target
+        env:
+          REQUESTED_TAG: ${{ inputs.tag }}
+          REQUESTED_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          create_tag=false
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            release_tag="$GITHUB_REF_NAME"
+          elif [[ -n "$REQUESTED_TAG" ]]; then
+            if [[ -n "$REQUESTED_VERSION" ]]; then
+              echo "Set either tag or version, not both." >&2
+              exit 1
+            fi
+            release_tag="$REQUESTED_TAG"
+            if ! git show-ref --verify --quiet "refs/tags/$release_tag"; then
+              echo "Tag '$release_tag' does not exist. Choose an existing tag or leave tag blank and provide version." >&2
+              exit 1
+            fi
+            git checkout --detach "$release_tag"
+          else
+            if [[ -z "$REQUESTED_VERSION" ]]; then
+              echo "Provide an existing tag, or leave tag blank and provide version to create a new tag." >&2
+              exit 1
+            fi
+            if [[ ! "$REQUESTED_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+              echo "Version must be a SemVer-like value such as 0.2.4 or 0.2.4-rc.1." >&2
+              exit 1
+            fi
+            release_tag="v$REQUESTED_VERSION"
+            create_tag=true
+          fi
+
+          if [[ ! "$release_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Release tag must use the form vMAJOR.MINOR.PATCH (optionally with a prerelease suffix)." >&2
+            exit 1
+          fi
+
+          {
+            echo "RELEASE_TAG=$release_tag"
+            echo "CREATE_TAG=$create_tag"
+          } >> "$GITHUB_ENV"
+
       - name: Verify release identity
         shell: bash
         run: |
+          set -euo pipefail
           package_version="$(dotnet msbuild "$PACKAGE_PROJECT" -getProperty:Version -nologo)"
-          tag_version="${GITHUB_REF_NAME#v}"
+          tag_version="${RELEASE_TAG#v}"
           test "$package_version" = "$tag_version"
           test "$(jq -r .fluentkitVersion fluentkit-consumer/metadata.json)" = "$package_version"
-          test "$(jq -r .sourceTag fluentkit-consumer/metadata.json)" = "v$package_version"
+          test "$(jq -r .sourceTag fluentkit-consumer/metadata.json)" = "$RELEASE_TAG"
+
+      - name: Create requested release tag
+        if: env.CREATE_TAG == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Tag '$RELEASE_TAG' already exists remotely. Select it in the tag input instead of creating it." >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$RELEASE_TAG" -m "Release FluentKit ${RELEASE_TAG#v}"
+          git push origin "refs/tags/$RELEASE_TAG"
 
       - name: Restore
         run: dotnet restore FluentKit.slnx
@@ -61,7 +135,18 @@ jobs:
         run: dotnet pack "$PACKAGE_PROJECT" --no-restore --configuration Release --output ./nupkg
 
       - name: Package portable consumer skill
-        run: zip -r "fluentkit-consumer-${GITHUB_REF_NAME}.zip" fluentkit-consumer
+        shell: bash
+        run: |
+          set -euo pipefail
+          skill_archive="fluentkit-consumer.zip"
+          rm -f "$skill_archive"
+          zip -qr "$skill_archive" fluentkit-consumer
+          test -s "$skill_archive"
+          unexpected_entries="$(unzip -Z1 "$skill_archive" | grep -vE '^fluentkit-consumer(/|$)' || true)"
+          if [[ -n "$unexpected_entries" ]]; then
+            echo "Skill archive contains files outside fluentkit-consumer/." >&2
+            exit 1
+          fi
 
       - name: NuGet login (Trusted Publishing)
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
@@ -96,9 +181,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "fluentkit-consumer-${GITHUB_REF_NAME}.zip" --clobber
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" fluentkit-consumer.zip --clobber
           else
-            gh release create "$GITHUB_REF_NAME" "fluentkit-consumer-${GITHUB_REF_NAME}.zip" \
-              --title "FluentKit ${GITHUB_REF_NAME}" --generate-notes
+            gh release create "$RELEASE_TAG" fluentkit-consumer.zip \
+              --title "FluentKit ${RELEASE_TAG}" --generate-notes
           fi

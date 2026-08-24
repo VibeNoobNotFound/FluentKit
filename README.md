@@ -13,7 +13,7 @@ WebAssembly · Server · MAUI Blazor Hybrid — pure Razor and CSS, no third-par
 [![CI](https://github.com/VibeNoobNotFound/FluentKit/actions/workflows/ci.yml/badge.svg)](https://github.com/VibeNoobNotFound/FluentKit/actions/workflows/ci.yml)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
 
-[Live sample](https://vibenoobnotfound.github.io/FluentKit/) · [Getting started](#getting-started) · [Known gaps](#known-gaps--next-up) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Live sample](https://vibenoobnotfound.github.io/FluentKit/) · [Getting started](#getting-started) · [Download the consumer skill](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-consumer.zip) · [Known gaps](#known-gaps--next-up) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 </div>
 <img width="1912" height="1242" alt="image" src="https://github.com/user-attachments/assets/299a9235-6fc5-4eb4-9c92-64560ebd6cae" />
@@ -38,6 +38,7 @@ styling, or token values were sourced from.
 - [Project layout](#project-layout)
 - [CSS isolation gotcha](#css-isolation-gotcha)
 - [Known gaps / next up](#known-gaps--next-up)
+- [Publishing](#publishing)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -47,7 +48,8 @@ For a separate application, use the [consumer documentation](docs/consumer/READM
 generated [API reference](docs/reference/api.md) and machine-readable
 [`api.json`](docs/reference/api.json) are produced from the compiled FluentKit assembly and
 are kept in sync by CI. Coding agents can use the versioned
-[`fluentkit-consumer`](fluentkit-consumer/SKILL.md) skill bundle.
+[`fluentkit-consumer`](fluentkit-consumer/SKILL.md) skill bundle, or
+[download the latest portable skill ZIP](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-consumer.zip).
 
 **1. Install**
 
@@ -357,6 +359,16 @@ directly.)
 6. `FluentTeachingTip`'s beak is positioned from the requested placement, not whatever
    `overlay-interop.js` actually flipped it to — fine as long as there's room, but the beak won't
    flip sides if the tip itself gets flipped.
+
+## Publishing
+
+The `Release FluentKit` workflow runs automatically for a `vMAJOR.MINOR.PATCH` tag. It can also
+be started from the GitHub Actions page: enter an existing tag in **tag** to republish that
+immutable version, or leave **tag** blank and enter a version to create and publish a new tag
+from the selected branch. The project version and `fluentkit-consumer/metadata.json` must already
+match that version. Each release publishes NuGet and a standalone
+[`fluentkit-consumer.zip`](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-consumer.zip)
+containing only the portable skill folder.
 
 ## Contributing
 
