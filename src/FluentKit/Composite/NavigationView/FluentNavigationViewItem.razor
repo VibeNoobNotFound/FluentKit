@@ -31,9 +31,9 @@
     }
 </button>
 
-@if (IsExpanded && ChildContent is not null)
+@if (ChildContent is not null)
 {
-    <div class="fluent-nav-view-item-children">
+    <div class="fluent-nav-view-item-children" hidden="@(!IsExpanded)">
         @ChildContent
     </div>
 }

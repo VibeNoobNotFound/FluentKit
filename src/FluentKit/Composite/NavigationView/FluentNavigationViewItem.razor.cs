@@ -37,6 +37,7 @@ public partial class FluentNavigationViewItem : ComponentBase, IDisposable
     private NavigationViewContext? Context { get; set; }
     private ElementReference _element;
     private bool _hasChildren;
+    private bool _lastIsExpandedForNotify;
 
     private bool RealIsSelectable => IsSelectable ?? !_hasChildren;
 
@@ -51,6 +52,21 @@ public partial class FluentNavigationViewItem : ComponentBase, IDisposable
             Context.SelectionChanged += OnSelectionChanged;
         }
         _hasChildren = ChildContent != null;
+        _lastIsExpandedForNotify = IsExpanded;
+    }
+
+    protected override void OnParametersSet()
+    {
+        // Catches expand/collapse driven by the consumer's own bound state (@bind-IsExpanded set
+        // from outside, e.g. "collapse all" logic or an externally-controlled accordion), not
+        // just the in-component toggle in HandleClickAsync below. Either way, the rendered
+        // branch changed and the navigation view must re-resolve its visible selection anchor.
+        if (_lastIsExpandedForNotify != IsExpanded)
+        {
+            _lastIsExpandedForNotify = IsExpanded;
+            Context?.NotifyExpansionChanged();
+        }
+        base.OnParametersSet();
     }
 
     private void OnSelectionChanged()
@@ -67,6 +83,7 @@ public partial class FluentNavigationViewItem : ComponentBase, IDisposable
         {
             IsExpanded = !IsExpanded;
             await IsExpandedChanged.InvokeAsync(IsExpanded);
+            Context.NotifyExpansionChanged();
             if (RealIsSelectable)
             {
                 Context.SelectValue(Value);

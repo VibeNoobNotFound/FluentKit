@@ -27,6 +27,15 @@ public class NavigationViewContext : IDisposable
     public event Action? SelectionChanged;
     public event Action<object?>? ItemClicked;
 
+    /// <summary>Raised whenever any FluentNavigationViewItem expands or collapses its children,
+    /// independent of SelectionChanged - a parent with children defaults to non-selectable (see
+    /// FluentNavigationViewItem.RealIsSelectable), so toggling it alone never fires
+    /// SelectionChanged even though it can reveal or hide the item that should carry the
+    /// navigation view's selection anchor (see FluentNavigationView.OnContextExpansionChanged).</summary>
+    public event Action? ExpansionChanged;
+
+    internal void NotifyExpansionChanged() => ExpansionChanged?.Invoke();
+
     public void SelectValue(object? value)
     {
         SelectedValue = value;

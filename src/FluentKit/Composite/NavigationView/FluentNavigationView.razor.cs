@@ -9,7 +9,17 @@ public enum NavigationViewPaneDisplayMode
     Left,
     Top,
     LeftCompact,
-    LeftMinimal
+    LeftMinimal,
+    LeftFullScreen
+}
+
+/// <summary>Which edge the full-screen overlay pane slides in from (and which edge the swipe-to-open
+/// gesture listens on) when <see cref="NavigationViewPaneDisplayMode.LeftFullScreen"/> is active.</summary>
+public enum NavigationViewFullScreenOrigin
+{
+    Left,
+    Top,
+    Right
 }
 
 public enum NavigationViewDisplayMode
@@ -90,6 +100,20 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     [Parameter]
     public bool AlwaysShowHeader { get; set; } = true;
 
+    /// <summary>Which edge the overlay pane slides in from, and which edge the swipe-to-open
+    /// gesture listens on, while <see cref="PaneDisplayMode"/> is
+    /// <see cref="NavigationViewPaneDisplayMode.LeftFullScreen"/> (including when Auto lands on
+    /// it at the narrowest width tier). Ignored in Compact/Minimal, which always swipe/slide
+    /// from the left rail.</summary>
+    [Parameter]
+    public NavigationViewFullScreenOrigin FullScreenOrigin { get; set; } = NavigationViewFullScreenOrigin.Left;
+
+    /// <summary>Enables the edge swipe-to-open gesture for the overlay pane in Compact, Minimal,
+    /// and FullScreen modes. The pane tracks the finger 1:1 while dragging (dragging halfway
+    /// opens it halfway) and snaps open or closed on release based on distance/velocity.</summary>
+    [Parameter]
+    public bool EnableSwipeToOpen { get; set; } = true;
+
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
@@ -97,35 +121,45 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private ElementReference _rootElement;
-    private ElementReference _itemsContainerElement;
-    private ElementReference _indicatorElement;
+    private ElementReference _overlayElement;
+    private ElementReference _closedSwipeRegion;
+    private ElementReference _openSwipeRegion;
     private NavigationViewContext? _context;
     private IJSObjectReference? _module;
     private DotNetObjectReference<FluentNavigationView>? _selfReference;
-
-    // A selection change is recorded here (by OnContextSelectionChanged) and only actually
-    // measured/animated from OnAfterRenderAsync, once Blazor has patched the DOM for whatever
-    // triggered it (see OnContextSelectionChanged for why this can't happen synchronously).
-    // Deliberately just a bool, not a remembered "target key": the JS side always re-resolves
-    // the target by querying for .fluent-nav-view-item--selected at animate time, so the
-    // indicator can never be pointed at a stale/wrong element - it always follows whatever the
-    // DOM currently says is selected, not whatever we think we clicked.
-    private bool _hasPendingIndicatorAnimation;
 
     private NavigationViewPaneDisplayMode _activePaneDisplayMode = NavigationViewPaneDisplayMode.Left;
     private NavigationViewPaneDisplayMode _lastPaneDisplayMode = NavigationViewPaneDisplayMode.Left;
     private bool _isTransitioning;
     private System.Threading.CancellationTokenSource? _transitionCts;
 
+    // What the JS-side swipe watcher was last configured for, so OnAfterRenderAsync only pays
+    // for a re-arm (stop + start) when something it actually depends on changed, not on every
+    // render (e.g. unrelated ChildContent updates while the pane sits idle).
+    private bool _swipeWatcherActive;
+    private bool _swipeWatcherIsOpen;
+    private NavigationViewFullScreenOrigin _swipeWatcherEdge;
+    private bool _swipeWatcherCompactOrMinimal;
+
     public NavigationViewDisplayMode DisplayMode { get; private set; } = NavigationViewDisplayMode.Expanded;
 
     private bool IsCompactOrMinimal =>
-        _activePaneDisplayMode is NavigationViewPaneDisplayMode.LeftCompact or NavigationViewPaneDisplayMode.LeftMinimal;
+        _activePaneDisplayMode is NavigationViewPaneDisplayMode.LeftCompact
+            or NavigationViewPaneDisplayMode.LeftMinimal
+            or NavigationViewPaneDisplayMode.LeftFullScreen;
+
+    /// <summary>The edge the swipe-open gesture should watch and the overlay should slide from.
+    /// Compact/Minimal are always left-anchored rails; only FullScreen honors FullScreenOrigin.</summary>
+    private NavigationViewFullScreenOrigin EffectiveSwipeEdge =>
+        _activePaneDisplayMode == NavigationViewPaneDisplayMode.LeftFullScreen
+            ? FullScreenOrigin
+            : NavigationViewFullScreenOrigin.Left;
 
     private string PaneDisplayModeClass => _activePaneDisplayMode switch
     {
         NavigationViewPaneDisplayMode.LeftCompact => "compact",
         NavigationViewPaneDisplayMode.LeftMinimal => "minimal",
+        NavigationViewPaneDisplayMode.LeftFullScreen => "minimal",
         NavigationViewPaneDisplayMode.Top => "top",
         NavigationViewPaneDisplayMode.Auto => "auto",
         _ => "expanded"
@@ -136,6 +170,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         _context = new NavigationViewContext(this);
         _context.SelectionChanged += OnContextSelectionChanged;
         _context.ItemClicked += (object? sender1) => OnItemClicked(sender1);
+        _context.ExpansionChanged += OnContextExpansionChanged;
         _activePaneDisplayMode = PaneDisplayMode;
         _lastPaneDisplayMode = PaneDisplayMode;
         base.OnInitialized();
@@ -159,19 +194,11 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             }
 
             await UpdateDisplayModeAsync();
+        }
 
-            // Place the ribbon indicator on whatever is selected at startup, instantly
-            // (no slide-in from nowhere on first paint).
-            await UpdateIndicatorAsync(animate: false);
-            _hasPendingIndicatorAnimation = false;
-        }
-        else if (_hasPendingIndicatorAnimation)
-        {
-            // DOM now reflects whatever expand/collapse the triggering click caused, so it's
-            // safe to measure real positions.
-            _hasPendingIndicatorAnimation = false;
-            await UpdateIndicatorAsync(animate: true);
-        }
+        await SyncNavItemAnchorsAsync();
+        await SyncSwipeGestureAsync();
+
         await base.OnAfterRenderAsync(firstRender);
     }
 
@@ -252,15 +279,6 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     {
         var newValue = _context?.SelectedValue;
 
-        // Don't touch the DOM here: this handler can fire from a click that *also* expands or
-        // collapses a sibling group (e.g. a parent item with Value=null and children), which
-        // inserts/removes rows and shifts everything below it. If we measure positions right
-        // now, we're measuring the *old* layout, before Blazor has patched the DOM for that
-        // change. Defer to OnAfterRenderAsync, and resolve the target there by querying for
-        // .fluent-nav-view-item--selected rather than remembering "the item we clicked" - that
-        // way the indicator always converges on whatever the DOM says is actually selected.
-        _hasPendingIndicatorAnimation = true;
-
         if (!Equals(SelectedValue, newValue))
         {
             SelectedValue = newValue;
@@ -270,16 +288,17 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         StateHasChanged();
     }
 
-    /// <summary>Moves the ribbon indicator onto whichever item currently has
-    /// .fluent-nav-view-item--selected in the DOM. Never told which item to target - it always
-    /// re-resolves that itself, so it can't drift onto a stale/wrong element the way passing a
-    /// remembered "target key" around could.</summary>
-    private async Task UpdateIndicatorAsync(bool animate)
+    private void OnContextExpansionChanged()
+    {
+        StateHasChanged();
+    }
+
+    private async Task SyncNavItemAnchorsAsync()
     {
         if (_module is null) return;
         try
         {
-            await _module.InvokeVoidAsync("updateNavIndicator", _itemsContainerElement, _indicatorElement, animate);
+            await _module.InvokeVoidAsync("syncNavItemAnchors", _rootElement);
         }
         catch (JSException) { }
     }
@@ -319,6 +338,70 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         StateHasChanged();
     }
 
+    /// <summary>(Re)configures the JS-side edge-swipe watcher whenever something it depends on has
+    /// actually changed since the last render — the current mode class, open/closed state, or the
+    /// origin edge. JS owns the live drag (finger-tracked transform on <c>_overlayElement</c>) so
+    /// it stays at input latency instead of round-tripping every pointer move through .NET; only
+    /// the final open/closed decision comes back via <see cref="OnSwipeCommit"/>.</summary>
+    private async Task SyncSwipeGestureAsync()
+    {
+        if (_module is null) return;
+
+        var shouldBeActive = EnableSwipeToOpen && IsCompactOrMinimal;
+        var edge = EffectiveSwipeEdge;
+
+        if (!shouldBeActive)
+        {
+            if (_swipeWatcherActive)
+            {
+                try { await _module.InvokeVoidAsync("stopSwipeWatcher", _rootElement); }
+                catch (JSException) { }
+                _swipeWatcherActive = false;
+            }
+            return;
+        }
+
+        var unchanged = _swipeWatcherActive
+            && _swipeWatcherIsOpen == IsPaneOpen
+            && _swipeWatcherEdge == edge
+            && _swipeWatcherCompactOrMinimal == IsCompactOrMinimal;
+        if (unchanged) return;
+
+        try
+        {
+            await _module.InvokeVoidAsync(
+                "startSwipeWatcher",
+                _rootElement,
+                _overlayElement,
+                _closedSwipeRegion,
+                _openSwipeRegion,
+                _selfReference,
+                IsPaneOpen,
+                edge.ToString().ToLowerInvariant());
+            _swipeWatcherActive = true;
+            _swipeWatcherIsOpen = IsPaneOpen;
+            _swipeWatcherEdge = edge;
+            _swipeWatcherCompactOrMinimal = IsCompactOrMinimal;
+        }
+        catch (JSException)
+        {
+            _swipeWatcherActive = false;
+        }
+    }
+
+    /// <summary>Called by the JS swipe watcher once a drag ends (or a tap outside during an
+    /// in-progress drag cancels it) with the final decision already made client-side (past the
+    /// distance/velocity threshold or not). Blazor only needs to commit the resulting state —
+    /// the drag itself never touched .NET.</summary>
+    [JSInvokable]
+    public async Task OnSwipeCommit(bool isOpen)
+    {
+        if (IsPaneOpen == isOpen) return;
+        IsPaneOpen = isOpen;
+        await IsPaneOpenChanged.InvokeAsync(IsPaneOpen);
+        StateHasChanged();
+    }
+
     [JSInvokable]
     public async Task OnResize(double width)
     {
@@ -345,6 +428,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             displayMode = NavigationViewDisplayMode.Compact;
         }
         else if (paneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal)
+        {
+            displayMode = NavigationViewDisplayMode.Minimal;
+        }
+        else if (paneDisplayMode == NavigationViewPaneDisplayMode.LeftFullScreen)
         {
             displayMode = NavigationViewDisplayMode.Minimal;
         }
@@ -397,8 +484,8 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             }
             else
             {
-                targetMode = NavigationViewPaneDisplayMode.LeftMinimal;
-                if (_activePaneDisplayMode != NavigationViewPaneDisplayMode.LeftMinimal)
+                targetMode = NavigationViewPaneDisplayMode.LeftFullScreen;
+                if (_activePaneDisplayMode != NavigationViewPaneDisplayMode.LeftFullScreen)
                 {
                     targetPaneOpen = false;
                 }
@@ -445,12 +532,21 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     public void Dispose()
     {
+        if (_context is not null)
+        {
+            _context.SelectionChanged -= OnContextSelectionChanged;
+            _context.ExpansionChanged -= OnContextExpansionChanged;
+        }
         _context?.Dispose();
         _selfReference?.Dispose();
         if (_module is not null)
         {
             try
             {
+                if (_swipeWatcherActive)
+                {
+                    _module.InvokeVoidAsync("stopSwipeWatcher", _rootElement);
+                }
                 _module.InvokeVoidAsync("stopObservingResize", _rootElement);
                 _module.DisposeAsync().AsTask().Wait();
             }
