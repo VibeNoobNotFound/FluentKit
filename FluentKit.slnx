@@ -6,4 +6,5 @@
   <Project Path="src/FluentKit/FluentKit.csproj" />
   <Project Path="src/FluentKit.IconGenerator/FluentKit.IconGenerator.csproj" />
   <Project Path="tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj" />
+  <Project Path="tests/FluentKit.Tests/FluentKit.Tests.csproj" />
 </Solution>

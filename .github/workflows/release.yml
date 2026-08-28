@@ -118,6 +118,9 @@ jobs:
       - name: Build and verify public API baseline
         run: dotnet build FluentKit.slnx -c Release --no-restore -warnaserror:RS0016,RS0017
 
+      - name: Run tests
+        run: dotnet test tests/FluentKit.Tests/FluentKit.Tests.csproj -c Release --no-build --no-restore
+
       - name: Verify generated API reference
         run: |
           dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
