@@ -58,7 +58,7 @@ dotnet add package FluentKit.Blazor
 ```
 
 ```xml
-<PackageReference Include="FluentKit.Blazor" Version="0.2.0" /> <!-- should match the nuget badge above -->
+<PackageReference Include="FluentKit.Blazor" Version="0.2.4" /> <!-- should match the nuget badge above -->
 ```
 
 Alternatively, to track `main` directly, use it as a project or repository reference instead:
@@ -346,8 +346,8 @@ directly.)
 1. Accent color tokens (`--accent-fill-color-default` etc.) are still placeholders (Windows'
    default blue), not derived from the user's actual system accent color — flagged `TODO` in both
    `_semantic.*.css` files.
-2. No automated tests yet (`tests/` doesn't exist) — bUnit plus Playwright screenshot tests pinned
-   against real WinUI 3 screenshots are planned.
+2. Component lifecycle regression coverage now lives in `tests/FluentKit.Tests`; Playwright screenshot
+   tests pinned against real WinUI 3 screenshots are still planned.
 3. No published docs/demo site yet, beyond the sample app.
 4. No High Contrast theme (a third theme alongside light/dark, mirroring WinUI's own
    `HighContrast` resource key) — `Theming/` currently only resolves light/dark/system.

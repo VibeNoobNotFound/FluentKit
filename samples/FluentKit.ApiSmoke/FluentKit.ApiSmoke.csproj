@@ -3,7 +3,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <FluentKitSmokeVersion>0.2.2</FluentKitSmokeVersion>
+    <!-- This is a package-consumer smoke test, so keep it on the latest published release.
+         The source package version is not available on NuGet until the release workflow runs. -->
+    <FluentKitSmokeVersion>0.2.3</FluentKitSmokeVersion>
   </PropertyGroup>
 
   <ItemGroup>

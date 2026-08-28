@@ -13,7 +13,7 @@ visual reference; its source is in `samples/FluentKit.Sample.Shared`.
 1. Add the package:
 
    ```bash
-   dotnet add package FluentKit.Blazor --version 0.2.2
+   dotnet add package FluentKit.Blazor --version 0.2.4
    ```
 
 2. Link the public token and icon stylesheets. The static web asset base is always
@@ -49,6 +49,9 @@ visual reference; its source is in `samples/FluentKit.Sample.Shared`.
 - **WebAssembly:** put the stylesheet links in `wwwroot/index.html`.
 - **Server:** put them in the host document or the app's root layout.
 - **MAUI Hybrid:** put them in the `BlazorWebView` host page (`wwwroot/index.html`).
+
+For a server-side redirect/disconnect disposal verification using the Aula consumer, see
+[server-circuit-disposal.md](server-circuit-disposal.md).
 
 The component API is the same across hosts. Only the host page and static-asset serving
 configuration differ.
