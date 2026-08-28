@@ -1,4 +1,5 @@
 using System.Globalization;
+using FluentKit.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -67,6 +68,7 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
     private IJSObjectReference? _module;
     private DotNetObjectReference<FluentTimePicker>? _selfReference;
     private bool _listenersAttached;
+    private int _disposed;
 
     private bool _open;
     private bool _closing;
@@ -268,15 +270,21 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
     private async Task ScrollColumnsToStagedAsync()
     {
         await EnsureModuleAsync();
+        var module = _module;
+        if (module is null || Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         _selfReference ??= DotNetObjectReference.Create(this);
 
         if (!_listenersAttached)
         {
-            await _module!.InvokeVoidAsync("attachColumn", _hourColumnRef, "hour", _selfReference);
-            await _module.InvokeVoidAsync("attachColumn", _minuteColumnRef, "minute", _selfReference);
+            await module.InvokeVoidAsync("attachColumn", _hourColumnRef, "hour", _selfReference);
+            await module.InvokeVoidAsync("attachColumn", _minuteColumnRef, "minute", _selfReference);
             if (!Is24Hour)
             {
-                await _module.InvokeVoidAsync("attachColumn", _periodColumnRef, "period", _selfReference);
+                await module.InvokeVoidAsync("attachColumn", _periodColumnRef, "period", _selfReference);
             }
 
             _listenersAttached = true;
@@ -285,12 +293,12 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
         var hourIndex = Is24Hour ? _stagedHour : HourValues.ToList().IndexOf(_stagedHour);
         var minuteIndex = MinuteValues.ToList().IndexOf(_stagedMinute);
 
-        await _module!.InvokeVoidAsync("scrollToIndex", _hourColumnRef, hourIndex);
-        await _module.InvokeVoidAsync("scrollToIndex", _minuteColumnRef, minuteIndex);
+        await module.InvokeVoidAsync("scrollToIndex", _hourColumnRef, hourIndex);
+        await module.InvokeVoidAsync("scrollToIndex", _minuteColumnRef, minuteIndex);
 
         if (!Is24Hour)
         {
-            await _module.InvokeVoidAsync("scrollToIndex", _periodColumnRef, _stagedIsPm ? 1 : 0);
+            await module.InvokeVoidAsync("scrollToIndex", _periodColumnRef, _stagedIsPm ? 1 : 0);
         }
     }
 
@@ -302,6 +310,11 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
     [JSInvokable]
     public void OnColumnSettled(string column, int index)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         switch (column)
         {
             case "hour":
@@ -337,18 +350,45 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_module is not null)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            try
-            {
-                await _module.DisposeAsync();
-            }
-            catch (JSDisconnectedException)
-            {
-                // Circuit already torn down (Blazor Server navigation/disconnect) — nothing to clean up.
-            }
+            return;
         }
 
-        _selfReference?.Dispose();
+        _closeGeneration++;
+        _open = false;
+        _closing = false;
+
+        var module = Interlocked.Exchange(ref _module, null);
+        var selfReference = Interlocked.Exchange(ref _selfReference, null);
+
+        try
+        {
+            if (module is not null)
+            {
+                try
+                {
+                    if (_listenersAttached)
+                    {
+                        await module.InvokeVoidAsync("detachColumn", _hourColumnRef).ConfigureAwait(false);
+                        await module.InvokeVoidAsync("detachColumn", _minuteColumnRef).ConfigureAwait(false);
+                        await module.InvokeVoidAsync("detachColumn", _periodColumnRef).ConfigureAwait(false);
+                    }
+                }
+                catch (JSDisconnectedException)
+                {
+                    // The browser-side listeners are unreachable after circuit teardown.
+                }
+                finally
+                {
+                    await JsModuleDisposal.DisposeAsync(module);
+                }
+            }
+        }
+        finally
+        {
+            _listenersAttached = false;
+            selfReference?.Dispose();
+        }
     }
 }

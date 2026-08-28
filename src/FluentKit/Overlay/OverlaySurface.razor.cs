@@ -1,3 +1,4 @@
+using FluentKit.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -15,6 +16,7 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
     private DotNetObjectReference<OverlaySurface>? _selfReference;
     private bool _needsPositioning = true;
     private bool _needsDismissRegistrationUpdate;
+    private int _disposed;
     // Guards HandleClosingAsync against running twice — Entry.IsClosing stays true across every
     // subsequent render once OverlayService.Close() flips it (the same OverlayEntry instance is kept
     // mounted via FluentOverlayHost's @key="entry.Id" specifically so the exit animation can play),
@@ -50,6 +52,11 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
     private async Task HandleClosingAsync()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         try
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
@@ -73,6 +80,11 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         if (!firstRender && !_needsPositioning && !_needsDismissRegistrationUpdate)
         {
             return;
@@ -190,13 +202,36 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_module is not null)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            await _module.InvokeVoidAsync("unregisterLightDismiss", Entry.Id.ToString());
-            await _module.DisposeAsync();
+            return;
         }
 
-        _selfReference?.Dispose();
+        var module = Interlocked.Exchange(ref _module, null);
+        var selfReference = Interlocked.Exchange(ref _selfReference, null);
+
+        try
+        {
+            if (module is not null)
+            {
+                try
+                {
+                    await module.InvokeVoidAsync("unregisterLightDismiss", Entry.Id.ToString()).ConfigureAwait(false);
+                }
+                catch (JSDisconnectedException)
+                {
+                    // The browser-side registration is unreachable after circuit teardown.
+                }
+                finally
+                {
+                    await JsModuleDisposal.DisposeAsync(module);
+                }
+            }
+        }
+        finally
+        {
+            selfReference?.Dispose();
+        }
     }
 
     private sealed class OverlayPosition

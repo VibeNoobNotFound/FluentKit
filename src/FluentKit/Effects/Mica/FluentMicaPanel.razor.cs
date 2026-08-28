@@ -1,3 +1,4 @@
+using FluentKit.Interop;
 using FluentKit.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -79,30 +80,72 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
     private IJSObjectReference? _module;
     private string? _renderedImageUrl;
     private string? _lastKey;
+    private int _disposed;
+    private int _renderGeneration;
+    private bool _themeHandlerSubscribed;
 
     private string VariantClass => Variant == MicaVariant.BaseAlt ? "fluent-mica--alt" : "fluent-mica--base";
 
     protected override async Task OnInitializedAsync()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         ThemeService.ThemeChanged += OnThemeChanged;
-        _module = await JS.InvokeAsync<IJSObjectReference>(
+        _themeHandlerSubscribed = true;
+        var module = await JS.InvokeAsync<IJSObjectReference>(
             "import", "./_content/FluentKit/Effects/mica-interop.js");
+
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            await JsModuleDisposal.DisposeAsync(module);
+            return;
+        }
+
+        _module = module;
         await RenderAsync();
     }
 
     protected override async Task OnParametersSetAsync()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         await RenderAsync();
     }
 
     private async void OnThemeChanged()
     {
-        await RenderAsync();
-        await InvokeAsync(StateHasChanged);
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await RenderAsync();
+            if (Volatile.Read(ref _disposed) == 0)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit may disappear while the asynchronous Mica render is in flight.
+        }
     }
 
     private async Task RenderAsync()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         if (string.IsNullOrEmpty(BackgroundImageUrl) || _module is null)
         {
             _renderedImageUrl = null;
@@ -120,6 +163,7 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
             return;
         }
         _lastKey = key;
+        var generation = Interlocked.Increment(ref _renderGeneration);
 
         if (_cache.TryGetValue(key, out var cached))
         {
@@ -129,24 +173,46 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
 
         // If I didnt do, Mica doesnt get properly rendered on first load. 
         await Task.Delay(700);
-        
-        var dataUrl = await _module!.InvokeAsync<string>("renderMica", key, BackgroundImageUrl, isBase);
+
+        if (Volatile.Read(ref _disposed) != 0 || generation != Volatile.Read(ref _renderGeneration) || _module is null)
+        {
+            return;
+        }
+
+        string dataUrl;
+        try
+        {
+            dataUrl = await _module.InvokeAsync<string>("renderMica", key, BackgroundImageUrl, isBase);
+        }
+        catch (JSDisconnectedException)
+        {
+            return;
+        }
+
         _cache[key] = dataUrl;
 
         // Guard against a stale response landing after a newer request already changed things.
-        if (key == _lastKey)
+        if (Volatile.Read(ref _disposed) == 0 && generation == Volatile.Read(ref _renderGeneration) && key == _lastKey)
         {
             _renderedImageUrl = dataUrl;
-            StateHasChanged();
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        ThemeService.ThemeChanged -= OnThemeChanged;
-        if (_module is not null)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            await _module.DisposeAsync();
+            return;
         }
+
+        if (_themeHandlerSubscribed)
+        {
+            ThemeService.ThemeChanged -= OnThemeChanged;
+            _themeHandlerSubscribed = false;
+        }
+
+        Interlocked.Increment(ref _renderGeneration);
+        var module = Interlocked.Exchange(ref _module, null);
+        await JsModuleDisposal.DisposeAsync(module);
     }
 }

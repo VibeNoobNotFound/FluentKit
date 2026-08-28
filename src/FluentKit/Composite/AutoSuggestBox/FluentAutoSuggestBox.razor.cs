@@ -1,3 +1,4 @@
+using FluentKit.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -92,6 +93,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
     // open — it only needs wiring up once per mount, right after the freshly-created <ul> actually
     // lands in the DOM (OnAfterRenderAsync), same as OverlaySurface's own _positioned guard.
     private bool _heightObserved;
+    private int _disposed;
 
     private List<AutoSuggestBoxItem<TValue>> Matches
     {
@@ -112,7 +114,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_open || _heightObserved)
+        if (Volatile.Read(ref _disposed) != 0 || !_open || _heightObserved)
         {
             return;
         }
@@ -121,6 +123,11 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
                 "import", "./_content/FluentKit/Overlay/overlay-interop.js");
+            if (Volatile.Read(ref _disposed) != 0 || _module is null)
+            {
+                return;
+            }
+
             await _module.InvokeVoidAsync("observeAutoHeight", _dropdownElement);
             _heightObserved = true;
         }
@@ -158,6 +165,11 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
 
     private async Task FinishClosingAsync(int generation)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         try
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
@@ -176,7 +188,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
 
         // Only the most recent close request gets to actually unmount the list — if the user reopened
         // (or closed again) while this was waiting, that newer request already owns _closing/_open.
-        if (generation == _closeGeneration && _closing)
+        if (Volatile.Read(ref _disposed) == 0 && generation == _closeGeneration && _closing)
         {
             _closing = false;
             _heightObserved = false;
@@ -186,9 +198,39 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
 
     public async ValueTask DisposeAsync()
     {
-        if (_module is not null)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            await _module.DisposeAsync();
+            return;
+        }
+
+        _closeGeneration++;
+        _open = false;
+        _closing = false;
+
+        var module = Interlocked.Exchange(ref _module, null);
+        if (module is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (_heightObserved)
+            {
+                try
+                {
+                    await module.InvokeVoidAsync("unobserveAutoHeight", _dropdownElement).ConfigureAwait(false);
+                }
+                catch (JSDisconnectedException)
+                {
+                    // The browser-side observer is unreachable after circuit teardown.
+                }
+            }
+        }
+        finally
+        {
+            _heightObserved = false;
+            await JsModuleDisposal.DisposeAsync(module);
         }
     }
 

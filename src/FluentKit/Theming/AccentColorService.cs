@@ -1,3 +1,4 @@
+using FluentKit.Interop;
 using Microsoft.JSInterop;
 
 namespace FluentKit.Theming;
@@ -7,6 +8,7 @@ public sealed class AccentColorService : IAccentColorService, IAsyncDisposable
 {
     private readonly IJSRuntime _js;
     private IJSObjectReference? _module;
+    private int _disposed;
 
     public AccentColorService(IJSRuntime js)
     {
@@ -21,6 +23,11 @@ public sealed class AccentColorService : IAccentColorService, IAsyncDisposable
 
     public async Task InitializeAsync()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         // Only apply if nothing has set an explicit accent yet — Initialize is meant to guarantee
         // the --accent-* variables exist on first paint, not to stomp a choice made before it runs.
         if (_module is not null)
@@ -33,12 +40,14 @@ public sealed class AccentColorService : IAccentColorService, IAsyncDisposable
 
     public async Task SetAccentAsync(string hexColor)
     {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
         var color = RgbColor.Parse(hexColor); // throws FormatException on bad input — this is a direct user/dev choice, so fail loudly
         await ApplyPaletteAsync(AccentPalette.FromColor(color));
     }
 
     public async Task SetAccentFromImageAsync(string imageUrl)
     {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
         var module = await GetModuleAsync();
 
         try
@@ -59,6 +68,7 @@ public sealed class AccentColorService : IAccentColorService, IAsyncDisposable
 
     private async Task ApplyPaletteAsync(AccentPalette palette)
     {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
         var module = await GetModuleAsync();
 
         CurrentAccent = palette.Base;
@@ -71,6 +81,7 @@ public sealed class AccentColorService : IAccentColorService, IAsyncDisposable
 
     private async Task<IJSObjectReference> GetModuleAsync()
     {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
         _module ??= await _js.InvokeAsync<IJSObjectReference>(
             "import", "./_content/FluentKit/Theming/accent-interop.js");
         return _module;
@@ -78,9 +89,12 @@ public sealed class AccentColorService : IAccentColorService, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_module is not null)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            await _module.DisposeAsync();
+            return;
         }
+
+        var module = Interlocked.Exchange(ref _module, null);
+        await JsModuleDisposal.DisposeAsync(module);
     }
 }

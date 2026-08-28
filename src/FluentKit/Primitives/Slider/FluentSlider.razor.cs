@@ -1,3 +1,4 @@
+using FluentKit.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -65,6 +66,7 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
     private bool _dragging;
     private bool _hovering;
     private bool _focused;
+    private int _disposed;
 
     private bool IsVertical => Orientation == FluentSliderOrientation.Vertical;
     private string OrientationArg => IsVertical ? "vertical" : "horizontal";
@@ -175,13 +177,18 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
         }
 
         await EnsureModuleAsync();
+        var module = _module;
+        if (module is null || Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
 
-        var pct = await _module!.InvokeAsync<double>(
+        var pct = await module.InvokeAsync<double>(
             "getPercentAt", _railElement, OrientationArg, Reverse, e.ClientX, e.ClientY);
         await SetFromPercentAsync(pct);
 
         _selfReference ??= DotNetObjectReference.Create(this);
-        await _module.InvokeVoidAsync(
+        await module.InvokeVoidAsync(
             "startDrag", _sliderId, _railElement, OrientationArg, Reverse, _selfReference);
 
         _dragging = true;
@@ -190,13 +197,26 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
     [JSInvokable]
     public async Task OnDragPercent(double pct)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         await SetFromPercentAsync(pct);
-        StateHasChanged();
+        if (Volatile.Read(ref _disposed) == 0)
+        {
+            StateHasChanged();
+        }
     }
 
     [JSInvokable]
     public void OnDragEnd()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         _dragging = false;
         StateHasChanged();
     }
@@ -237,12 +257,35 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_module is not null)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            await _module.InvokeVoidAsync("stopDrag", _sliderId);
-            await _module.DisposeAsync();
+            return;
         }
 
-        _selfReference?.Dispose();
+        var module = Interlocked.Exchange(ref _module, null);
+        var selfReference = Interlocked.Exchange(ref _selfReference, null);
+
+        try
+        {
+            if (module is not null)
+            {
+                try
+                {
+                    await module.InvokeVoidAsync("stopDrag", _sliderId).ConfigureAwait(false);
+                }
+                catch (JSDisconnectedException)
+                {
+                    // The browser-side drag state is unreachable after circuit teardown.
+                }
+                finally
+                {
+                    await JsModuleDisposal.DisposeAsync(module);
+                }
+            }
+        }
+        finally
+        {
+            selfReference?.Dispose();
+        }
     }
 }

@@ -1,1 +1,2 @@
 #nullable enable
+FluentKit.Composite.FluentNavigationView.DisposeAsync() -> System.Threading.Tasks.ValueTask

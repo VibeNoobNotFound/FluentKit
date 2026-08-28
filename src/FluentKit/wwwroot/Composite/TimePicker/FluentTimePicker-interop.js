@@ -16,7 +16,7 @@
 const ITEM_HEIGHT = 40;
 const SETTLE_DEBOUNCE_MS = 120;
 
-/** @type {WeakMap<Element, { timer: number|null, dotNetRef: any, column: string }>} */
+/** @type {WeakMap<Element, { timer: number|null, dotNetRef: any, column: string, handler: Function }>} */
 const state = new WeakMap();
 
 function nearestIndex(el) {
@@ -34,6 +34,7 @@ function onScroll(el) {
 
     entry.timer = setTimeout(() => {
         entry.timer = null;
+        if (state.get(el) !== entry) return;
         const index = nearestIndex(el);
         entry.dotNetRef.invokeMethodAsync("OnColumnSettled", entry.column, index);
     }, SETTLE_DEBOUNCE_MS);
@@ -41,15 +42,36 @@ function onScroll(el) {
 
 /**
  * Attach scroll-settle tracking to a column. Safe to call multiple times per element across
- * re-opens of the flyout (each open re-creates the <ul> via @if in the .razor, so a fresh
- * listener is attached to a fresh element each time — no explicit detach needed, the old
- * element and its listener are simply garbage-collected once removed from the DOM).
+ * re-opens of the flyout; an existing listener is explicitly detached first.
  */
 export function attachColumn(el, column, dotNetRef) {
     if (!el) return;
 
-    state.set(el, { timer: null, dotNetRef, column });
-    el.addEventListener("scroll", () => onScroll(el), { passive: true });
+    detachColumn(el);
+    const entry = {
+        timer: null,
+        dotNetRef,
+        column,
+        handler: () => onScroll(el)
+    };
+    state.set(el, entry);
+    el.addEventListener("scroll", entry.handler, { passive: true });
+}
+
+/** Detaches a column listener and cancels any pending settle callback. Safe when the column was never attached. */
+export function detachColumn(el) {
+    if (!el) return;
+
+    const entry = state.get(el);
+    if (!entry) return;
+
+    if (entry.timer !== null) {
+        clearTimeout(entry.timer);
+        entry.timer = null;
+    }
+
+    el.removeEventListener("scroll", entry.handler);
+    state.delete(el);
 }
 
 /**

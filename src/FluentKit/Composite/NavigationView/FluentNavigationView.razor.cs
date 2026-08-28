@@ -1,3 +1,4 @@
+using FluentKit.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -19,7 +20,7 @@ public enum NavigationViewDisplayMode
     Expanded
 }
 
-public partial class FluentNavigationView : ComponentBase, IDisposable
+public partial class FluentNavigationView : ComponentBase, IDisposable, IAsyncDisposable
 {
     /// <summary>Sentinel <see cref="FluentNavigationViewItem.Value"/> the built-in Settings row uses,
     /// so it participates in normal single-selection like any other item (highlighted via
@@ -102,6 +103,8 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     private NavigationViewContext? _context;
     private IJSObjectReference? _module;
     private DotNetObjectReference<FluentNavigationView>? _selfReference;
+    private Action<object?>? _itemClickedHandler;
+    private int _disposed;
 
     // A selection change is recorded here (by OnContextSelectionChanged) and only actually
     // measured/animated from OnAfterRenderAsync, once Blazor has patched the DOM for whatever
@@ -133,9 +136,15 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     protected override void OnInitialized()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         _context = new NavigationViewContext(this);
         _context.SelectionChanged += OnContextSelectionChanged;
-        _context.ItemClicked += (object? sender1) => OnItemClicked(sender1);
+        _itemClickedHandler = OnItemClickedFromContext;
+        _context.ItemClicked += _itemClickedHandler;
         _activePaneDisplayMode = PaneDisplayMode;
         _lastPaneDisplayMode = PaneDisplayMode;
         base.OnInitialized();
@@ -143,6 +152,11 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         if (firstRender)
         {
             _selfReference = DotNetObjectReference.Create(this);
@@ -152,10 +166,15 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
                     "import", "./_content/FluentKit/Composite/NavigationView/navview-interop.js");
                 await _module.InvokeVoidAsync("startObservingResize", _rootElement, _selfReference);
             }
-            catch (JSException)
+            catch (JSDisconnectedException)
             {
                 // GetWidthAsync() already tolerates _module being null
                 _module = null;
+            }
+
+            if (Volatile.Read(ref _disposed) != 0)
+            {
+                return;
             }
 
             await UpdateDisplayModeAsync();
@@ -231,7 +250,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         try
         {
             await Task.Delay(delayMs, token);
-            if (token.IsCancellationRequested) return;
+            if (token.IsCancellationRequested || Volatile.Read(ref _disposed) != 0) return;
 
             _activePaneDisplayMode = targetMode;
             if (openPaneAfter)
@@ -250,6 +269,11 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     private void OnContextSelectionChanged()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         var newValue = _context?.SelectedValue;
 
         // Don't touch the DOM here: this handler can fire from a click that *also* expands or
@@ -276,12 +300,12 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
     /// remembered "target key" around could.</summary>
     private async Task UpdateIndicatorAsync(bool animate)
     {
-        if (_module is null) return;
+        if (Volatile.Read(ref _disposed) != 0 || _module is null) return;
         try
         {
             await _module.InvokeVoidAsync("updateNavIndicator", _itemsContainerElement, _indicatorElement, animate);
         }
-        catch (JSException) { }
+        catch (JSDisconnectedException) { }
     }
 
     internal void NotifyContextSelectionChanged(object? newValue)
@@ -291,6 +315,11 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     private async Task OnItemClicked(object? value)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         // Settings behaves like any other selectable item (see SettingsItemValue's own doc comment)
         // right up until the "what happens on click" step, where it fires SettingsRequested instead
         // of ItemInvoked — same split WinUI itself makes between its own SettingsInvoked and
@@ -305,6 +334,11 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             await ItemInvoked.InvokeAsync(value);
         }
 
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         // Close overlay if in compact/minimal and pane is open
         if (IsCompactOrMinimal && IsPaneOpen)
         {
@@ -314,25 +348,46 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     private async Task TogglePaneAsync()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         IsPaneOpen = !IsPaneOpen;
         await IsPaneOpenChanged.InvokeAsync(IsPaneOpen);
-        StateHasChanged();
+        if (Volatile.Read(ref _disposed) == 0)
+        {
+            StateHasChanged();
+        }
     }
 
     [JSInvokable]
     public async Task OnResize(double width)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         await UpdateDisplayModeWithWidthAsync(width);
     }
 
     private async Task UpdateDisplayModeAsync()
     {
         var width = await GetWidthAsync();
-        await UpdateDisplayModeWithWidthAsync(width);
+        if (Volatile.Read(ref _disposed) == 0)
+        {
+            await UpdateDisplayModeWithWidthAsync(width);
+        }
     }
 
     private async Task UpdateDisplayModeWithWidthAsync(double width)
     {
+        if (Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
         var paneDisplayMode = PaneDisplayMode;
 
         NavigationViewDisplayMode displayMode;
@@ -368,7 +423,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
         if (DisplayMode != displayMode)
         {
             DisplayMode = displayMode;
-            StateHasChanged();
+            if (Volatile.Read(ref _disposed) == 0)
+            {
+                StateHasChanged();
+            }
         }
 
         if (PaneDisplayMode == NavigationViewPaneDisplayMode.Auto)
@@ -412,7 +470,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
                     IsPaneOpen = targetPaneOpen;
                     await IsPaneOpenChanged.InvokeAsync(IsPaneOpen);
                 }
-                StateHasChanged();
+                if (Volatile.Read(ref _disposed) == 0)
+                {
+                    StateHasChanged();
+                }
             }
         }
         else
@@ -420,7 +481,10 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             // Auto close pane when switching to compact/minimal
             if (IsCompactOrMinimal && IsPaneOpen)
             {
-                await TogglePaneAsync();
+                if (Volatile.Read(ref _disposed) == 0)
+                {
+                    await TogglePaneAsync();
+                }
             }
         }
     }
@@ -433,7 +497,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
             {
                 return await _module.InvokeAsync<double>("getElementWidth", _rootElement);
             }
-            catch
+            catch (JSDisconnectedException)
             {
                 return 800;
             }
@@ -443,18 +507,60 @@ public partial class FluentNavigationView : ComponentBase, IDisposable
 
     private async Task OnBackClick() => await BackRequested.InvokeAsync();
 
-    public void Dispose()
+    private void OnItemClickedFromContext(object? value)
     {
-        _context?.Dispose();
-        _selfReference?.Dispose();
-        if (_module is not null)
+        _ = OnItemClicked(value);
+    }
+
+    public void Dispose() => DisposeAsync().AsTask().GetAwaiter().GetResult();
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            try
+            return;
+        }
+
+        _transitionCts?.Cancel();
+        _transitionCts?.Dispose();
+        _transitionCts = null;
+
+        var context = _context;
+        if (context is not null)
+        {
+            context.SelectionChanged -= OnContextSelectionChanged;
+            if (_itemClickedHandler is not null)
             {
-                _module.InvokeVoidAsync("stopObservingResize", _rootElement);
-                _module.DisposeAsync().AsTask().Wait();
+                context.ItemClicked -= _itemClickedHandler;
             }
-            catch { }
+
+            context.Dispose();
+        }
+
+        var module = Interlocked.Exchange(ref _module, null);
+        var selfReference = Interlocked.Exchange(ref _selfReference, null);
+
+        try
+        {
+            if (module is not null)
+            {
+                try
+                {
+                    await module.InvokeVoidAsync("stopObservingResize", _rootElement).ConfigureAwait(false);
+                }
+                catch (JSDisconnectedException)
+                {
+                    // The browser-side observer is unreachable after circuit teardown.
+                }
+                finally
+                {
+                    await JsModuleDisposal.DisposeAsync(module);
+                }
+            }
+        }
+        finally
+        {
+            selfReference?.Dispose();
         }
     }
 }

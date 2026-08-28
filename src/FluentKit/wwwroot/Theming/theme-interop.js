@@ -2,15 +2,27 @@
 // Kept deliberately tiny — this is the ONE JS file in the theming layer.
 
 let mediaQuery = null;
+let mediaQueryHandler = null;
 
 export function watchSystemPreference(dotNetRef) {
+    unwatchSystemPreference();
     mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    mediaQuery.addEventListener("change", (event) => {
+    mediaQueryHandler = (event) => {
         dotNetRef.invokeMethodAsync("OnSystemPreferenceChanged", event.matches ? "dark" : "light");
-    });
+    };
+
+    mediaQuery.addEventListener("change", mediaQueryHandler);
 
     return mediaQuery.matches ? "dark" : "light";
+}
+
+export function unwatchSystemPreference() {
+    if (mediaQuery && mediaQueryHandler) {
+        mediaQuery.removeEventListener("change", mediaQueryHandler);
+    }
+
+    mediaQuery = null;
+    mediaQueryHandler = null;
 }
 
 export function applyResolvedTheme(theme) {

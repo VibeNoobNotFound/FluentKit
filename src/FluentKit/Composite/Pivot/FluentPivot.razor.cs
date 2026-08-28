@@ -1,3 +1,4 @@
+using FluentKit.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -34,6 +35,7 @@ public partial class FluentPivot : ComponentBase, IAsyncDisposable
     private readonly PivotContext _context;
     private ElementReference _headerElement;
     private IJSObjectReference? _module;
+    private int _disposed;
 
     // Guards against re-measuring (and therefore re-rendering) every single render pass — only the
     // selected tab or the item count actually changing warrants a new measurement. Without this,
@@ -54,13 +56,21 @@ public partial class FluentPivot : ComponentBase, IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && Volatile.Read(ref _disposed) == 0)
         {
-            _module = await JS.InvokeAsync<IJSObjectReference>(
+            var module = await JS.InvokeAsync<IJSObjectReference>(
                 "import", "./_content/FluentKit/Composite/Pivot/pivot-interop.js");
+
+            if (Volatile.Read(ref _disposed) != 0)
+            {
+                await JsModuleDisposal.DisposeAsync(module);
+                return;
+            }
+
+            _module = module;
         }
 
-        if (_module is null || _context.Items.Count == 0)
+        if (Volatile.Read(ref _disposed) != 0 || _module is null || _context.Items.Count == 0)
         {
             return;
         }
@@ -124,10 +134,13 @@ public partial class FluentPivot : ComponentBase, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_module is not null)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
-            await _module.DisposeAsync();
+            return;
         }
+
+        var module = Interlocked.Exchange(ref _module, null);
+        await JsModuleDisposal.DisposeAsync(module);
     }
 
     private sealed class TabRect
