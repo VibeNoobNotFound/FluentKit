@@ -101,7 +101,7 @@ public partial class FluentNavigationView : ComponentBase, IDisposable, IAsyncDi
     private ElementReference _itemsContainerElement;
     private ElementReference _indicatorElement;
     private NavigationViewContext? _context;
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
     private DotNetObjectReference<FluentNavigationView>? _selfReference;
     private Action<object?>? _itemClickedHandler;
     private int _disposed;
@@ -114,6 +114,9 @@ public partial class FluentNavigationView : ComponentBase, IDisposable, IAsyncDi
     // indicator can never be pointed at a stale/wrong element - it always follows whatever the
     // DOM currently says is selected, not whatever we think we clicked.
     private bool _hasPendingIndicatorAnimation;
+
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Composite/NavigationView/navview-interop.js");
 
     private NavigationViewPaneDisplayMode _activePaneDisplayMode = NavigationViewPaneDisplayMode.Left;
     private NavigationViewPaneDisplayMode _lastPaneDisplayMode = NavigationViewPaneDisplayMode.Left;
@@ -160,17 +163,12 @@ public partial class FluentNavigationView : ComponentBase, IDisposable, IAsyncDi
         if (firstRender)
         {
             _selfReference = DotNetObjectReference.Create(this);
-            try
+            if (!await Interop.EnsureModuleAsync())
             {
-                _module = await JS.InvokeAsync<IJSObjectReference>(
-                    "import", "./_content/FluentKit/Composite/NavigationView/navview-interop.js");
-                await _module.InvokeVoidAsync("startObservingResize", _rootElement, _selfReference);
+                return;
             }
-            catch (JSDisconnectedException)
-            {
-                // GetWidthAsync() already tolerates _module being null
-                _module = null;
-            }
+
+            await Interop.InvokeVoidAsync("startObservingResize", _rootElement, _selfReference);
 
             if (Volatile.Read(ref _disposed) != 0)
             {
@@ -300,12 +298,12 @@ public partial class FluentNavigationView : ComponentBase, IDisposable, IAsyncDi
     /// remembered "target key" around could.</summary>
     private async Task UpdateIndicatorAsync(bool animate)
     {
-        if (Volatile.Read(ref _disposed) != 0 || _module is null) return;
-        try
+        if (Volatile.Read(ref _disposed) != 0)
         {
-            await _module.InvokeVoidAsync("updateNavIndicator", _itemsContainerElement, _indicatorElement, animate);
+            return;
         }
-        catch (JSDisconnectedException) { }
+
+        await Interop.InvokeVoidAsync("updateNavIndicator", _itemsContainerElement, _indicatorElement, animate);
     }
 
     internal void NotifyContextSelectionChanged(object? newValue)
@@ -491,15 +489,12 @@ public partial class FluentNavigationView : ComponentBase, IDisposable, IAsyncDi
 
     private async Task<double> GetWidthAsync()
     {
-        if (_module != null)
+        if (Volatile.Read(ref _disposed) == 0)
         {
-            try
+            var result = await Interop.InvokeAsync<double>("getElementWidth", _rootElement);
+            if (result.Succeeded)
             {
-                return await _module.InvokeAsync<double>("getElementWidth", _rootElement);
-            }
-            catch (JSDisconnectedException)
-            {
-                return 800;
+                return result.Value;
             }
         }
         return 800;
@@ -537,25 +532,13 @@ public partial class FluentNavigationView : ComponentBase, IDisposable, IAsyncDi
             context.Dispose();
         }
 
-        var module = Interlocked.Exchange(ref _module, null);
         var selfReference = Interlocked.Exchange(ref _selfReference, null);
 
         try
         {
-            if (module is not null)
+            if (_interop is not null)
             {
-                try
-                {
-                    await module.InvokeVoidAsync("stopObservingResize", _rootElement).ConfigureAwait(false);
-                }
-                catch (JSDisconnectedException)
-                {
-                    // The browser-side observer is unreachable after circuit teardown.
-                }
-                finally
-                {
-                    await JsModuleDisposal.DisposeAsync(module);
-                }
+                await _interop.DisposeAsync(("stopObservingResize", new object?[] { _rootElement }));
             }
         }
         finally

@@ -5,15 +5,14 @@ namespace FluentKit.Theming;
 
 public sealed class ThemeService : IThemeService, IAsyncDisposable
 {
-    private readonly IJSRuntime _js;
-    private IJSObjectReference? _module;
+    private readonly JsModuleLifetime _interop;
     private DotNetObjectReference<ThemeService>? _selfReference;
     private string _systemPreference = "dark"; // safe default before JS has responded
     private int _disposed;
 
     public ThemeService(IJSRuntime js)
     {
-        _js = js;
+        _interop = new(js, "./_content/FluentKit/Theming/theme-interop.js");
     }
 
     public ThemeMode Mode { get; private set; } = ThemeMode.System;
@@ -34,31 +33,23 @@ public sealed class ThemeService : IThemeService, IAsyncDisposable
             return;
         }
 
-        var module = await _js.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/FluentKit/Theming/theme-interop.js");
-
-        if (Volatile.Read(ref _disposed) != 0)
+        if (!await _interop.EnsureModuleAsync())
         {
-            await JsModuleDisposal.DisposeAsync(module);
             return;
         }
-
-        _module = module;
 
         _selfReference = DotNetObjectReference.Create(this);
 
         // theme-interop.js reads matchMedia('(prefers-color-scheme: dark)') once here,
         // then calls back into OnSystemPreferenceChanged whenever the OS-level setting changes live.
-        try
+        var result = await _interop.InvokeAsync<string>(
+            "watchSystemPreference", _selfReference);
+        if (!result.Succeeded)
         {
-            _systemPreference = await module.InvokeAsync<string>(
-                "watchSystemPreference", _selfReference);
-        }
-        catch (JSDisconnectedException)
-        {
-            // Initialization can overlap circuit teardown just like disposal can.
             return;
         }
+
+        _systemPreference = result.Value ?? _systemPreference;
 
         if (Volatile.Read(ref _disposed) == 0)
         {
@@ -100,26 +91,11 @@ public sealed class ThemeService : IThemeService, IAsyncDisposable
             return;
         }
 
-        var module = Interlocked.Exchange(ref _module, null);
         var selfReference = Interlocked.Exchange(ref _selfReference, null);
 
         try
         {
-            if (module is not null)
-            {
-                try
-                {
-                    await module.InvokeVoidAsync("unwatchSystemPreference").ConfigureAwait(false);
-                }
-                catch (JSDisconnectedException)
-                {
-                    // The browser-side listener is unreachable after circuit teardown.
-                }
-                finally
-                {
-                    await JsModuleDisposal.DisposeAsync(module);
-                }
-            }
+            await _interop.DisposeAsync(("unwatchSystemPreference", null));
         }
         finally
         {

@@ -14,14 +14,37 @@ internal sealed class TestJsObjectReference : IJSObjectReference
 
     public Exception? DisposeException { get; set; }
 
+    public bool BlockInvocationsUntilCanceled { get; set; }
+
+    public bool ThrowTaskCanceledExceptionWhenCanceled { get; set; }
+
     public int DisposeCount { get; private set; }
 
     public void ThrowOnInvoke(string identifier, Exception exception) => _invokeExceptions[identifier] = exception;
 
-    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args)
+    public void ClearInvokeException(string identifier) => _invokeExceptions.Remove(identifier);
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args) =>
+        InvokeAsync<TValue>(identifier, CancellationToken.None, args);
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
     {
         Calls.Add(identifier);
         Invocations.Add((identifier, args));
+
+        if (BlockInvocationsUntilCanceled && cancellationToken.CanBeCanceled)
+        {
+            var completion = new TaskCompletionSource<TValue>(TaskCreationOptions.RunContinuationsAsynchronously);
+            if (ThrowTaskCanceledExceptionWhenCanceled)
+            {
+                cancellationToken.Register(() => completion.TrySetException(new TaskCanceledException("JS call canceled")));
+            }
+            else
+            {
+                cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken));
+            }
+            return new ValueTask<TValue>(completion.Task);
+        }
 
         if (_invokeExceptions.TryGetValue(identifier, out var exception))
         {
@@ -35,9 +58,6 @@ internal sealed class TestJsObjectReference : IJSObjectReference
 
         return ValueTask.FromResult(default(TValue)!);
     }
-
-    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args) =>
-        InvokeAsync<TValue>(identifier, args);
 
     public ValueTask DisposeAsync()
     {
@@ -58,16 +78,24 @@ internal sealed class TestJsRuntime : IJSRuntime
         _module = module;
     }
 
-    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args)
+    public Exception? ImportException { get; set; }
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args) =>
+        InvokeAsync<TValue>(identifier, CancellationToken.None, args);
+
+    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
     {
         if (identifier == "import")
         {
+            if (ImportException is not null)
+            {
+                return ValueTask.FromException<TValue>(ImportException);
+            }
+
             return ValueTask.FromResult((TValue)(object)_module);
         }
 
         return ValueTask.FromResult(default(TValue)!);
     }
 
-    public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args) =>
-        InvokeAsync<TValue>(identifier, args);
 }

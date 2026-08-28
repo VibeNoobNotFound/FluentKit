@@ -85,7 +85,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
     private int _closeGeneration;
     private List<AutoSuggestBoxItem<TValue>> _lastMatches = [];
     private ElementReference _dropdownElement;
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
 
     private List<AutoSuggestBoxItem<TValue>> DisplayMatches => _open ? Matches : _lastMatches;
 
@@ -94,6 +94,9 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
     // lands in the DOM (OnAfterRenderAsync), same as OverlaySurface's own _positioned guard.
     private bool _heightObserved;
     private int _disposed;
+
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Overlay/overlay-interop.js");
 
     private List<AutoSuggestBoxItem<TValue>> Matches
     {
@@ -119,23 +122,14 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
             return;
         }
 
-        try
+        if (!await Interop.EnsureModuleAsync())
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/FluentKit/Overlay/overlay-interop.js");
-            if (Volatile.Read(ref _disposed) != 0 || _module is null)
-            {
-                return;
-            }
+            return;
+        }
 
-            await _module.InvokeVoidAsync("observeAutoHeight", _dropdownElement);
+        if (await Interop.InvokeVoidAsync("observeAutoHeight", _dropdownElement))
+        {
             _heightObserved = true;
-        }
-        catch (JSDisconnectedException)
-        {
-        }
-        catch (ObjectDisposedException)
-        {
         }
     }
 
@@ -160,7 +154,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
         _open = false;
         _closing = true;
         var generation = ++_closeGeneration;
-        _ = FinishClosingAsync(generation);
+        ObserveBackgroundTask(FinishClosingAsync(generation));
     }
 
     private async Task FinishClosingAsync(int generation)
@@ -170,21 +164,13 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
             return;
         }
 
-        try
-        {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/FluentKit/Overlay/overlay-interop.js");
-            await _module.InvokeVoidAsync("waitForExitAnimation", _dropdownElement);
-            await _module.InvokeVoidAsync("unobserveAutoHeight", _dropdownElement);
-        }
-        catch (JSDisconnectedException)
+        if (!await Interop.EnsureModuleAsync())
         {
             return;
         }
-        catch (ObjectDisposedException)
-        {
-            return;
-        }
+
+        await Interop.InvokeVoidAsync("waitForExitAnimation", _dropdownElement);
+        await Interop.InvokeVoidAsync("unobserveAutoHeight", _dropdownElement);
 
         // Only the most recent close request gets to actually unmount the list — if the user reopened
         // (or closed again) while this was waiting, that newer request already owns _closing/_open.
@@ -194,6 +180,26 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
             _heightObserved = false;
             StateHasChanged();
         }
+    }
+
+    private void ObserveBackgroundTask(Task task)
+    {
+        _ = task.ContinueWith(
+            static (completed, state) =>
+            {
+                var component = (FluentAutoSuggestBox<TValue>)state!;
+                var exception = completed.Exception?.GetBaseException();
+                if (exception is not null &&
+                    exception is not JSDisconnectedException &&
+                    (exception is not OperationCanceledException || Volatile.Read(ref component._disposed) == 0))
+                {
+                    _ = component.DispatchExceptionAsync(exception);
+                }
+            },
+            this,
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     public async ValueTask DisposeAsync()
@@ -207,31 +213,21 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
         _open = false;
         _closing = false;
 
-        var module = Interlocked.Exchange(ref _module, null);
-        if (module is null)
+        if (_interop is null)
         {
             return;
         }
 
-        try
+        if (_heightObserved)
         {
-            if (_heightObserved)
-            {
-                try
-                {
-                    await module.InvokeVoidAsync("unobserveAutoHeight", _dropdownElement).ConfigureAwait(false);
-                }
-                catch (JSDisconnectedException)
-                {
-                    // The browser-side observer is unreachable after circuit teardown.
-                }
-            }
+            await _interop.DisposeAsync(("unobserveAutoHeight", new object?[] { _dropdownElement }));
         }
-        finally
+        else
         {
-            _heightObserved = false;
-            await JsModuleDisposal.DisposeAsync(module);
+            await _interop.DisposeAsync();
         }
+
+        _heightObserved = false;
     }
 
     private async Task OnTextChangedAsync(string? text)

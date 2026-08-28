@@ -77,12 +77,16 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
     // instead of each paying the render cost separately.
     private static readonly Dictionary<string, string> _cache = new();
 
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
     private string? _renderedImageUrl;
     private string? _lastKey;
+    private string? _pendingKey;
     private int _disposed;
     private int _renderGeneration;
     private bool _themeHandlerSubscribed;
+
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Effects/mica-interop.js");
 
     private string VariantClass => Variant == MicaVariant.BaseAlt ? "fluent-mica--alt" : "fluent-mica--base";
 
@@ -95,16 +99,11 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
 
         ThemeService.ThemeChanged += OnThemeChanged;
         _themeHandlerSubscribed = true;
-        var module = await JS.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/FluentKit/Effects/mica-interop.js");
-
-        if (Volatile.Read(ref _disposed) != 0)
+        if (!await Interop.EnsureModuleAsync())
         {
-            await JsModuleDisposal.DisposeAsync(module);
             return;
         }
 
-        _module = module;
         await RenderAsync();
     }
 
@@ -118,7 +117,9 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
         await RenderAsync();
     }
 
-    private async void OnThemeChanged()
+    private void OnThemeChanged() => ObserveBackgroundTask(OnThemeChangedAsync());
+
+    private async Task OnThemeChangedAsync()
     {
         if (Volatile.Read(ref _disposed) != 0)
         {
@@ -137,6 +138,30 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
         {
             // The circuit may disappear while the asynchronous Mica render is in flight.
         }
+        catch (OperationCanceledException) when (Volatile.Read(ref _disposed) != 0)
+        {
+            // Component-owned cancellation is expected during circuit teardown.
+        }
+    }
+
+    private void ObserveBackgroundTask(Task task)
+    {
+        _ = task.ContinueWith(
+            static (completed, state) =>
+            {
+                var component = (FluentMicaPanel)state!;
+                var exception = completed.Exception?.GetBaseException();
+                if (exception is not null &&
+                    exception is not JSDisconnectedException &&
+                    (exception is not OperationCanceledException || Volatile.Read(ref component._disposed) == 0))
+                {
+                    _ = component.DispatchExceptionAsync(exception);
+                }
+            },
+            this,
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     private async Task RenderAsync()
@@ -146,10 +171,25 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
             return;
         }
 
-        if (string.IsNullOrEmpty(BackgroundImageUrl) || _module is null)
+        if (string.IsNullOrEmpty(BackgroundImageUrl))
         {
+            Interlocked.Increment(ref _renderGeneration);
+            _pendingKey = null;
             _renderedImageUrl = null;
             _lastKey = null;
+            return;
+        }
+
+        if (!await Interop.EnsureModuleAsync())
+        {
+            if (Volatile.Read(ref _disposed) == 0)
+            {
+                Interlocked.Increment(ref _renderGeneration);
+                _pendingKey = null;
+                _renderedImageUrl = null;
+                _lastKey = null;
+            }
+
             return;
         }
 
@@ -162,39 +202,57 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
         {
             return;
         }
-        _lastKey = key;
+        if (key == _pendingKey)
+        {
+            return;
+        }
+
+        _pendingKey = key;
         var generation = Interlocked.Increment(ref _renderGeneration);
 
         if (_cache.TryGetValue(key, out var cached))
         {
             _renderedImageUrl = cached;
+            _lastKey = key;
+            _pendingKey = null;
             return;
         }
 
-        // If I didnt do, Mica doesnt get properly rendered on first load. 
-        await Task.Delay(700);
-
-        if (Volatile.Read(ref _disposed) != 0 || generation != Volatile.Read(ref _renderGeneration) || _module is null)
-        {
-            return;
-        }
-
-        string dataUrl;
+        // If I didnt do, Mica doesnt get properly rendered on first load.
         try
         {
-            dataUrl = await _module.InvokeAsync<string>("renderMica", key, BackgroundImageUrl, isBase);
-        }
-        catch (JSDisconnectedException)
-        {
-            return;
-        }
+            await Task.Delay(700, Interop.DisposalToken);
 
-        _cache[key] = dataUrl;
+            if (Volatile.Read(ref _disposed) != 0 || generation != Volatile.Read(ref _renderGeneration))
+            {
+                return;
+            }
 
-        // Guard against a stale response landing after a newer request already changed things.
-        if (Volatile.Read(ref _disposed) == 0 && generation == Volatile.Read(ref _renderGeneration) && key == _lastKey)
+            var result = await Interop.InvokeAsync<string>("renderMica", key, BackgroundImageUrl, isBase);
+            if (!result.Succeeded || string.IsNullOrEmpty(result.Value))
+            {
+                return;
+            }
+
+            _cache[key] = result.Value;
+
+            // Guard against a stale response landing after a newer request already changed things.
+            if (Volatile.Read(ref _disposed) == 0 && generation == Volatile.Read(ref _renderGeneration))
+            {
+                _lastKey = key;
+                _renderedImageUrl = result.Value;
+            }
+        }
+        catch (OperationCanceledException) when (Volatile.Read(ref _disposed) != 0)
         {
-            _renderedImageUrl = dataUrl;
+            // The delayed render or JS call was canceled by component disposal.
+        }
+        finally
+        {
+            if (key == _pendingKey)
+            {
+                _pendingKey = null;
+            }
         }
     }
 
@@ -212,7 +270,9 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
         }
 
         Interlocked.Increment(ref _renderGeneration);
-        var module = Interlocked.Exchange(ref _module, null);
-        await JsModuleDisposal.DisposeAsync(module);
+        if (_interop is not null)
+        {
+            await _interop.DisposeAsync();
+        }
     }
 }

@@ -12,7 +12,7 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
     [Parameter, EditorRequired] public OverlayEntry Entry { get; set; } = default!;
 
     private ElementReference _surfaceElement;
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
     private DotNetObjectReference<OverlaySurface>? _selfReference;
     private bool _needsPositioning = true;
     private bool _needsDismissRegistrationUpdate;
@@ -23,6 +23,9 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
     // so without this OnParametersSet would kick off a redundant wait-and-CompleteClose on every
     // one of those re-renders instead of just the first.
     private bool _closingHandled;
+
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Overlay/overlay-interop.js");
 
     protected override void OnParametersSet()
     {
@@ -46,7 +49,7 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             // "fluent-overlay-surface--closing" class actually lands in the DOM (that's what starts
             // the CSS exit animation in the first place) before HandleClosingAsync goes looking for
             // its animationend event.
-            _ = HandleClosingAsync();
+            ObserveBackgroundTask(HandleClosingAsync());
         }
     }
 
@@ -57,20 +60,12 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             return;
         }
 
-        try
+        if (!await Interop.EnsureModuleAsync())
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/FluentKit/Overlay/overlay-interop.js");
-            await _module.InvokeVoidAsync("waitForExitAnimation", _surfaceElement);
-        }
-        catch (JSDisconnectedException)
-        {
-            // Circuit already gone — nothing left to animate or clean up on the client, and
-            // OverlayService's own state doesn't need CompleteClose to keep it consistent once the
-            // whole circuit is torn down.
             return;
         }
-        catch (ObjectDisposedException)
+
+        if (!await Interop.InvokeVoidAsync("waitForExitAnimation", _surfaceElement))
         {
             return;
         }
@@ -90,8 +85,10 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             return;
         }
 
-        _module ??= await JS.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/FluentKit/Overlay/overlay-interop.js");
+        if (!await Interop.EnsureModuleAsync())
+        {
+            return;
+        }
 
         if (_needsDismissRegistrationUpdate)
         {
@@ -124,12 +121,21 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             // Must finish (and its two-rAF settle) before computePosition measures the anchor below,
             // or the position math would read a mid-scroll rect and place the popup somewhere that's
             // about to scroll away from it.
-            await _module.InvokeVoidAsync("scrollIntoViewIfNeeded", Entry.Anchor);
+            if (!await Interop.InvokeVoidAsync("scrollIntoViewIfNeeded", Entry.Anchor))
+            {
+                return;
+            }
         }
 
         var placementArg = Entry.PreferredPlacement.ToString().ToLowerInvariant();
-        var position = await _module.InvokeAsync<OverlayPosition>(
+        var positionResult = await Interop.InvokeAsync<OverlayPosition>(
             "computePosition", Entry.Anchor, _surfaceElement, placementArg, Entry.MatchAnchorWidth);
+        if (!positionResult.Succeeded || positionResult.Value is null)
+        {
+            return;
+        }
+
+        var position = positionResult.Value;
 
         var widthStyle = position.Width is { } width ? $"width: {width}px; " : "";
         Entry.ComputedStyle =
@@ -145,7 +151,11 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
     private async Task SyncDismissRegistrationAsync()
     {
-        await _module!.InvokeVoidAsync("unregisterLightDismiss", Entry.Id.ToString());
+        if (!await Interop.InvokeVoidAsync("unregisterLightDismiss", Entry.Id.ToString()))
+        {
+            return;
+        }
+
         _selfReference?.Dispose();
         _selfReference = null;
         await RegisterDismissHandlersAsync();
@@ -162,19 +172,19 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
         {
             if (Entry.IsDetached)
             {
-                await _module!.InvokeVoidAsync(
+                await Interop.InvokeVoidAsync(
                     "registerLightDismissDetached", Entry.Id.ToString(), _surfaceElement, _selfReference);
             }
             else
             {
-                await _module!.InvokeVoidAsync(
+                await Interop.InvokeVoidAsync(
                     "registerLightDismiss", Entry.Id.ToString(), _surfaceElement, Entry.Anchor, _selfReference);
             }
         }
 
         if (Entry.WatchAnchorRemoved)
         {
-            await _module!.InvokeVoidAsync(
+            await Interop.InvokeVoidAsync(
                 "watchAnchorRemoved", Entry.Id.ToString(), Entry.Anchor, _selfReference);
         }
     }
@@ -207,24 +217,19 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             return;
         }
 
-        var module = Interlocked.Exchange(ref _module, null);
         var selfReference = Interlocked.Exchange(ref _selfReference, null);
 
         try
         {
-            if (module is not null)
+            if (_interop is not null)
             {
-                try
+                if (Entry.Id != Guid.Empty)
                 {
-                    await module.InvokeVoidAsync("unregisterLightDismiss", Entry.Id.ToString()).ConfigureAwait(false);
+                    await _interop.DisposeAsync(("unregisterLightDismiss", new object?[] { Entry.Id.ToString() }));
                 }
-                catch (JSDisconnectedException)
+                else
                 {
-                    // The browser-side registration is unreachable after circuit teardown.
-                }
-                finally
-                {
-                    await JsModuleDisposal.DisposeAsync(module);
+                    await _interop.DisposeAsync();
                 }
             }
         }
@@ -232,6 +237,26 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
         {
             selfReference?.Dispose();
         }
+    }
+
+    private void ObserveBackgroundTask(Task task)
+    {
+        _ = task.ContinueWith(
+            static (completed, state) =>
+            {
+                var component = (OverlaySurface)state!;
+                var exception = completed.Exception?.GetBaseException();
+                if (exception is not null &&
+                    exception is not JSDisconnectedException &&
+                    (exception is not OperationCanceledException || Volatile.Read(ref component._disposed) == 0))
+                {
+                    _ = component.DispatchExceptionAsync(exception);
+                }
+            },
+            this,
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     private sealed class OverlayPosition

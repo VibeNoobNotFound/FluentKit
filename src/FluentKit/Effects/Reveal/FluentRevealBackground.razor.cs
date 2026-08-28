@@ -28,24 +28,22 @@ public partial class FluentRevealBackground : ComponentBase, IAsyncDisposable
 
     private readonly string _id = Guid.NewGuid().ToString("N");
     private ElementReference _element;
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
     private int _disposed;
+
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Effects/Reveal/reveal-interop.js");
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && Volatile.Read(ref _disposed) == 0)
         {
-            var module = await JS.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/FluentKit/Effects/Reveal/reveal-interop.js");
-
-            if (Volatile.Read(ref _disposed) != 0)
+            if (!await Interop.EnsureModuleAsync())
             {
-                await JsModuleDisposal.DisposeAsync(module);
                 return;
             }
 
-            _module = module;
-            await module.InvokeVoidAsync("startTracking", _id, _element);
+            await Interop.InvokeVoidAsync("startTracking", _id, _element);
         }
     }
 
@@ -56,26 +54,11 @@ public partial class FluentRevealBackground : ComponentBase, IAsyncDisposable
             return;
         }
 
-        var module = Interlocked.Exchange(ref _module, null);
-        if (module is null)
+        if (_interop is null)
         {
             return;
         }
 
-        try
-        {
-            try
-            {
-                await module.InvokeVoidAsync("stopTracking", _id).ConfigureAwait(false);
-            }
-            catch (JSDisconnectedException)
-            {
-                // The browser-side tracking state is unreachable after circuit teardown.
-            }
-        }
-        finally
-        {
-            await JsModuleDisposal.DisposeAsync(module);
-        }
+        await _interop.DisposeAsync(("stopTracking", new object?[] { _id }));
     }
 }

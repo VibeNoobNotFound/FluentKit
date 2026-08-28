@@ -11,10 +11,13 @@ public partial class ThemeProvider : ComponentBase, IAsyncDisposable
 
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
     private string? _lastAppliedTheme;
     private int _disposed;
     private bool _themeHandlerSubscribed;
+
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Theming/theme-interop.js");
 
     protected override async Task OnInitializedAsync()
     {
@@ -26,16 +29,10 @@ public partial class ThemeProvider : ComponentBase, IAsyncDisposable
         ThemeService.ThemeChanged += OnThemeChanged;
         _themeHandlerSubscribed = true;
 
-        var module = await JS.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/FluentKit/Theming/theme-interop.js");
-
-        if (Volatile.Read(ref _disposed) != 0)
+        if (!await Interop.EnsureModuleAsync())
         {
-            await JsModuleDisposal.DisposeAsync(module);
             return;
         }
-
-        _module = module;
 
         // Reads prefers-color-scheme and sets up a live listener for OS-level changes.
         await ThemeService.InitializeAsync();
@@ -46,7 +43,9 @@ public partial class ThemeProvider : ComponentBase, IAsyncDisposable
         }
     }
 
-    private async void OnThemeChanged()
+    private void OnThemeChanged() => ObserveBackgroundTask(OnThemeChangedAsync());
+
+    private async Task OnThemeChangedAsync()
     {
         if (Volatile.Read(ref _disposed) != 0)
         {
@@ -65,24 +64,43 @@ public partial class ThemeProvider : ComponentBase, IAsyncDisposable
         {
             // The circuit may disappear while the asynchronous theme update is in flight.
         }
+        catch (OperationCanceledException) when (Volatile.Read(ref _disposed) != 0)
+        {
+            // Component-owned cancellation is expected during circuit teardown.
+        }
+    }
+
+    private void ObserveBackgroundTask(Task task)
+    {
+        _ = task.ContinueWith(
+            static (completed, state) =>
+            {
+                var component = (ThemeProvider)state!;
+                var exception = completed.Exception?.GetBaseException();
+                if (exception is not null &&
+                    exception is not JSDisconnectedException &&
+                    (exception is not OperationCanceledException || Volatile.Read(ref component._disposed) == 0))
+                {
+                    _ = component.DispatchExceptionAsync(exception);
+                }
+            },
+            this,
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     private async Task ApplyThemeAsync()
     {
         var resolved = ThemeService.ResolvedTheme;
-        if (Volatile.Read(ref _disposed) != 0 || resolved == _lastAppliedTheme || _module is null)
+        if (Volatile.Read(ref _disposed) != 0 || resolved == _lastAppliedTheme)
         {
             return;
         }
 
-        _lastAppliedTheme = resolved;
-        try
+        if (await Interop.InvokeVoidAsync("applyResolvedTheme", resolved))
         {
-            await _module.InvokeVoidAsync("applyResolvedTheme", resolved);
-        }
-        catch (JSDisconnectedException)
-        {
-            // The circuit may disappear while applying the theme.
+            _lastAppliedTheme = resolved;
         }
     }
 
@@ -99,7 +117,9 @@ public partial class ThemeProvider : ComponentBase, IAsyncDisposable
             _themeHandlerSubscribed = false;
         }
 
-        var module = Interlocked.Exchange(ref _module, null);
-        await JsModuleDisposal.DisposeAsync(module);
+        if (_interop is not null)
+        {
+            await _interop.DisposeAsync();
+        }
     }
 }

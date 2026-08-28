@@ -65,10 +65,13 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
     private ElementReference _hourColumnRef;
     private ElementReference _minuteColumnRef;
     private ElementReference _periodColumnRef;
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
     private DotNetObjectReference<FluentTimePicker>? _selfReference;
     private bool _listenersAttached;
     private int _disposed;
+
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Composite/TimePicker/FluentTimePicker-interop.js");
 
     private bool _open;
     private bool _closing;
@@ -221,23 +224,29 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
     {
         _stagedHour = hour;
         var index = Is24Hour ? hour : HourValues.ToList().IndexOf(hour);
-        await EnsureModuleAsync();
-        await _module!.InvokeVoidAsync("scrollToIndex", _hourColumnRef, index, true);
+        if (await EnsureModuleAsync())
+        {
+            await Interop.InvokeVoidAsync("scrollToIndex", _hourColumnRef, index, true);
+        }
     }
 
     private async Task OnMinuteItemClickedAsync(int minute)
     {
         _stagedMinute = minute;
         var index = MinuteValues.ToList().IndexOf(minute);
-        await EnsureModuleAsync();
-        await _module!.InvokeVoidAsync("scrollToIndex", _minuteColumnRef, index, true);
+        if (await EnsureModuleAsync())
+        {
+            await Interop.InvokeVoidAsync("scrollToIndex", _minuteColumnRef, index, true);
+        }
     }
 
     private async Task OnPeriodItemClickedAsync(bool isPm)
     {
         _stagedIsPm = isPm;
-        await EnsureModuleAsync();
-        await _module!.InvokeVoidAsync("scrollToIndex", _periodColumnRef, isPm ? 1 : 0, true);
+        if (await EnsureModuleAsync())
+        {
+            await Interop.InvokeVoidAsync("scrollToIndex", _periodColumnRef, isPm ? 1 : 0, true);
+        }
     }
 
     private static int ToTwelveHour(int hour24)
@@ -261,17 +270,14 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
 
     // ----- Scroll-driven selection (JS interop) -----
 
-    private async Task EnsureModuleAsync()
+    private ValueTask<bool> EnsureModuleAsync()
     {
-        _module ??= await JS.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/FluentKit/Composite/TimePicker/FluentTimePicker-interop.js");
+        return Interop.EnsureModuleAsync();
     }
 
     private async Task ScrollColumnsToStagedAsync()
     {
-        await EnsureModuleAsync();
-        var module = _module;
-        if (module is null || Volatile.Read(ref _disposed) != 0)
+        if (!await EnsureModuleAsync() || Volatile.Read(ref _disposed) != 0)
         {
             return;
         }
@@ -280,11 +286,18 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
 
         if (!_listenersAttached)
         {
-            await module.InvokeVoidAsync("attachColumn", _hourColumnRef, "hour", _selfReference);
-            await module.InvokeVoidAsync("attachColumn", _minuteColumnRef, "minute", _selfReference);
+            if (!await Interop.InvokeVoidAsync("attachColumn", _hourColumnRef, "hour", _selfReference) ||
+                !await Interop.InvokeVoidAsync("attachColumn", _minuteColumnRef, "minute", _selfReference))
+            {
+                return;
+            }
+
             if (!Is24Hour)
             {
-                await module.InvokeVoidAsync("attachColumn", _periodColumnRef, "period", _selfReference);
+                if (!await Interop.InvokeVoidAsync("attachColumn", _periodColumnRef, "period", _selfReference))
+                {
+                    return;
+                }
             }
 
             _listenersAttached = true;
@@ -293,12 +306,15 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
         var hourIndex = Is24Hour ? _stagedHour : HourValues.ToList().IndexOf(_stagedHour);
         var minuteIndex = MinuteValues.ToList().IndexOf(_stagedMinute);
 
-        await module.InvokeVoidAsync("scrollToIndex", _hourColumnRef, hourIndex);
-        await module.InvokeVoidAsync("scrollToIndex", _minuteColumnRef, minuteIndex);
+        if (!await Interop.InvokeVoidAsync("scrollToIndex", _hourColumnRef, hourIndex) ||
+            !await Interop.InvokeVoidAsync("scrollToIndex", _minuteColumnRef, minuteIndex))
+        {
+            return;
+        }
 
         if (!Is24Hour)
         {
-            await module.InvokeVoidAsync("scrollToIndex", _periodColumnRef, _stagedIsPm ? 1 : 0);
+            await Interop.InvokeVoidAsync("scrollToIndex", _periodColumnRef, _stagedIsPm ? 1 : 0);
         }
     }
 
@@ -359,29 +375,22 @@ public partial class FluentTimePicker : ComponentBase, IAsyncDisposable
         _open = false;
         _closing = false;
 
-        var module = Interlocked.Exchange(ref _module, null);
         var selfReference = Interlocked.Exchange(ref _selfReference, null);
 
         try
         {
-            if (module is not null)
+            if (_interop is not null)
             {
-                try
+                if (_listenersAttached)
                 {
-                    if (_listenersAttached)
-                    {
-                        await module.InvokeVoidAsync("detachColumn", _hourColumnRef).ConfigureAwait(false);
-                        await module.InvokeVoidAsync("detachColumn", _minuteColumnRef).ConfigureAwait(false);
-                        await module.InvokeVoidAsync("detachColumn", _periodColumnRef).ConfigureAwait(false);
-                    }
+                    await _interop.DisposeAsync(
+                        ("detachColumn", new object?[] { _hourColumnRef }),
+                        ("detachColumn", new object?[] { _minuteColumnRef }),
+                        ("detachColumn", new object?[] { _periodColumnRef }));
                 }
-                catch (JSDisconnectedException)
+                else
                 {
-                    // The browser-side listeners are unreachable after circuit teardown.
-                }
-                finally
-                {
-                    await JsModuleDisposal.DisposeAsync(module);
+                    await _interop.DisposeAsync();
                 }
             }
         }

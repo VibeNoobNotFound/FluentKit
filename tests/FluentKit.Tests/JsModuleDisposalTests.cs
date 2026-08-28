@@ -39,9 +39,26 @@ public sealed class JsModuleDisposalTests
         foreach (var owner in CreateComponentOwners())
         {
             var module = new TestJsObjectReference { DisposeException = new JSDisconnectedException("circuit disconnected") };
-            SetPrivateField(owner, "_module", module);
+            SetModule(owner, module);
 
             await owner.DisposeAsync();
+            await owner.DisposeAsync();
+
+            Assert.Equal(1, module.DisposeCount);
+        }
+    }
+
+    [Fact]
+    public async Task EveryComponentModuleOwnerIgnoresTeardownCancellationOnDisposal()
+    {
+        foreach (var owner in CreateComponentOwners())
+        {
+            var module = new TestJsObjectReference
+            {
+                DisposeException = new TaskCanceledException("circuit teardown")
+            };
+            SetModule(owner, module);
+
             await owner.DisposeAsync();
 
             Assert.Equal(1, module.DisposeCount);
@@ -53,7 +70,7 @@ public sealed class JsModuleDisposalTests
     {
         var module = new TestJsObjectReference();
         var reveal = new FluentRevealBackground();
-        SetPrivateField(reveal, "_module", module);
+        SetModule(reveal, module);
 
         await reveal.DisposeAsync();
 
@@ -69,34 +86,34 @@ public sealed class JsModuleDisposalTests
             Entry = new OverlayEntry { Content = _ => { } }
         };
         var overlayModule = new TestJsObjectReference();
-        SetPrivateField(overlay, "_module", overlayModule);
+        SetModule(overlay, overlayModule);
         SetPrivateField(overlay, "_selfReference", DotNetObjectReference.Create(overlay));
         await overlay.DisposeAsync();
         AssertBeforeDispose(overlayModule, "unregisterLightDismiss");
 
         var autoSuggest = new FluentAutoSuggestBox<string>();
         var autoSuggestModule = new TestJsObjectReference();
-        SetPrivateField(autoSuggest, "_module", autoSuggestModule);
+        SetModule(autoSuggest, autoSuggestModule);
         SetPrivateField(autoSuggest, "_heightObserved", true);
         await autoSuggest.DisposeAsync();
         AssertBeforeDispose(autoSuggestModule, "unobserveAutoHeight");
 
         var timePicker = new FluentTimePicker();
         var timePickerModule = new TestJsObjectReference();
-        SetPrivateField(timePicker, "_module", timePickerModule);
+        SetModule(timePicker, timePickerModule);
         SetPrivateField(timePicker, "_listenersAttached", true);
         await timePicker.DisposeAsync();
         AssertBeforeDispose(timePickerModule, "detachColumn");
 
         var slider = new FluentSlider();
         var sliderModule = new TestJsObjectReference();
-        SetPrivateField(slider, "_module", sliderModule);
+        SetModule(slider, sliderModule);
         await slider.DisposeAsync();
         AssertBeforeDispose(sliderModule, "stopDrag");
 
         var navigationView = new FluentNavigationView();
         var navigationModule = new TestJsObjectReference();
-        SetPrivateField(navigationView, "_module", navigationModule);
+        SetModule(navigationView, navigationModule);
         await navigationView.DisposeAsync();
         AssertBeforeDispose(navigationModule, "stopObservingResize");
     }
@@ -108,7 +125,7 @@ public sealed class JsModuleDisposalTests
         var module = new TestJsObjectReference();
         module.ThrowOnInvoke("stopTracking", expected);
         var reveal = new FluentRevealBackground();
-        SetPrivateField(reveal, "_module", module);
+        SetModule(reveal, module);
 
         var actual = await Assert.ThrowsAsync<InvalidOperationException>(
             () => reveal.DisposeAsync().AsTask());
@@ -148,7 +165,7 @@ public sealed class JsModuleDisposalTests
         var overlayReference = DotNetObjectReference.Create(overlay);
         var overlayModule = new TestJsObjectReference();
         SetPrivateField(overlay, "_selfReference", overlayReference);
-        SetPrivateField(overlay, "_module", overlayModule);
+        SetModule(overlay, overlayModule);
         await overlay.DisposeAsync();
         AssertDisposed(overlayReference);
 
@@ -156,7 +173,7 @@ public sealed class JsModuleDisposalTests
         var sliderReference = DotNetObjectReference.Create(slider);
         var sliderModule = new TestJsObjectReference();
         SetPrivateField(slider, "_selfReference", sliderReference);
-        SetPrivateField(slider, "_module", sliderModule);
+        SetModule(slider, sliderModule);
         await slider.DisposeAsync();
         AssertDisposed(sliderReference);
 
@@ -164,7 +181,7 @@ public sealed class JsModuleDisposalTests
         var timeReference = DotNetObjectReference.Create(timePicker);
         var timeModule = new TestJsObjectReference();
         SetPrivateField(timePicker, "_selfReference", timeReference);
-        SetPrivateField(timePicker, "_module", timeModule);
+        SetModule(timePicker, timeModule);
         await timePicker.DisposeAsync();
         AssertDisposed(timeReference);
 
@@ -172,7 +189,7 @@ public sealed class JsModuleDisposalTests
         var navigationReference = DotNetObjectReference.Create(navigationView);
         var navigationModule = new TestJsObjectReference();
         SetPrivateField(navigationView, "_selfReference", navigationReference);
-        SetPrivateField(navigationView, "_module", navigationModule);
+        SetModule(navigationView, navigationModule);
         await navigationView.DisposeAsync();
         AssertDisposed(navigationReference);
     }
@@ -185,6 +202,7 @@ public sealed class JsModuleDisposalTests
     private static IEnumerable<IAsyncDisposable> CreateComponentOwners()
     {
         yield return new ThemeProvider();
+        yield return new ThemeService(new TestJsRuntime(new TestJsObjectReference()));
         yield return new AccentColorService(new TestJsRuntime(new TestJsObjectReference()));
         yield return new FluentMicaPanel();
         yield return new FluentRevealBackground();
@@ -206,6 +224,25 @@ public sealed class JsModuleDisposalTests
         var field = instance.GetType().GetField(fieldName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
         Assert.NotNull(field);
         field!.SetValue(instance, value);
+    }
+
+    private static void SetModule(object instance, TestJsObjectReference module)
+    {
+        var field = instance.GetType().GetField("_interop", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        Assert.NotNull(field);
+
+        var lifetime = field!.GetValue(instance) as JsModuleLifetime;
+        if (lifetime is null)
+        {
+            lifetime = new JsModuleLifetime(new TestJsRuntime(module), "./test-module.js");
+            lifetime.Module = module;
+            field.SetValue(instance, lifetime);
+        }
+        else
+        {
+            lifetime.Module = module;
+        }
+        Assert.True(ReferenceEquals(module, lifetime.Module), instance.GetType().FullName);
     }
 
     private static void AssertBeforeDispose(TestJsObjectReference module, string cleanupIdentifier)

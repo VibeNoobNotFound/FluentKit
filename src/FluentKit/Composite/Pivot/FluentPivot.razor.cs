@@ -34,7 +34,7 @@ public partial class FluentPivot : ComponentBase, IAsyncDisposable
 
     private readonly PivotContext _context;
     private ElementReference _headerElement;
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
     private int _disposed;
 
     // Guards against re-measuring (and therefore re-rendering) every single render pass — only the
@@ -49,6 +49,9 @@ public partial class FluentPivot : ComponentBase, IAsyncDisposable
     private double _indicatorWidth;
     private bool _hasIndicator;
 
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Composite/Pivot/pivot-interop.js");
+
     public FluentPivot()
     {
         _context = new PivotContext(() => InvokeAsync(StateHasChanged));
@@ -58,19 +61,13 @@ public partial class FluentPivot : ComponentBase, IAsyncDisposable
     {
         if (firstRender && Volatile.Read(ref _disposed) == 0)
         {
-            var module = await JS.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/FluentKit/Composite/Pivot/pivot-interop.js");
-
-            if (Volatile.Read(ref _disposed) != 0)
+            if (!await Interop.EnsureModuleAsync())
             {
-                await JsModuleDisposal.DisposeAsync(module);
                 return;
             }
-
-            _module = module;
         }
 
-        if (Volatile.Read(ref _disposed) != 0 || _module is null || _context.Items.Count == 0)
+        if (Volatile.Read(ref _disposed) != 0 || _interop is null || _context.Items.Count == 0)
         {
             return;
         }
@@ -80,15 +77,20 @@ public partial class FluentPivot : ComponentBase, IAsyncDisposable
             return;
         }
 
-        _measuredIndex = SelectedIndex;
-        _measuredCount = _context.Items.Count;
-
         if (SelectedIndex < 0 || SelectedIndex >= _context.Items.Count)
         {
             return;
         }
 
-        var rect = await _module.InvokeAsync<TabRect?>("measureTab", _headerElement, SelectedIndex);
+        var result = await Interop.InvokeAsync<TabRect?>("measureTab", _headerElement, SelectedIndex);
+        if (!result.Succeeded)
+        {
+            return;
+        }
+
+        _measuredIndex = SelectedIndex;
+        _measuredCount = _context.Items.Count;
+        var rect = result.Value;
         if (rect is not null)
         {
             _indicatorLeft = rect.Left;
@@ -139,8 +141,10 @@ public partial class FluentPivot : ComponentBase, IAsyncDisposable
             return;
         }
 
-        var module = Interlocked.Exchange(ref _module, null);
-        await JsModuleDisposal.DisposeAsync(module);
+        if (_interop is not null)
+        {
+            await _interop.DisposeAsync();
+        }
     }
 
     private sealed class TabRect

@@ -61,12 +61,15 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
 
     private readonly string _sliderId = Guid.NewGuid().ToString("N");
     private ElementReference _railElement;
-    private IJSObjectReference? _module;
+    private JsModuleLifetime? _interop;
     private DotNetObjectReference<FluentSlider>? _selfReference;
     private bool _dragging;
     private bool _hovering;
     private bool _focused;
     private int _disposed;
+
+    private JsModuleLifetime Interop => _interop ??= new(
+        JS, "./_content/FluentKit/Primitives/Slider/slider-interop.js");
 
     private bool IsVertical => Orientation == FluentSliderOrientation.Vertical;
     private string OrientationArg => IsVertical ? "vertical" : "horizontal";
@@ -149,10 +152,9 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
 
     private string DisplayValue => ClampedValue.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 
-    private async Task EnsureModuleAsync()
+    private ValueTask<bool> EnsureModuleAsync()
     {
-        _module ??= await JS.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/FluentKit/Primitives/Slider/slider-interop.js");
+        return Interop.EnsureModuleAsync();
     }
 
     private async Task SetFromPercentAsync(double pct)
@@ -176,20 +178,26 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
             return;
         }
 
-        await EnsureModuleAsync();
-        var module = _module;
-        if (module is null || Volatile.Read(ref _disposed) != 0)
+        if (!await EnsureModuleAsync() || Volatile.Read(ref _disposed) != 0)
         {
             return;
         }
 
-        var pct = await module.InvokeAsync<double>(
+        var pctResult = await Interop.InvokeAsync<double>(
             "getPercentAt", _railElement, OrientationArg, Reverse, e.ClientX, e.ClientY);
-        await SetFromPercentAsync(pct);
+        if (!pctResult.Succeeded)
+        {
+            return;
+        }
+
+        await SetFromPercentAsync(pctResult.Value);
 
         _selfReference ??= DotNetObjectReference.Create(this);
-        await module.InvokeVoidAsync(
-            "startDrag", _sliderId, _railElement, OrientationArg, Reverse, _selfReference);
+        if (!await Interop.InvokeVoidAsync(
+            "startDrag", _sliderId, _railElement, OrientationArg, Reverse, _selfReference))
+        {
+            return;
+        }
 
         _dragging = true;
     }
@@ -262,25 +270,13 @@ public partial class FluentSlider : ComponentBase, IAsyncDisposable
             return;
         }
 
-        var module = Interlocked.Exchange(ref _module, null);
         var selfReference = Interlocked.Exchange(ref _selfReference, null);
 
         try
         {
-            if (module is not null)
+            if (_interop is not null)
             {
-                try
-                {
-                    await module.InvokeVoidAsync("stopDrag", _sliderId).ConfigureAwait(false);
-                }
-                catch (JSDisconnectedException)
-                {
-                    // The browser-side drag state is unreachable after circuit teardown.
-                }
-                finally
-                {
-                    await JsModuleDisposal.DisposeAsync(module);
-                }
+                await _interop.DisposeAsync(("stopDrag", new object?[] { _sliderId }));
             }
         }
         finally

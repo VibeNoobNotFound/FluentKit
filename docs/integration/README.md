@@ -50,7 +50,7 @@ visual reference; its source is in `samples/FluentKit.Sample.Shared`.
 - **Server:** put them in the host document or the app's root layout.
 - **MAUI Hybrid:** put them in the `BlazorWebView` host page (`wwwroot/index.html`).
 
-For a server-side redirect/disconnect disposal verification using the Aula consumer, see
+For a server-side redirect/disconnect disposal verification in a Blazor Server consumer, see
 [server-circuit-disposal.md](server-circuit-disposal.md).
 
 The component API is the same across hosts. Only the host page and static-asset serving

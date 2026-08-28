@@ -46,6 +46,60 @@ public sealed class ThemeDisposalTests : Bunit.BunitContext
         Assert.Equal(0, theme.SubscriberCount);
     }
 
+    [Fact]
+    public async Task MicaThemeRenderCancellationDoesNotCompleteTheRenderKey()
+    {
+        var theme = new TestThemeService();
+        var module = new TestJsObjectReference
+        {
+            BlockInvocationsUntilCanceled = true,
+            ThrowTaskCanceledExceptionWhenCanceled = true
+        };
+        Services.AddSingleton<IThemeService>(theme);
+        Services.AddSingleton<IJSRuntime>(new TestJsRuntime(module));
+
+        var cut = Render<FluentKit.Effects.FluentMicaPanel>();
+        cut.Instance.BackgroundImageUrl = "wallpaper.png";
+        theme.RaiseChanged();
+
+        await WaitUntilAsync(() => module.Calls.Contains("renderMica"));
+        await cut.Instance.DisposeAsync();
+
+        var lastKey = typeof(FluentKit.Effects.FluentMicaPanel)
+            .GetField("_lastKey", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+            .GetValue(cut.Instance);
+
+        Assert.Null(lastKey);
+        Assert.Equal(1, module.DisposeCount);
+    }
+
+    [Fact]
+    public async Task MicaThemeRenderDisconnectCanRetryTheSameKey()
+    {
+        var theme = new TestThemeService();
+        var module = new TestJsObjectReference();
+        module.ThrowOnInvoke("renderMica", new JSDisconnectedException("circuit disconnected"));
+        Services.AddSingleton<IThemeService>(theme);
+        Services.AddSingleton<IJSRuntime>(new TestJsRuntime(module));
+
+        var cut = Render<FluentKit.Effects.FluentMicaPanel>();
+        cut.Instance.BackgroundImageUrl = "retry-wallpaper.png";
+        theme.RaiseChanged();
+        await WaitUntilAsync(() => module.Calls.Count(call => call == "renderMica") == 1);
+
+        var lastKey = typeof(FluentKit.Effects.FluentMicaPanel)
+            .GetField("_lastKey", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
+        Assert.Null(lastKey.GetValue(cut.Instance));
+
+        module.ClearInvokeException("renderMica");
+        module.Results["renderMica"] = "data:image/png;base64,retry";
+        theme.RaiseChanged();
+        await WaitUntilAsync(() => module.Calls.Count(call => call == "renderMica") == 2);
+
+        Assert.Equal("retry-wallpaper.png|True|dark", lastKey.GetValue(cut.Instance));
+        await cut.Instance.DisposeAsync();
+    }
+
     private sealed class TestThemeService : IThemeService
     {
         private Action? _themeChanged;
@@ -72,5 +126,15 @@ public sealed class ThemeDisposalTests : Bunit.BunitContext
         public Task InitializeAsync() => Task.CompletedTask;
 
         public void RaiseChanged() => _themeChanged?.Invoke();
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 200 && !condition(); i++)
+        {
+            await Task.Delay(5);
+        }
+
+        Assert.True(condition());
     }
 }
