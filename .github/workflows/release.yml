@@ -85,6 +85,11 @@ jobs:
           {
             echo "RELEASE_TAG=$release_tag"
             echo "CREATE_TAG=$create_tag"
+            if [[ "$release_tag" == *-* ]]; then
+              echo "RELEASE_IS_PRERELEASE=true"
+            else
+              echo "RELEASE_IS_PRERELEASE=false"
+            fi
           } >> "$GITHUB_ENV"
 
       - name: Verify release identity
@@ -223,9 +228,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          release_args=(--title "FluentKit ${RELEASE_TAG}" --generate-notes)
+          if [[ "$RELEASE_IS_PRERELEASE" == "true" ]]; then
+            release_args+=(--prerelease)
+          fi
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" fluentkit-api.zip fluentkit-api.zip.sha256 --clobber
+            if [[ "$RELEASE_IS_PRERELEASE" == "true" ]]; then
+              gh release edit "$RELEASE_TAG" --prerelease
+            fi
           else
             gh release create "$RELEASE_TAG" fluentkit-api.zip fluentkit-api.zip.sha256 \
-              --title "FluentKit ${RELEASE_TAG}" --generate-notes
+              "${release_args[@]}"
           fi

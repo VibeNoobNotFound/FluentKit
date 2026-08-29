@@ -368,7 +368,9 @@ from the selected branch. The project version must already match that version. E
 publishes NuGet and a standalone
 [`fluentkit-api.zip`](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-api.zip)
 containing the permanent bootstrap skill. The package itself contains the version-specific
-agent contract, and the release also publishes a checksum for the ZIP.
+agent contract, and the release also publishes a checksum for the ZIP. Versions/tags with a
+SemVer prerelease suffix, such as `0.2.6-alpha` / `v0.2.6-alpha`, are published as prereleases
+on NuGet and GitHub Releases.
 
 ## Contributing
 
