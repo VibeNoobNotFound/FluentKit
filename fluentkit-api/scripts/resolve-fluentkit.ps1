@@ -18,12 +18,16 @@ if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) {
 
 $projectDirectory = Split-Path -Parent $projectPath
 $msbuildProperties = @($Property | ForEach-Object { "-p:$_" })
-$restoreSources = @()
-foreach ($sourcePath in $Source) { $restoreSources += @('--source', $sourcePath) }
+$restoreProperties = @()
+if ($Source.Count -gt 0) {
+    # RestoreSources is a semicolon-delimited MSBuild property. It avoids the Windows NuGet
+    # command-line edge case where a repeated --source URL can be normalized as a relative path.
+    $restoreProperties += "-p:RestoreSources=$($Source -join ';')"
+}
 if (Test-Path -LiteralPath (Join-Path $projectDirectory 'packages.lock.json') -PathType Leaf) {
-    & dotnet restore $projectPath --locked-mode @restoreSources @msbuildProperties
+    & dotnet restore $projectPath --locked-mode @restoreProperties @msbuildProperties
 } else {
-    & dotnet restore $projectPath @restoreSources @msbuildProperties
+    & dotnet restore $projectPath @restoreProperties @msbuildProperties
 }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 

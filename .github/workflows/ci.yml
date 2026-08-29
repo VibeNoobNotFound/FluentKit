@@ -144,7 +144,7 @@ jobs:
           $env:NUGET_PACKAGES = $packages
           "NUGET_PACKAGES=$packages" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "LOCAL_NUGET_FEED=$feed" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          dotnet restore $env:SMOKE_PROJECT -p:FluentKitSmokeVersion=$env:PACKAGE_VERSION --source $feed --source https://api.nuget.org/v3/index.json
+          dotnet restore $env:SMOKE_PROJECT -p:FluentKitSmokeVersion=$env:PACKAGE_VERSION -p:RestoreSources="$feed;https://api.nuget.org/v3/index.json"
           dotnet build $env:SMOKE_PROJECT -c Release --no-restore
 
       - name: Resolve package contract (Windows)
