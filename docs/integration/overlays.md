@@ -6,5 +6,5 @@ Register `IOverlayService` and render one `FluentOverlayHost` inside the root
 
 Keep an overlay host mounted for the lifetime of the application. Rendering a second host
 or placing it inside a transient page can make an overlay disappear when navigation occurs.
-The [overlay sample pages](../../samples/FluentKit.Sample.Shared/Pages/Composite) show the
-supported trigger, placement, close, focus, and keyboard patterns.
+The component's `sample` field in the package-local `api.json` identifies the corresponding
+visual sample route.

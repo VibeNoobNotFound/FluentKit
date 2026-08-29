@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <!-- These paths are intentionally derived from this imported file. NuGet restores this file
+         from the exact FluentKit.Blazor package selected by the consuming project. -->
+    <FluentKitAgentContractRoot Condition="'$(FluentKitAgentContractRoot)' == ''">$(MSBuildThisFileDirectory)../fluentkit/agent/v1</FluentKitAgentContractRoot>
+    <FluentKitAgentManifestPath Condition="'$(FluentKitAgentManifestPath)' == ''">$(FluentKitAgentContractRoot)/manifest.json</FluentKitAgentManifestPath>
+    <FluentKitAgentSkillPath Condition="'$(FluentKitAgentSkillPath)' == ''">$(FluentKitAgentContractRoot)/SKILL.md</FluentKitAgentSkillPath>
+  </PropertyGroup>
+</Project>

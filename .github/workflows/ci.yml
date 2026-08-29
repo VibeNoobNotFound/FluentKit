@@ -1,8 +1,5 @@
 name: CI
 
-# Runs on every commit: any branch push, and any PR targeting main.
-# workflow_dispatch lets you trigger a run manually from the GitHub Actions page —
-# Release publishing is tag-driven; CI validates every commit and pull request.
 on:
   push:
     branches: ["**"]
@@ -12,6 +9,7 @@ on:
 
 env:
   PACKAGE_PROJECT: src/FluentKit/FluentKit.csproj
+  SMOKE_PROJECT: samples/FluentKit.ApiSmoke/FluentKit.ApiSmoke.csproj
 
 permissions:
   contents: read
@@ -29,17 +27,12 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      # against this preview SDK first.
       - name: Install MAUI Android workload
         run: dotnet workload install maui-android
 
       - name: Restore
         run: dotnet restore FluentKit.slnx
 
-      # Building the .slnx builds every project it references — src/FluentKit
-      # (net10.0, the library), samples/FluentKit.Sample.Wasm (net10.0), and the
-      # Android target of samples/Fluentkit.Sample.Maui (net11.0-android) — so this
-      # single step covers "build everything" that's buildable on a Linux runner.
       - name: Build (Release)
         run: dotnet build FluentKit.slnx -c Release --no-restore -warnaserror:RS0016,RS0017
 
@@ -47,22 +40,160 @@ jobs:
         run: dotnet test tests/FluentKit.Tests/FluentKit.Tests.csproj -c Release --no-build --no-restore
 
       - name: Verify generated API reference
+        run: |
+          ./scripts/update-api-reference.sh Release --verify
+          git diff --exit-code -- docs/reference/api.json docs/reference/api.md
+
+      - name: Validate generator fixture
+        run: dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj -c Release --no-build --no-restore -- --self-test
+
+      - name: Validate standalone skill
+        run: python3 scripts/validate-fluentkit-api-skill.py
+
+  package-contract:
+    name: Package contract (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Verify generated API reference (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          ./scripts/update-api-reference.sh Release --verify
+          git diff --exit-code -- docs/reference/api.json docs/reference/api.md
+
+      - name: Verify generated API reference (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          scripts\update-api-reference.bat Release --verify
+          git diff --exit-code -- docs/reference/api.json docs/reference/api.md
+
+      - name: Validate standalone skill
+        shell: pwsh
+        run: python scripts/validate-fluentkit-api-skill.py
+
+      - name: Build generator and library (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: dotnet build $env:PACKAGE_PROJECT -c Release
+
+      - name: Build generator and library (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: dotnet build "$PACKAGE_PROJECT" -c Release
+
+      - name: Pack package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path package-output -Force | Out-Null
+          dotnet pack $env:PACKAGE_PROJECT -c Release --no-restore --output package-output
+          $package = (Get-ChildItem package-output -Filter '*.nupkg' | Select-Object -First 1).FullName
+          "PACKAGE_PATH=$package" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $version = (& dotnet msbuild $env:PACKAGE_PROJECT -getProperty:PackageVersion -nologo | Select-Object -Last 1).Trim()
+          "PACKAGE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Pack package (Unix)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
-          dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
-            -c Release --no-build -- \
+          mkdir -p package-output
+          dotnet pack "$PACKAGE_PROJECT" -c Release --no-restore --output package-output
+          package_path="$(find package-output -maxdepth 1 -name '*.nupkg' -print -quit)"
+          echo "PACKAGE_PATH=$package_path" >> "$GITHUB_ENV"
+          echo "PACKAGE_VERSION=$(dotnet msbuild "$PACKAGE_PROJECT" -getProperty:PackageVersion -nologo)" >> "$GITHUB_ENV"
+
+      - name: Verify package contract (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: >-
+          dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj
+          -c Release --no-build --no-restore -- --verify-package "$env:PACKAGE_PATH"
+          --assembly "src/FluentKit/bin/Release/net10.0/FluentKit.dll"
+          --xml "src/FluentKit/bin/Release/net10.0/FluentKit.xml"
+          --manifest "docs/integration/manifest.json"
+
+      - name: Verify package contract (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: >-
+          dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj
+          -c Release --no-build --no-restore -- --verify-package "$PACKAGE_PATH"
+          --assembly "src/FluentKit/bin/Release/net10.0/FluentKit.dll"
+          --xml "src/FluentKit/bin/Release/net10.0/FluentKit.xml"
+          --manifest "docs/integration/manifest.json"
+
+      - name: Restore and build local package smoke test
+        shell: pwsh
+        run: |
+          $feed = Join-Path $env:RUNNER_TEMP 'fluentkit-feed'
+          $packages = Join-Path $env:RUNNER_TEMP 'fluentkit-packages'
+          New-Item -ItemType Directory -Path $feed, $packages -Force | Out-Null
+          Copy-Item -LiteralPath $env:PACKAGE_PATH -Destination $feed
+          $env:NUGET_PACKAGES = $packages
+          "NUGET_PACKAGES=$packages" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "LOCAL_NUGET_FEED=$feed" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          dotnet restore $env:SMOKE_PROJECT -p:FluentKitSmokeVersion=$env:PACKAGE_VERSION --source $feed --source https://api.nuget.org/v3/index.json
+          dotnet build $env:SMOKE_PROJECT -c Release --no-restore
+
+      - name: Resolve package contract (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          & powershell -NoProfile -ExecutionPolicy Bypass -File fluentkit-api/scripts/resolve-fluentkit.ps1 -Project $env:SMOKE_PROJECT -Property FluentKitSmokeVersion=$env:PACKAGE_VERSION -Source $env:LOCAL_NUGET_FEED
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $manifest = (& dotnet msbuild $env:SMOKE_PROJECT -nologo -getProperty:FluentKitAgentManifestPath | Select-Object -Last 1).Trim()
+          $contract = Get-Content -Raw -LiteralPath $manifest | ConvertFrom-Json
+          if ($contract.packageVersion -ne $env:PACKAGE_VERSION) { throw "Resolved package version $($contract.packageVersion) does not equal $env:PACKAGE_VERSION" }
+
+      - name: Resolve package contract (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          bash fluentkit-api/scripts/resolve-fluentkit.sh "$SMOKE_PROJECT" --property "FluentKitSmokeVersion=$PACKAGE_VERSION" --source "$LOCAL_NUGET_FEED"
+          manifest="$(dotnet msbuild "$SMOKE_PROJECT" -nologo -p:FluentKitSmokeVersion="$PACKAGE_VERSION" -getProperty:FluentKitAgentManifestPath | tail -n 1 | tr -d '\r')"
+          test -f "$manifest"
+          test "$(jq -r .packageVersion "$manifest")" = "$PACKAGE_VERSION"
+
+      - name: Test contract failure scenarios (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          python scripts/test-fluentkit-contract.py `
+            --root $env:GITHUB_WORKSPACE `
+            --package $env:PACKAGE_PATH `
+            --version $env:PACKAGE_VERSION `
+            --source $env:LOCAL_NUGET_FEED `
+            --smoke-project $env:SMOKE_PROJECT `
+            --resolver fluentkit-api/scripts/resolve-fluentkit.ps1 `
+            --generator tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj `
+            --assembly src/FluentKit/bin/Release/net10.0/FluentKit.dll `
+            --xml src/FluentKit/bin/Release/net10.0/FluentKit.xml `
+            --manifest docs/integration/manifest.json
+
+      - name: Test contract failure scenarios (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          python3 scripts/test-fluentkit-contract.py \
+            --root "$GITHUB_WORKSPACE" \
+            --package "$PACKAGE_PATH" \
+            --version "$PACKAGE_VERSION" \
+            --source "$LOCAL_NUGET_FEED" \
+            --smoke-project "$SMOKE_PROJECT" \
+            --resolver fluentkit-api/scripts/resolve-fluentkit.sh \
+            --generator tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
             --assembly src/FluentKit/bin/Release/net10.0/FluentKit.dll \
             --xml src/FluentKit/bin/Release/net10.0/FluentKit.xml \
-            --manifest docs/integration/manifest.json \
-            --json docs/reference/api.json \
-            --markdown docs/reference/api.md \
-            --summary-baseline docs/reference/summary-baseline.json \
-            --check-summaries --verify
-          cmp --silent docs/reference/api.json fluentkit-api/references/api.json
-          test "$(dotnet msbuild src/FluentKit/FluentKit.csproj -getProperty:Version -nologo)" = "$(jq -r .fluentkitVersion fluentkit-api/metadata.json)"
-
-      - name: Verify generator fixture
-        run: dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj -c Release --no-build -- --self-test
-
-      - name: Report
-        run: echo "Build, application smoke sample, generated reference, API baseline, and skill metadata verified."
+            --manifest docs/integration/manifest.json

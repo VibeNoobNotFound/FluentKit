@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
-# Rebuild FluentKit, regenerate the API reference, copy the machine-readable reference into
-# the API skill, and run the same freshness checks used by CI.
+# Rebuild FluentKit and regenerate or verify the canonical API reference.
 set -euo pipefail
 
 CONFIGURATION="${1:-Release}"
+MODE="${2:-}"
+if [[ "$CONFIGURATION" == "--verify" ]]; then
+  CONFIGURATION="Release"
+  MODE="--verify"
+fi
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
@@ -16,27 +20,9 @@ dotnet run --project tools/FluentKit.ApiReferenceGenerator \
   --xml "src/FluentKit/bin/$CONFIGURATION/net10.0/FluentKit.xml" \
   --manifest docs/integration/manifest.json \
   --json docs/reference/api.json \
-  --markdown docs/reference/api.md
-
-cp docs/reference/api.json fluentkit-api/references/api.json
-
-dotnet run --project tools/FluentKit.ApiReferenceGenerator \
-  -c "$CONFIGURATION" -- \
-  --assembly "src/FluentKit/bin/$CONFIGURATION/net10.0/FluentKit.dll" \
-  --xml "src/FluentKit/bin/$CONFIGURATION/net10.0/FluentKit.xml" \
-  --manifest docs/integration/manifest.json \
-  --json docs/reference/api.json \
   --markdown docs/reference/api.md \
   --summary-baseline docs/reference/summary-baseline.json \
-  --check-summaries --verify
-
-cmp --silent docs/reference/api.json fluentkit-api/references/api.json
+  --check-summaries $MODE
 
 PACKAGE_VERSION="$(dotnet msbuild src/FluentKit/FluentKit.csproj -getProperty:Version -nologo)"
-SKILL_VERSION="$(sed -nE 's/.*"fluentkitVersion"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' fluentkit-api/metadata.json)"
-if [[ "$PACKAGE_VERSION" != "$SKILL_VERSION" ]]; then
-  printf 'Version mismatch: package=%s skill=%s\n' "$PACKAGE_VERSION" "$SKILL_VERSION" >&2
-  exit 1
-fi
-
 printf 'API reference is current for FluentKit %s.\n' "$PACKAGE_VERSION"

@@ -1,14 +1,14 @@
 # FluentKit setup
 
-Install `FluentKit.Blazor` at the version declared by `metadata.json`. Link these files in
-the host page:
+Install the `FluentKit.Blazor` package at the version selected by the consumer application.
+Link these public assets in the host page:
 
 ```html
 <link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
 <link rel="stylesheet" href="_content/FluentKit/Icons/FluentSystemIcons-Regular.css" />
 ```
 
-Register:
+Register the core services:
 
 ```csharp
 builder.Services.AddScoped<IThemeService, ThemeService>();
@@ -16,7 +16,7 @@ builder.Services.AddScoped<IAccentColorService, AccentColorService>();
 builder.Services.AddScoped<IOverlayService, OverlayService>();
 ```
 
-At the root:
+At the application root, render one long-lived overlay host inside the theme provider:
 
 ```razor
 <ThemeProvider>
