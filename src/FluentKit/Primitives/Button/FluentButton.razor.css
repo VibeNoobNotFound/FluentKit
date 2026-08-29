@@ -24,6 +24,7 @@
     border-style: solid;
 
     cursor: pointer;
+    text-decoration: none;
     user-select: none;
     transition: background-color var(--duration-fast) var(--easing-standard),
                 border-color var(--duration-fast) var(--easing-standard),
