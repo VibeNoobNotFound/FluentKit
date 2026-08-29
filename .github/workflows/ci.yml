@@ -144,7 +144,18 @@ jobs:
           $env:NUGET_PACKAGES = $packages
           "NUGET_PACKAGES=$packages" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "LOCAL_NUGET_FEED=$feed" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          dotnet restore $env:SMOKE_PROJECT -p:FluentKitSmokeVersion=$env:PACKAGE_VERSION -p:RestoreSources="$feed;https://api.nuget.org/v3/index.json"
+          $nugetConfig = Join-Path $env:RUNNER_TEMP 'fluentkit-smoke.NuGet.Config'
+          @"
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="fluentkit-local" value="$feed" />
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+            </packageSources>
+          </configuration>
+          "@ | Set-Content -LiteralPath $nugetConfig -Encoding utf8
+          dotnet restore $env:SMOKE_PROJECT -p:FluentKitSmokeVersion=$env:PACKAGE_VERSION --configfile $nugetConfig
           dotnet build $env:SMOKE_PROJECT -c Release --no-restore
 
       - name: Resolve package contract (Windows)

@@ -27,7 +27,7 @@ never use a release ZIP, online "latest" API snapshot, or a different package ve
 
 4. If the project requires MSBuild properties or a private/local NuGet source to evaluate its
    package references, forward them with `--property Name=Value` / `-Property Name=Value` or
-   `--source PATH` / `-Source PATH`.
+   `--source PATH` / `-Source PATH[,PATH]`.
 
 5. The resolver queries `FluentKitAgentManifestPath` and `FluentKitAgentSkillPath` through
    `dotnet msbuild`. Read the returned package-local `SKILL.md` completely before acting.
