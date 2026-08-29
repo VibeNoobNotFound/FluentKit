@@ -20,7 +20,7 @@
 
     <!-- NuGet metadata -->
     <PackageId>FluentKit.Blazor</PackageId>
-    <Version>0.2.5</Version>
+    <Version>0.2.6</Version>
     <Authors>NoobNotFound</Authors>
     <Description>A token-accurate Fluent Design (WinUI 3) component library for Blazor WASM, Server, and MAUI Blazor Hybrid.</Description>
 
@@ -37,6 +37,21 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <PackageIcon>icon.png</PackageIcon>
+
+    <!-- The generated contract is staged under obj during pack so it always describes the
+         just-built assembly and the actual package version. -->
+    <FluentKitAgentStagingDirectory>$(MSBuildProjectDirectory)/obj/$(Configuration)/$(TargetFramework)/fluentkit-agent/v1</FluentKitAgentStagingDirectory>
+    <FluentKitApiReferenceGeneratorProject>$(MSBuildProjectDirectory)/../../tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj</FluentKitApiReferenceGeneratorProject>
+    <FluentKitIntegrationManifest>$(MSBuildProjectDirectory)/../../docs/integration/manifest.json</FluentKitIntegrationManifest>
+    <FluentKitAgentSkillSource>$(MSBuildProjectDirectory)/../../docs/integration/agent-skill.md</FluentKitAgentSkillSource>
+    <FluentKitAgentReferencesSource>$(MSBuildProjectDirectory)/../../docs/integration</FluentKitAgentReferencesSource>
+
+    <!-- The package supplies the conventional buildTransitive props wrapper so NuGet imports
+         both the generated static-web-assets props and the agent contract properties. -->
+    <StaticWebAssetsDisableProjectBuildTransitivePropsFileGeneration>true</StaticWebAssetsDisableProjectBuildTransitivePropsFileGeneration>
+
+    <!-- NuGet asks this target for non-TFM package files while generating the nuspec. -->
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);GetFluentKitAgentPackageFiles</TargetsForTfmSpecificContentInPackage>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -70,6 +85,32 @@
     <!-- Pulls the repo-root README into the .nupkg so PackageReadmeFile above has something to point at -->
     <None Include="../../README.md" Pack="true" PackagePath="\" />
     <None Include="icon.png" Pack="true" PackagePath="\" />
+    <None Include="Agent/FluentKit.Blazor.props" Pack="true" PackagePath="buildTransitive/FluentKit.Blazor.props" />
+    <None Include="Agent/FluentKit.Blazor.Agent.props" Pack="true" PackagePath="buildTransitive/FluentKit.Blazor.Agent.props" />
   </ItemGroup>
+
+  <Target Name="BuildFluentKitApiReferenceGenerator" BeforeTargets="PrepareFluentKitAgentContract">
+    <MSBuild Projects="$(FluentKitApiReferenceGeneratorProject)"
+             Targets="Build"
+             Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="PrepareFluentKitAgentContract"
+          BeforeTargets="GenerateNuspec"
+          DependsOnTargets="Build;BuildFluentKitApiReferenceGenerator">
+    <RemoveDir Directories="$(FluentKitAgentStagingDirectory)" />
+    <MakeDir Directories="$(FluentKitAgentStagingDirectory)" />
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)/../../"
+          Command="dotnet run --project &quot;$(FluentKitApiReferenceGeneratorProject)&quot; --configuration &quot;$(Configuration)&quot; --no-build -- --assembly &quot;$(TargetPath)&quot; --xml &quot;$(TargetDir)$(TargetName).xml&quot; --manifest &quot;$(FluentKitIntegrationManifest)&quot; --json &quot;$(FluentKitAgentStagingDirectory)/api.json&quot; --markdown &quot;$(FluentKitAgentStagingDirectory)/api.md&quot; --contract-output &quot;$(FluentKitAgentStagingDirectory)&quot; --package-id &quot;$(PackageId)&quot; --package-version &quot;$(PackageVersion)&quot; --skill-source &quot;$(FluentKitAgentSkillSource)&quot; --references-source &quot;$(FluentKitAgentReferencesSource)&quot;" />
+  </Target>
+
+  <Target Name="GetFluentKitAgentPackageFiles" DependsOnTargets="PrepareFluentKitAgentContract">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(FluentKitAgentStagingDirectory)/**/*">
+        <PackagePath>fluentkit/agent/v1/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+        <BuildAction>None</BuildAction>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
 
 </Project>

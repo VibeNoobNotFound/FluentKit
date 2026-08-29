@@ -1,6 +1,6 @@
 # Server circuit-disposal verification
 
-This runbook verifies the server-side failure mode fixed in FluentKit 0.2.4: a component tree
+This runbook verifies the server-side circuit-disposal failure mode: a component tree
 containing `ThemeProvider` and `FluentMicaPanel` is disposed after a normal HTTP form post redirects
 the browser to another page.
 
@@ -14,10 +14,12 @@ From the FluentKit repository:
 ```bash
 FEED_DIR="$(mktemp -d)"
 dotnet pack src/FluentKit/FluentKit.csproj -c Release -o "$FEED_DIR"
+FLUENTKIT_VERSION="$(dotnet msbuild src/FluentKit/FluentKit.csproj -getProperty:Version -nologo)"
+echo "Use FluentKit.Blazor version $FLUENTKIT_VERSION in the consumer checkout."
 ```
 
-In the consumer checkout, temporarily set its central `FluentKit.Blazor` package version to `0.2.4`,
-then restore using the temporary feed and NuGet.org:
+In the consumer checkout, temporarily set its central `FluentKit.Blazor` package version to the
+version under test, then restore using the temporary feed and NuGet.org:
 
 ```bash
 CONSUMER_DIR="${CONSUMER_DIR:-../consumer}"

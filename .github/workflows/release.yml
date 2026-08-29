@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing release tag to publish (for example, v0.2.3). Leave blank to create a tag."
+        description: "Existing release tag to publish (for example, v0.2.6). Leave blank to create a tag."
         required: false
         type: string
       version:
@@ -22,6 +22,7 @@ permissions:
 
 env:
   PACKAGE_PROJECT: src/FluentKit/FluentKit.csproj
+  SMOKE_PROJECT: samples/FluentKit.ApiSmoke/FluentKit.ApiSmoke.csproj
 
 jobs:
   release:
@@ -31,8 +32,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
-          # A manual run starts from the selected branch. The resolve step below checks out
-          # an existing input tag, or leaves this commit checked out to create a new tag.
           fetch-depth: 0
 
       - name: Setup .NET
@@ -71,7 +70,7 @@ jobs:
               exit 1
             fi
             if [[ ! "$REQUESTED_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
-              echo "Version must be a SemVer-like value such as 0.2.4 or 0.2.4-rc.1." >&2
+              echo "Version must be a SemVer-like value such as 0.2.6 or 0.2.6-rc.1." >&2
               exit 1
             fi
             release_tag="v$REQUESTED_VERSION"
@@ -86,6 +85,11 @@ jobs:
           {
             echo "RELEASE_TAG=$release_tag"
             echo "CREATE_TAG=$create_tag"
+            if [[ "$release_tag" == *-* ]]; then
+              echo "RELEASE_IS_PRERELEASE=true"
+            else
+              echo "RELEASE_IS_PRERELEASE=false"
+            fi
           } >> "$GITHUB_ENV"
 
       - name: Verify release identity
@@ -95,8 +99,6 @@ jobs:
           package_version="$(dotnet msbuild "$PACKAGE_PROJECT" -getProperty:Version -nologo)"
           tag_version="${RELEASE_TAG#v}"
           test "$package_version" = "$tag_version"
-          test "$(jq -r .fluentkitVersion fluentkit-api/metadata.json)" = "$package_version"
-          test "$(jq -r .sourceTag fluentkit-api/metadata.json)" = "$RELEASE_TAG"
 
       - name: Create requested release tag
         if: env.CREATE_TAG == 'true'
@@ -115,7 +117,7 @@ jobs:
       - name: Restore
         run: dotnet restore FluentKit.slnx
 
-      - name: Build and verify public API baseline
+      - name: Build solution
         run: dotnet build FluentKit.slnx -c Release --no-restore -warnaserror:RS0016,RS0017
 
       - name: Run tests
@@ -123,33 +125,75 @@ jobs:
 
       - name: Verify generated API reference
         run: |
-          dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
-            -c Release --no-build -- \
-            --assembly src/FluentKit/bin/Release/net10.0/FluentKit.dll \
-            --xml src/FluentKit/bin/Release/net10.0/FluentKit.xml \
-            --manifest docs/integration/manifest.json \
-            --json docs/reference/api.json \
-            --markdown docs/reference/api.md \
-            --summary-baseline docs/reference/summary-baseline.json \
-            --check-summaries --verify
-          cmp --silent docs/reference/api.json fluentkit-api/references/api.json
+          ./scripts/update-api-reference.sh Release --verify
+          git diff --exit-code -- docs/reference/api.json docs/reference/api.md
+
+      - name: Validate standalone skill
+        run: python3 scripts/validate-fluentkit-api-skill.py
 
       - name: Package NuGet
-        run: dotnet pack "$PACKAGE_PROJECT" --no-restore --configuration Release --output ./nupkg
-
-      - name: Package portable API skill
         shell: bash
         run: |
           set -euo pipefail
-          skill_archive="fluentkit-api.zip"
-          rm -f "$skill_archive"
-          zip -qr "$skill_archive" fluentkit-api
-          test -s "$skill_archive"
-          unexpected_entries="$(unzip -Z1 "$skill_archive" | grep -vE '^fluentkit-api(/|$)' || true)"
+          mkdir -p nupkg
+          dotnet pack "$PACKAGE_PROJECT" --no-restore --configuration Release --output ./nupkg
+          package_path="$(find nupkg -maxdepth 1 -name '*.nupkg' -print -quit)"
+          echo "PACKAGE_PATH=$package_path" >> "$GITHUB_ENV"
+          echo "PACKAGE_VERSION=$(dotnet msbuild "$PACKAGE_PROJECT" -getProperty:PackageVersion -nologo)" >> "$GITHUB_ENV"
+
+      - name: Verify package contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet run --project tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
+            -c Release --no-build --no-restore -- --verify-package "$PACKAGE_PATH" \
+            --assembly "src/FluentKit/bin/Release/net10.0/FluentKit.dll" \
+            --xml "src/FluentKit/bin/Release/net10.0/FluentKit.xml" \
+            --manifest "docs/integration/manifest.json"
+
+      - name: Restore and build local package smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          feed_dir="$RUNNER_TEMP/fluentkit-feed"
+          packages_dir="$RUNNER_TEMP/fluentkit-packages"
+          mkdir -p "$feed_dir" "$packages_dir"
+          cp "$PACKAGE_PATH" "$feed_dir/"
+          echo "NUGET_PACKAGES=$packages_dir" >> "$GITHUB_ENV"
+          echo "LOCAL_NUGET_FEED=$feed_dir" >> "$GITHUB_ENV"
+          NUGET_PACKAGES="$packages_dir" dotnet restore "$SMOKE_PROJECT" \
+            -p:FluentKitSmokeVersion="$PACKAGE_VERSION" \
+            --source "$feed_dir" --source https://api.nuget.org/v3/index.json
+          NUGET_PACKAGES="$packages_dir" dotnet build "$SMOKE_PROJECT" -c Release --no-restore
+          NUGET_PACKAGES="$packages_dir" bash fluentkit-api/scripts/resolve-fluentkit.sh "$SMOKE_PROJECT" --property "FluentKitSmokeVersion=$PACKAGE_VERSION" --source "$feed_dir"
+          manifest_path="$(NUGET_PACKAGES="$packages_dir" dotnet msbuild "$SMOKE_PROJECT" -nologo -p:FluentKitSmokeVersion="$PACKAGE_VERSION" -getProperty:FluentKitAgentManifestPath | tail -n 1 | tr -d '\r')"
+          test "$(jq -r .packageVersion "$manifest_path")" = "$PACKAGE_VERSION"
+
+          python3 scripts/test-fluentkit-contract.py \
+            --root "$GITHUB_WORKSPACE" \
+            --package "$PACKAGE_PATH" \
+            --version "$PACKAGE_VERSION" \
+            --source "$feed_dir" \
+            --smoke-project "$SMOKE_PROJECT" \
+            --resolver fluentkit-api/scripts/resolve-fluentkit.sh \
+            --generator tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj \
+            --assembly src/FluentKit/bin/Release/net10.0/FluentKit.dll \
+            --xml src/FluentKit/bin/Release/net10.0/FluentKit.xml \
+            --manifest docs/integration/manifest.json
+
+      - name: Create bootstrap skill release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f fluentkit-api.zip fluentkit-api.zip.sha256
+          zip -qr fluentkit-api.zip fluentkit-api
+          test -s fluentkit-api.zip
+          unexpected_entries="$(unzip -Z1 fluentkit-api.zip | grep -vE '^fluentkit-api(/|$)' || true)"
           if [[ -n "$unexpected_entries" ]]; then
             echo "Skill archive contains files outside fluentkit-api/." >&2
             exit 1
           fi
+          sha256sum fluentkit-api.zip > fluentkit-api.zip.sha256
 
       - name: NuGet login (Trusted Publishing)
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
@@ -180,13 +224,20 @@ jobs:
             --source github \
             --skip-duplicate
 
-      - name: Create GitHub Release and attach skill bundle
+      - name: Create GitHub Release and attach bootstrap assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          release_args=(--title "FluentKit ${RELEASE_TAG}" --generate-notes)
+          if [[ "$RELEASE_IS_PRERELEASE" == "true" ]]; then
+            release_args+=(--prerelease)
+          fi
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" fluentkit-api.zip --clobber
+            gh release upload "$RELEASE_TAG" fluentkit-api.zip fluentkit-api.zip.sha256 --clobber
+            if [[ "$RELEASE_IS_PRERELEASE" == "true" ]]; then
+              gh release edit "$RELEASE_TAG" --prerelease
+            fi
           else
-            gh release create "$RELEASE_TAG" fluentkit-api.zip \
-              --title "FluentKit ${RELEASE_TAG}" --generate-notes
+            gh release create "$RELEASE_TAG" fluentkit-api.zip fluentkit-api.zip.sha256 \
+              "${release_args[@]}"
           fi

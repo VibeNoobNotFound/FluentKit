@@ -2,7 +2,6 @@
   <Project Path="samples/Fluentkit.Sample.Maui/Fluentkit.Sample.Maui.csproj" />
   <Project Path="samples/FluentKit.Sample.Shared/FluentKit.Sample.Shared.csproj" />
   <Project Path="samples/FluentKit.Sample.Wasm/FluentKit.Sample.Wasm.csproj" />
-  <Project Path="samples/FluentKit.ApiSmoke/FluentKit.ApiSmoke.csproj" />
   <Project Path="src/FluentKit/FluentKit.csproj" />
   <Project Path="src/FluentKit.IconGenerator/FluentKit.IconGenerator.csproj" />
   <Project Path="tools/FluentKit.ApiReferenceGenerator/FluentKit.ApiReferenceGenerator.csproj" />

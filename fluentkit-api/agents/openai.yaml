@@ -1,0 +1,7 @@
+interface:
+  display_name: "FluentKit API"
+  short_description: "Use the exact installed FluentKit API"
+  default_prompt: "Use $fluentkit-api to build against the exact FluentKit.Blazor package in this application."
+
+policy:
+  allow_implicit_invocation: true

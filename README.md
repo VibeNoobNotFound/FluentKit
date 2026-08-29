@@ -45,9 +45,10 @@ styling, or token values were sourced from.
 For a separate application, use the [integration documentation](docs/integration/README.md). The
 generated [API reference](docs/reference/api.md) and machine-readable
 [`api.json`](docs/reference/api.json) are produced from the compiled FluentKit assembly and
-are kept in sync by CI. Coding agents can use the versioned
-[`fluentkit-api`](fluentkit-api/SKILL.md) skill bundle, or
-[download the latest portable skill ZIP](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-api.zip).
+are kept in sync by CI. Coding agents can use the standalone
+[`fluentkit-api`](fluentkit-api/SKILL.md) bootstrap skill. It resolves the exact API and
+integration contract embedded in the package used by the consumer app; install it once from
+the [latest portable skill ZIP](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-api.zip).
 
 **1. Install**
 
@@ -58,7 +59,7 @@ dotnet add package FluentKit.Blazor
 ```
 
 ```xml
-<PackageReference Include="FluentKit.Blazor" Version="0.2.4" /> <!-- should match the nuget badge above -->
+<PackageReference Include="FluentKit.Blazor" Version="&lt;VERSION&gt;" />
 ```
 
 Alternatively, to track `main` directly, use it as a project or repository reference instead:
@@ -363,10 +364,13 @@ directly.)
 The `Release FluentKit` workflow runs automatically for a `vMAJOR.MINOR.PATCH` tag. It can also
 be started from the GitHub Actions page: enter an existing tag in **tag** to republish that
 immutable version, or leave **tag** blank and enter a version to create and publish a new tag
-from the selected branch. The project version and `fluentkit-api/metadata.json` must already
-match that version. Each release publishes NuGet and a standalone
+from the selected branch. The project version must already match that version. Each release
+publishes NuGet and a standalone
 [`fluentkit-api.zip`](https://github.com/VibeNoobNotFound/FluentKit/releases/latest/download/fluentkit-api.zip)
-containing only the portable skill folder.
+containing the permanent bootstrap skill. The package itself contains the version-specific
+agent contract, and the release also publishes a checksum for the ZIP. Versions/tags with a
+SemVer prerelease suffix, such as `0.2.6-alpha` / `v0.2.6-alpha`, are published as prereleases
+on NuGet and GitHub Releases.
 
 ## Contributing
 

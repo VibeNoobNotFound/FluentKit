@@ -14,4 +14,5 @@ Use it to find the smallest control that owns the behavior your feature needs.
 | Navigation | `FluentNavigationView`, `FluentMenuBar`, `FluentPivot` | `/Composite/NavigationView` |
 | Effects | `FluentMicaPanel`, `FluentAcrylicBrush`, `FluentRevealBackground` | `/Effects/Mica` |
 
-For the exact parameter and event surface, use [api.md](../reference/api.md).
+For the exact parameter and event surface, use the package-local `api.md` generated from the
+same assembly as this guide.

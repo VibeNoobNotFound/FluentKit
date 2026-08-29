@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.IO.Compression;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -9,8 +11,8 @@ return await ApiReferenceGenerator.RunAsync(args);
 
 internal static class ApiReferenceGenerator
 {
-    // Keep generated JSON stable so it can be compared in CI and copied byte-for-byte into
-    // the versioned API skill bundle.
+    // Keep generated JSON stable so it can be compared in CI and embedded byte-for-byte in
+    // the package-local agent contract.
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -32,6 +34,11 @@ internal static class ApiReferenceGenerator
         if (options.ContainsKey("self-test"))
         {
             return SelfTest();
+        }
+
+        if (options.TryGetValue("verify-package", out var packagePath))
+        {
+            return VerifyPackage(packagePath, options);
         }
 
         if (!options.TryGetValue("assembly", out var assemblyPath) ||
@@ -79,12 +86,27 @@ internal static class ApiReferenceGenerator
         }
         var json = JsonSerializer.Serialize(model, JsonOptions) + Environment.NewLine;
         var markdown = RenderMarkdown(model);
+        var contractOutput = options.GetValueOrDefault("contract-output");
+        var contract = contractOutput is null
+            ? null
+            : CreateAgentContract(
+                model,
+                options.GetValueOrDefault("package-id") ?? "FluentKit.Blazor",
+                options.GetValueOrDefault("package-version") ?? throw new InvalidOperationException("--package-version is required with --contract-output."),
+                options.GetValueOrDefault("skill-source") ?? throw new InvalidOperationException("--skill-source is required with --contract-output."),
+                options.GetValueOrDefault("references-source") ?? throw new InvalidOperationException("--references-source is required with --contract-output."),
+                json,
+                markdown);
 
         if (options.ContainsKey("verify"))
         {
             // Verification never writes tracked files. It is used by PR/release CI to catch
             // developers who changed the assembly without regenerating the checked-in output.
             var ok = CompareFile(jsonPath, json) & CompareFile(markdownPath, markdown);
+            if (contract is not null)
+            {
+                ok &= VerifyAgentContract(contract, contractOutput!);
+            }
             return ok ? 0 : 1;
         }
 
@@ -92,8 +114,328 @@ internal static class ApiReferenceGenerator
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(markdownPath))!);
         await File.WriteAllTextAsync(jsonPath, json, Encoding.UTF8);
         await File.WriteAllTextAsync(markdownPath, markdown, Encoding.UTF8);
+        if (contract is not null)
+        {
+            WriteAgentContract(contract, contractOutput!);
+        }
         return 0;
     }
+
+    private static AgentContract CreateAgentContract(
+        ReferenceModel model,
+        string packageId,
+        string packageVersion,
+        string skillSource,
+        string referencesSource,
+        string json,
+        string markdown)
+    {
+        if (!File.Exists(skillSource))
+            throw new InvalidOperationException($"Agent skill source not found: {skillSource}");
+        if (!Directory.Exists(referencesSource))
+            throw new InvalidOperationException($"Agent references directory not found: {referencesSource}");
+
+        ValidatePackageVersion(model.Version, packageVersion);
+
+        var referenceNames = new[]
+        {
+            "setup",
+            "component-selection",
+            "theming-and-tokens",
+            "overlays",
+            "icons",
+            "troubleshooting"
+        };
+        var referenceSources = referenceNames.ToDictionary(
+            name => name,
+            name => Path.Combine(referencesSource, name + ".md"),
+            StringComparer.Ordinal);
+        foreach (var source in referenceSources.Values)
+        {
+            if (!File.Exists(source))
+                throw new InvalidOperationException($"Agent reference source not found: {source}");
+        }
+        var references = referenceSources.ToDictionary(
+            x => x.Key,
+            x => "references/" + Path.GetFileName(x.Value),
+            StringComparer.Ordinal);
+        var files = new[] { "SKILL.md", "api.json", "api.md" }
+            .Concat(references.Values)
+            .ToDictionary(
+                path => path,
+                path => path switch
+                {
+                    "SKILL.md" => Sha256(skillSource),
+                    "api.json" => Sha256(Utf8Bytes(json)),
+                    "api.md" => Sha256(Utf8Bytes(markdown)),
+                    _ => Sha256(referenceSources.Single(x => references[x.Key] == path).Value)
+                },
+                StringComparer.Ordinal);
+
+        return new AgentContract(
+            new AgentContractManifest(
+                1,
+                packageId,
+                packageVersion,
+                model.Assembly,
+                "SKILL.md",
+                "api.json",
+                "api.md",
+                references,
+                "https://vibenoobnotfound.github.io/FluentKit/",
+                "https://github.com/VibeNoobNotFound/FluentKit/tree/main/docs/integration",
+                files),
+            json,
+            markdown,
+            skillSource,
+            referenceSources);
+    }
+
+    private static void WriteAgentContract(AgentContract contract, string outputDirectory)
+    {
+        Directory.CreateDirectory(outputDirectory);
+        File.WriteAllText(Path.Combine(outputDirectory, "api.json"), contract.Json, Encoding.UTF8);
+        File.WriteAllText(Path.Combine(outputDirectory, "api.md"), contract.Markdown, Encoding.UTF8);
+        File.Copy(contract.SkillSource, Path.Combine(outputDirectory, "SKILL.md"), true);
+        var referenceDirectory = Path.Combine(outputDirectory, "references");
+        Directory.CreateDirectory(referenceDirectory);
+        foreach (var source in contract.ReferenceSources.Values)
+        {
+            File.Copy(source, Path.Combine(referenceDirectory, Path.GetFileName(source)), true);
+        }
+        var manifestPath = Path.Combine(outputDirectory, "manifest.json");
+        File.WriteAllText(manifestPath, JsonSerializer.Serialize(contract.Manifest, JsonOptions) + Environment.NewLine, Encoding.UTF8);
+    }
+
+    private static bool VerifyAgentContract(AgentContract contract, string outputDirectory)
+    {
+        var ok = true;
+        ok &= CompareFile(Path.Combine(outputDirectory, "api.json"), contract.Json);
+        ok &= CompareFile(Path.Combine(outputDirectory, "api.md"), contract.Markdown);
+        ok &= CompareFile(Path.Combine(outputDirectory, "SKILL.md"), File.ReadAllText(contract.SkillSource));
+        foreach (var source in contract.ReferenceSources)
+        {
+            ok &= CompareFile(
+                Path.Combine(outputDirectory, contract.Manifest.References[source.Key].Replace('/', Path.DirectorySeparatorChar)),
+                File.ReadAllText(source.Value));
+        }
+        var manifestPath = Path.Combine(outputDirectory, "manifest.json");
+        if (!File.Exists(manifestPath))
+        {
+            Console.Error.WriteLine($"Agent contract manifest is missing: {manifestPath}");
+            return false;
+        }
+
+        var expected = JsonSerializer.Serialize(contract.Manifest, JsonOptions) + Environment.NewLine;
+        ok &= CompareFile(manifestPath, expected);
+        foreach (var path in contract.Manifest.Files.Keys)
+        {
+            var fullPath = Path.Combine(outputDirectory, path.Replace('/', Path.DirectorySeparatorChar));
+            if (!File.Exists(fullPath))
+            {
+                Console.Error.WriteLine($"Agent contract file is missing: {fullPath}");
+                ok = false;
+                continue;
+            }
+            if (!string.Equals(Sha256(fullPath), contract.Manifest.Files[path], StringComparison.OrdinalIgnoreCase))
+            {
+                Console.Error.WriteLine($"Agent contract file has the wrong hash: {fullPath}");
+                ok = false;
+            }
+        }
+        return ok;
+    }
+
+    private static int VerifyPackage(string packagePath, IReadOnlyDictionary<string, string> options)
+    {
+        if (!File.Exists(packagePath))
+        {
+            Console.Error.WriteLine($"NuGet package not found: {packagePath}");
+            return 2;
+        }
+
+        try
+        {
+            using var archive = ZipFile.OpenRead(packagePath);
+            var entries = archive.Entries.ToDictionary(x => x.FullName, StringComparer.Ordinal);
+            var required = new[]
+            {
+                "fluentkit/agent/v1/manifest.json",
+                "fluentkit/agent/v1/SKILL.md",
+                "fluentkit/agent/v1/api.json",
+                "fluentkit/agent/v1/api.md",
+                "buildTransitive/FluentKit.Blazor.props",
+                "buildTransitive/FluentKit.Blazor.Agent.props"
+            };
+            var ok = true;
+            foreach (var path in required)
+            {
+                if (!entries.ContainsKey(path))
+                {
+                    Console.Error.WriteLine($"NuGet package is missing: {path}");
+                    ok = false;
+                }
+            }
+            if (!ok) return 1;
+
+            var manifest = ReadJson<AgentContractManifest>(entries["fluentkit/agent/v1/manifest.json"]);
+            if (manifest.SchemaVersion != 1 || string.IsNullOrWhiteSpace(manifest.PackageId) ||
+                string.IsNullOrWhiteSpace(manifest.PackageVersion) || string.IsNullOrWhiteSpace(manifest.AssemblyName) ||
+                !string.Equals(manifest.PackageId, "FluentKit.Blazor", StringComparison.Ordinal) ||
+                !string.Equals(manifest.Skill, "SKILL.md", StringComparison.Ordinal) ||
+                !string.Equals(manifest.ApiJson, "api.json", StringComparison.Ordinal) ||
+                !string.Equals(manifest.ApiMarkdown, "api.md", StringComparison.Ordinal) ||
+                string.IsNullOrWhiteSpace(manifest.SampleBaseUrl) ||
+                string.IsNullOrWhiteSpace(manifest.DocumentationBaseUrl) ||
+                manifest.Files is null || manifest.Files.Count == 0 || manifest.References is null)
+            {
+                Console.Error.WriteLine("Agent contract manifest is invalid.");
+                return 1;
+            }
+            if (manifest.Files.Keys.Any(path => !IsSafeRelativePath(path)) ||
+                manifest.References.Values.Any(path => !IsSafeRelativePath(path) || !path.StartsWith("references/", StringComparison.Ordinal)))
+            {
+                Console.Error.WriteLine("Agent contract manifest contains an unsafe relative path.");
+                return 1;
+            }
+
+            using var nuspecStream = entries.Values.FirstOrDefault(x => x.FullName.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase))?.Open();
+            if (nuspecStream is null)
+            {
+                Console.Error.WriteLine("NuGet package does not contain a nuspec.");
+                return 1;
+            }
+            var nuspec = XDocument.Load(nuspecStream);
+            var metadata = nuspec.Descendants().FirstOrDefault(x => x.Name.LocalName == "metadata");
+            var packageId = metadata?.Elements().FirstOrDefault(x => x.Name.LocalName == "id")?.Value;
+            var packageVersion = metadata?.Elements().FirstOrDefault(x => x.Name.LocalName == "version")?.Value;
+            if (!string.Equals(packageId, manifest.PackageId, StringComparison.Ordinal) ||
+                !string.Equals(packageVersion, manifest.PackageVersion, StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("Agent contract package identity does not match the nuspec.");
+                ok = false;
+            }
+
+            var apiJsonPath = "fluentkit/agent/v1/" + manifest.ApiJson;
+            var apiMarkdownPath = "fluentkit/agent/v1/" + manifest.ApiMarkdown;
+            if (!entries.ContainsKey(apiJsonPath) || !entries.ContainsKey(apiMarkdownPath))
+            {
+                Console.Error.WriteLine("Agent contract API paths are missing from the package.");
+                return 1;
+            }
+            var model = ReadJson<ReferenceModel>(entries[apiJsonPath]);
+            if (!string.Equals(model.Assembly, manifest.AssemblyName, StringComparison.Ordinal) ||
+                !string.Equals(model.Version, StripPrerelease(manifest.PackageVersion), StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("Agent contract API identity does not match the manifest.");
+                ok = false;
+            }
+            var markdown = ReadEntry(entries[apiMarkdownPath]);
+            if (!string.Equals(markdown, RenderMarkdown(model), StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("Packaged api.md is not generated from packaged api.json.");
+                ok = false;
+            }
+
+            if (options.TryGetValue("assembly", out var builtAssemblyPath))
+            {
+                if (!options.TryGetValue("manifest", out var builtManifestPath))
+                    throw new InvalidOperationException("--manifest is required when --assembly is supplied with --verify-package.");
+                var builtXmlPath = options.GetValueOrDefault("xml") ?? Path.ChangeExtension(builtAssemblyPath, ".xml");
+                var builtModel = BuildModel(builtAssemblyPath, builtXmlPath, builtManifestPath);
+                var builtJson = JsonSerializer.Serialize(builtModel, JsonOptions) + Environment.NewLine;
+                var builtMarkdown = RenderMarkdown(builtModel);
+                if (!string.Equals(ReadEntry(entries[apiJsonPath]), builtJson, StringComparison.Ordinal))
+                {
+                    Console.Error.WriteLine("Packaged api.json differs from the freshly generated built-assembly API.");
+                    ok = false;
+                }
+                if (!string.Equals(markdown, builtMarkdown, StringComparison.Ordinal))
+                {
+                    Console.Error.WriteLine("Packaged api.md differs from the freshly generated built-assembly API.");
+                    ok = false;
+                }
+            }
+
+            foreach (var file in manifest.Files)
+            {
+                var entryPath = "fluentkit/agent/v1/" + file.Key;
+                if (!entries.TryGetValue(entryPath, out var entry))
+                {
+                    Console.Error.WriteLine($"Manifest file is missing from package: {file.Key}");
+                    ok = false;
+                    continue;
+                }
+                using var stream = entry.Open();
+                if (!string.Equals(Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant(), file.Value, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.Error.WriteLine($"Manifest hash mismatch: {file.Key}");
+                    ok = false;
+                }
+            }
+
+            var props = ReadEntry(entries["buildTransitive/FluentKit.Blazor.Agent.props"]);
+            var propsDocument = XDocument.Parse(props);
+            foreach (var property in new[] { "FluentKitAgentContractRoot", "FluentKitAgentManifestPath", "FluentKitAgentSkillPath" })
+            {
+                if (!propsDocument.Descendants().Any(x => x.Name.LocalName == property))
+                {
+                    Console.Error.WriteLine($"Agent props does not expose {property}.");
+                    ok = false;
+                }
+            }
+            var wrapperProps = ReadEntry(entries["buildTransitive/FluentKit.Blazor.props"]);
+            _ = XDocument.Parse(wrapperProps);
+            if (!wrapperProps.Contains("FluentKit.Blazor.Agent.props", StringComparison.Ordinal) ||
+                !wrapperProps.Contains("../buildMultiTargeting/FluentKit.Blazor.props", StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("Conventional buildTransitive props do not import the static-assets and agent props.");
+                ok = false;
+            }
+            return ok ? 0 : 1;
+        }
+        catch (Exception ex) when (ex is InvalidDataException or JsonException or InvalidOperationException or System.Xml.XmlException)
+        {
+            Console.Error.WriteLine($"NuGet package contract verification failed: {ex.Message}");
+            return 1;
+        }
+    }
+
+    private static T ReadJson<T>(ZipArchiveEntry entry)
+    {
+        using var stream = entry.Open();
+        return JsonSerializer.Deserialize<T>(stream, JsonOptions) ?? throw new InvalidDataException($"Empty JSON entry: {entry.FullName}");
+    }
+
+    private static string ReadEntry(ZipArchiveEntry entry)
+    {
+        using var reader = new StreamReader(entry.Open(), Encoding.UTF8);
+        return reader.ReadToEnd();
+    }
+
+    private static string Sha256(string path) => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+
+    private static string Sha256(byte[] bytes) => Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+
+    private static byte[] Utf8Bytes(string text) => Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(text)).ToArray();
+
+    private static void ValidatePackageVersion(string assemblyVersion, string packageVersion)
+    {
+        var assemblyCore = StripPrerelease(assemblyVersion);
+        var packageCore = StripPrerelease(packageVersion);
+        if (!string.Equals(assemblyCore, packageCore, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Package version {packageVersion} does not match assembly version {assemblyVersion}.");
+        }
+    }
+
+    private static string StripPrerelease(string version) => version.Split('-', '+')[0];
+
+    private static bool IsSafeRelativePath(string path) =>
+        !string.IsNullOrWhiteSpace(path) &&
+        !path.StartsWith("/", StringComparison.Ordinal) &&
+        !path.Contains("\\", StringComparison.Ordinal) &&
+        !path.Split('/').Any(segment => segment is "" or "." or "..");
 
     private static ReferenceModel BuildModel(string assemblyPath, string xmlPath, string manifestPath)
     {
@@ -367,7 +709,7 @@ internal static class ApiReferenceGenerator
         return 0;
     }
 
-    private static void PrintUsage() => Console.WriteLine("Usage: --assembly PATH --manifest PATH --json PATH --markdown PATH [--xml PATH] [--verify] | --self-test");
+    private static void PrintUsage() => Console.WriteLine("Usage: --assembly PATH --manifest PATH --json PATH --markdown PATH [--xml PATH] [--verify] [--contract-output PATH --package-id ID --package-version VERSION --skill-source PATH --references-source PATH] | --verify-package PATH [--assembly PATH --xml PATH --manifest PATH] | --self-test");
 
     private sealed class XmlDocs(IReadOnlyDictionary<string, string> members)
     {
@@ -386,6 +728,24 @@ internal static class ApiReferenceGenerator
     }
 
     private sealed record ReferenceModel(string Assembly, string Version, ComponentReference[] Components, TypeReference[] Types, string[] MissingSummaries);
+    private sealed record AgentContract(
+        AgentContractManifest Manifest,
+        string Json,
+        string Markdown,
+        string SkillSource,
+        Dictionary<string, string> ReferenceSources);
+    private sealed record AgentContractManifest(
+        int SchemaVersion,
+        string PackageId,
+        string PackageVersion,
+        string AssemblyName,
+        string Skill,
+        string ApiJson,
+        string ApiMarkdown,
+        Dictionary<string, string> References,
+        string SampleBaseUrl,
+        string DocumentationBaseUrl,
+        Dictionary<string, string> Files);
     private sealed record ComponentReference(string Name, string FullName, string Category, string Sample, string[] GenericParameters, string? Summary, ParameterReference[] Parameters);
     private sealed record ParameterReference(string Name, string Type, bool Cascading, bool RenderFragment, bool Bindable, string? Summary, bool Settable);
     private sealed record TypeReference(string Name, string FullName, string Kind, string[] GenericParameters, string[] Values, string? Summary, MemberReference[] Members);

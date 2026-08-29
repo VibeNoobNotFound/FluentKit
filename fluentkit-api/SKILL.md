@@ -1,33 +1,45 @@
 ---
 name: fluentkit-api
-description: Use FluentKit.Blazor correctly when building a separate Blazor WASM, Server, or MAUI Blazor Hybrid product. Versioned with the FluentKit package.
+description: Use the exact FluentKit.Blazor API and integration guidance shipped by the package referenced by the current Blazor or MAUI Blazor application.
 ---
 
-# FluentKit application
+# FluentKit package contract bootstrap
 
-This skill is for using FluentKit from another application. It is not the repository
-maintainer workflow. The bundle version in `metadata.json` must match the installed
-`FluentKit.Blazor` package exactly.
+This is a permanent bootstrap skill. It is installed once and resolves the version-specific
+agent contract from the `FluentKit.Blazor` package restored by the consumer project. It must
+never use a release ZIP, online "latest" API snapshot, or a different package version.
 
-## Required workflow
+## Resolve the exact package contract
 
-1. Inspect the app's project files and package lock/assets to identify its
-   `FluentKit.Blazor` version and hosting model.
-2. Read `references/api.json` for the exact component parameters, callbacks, slots, enums,
-   and services in this bundle's version. Do not invent a parameter from a newer release.
-3. Follow `references/setup.md` before adding components. The fixed static asset base is
-   `_content/FluentKit`, not `_content/FluentKit.Blazor`.
-4. Keep `ThemeProvider` at the root, register the theme/accent/overlay services, and render
-   one `FluentOverlayHost` for overlays.
-5. Prefer token variables and existing component parameters over app-local hard-coded Fluent
-   values. Use the sample route in the API JSON to find a runnable example.
-6. After changes, build the app and verify static assets and interactive overlays.
+1. If the user names a project, use that project. Otherwise inspect the current directory for the nearest `.csproj`, `.sln`, or `.slnx` containing a `FluentKit.Blazor` reference. If more than one valid project remains, ask which project is in scope.
+2. Restore the selected project. If its directory contains `packages.lock.json`, use locked
+   restore so the resolved dependency graph cannot change silently.
+3. Run the resolver script shipped beside this `SKILL.md`, matching the host operating system.
+   Substitute the installed skill directory for `<skill-dir>`:
 
-## References
+   ```bash
+   bash <skill-dir>/scripts/resolve-fluentkit.sh /absolute/path/to/Consumer.csproj
+   ```
 
-- [Setup](references/setup.md)
-- [Theming and tokens](references/theming-and-tokens.md)
-- [Overlays](references/overlays.md)
-- [Troubleshooting](references/troubleshooting.md)
-- [Sample routes](references/sample-routes.md)
-- [Generated API JSON](references/api.json)
+   ```powershell
+   <skill-dir>\scripts\resolve-fluentkit.ps1 -Project C:\path\to\Consumer.csproj
+   ```
+
+4. If the project requires MSBuild properties or a private/local NuGet source to evaluate its
+   package references, forward them with `--property Name=Value` / `-Property Name=Value` or
+   `--source PATH` / `-Source PATH[,PATH]`.
+
+5. The resolver queries `FluentKitAgentManifestPath` and `FluentKitAgentSkillPath` through
+   `dotnet msbuild`. Read the returned package-local `SKILL.md` completely before acting.
+6. If either property is absent, explain that the package predates the agent contract and ask
+   the user to upgrade to the first contract-bearing FluentKit release. Do not fall back to
+   reflection or a downloaded historical bundle.
+
+The package-local contract contains the exact `api.json`, `api.md`, and integration references.
+Follow those instructions for the remainder of the task.
+
+## Safety and scope
+
+- Never write into the user's skill directory during package restore or application builds.
+- Do not assume the package's latest published version is the version used by the app.
+- Keep the fixed static asset base `_content/FluentKit`, not `_content/FluentKit.Blazor`.

@@ -1,0 +1,5 @@
+<Project>
+  <!-- Preserve the Razor class library's generated static-web-assets import. -->
+  <Import Project="../buildMultiTargeting/FluentKit.Blazor.props" />
+  <Import Project="FluentKit.Blazor.Agent.props" />
+</Project>
