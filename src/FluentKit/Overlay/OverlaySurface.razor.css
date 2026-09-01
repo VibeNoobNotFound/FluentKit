@@ -9,6 +9,7 @@
    renders (Flyout, MenuFlyout, Tooltip, TeachingTip). */
 .fluent-overlay-surface {
     position: relative;
+    box-sizing: border-box;
     /* TeachingTip's beak (FluentTeachingTip.razor.css) intentionally renders outside this box's own
        rect via negative offsets — don't clip it. */
     overflow: visible;

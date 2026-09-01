@@ -33,7 +33,6 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
         {
             Entry.NeedsReposition = false;
             _needsPositioning = true;
-            Entry.ComputedStyle = "position: fixed; visibility: hidden;";
         }
 
         if (Entry.NeedsDismissRegistrationUpdate)
@@ -129,7 +128,8 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
         var placementArg = Entry.PreferredPlacement.ToString().ToLowerInvariant();
         var positionResult = await Interop.InvokeAsync<OverlayPosition>(
-            "computePosition", Entry.Anchor, _surfaceElement, placementArg, Entry.MatchAnchorWidth);
+            "computePosition", Entry.Anchor, _surfaceElement, placementArg, Entry.MatchAnchorWidth,
+            Entry.Positioning.Alignment.ToString(), Entry.Positioning.MainAxisOffset);
         if (!positionResult.Succeeded || positionResult.Value is null)
         {
             return;

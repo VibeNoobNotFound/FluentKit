@@ -1,108 +1,51 @@
+using FluentKit.Overlay;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
 namespace FluentKit.Composite;
 
 /// <summary>
-/// Mirrors fluent-svelte's ComboBox.svelte (dropdown list with an optional editable/searchable
-/// text-box mode). Two render modes off <see cref="Editable"/>:
-///   - false (default): a FluentButton-shaped trigger showing the selected item's Name, opens a
-///     positioned &lt;ul&gt; of ComboBoxItem-equivalent &lt;li&gt; rows on click.
-///   - true: a FluentTextBox-shaped trigger the user can type into, filtering/matching items by
-///     Name prefix (case-insensitive), same as fluent-svelte's handleInput/searchValue flow.
-///
-/// Unlike FluentMenuFlyout, this does NOT go through IOverlayService/FluentOverlayHost — the
-/// dropdown list needs to be exactly the trigger's width and grow from a specific list index (the
-/// menuOffset/menuGrowDirection choreography below), which is easiest to keep as a plain
-/// absolutely-positioned child of the component's own root (same as ComboBox.scss's own
-/// `position: relative` + `.combo-box-dropdown { position: absolute }`). A portal would only add
-/// indirection for zero benefit here since there's no anchor-to-elsewhere requirement.
+/// A WinUI-style selectable list with optional editable search. Its dropdown is rendered through
+/// <see cref="IOverlayService"/> so it can escape labels, clipping ancestors, and backdrop-filter
+/// roots while retaining the trigger's width and selected-row alignment.
 /// </summary>
-public partial class FluentComboBox<TValue> : ComponentBase
+public partial class FluentComboBox<TValue> : ComponentBase, IDisposable
 {
+    [Inject] private IOverlayService OverlayService { get; set; } = default!;
+
     /// <summary>Currently selected item's value. Two-way bindable.</summary>
     [Parameter] public TValue? Value { get; set; }
-
     [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
-
-    /// <summary>Current text in the search box. Only meaningful when <see cref="Editable"/> is true.</summary>
+    /// <summary>Current editable search text.</summary>
     [Parameter] public string? SearchValue { get; set; }
-
     [Parameter] public EventCallback<string?> SearchValueChanged { get; set; }
-
     [Parameter, EditorRequired] public IReadOnlyList<ComboBoxItem<TValue>> Items { get; set; } = [];
-
-    /// <summary>
-    /// Optional custom row content for each dropdown item. Falls back to a plain
-    /// <c>&lt;span&gt;@item.Name&lt;/span&gt;</c> when not supplied — same "text unless you say
-    /// otherwise" default as fluent-svelte's own ComboBoxItem (which likewise only exposes a
-    /// default slot, no separate templating concept). Wraps in the same .fluent-combo-box-item
-    /// &lt;li&gt; (selection bar, hover/active states, focus ring) regardless of what you render
-    /// inside — only the row's inner content is replaced, not its interaction chrome.
-    /// </summary>
+    /// <summary>Optional custom content for each dropdown row.</summary>
     [Parameter] public RenderFragment<ComboBoxItem<TValue>>? ItemTemplate { get; set; }
-
-    /// <summary>
-    /// Optional custom content for the closed/collapsed trigger label in non-editable
-    /// (<see cref="Editable"/> = false) mode, e.g. to show an icon + name instead of plain text
-    /// once something is selected. Only used when there IS a selection — the placeholder text
-    /// always renders plain regardless. Has no effect in Editable mode, since that trigger is a
-    /// real &lt;input&gt; and can only ever hold plain text.
-    /// </summary>
+    /// <summary>Optional custom content for the selected non-editable trigger label.</summary>
     [Parameter] public RenderFragment<ComboBoxItem<TValue>>? SelectedTemplate { get; set; }
-
     [Parameter] public string? Placeholder { get; set; }
-
-    /// <summary>Whether the ComboBox can be searched/typed into (fluent-svelte's `editable` prop).</summary>
+    /// <summary>Whether the ComboBox permits typing and prefix matching.</summary>
     [Parameter] public bool Editable { get; set; }
-
     [Parameter] public bool Disabled { get; set; }
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private bool _open;
-    private ElementReference _rootElement;
-
     private const int ItemHeight = 36;
-    private const int MaxVisibleItems = 14; // 504px max-block-size / 36px itemHeight, per ComboBox.scss
+    private const int MaxVisibleItems = 14;
 
-    private IEnumerable<ComboBoxItem<TValue>> SelectableItems => Items.Where(i => !i.Disabled);
+    private readonly string _dropdownId = $"fluent-combo-box-{Guid.NewGuid():N}";
+    private bool _open;
+    private bool _searchValueInitialized;
+    private ElementReference _rootElement;
+    private Guid? _overlayId;
 
-    private ComboBoxItem<TValue>? Selection =>
-        Items.FirstOrDefault(i => EqualityComparer<TValue>.Default.Equals(i.Value, Value!));
+    private string DropdownId => _dropdownId;
+    private string AriaExpanded => _open.ToString().ToLowerInvariant();
+    private IEnumerable<ComboBoxItem<TValue>> SelectableItems => Items.Where(item => !item.Disabled);
+    private ComboBoxItem<TValue>? Selection => Items.FirstOrDefault(item => EqualityComparer<TValue>.Default.Equals(item.Value, Value!));
 
-    /// <summary>
-    /// Which edge the dropdown visually grows from, purely cosmetic (drives the clip-path grow
-    /// animation direction in FluentComboBox.razor.css) — same three-way split as fluent-svelte's
-    /// menuGrowDirection: grows from the selected row if it's near an edge of the list, otherwise
-    /// from the center.
-    /// </summary>
-    private string GrowDirectionClass
-    {
-        get
-        {
-            if (Editable)
-            {
-                return "top";
-            }
-
-            var mid = Items.Count / 2;
-            var selectedIndex = Selection is null ? -1 : Items.ToList().IndexOf(Selection);
-
-            if (selectedIndex < 0 || selectedIndex == mid)
-            {
-                return "center";
-            }
-
-            return selectedIndex < mid ? "top" : "bottom";
-        }
-    }
-
-    /// <summary>
-    /// Vertical offset (px) so the dropdown opens with the selected row aligned under the trigger,
-    /// rather than always starting from row 0 — same idea as fluent-svelte's `menuOffset`.
-    /// </summary>
     private int MenuOffsetPx
     {
         get
@@ -113,15 +56,14 @@ public partial class FluentComboBox<TValue> : ComponentBase
         }
     }
 
-    private bool _searchValueInitialized;
+    private OverlayPositioningOptions Positioning => Editable
+        ? new() { MainAxisOffset = -4 }
+        : new() { Alignment = OverlayAnchorAlignment.AnchorStart, MainAxisOffset = MenuOffsetPx - 6 };
+
+    protected override void OnInitialized() => OverlayService.Changed += OnOverlayServiceChanged;
 
     protected override void OnParametersSet()
     {
-        // Mirrors the svelte onMount exactly: seed the search box from the current selection ONCE,
-        // on first render only. The old version re-checked IsNullOrEmpty(SearchValue) on every
-        // render, so backspacing the box to empty (a perfectly valid "no match" state) would get
-        // silently overwritten back to the selected item's name on the next render — this is the
-        // bug where clearing the editable box snaps back to the current selection.
         if (Editable && !_searchValueInitialized)
         {
             _searchValueInitialized = true;
@@ -130,34 +72,94 @@ public partial class FluentComboBox<TValue> : ComponentBase
                 SearchValue = Selection.Name;
             }
         }
+
+        RefreshOpenDropdown();
     }
 
-    private async Task ToggleOpenAsync()
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Disabled)
+        if (_overlayId is { } id)
+        {
+            OverlayService.Update(id, _rootElement, Positioning, OverlayPlacement.Bottom, lightDismiss: true,
+                matchAnchorWidth: true);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void OnOverlayServiceChanged()
+    {
+        if (_overlayId is not { } id)
         {
             return;
         }
 
-        await SetOpenAsync(!_open);
+        var entry = OverlayService.Active.FirstOrDefault(candidate => candidate.Id == id);
+        if (entry is null || entry.IsClosing)
+        {
+            _overlayId = null;
+            if (_open)
+            {
+                _open = false;
+                _ = InvokeAsync(StateHasChanged);
+            }
+        }
     }
 
-    private async Task SetOpenAsync(bool value)
+    private Task ToggleOpenAsync()
     {
-        if (_open == value)
+        if (!Disabled)
+        {
+            if (_open)
+            {
+                CloseDropdown();
+            }
+            else
+            {
+                OpenDropdown();
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void OpenDropdown()
+    {
+        if (Disabled || Items.Count == 0 || _open)
         {
             return;
         }
 
-        _open = value;
+        _open = true;
+        _overlayId = OverlayService.Show(RenderDropdown, _rootElement, Positioning, OverlayPlacement.Bottom,
+            lightDismiss: true, bare: false, matchAnchorWidth: true, scrollAnchorIntoView: false,
+            watchAnchorRemoved: false);
         StateHasChanged();
+    }
 
-        if (_open && Editable)
+    private void CloseDropdown()
+    {
+        var overlayId = _overlayId;
+        _overlayId = null;
+        _open = false;
+        if (overlayId is { } id)
         {
-            // Let the dropdown render, then focus/select the search input the way svelte's
-            // `await tick(); searchInputElement.focus()` does.
-            await Task.Yield();
+            OverlayService.Close(id);
         }
+
+        StateHasChanged();
+    }
+
+    private void RefreshOpenDropdown()
+    {
+        if (!_open || _overlayId is not { } id)
+        {
+            return;
+        }
+
+        OverlayService.Update(id, _rootElement, Positioning, OverlayPlacement.Bottom, lightDismiss: true,
+            matchAnchorWidth: true);
+        OverlayService.RefreshContent(id);
     }
 
     private async Task SelectAsync(ComboBoxItem<TValue> item)
@@ -168,34 +170,31 @@ public partial class FluentComboBox<TValue> : ComponentBase
         }
 
         Value = item.Value;
-        await ValueChanged.InvokeAsync(Value);
-
         if (Editable)
         {
             SearchValue = item.Name;
-            await SearchValueChanged.InvokeAsync(SearchValue);
         }
 
-        await SetOpenAsync(false);
+        CloseDropdown();
+        await ValueChanged.InvokeAsync(Value);
+        if (Editable)
+        {
+            await SearchValueChanged.InvokeAsync(SearchValue);
+        }
     }
 
     private async Task OnSearchInputAsync(ChangeEventArgs e)
     {
         var text = e.Value?.ToString() ?? string.Empty;
         SearchValue = text;
+
+        var match = SelectableItems.FirstOrDefault(item => item.Name.StartsWith(text, StringComparison.OrdinalIgnoreCase));
+        Value = match is not null ? match.Value : text.Length == 0 ? default : Value;
+        RefreshOpenDropdown();
+
         await SearchValueChanged.InvokeAsync(SearchValue);
-
-        var match = SelectableItems.FirstOrDefault(
-            i => i.Name.StartsWith(text, StringComparison.OrdinalIgnoreCase));
-
-        if (match is not null)
+        if (match is not null || text.Length == 0)
         {
-            Value = match.Value;
-            await ValueChanged.InvokeAsync(Value);
-        }
-        else if (text.Length == 0)
-        {
-            Value = default;
             await ValueChanged.InvokeAsync(Value);
         }
     }
@@ -208,7 +207,7 @@ public partial class FluentComboBox<TValue> : ComponentBase
         {
             case "Escape":
             case "Tab":
-                await SetOpenAsync(false);
+                CloseDropdown();
                 return;
 
             case "Enter":
@@ -223,7 +222,7 @@ public partial class FluentComboBox<TValue> : ComponentBase
                 await MoveSelectionAsync(+1);
                 if (Editable && !_open)
                 {
-                    await SetOpenAsync(true);
+                    OpenDropdown();
                 }
                 return;
 
@@ -240,7 +239,7 @@ public partial class FluentComboBox<TValue> : ComponentBase
                 return;
 
             case "ArrowDown" or "ArrowUp" when Editable && !_open:
-                await SetOpenAsync(true);
+                OpenDropdown();
                 return;
         }
     }
@@ -248,53 +247,48 @@ public partial class FluentComboBox<TValue> : ComponentBase
     private async Task MoveSelectionAsync(int direction)
     {
         var selectable = SelectableItems.ToList();
-        if (selectable.Count == 0)
-        {
-            return;
-        }
-
         var currentIndex = Selection is null ? -1 : selectable.IndexOf(Selection);
         var nextIndex = currentIndex + direction;
-
-        if (nextIndex < 0 || nextIndex >= selectable.Count)
+        if (nextIndex >= 0 && nextIndex < selectable.Count)
         {
-            return;
+            await SelectSilentlyAsync(selectable[nextIndex]);
         }
-
-        await SelectSilentlyAsync(selectable[nextIndex]);
     }
 
     private async Task JumpSelectionAsync(bool toFirst)
     {
         var selectable = SelectableItems.ToList();
-        if (selectable.Count == 0)
+        if (selectable.Count > 0)
         {
-            return;
+            await SelectSilentlyAsync(toFirst ? selectable[0] : selectable[^1]);
         }
-
-        await SelectSilentlyAsync(toFirst ? selectable[0] : selectable[^1]);
     }
 
-    /// <summary>Updates Value/SearchValue for keyboard navigation without closing the dropdown or
-    /// treating it as a final "select" action (mirrors svelte's direct `value = ...` assignments
-    /// inside handleKeyboardNavigation, as distinct from the explicit `selectItem` call on Enter).</summary>
     private async Task SelectSilentlyAsync(ComboBoxItem<TValue> item)
     {
         Value = item.Value;
-        await ValueChanged.InvokeAsync(Value);
-
         if (Editable)
         {
             SearchValue = item.Name;
+        }
+
+        RefreshOpenDropdown();
+        await ValueChanged.InvokeAsync(Value);
+        if (Editable)
+        {
             await SearchValueChanged.InvokeAsync(SearchValue);
         }
     }
 
-    private async Task OnFocusLostAsync()
+    public void Dispose()
     {
-        // Closest Blazor equivalent of svelte's externalMouseEvents/outermousedown dismiss —
-        // <ul tabindex> loses focus when the user clicks elsewhere, since nothing inside the
-        // dropdown intercepts focus permanently.
-        await SetOpenAsync(false);
+        if (OverlayService is not null)
+        {
+            OverlayService.Changed -= OnOverlayServiceChanged;
+            if (_overlayId is { } id)
+            {
+                OverlayService.Close(id);
+            }
+        }
     }
 }

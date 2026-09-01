@@ -1,165 +1,26 @@
-/* Ported from fluent-svelte AutoSuggestBox's flyout list, reusing the same dropdown/item recipe
-   ComboBox's editable dropdown already established (--flyout-*, --subtle-fill-color-*, --control-*),
-   with a "highlighted" state (keyboard arrow position) standing in for ComboBox's "selected". */
-
 .fluent-autosuggest-root {
-    position: relative;
     display: block;
     width: 100%;
     max-width: 300px;
 }
 
-/* Outer box: absolutely positioned/sized/animated, exactly what overlay-interop.js's
-   observeAutoHeight/waitForExitAnimation target via @ref="_dropdownElement" (see
-   FluentAutoSuggestBox.razor). Holds two children (see markup): a material div painted first,
-   then the actual scrolling <ul> painted after it — content is guaranteed above the acrylic
-   material by DOM/paint order, not z-index arithmetic across siblings that a backdrop-filter
-   boundary doesn't always honor consistently. */
-.fluent-autosuggest-dropdown {
-    z-index: 100;
-    position: absolute;
-    box-sizing: border-box;
-    inset-inline-start: 0;
-    inset-block-start: 100%;
-    margin: 0;
-    margin-block-start: var(--spacing-xxs);
-    width: 100%;
-    max-height: 320px;
-    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
-    /* Clips the material's square corners/noise tile to the rounded box, and clips the inner <ul>'s
-       own scroll content the same way a plain overflow:hidden card would. */
-    overflow: hidden;
-
-    /* Explicit `height` is set/kept in sync by overlay-interop.js's observeAutoHeight (see
-       FluentAutoSuggestBox.razor.cs's OnAfterRenderAsync) rather than left as the browser's normal
-       auto/intrinsic sizing — CSS can only transition between two concrete values, not to/from
-       `auto`, so without a script pinning it to the content's actual scrollHeight on every list-size
-       change, this `transition` would have nothing to animate and item-count changes would keep
-       snapping instantly even with everything else here in place. `max-height` above still caps the
-       visible/rendered size the normal way regardless of what the JS-set `height` says, so long
-       lists still scroll instead of growing past 320px. */
-    transition: height var(--duration-normal) var(--easing-standard);
-
-    /* Same enter/exit approach as OverlaySurface (see that file's comments for the full rationale,
-       including why this animates the standalone `scale`/`translate` properties instead of writing
-       to `transform` directly — avoids clobbering any positioning transform, even though this
-       particular element doesn't currently have one). A small downward-into-place translate on top
-       of the fade/scale reads better here than a pure scale, since the dropdown always grows out of
-       a fixed edge (right under the TextBox) rather than from a point that could be anywhere
-       on-screen the way a generic overlay's anchor can be. Uses --duration-normal (250ms), not the
-       buttons/menus --duration-fast (150ms) — this is a noticeably larger, content-bearing surface
-       appearing right under something the person is actively looking at (their own typing), so it
-       reads better a touch slower/more deliberate than a quick hover-feedback fade. */
-    transform-origin: top center;
-    animation: fluent-autosuggest-enter var(--duration-normal) var(--easing-decelerate) both;
-
-    border: 1px solid var(--flyout-border);
-    background-clip: padding-box;
-    box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
-    /* no backdrop-filter support / reduced-transparency */
-    background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
-}
-
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-    .fluent-autosuggest-dropdown {
-        background-color: transparent;
-        backdrop-filter: blur(var(--acrylic-thin-blur-amount));
-        -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
-    }
-
-    .fluent-autosuggest-dropdown::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        border-radius: inherit;
-        pointer-events: none;
-        background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
-        opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-thin-tint-opacity));
-    }
-}
-
-.fluent-autosuggest-dropdown::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    pointer-events: none;
-    background-image: var(--noise-asset);
-    background-repeat: repeat;
-    background-size: 256px 256px;
-    opacity: 0.02;
-}
-
-@media (prefers-reduced-transparency: reduce) {
-    .fluent-autosuggest-dropdown {
-        background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
-    .fluent-autosuggest-dropdown::before {
-        background-color: transparent;
-        opacity: 0;
-    }
-}
-
-.fluent-autosuggest-dropdown-material {
-    display: none;
-}
-
-/* Inner scrolling list — plain, no position/background/animation of its own. Sized to fill the
-   outer box exactly (100%/100%), scrolls independently of the material sibling painted behind it. */
 .fluent-autosuggest-dropdown-list {
-    position: relative;
     box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    margin: 0;
+    width: calc(100% + (var(--spacing-xs) * 2));
+    max-height: 320px;
+    margin: calc(var(--spacing-xs) * -1);
     padding: var(--spacing-xxs);
     list-style: none;
     overflow: auto;
-}
-
-/* Applied by FluentAutoSuggestBox.razor.cs's CloseDropdown/_closing the instant a close is
-   requested — see that file's FinishClosingAsync for the matching JS-animationend wait that keeps
-   the <ul> mounted long enough for this to actually play before it's removed from the DOM. */
-.fluent-autosuggest-dropdown--closing {
-    animation: fluent-autosuggest-exit var(--duration-normal) var(--easing-accelerate) both;
-}
-
-@keyframes fluent-autosuggest-enter {
-    from {
-        opacity: 0;
-        scale: 0.94;
-        translate: 0 -8px;
-    }
-    to {
-        opacity: 1;
-        scale: 1;
-        translate: 0 0;
-    }
-}
-
-@keyframes fluent-autosuggest-exit {
-    from {
-        opacity: 1;
-        scale: 1;
-        translate: 0 0;
-    }
-    to {
-        opacity: 0;
-        scale: 0.94;
-        translate: 0 -8px;
-    }
+    transition: height var(--duration-normal) var(--easing-standard);
 }
 
 .fluent-autosuggest-item {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    position: relative;
     box-sizing: border-box;
+    height: 32px;
     margin: var(--spacing-xxs) 0;
     padding-inline: var(--spacing-s);
     border-radius: var(--control-corner-radius);
@@ -167,8 +28,6 @@
     color: var(--text-fill-color-primary);
     cursor: default;
     user-select: none;
-    height: 32px;
-
     font-family: var(--font-family-base);
     font-size: var(--font-size-body);
 }
@@ -189,17 +48,8 @@
 
 .fluent-autosuggest-item span {
     flex: 1 1 auto;
+    max-width: 100%;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    overflow: hidden;
-    max-width: 100%;
-}
-
-.fluent-autosuggest-dismiss-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 99;
-    background: transparent;
-    pointer-events: auto;
-    cursor: default;
 }

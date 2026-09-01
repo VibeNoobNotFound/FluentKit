@@ -23,6 +23,8 @@ public sealed class OverlayEntry
     /// it via <c>getBoundingClientRect</c>.</summary>
     public bool MatchAnchorWidth { get; internal set; }
 
+    internal OverlayPositioningOptions Positioning { get; set; } = new();
+
     /// <summary>True for overlays created via <see cref="IOverlayService.ShowDetached"/> — no anchor
     /// element, positioned relative to the viewport instead. OverlaySurface uses this to skip the
     /// anchor-measurement JS round-trip entirely (ComputedStyle is already filled in by

@@ -19,16 +19,29 @@ public partial class ThemeProvider : ComponentBase, IAsyncDisposable
     private JsModuleLifetime Interop => _interop ??= new(
         JS, "./_content/FluentKit/Theming/theme-interop.js");
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         if (Volatile.Read(ref _disposed) != 0)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         ThemeService.ThemeChanged += OnThemeChanged;
         _themeHandlerSubscribed = true;
 
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || Volatile.Read(ref _disposed) != 0)
+        {
+            return;
+        }
+
+        // JS interop cannot run while an Interactive Server component is being prerendered.
+        // Defer browser preference tracking and the document-level theme attribute until the
+        // first interactive render; the cascading provider itself remains fully prerenderable.
         if (!await Interop.EnsureModuleAsync())
         {
             return;

@@ -2,24 +2,6 @@
    (--subtle-fill-color-*, --textbox-*, --control-*, --flyout-*) instead of fluent-svelte's own
    --fds-* custom properties. Grow/shadow-in keyframes kept as-is since they're purely presentational. */
 
-@keyframes fluent-combo-box-menu-in {
-    0% {
-        clip-path: var(--fluent-combo-box-grow-clip-path);
-    }
-    100% {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    }
-}
-
-@keyframes fluent-combo-box-shadow-in {
-    0% {
-        box-shadow: none;
-    }
-    100% {
-        box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
-    }
-}
-
 .fluent-combo-box {
     position: relative;
     display: inline-flex;
@@ -38,7 +20,7 @@
     display: flex;
     align-items: center;
     flex: 1 1 auto;
-    inline-size: 100%;
+    inline-size: calc(100% + (var(--spacing-xs) * 2));
     min-block-size: 30px;
     padding-inline: var(--spacing-s);
     gap: var(--spacing-xs);
@@ -212,122 +194,19 @@
     cursor: not-allowed;
 }
 
-/* ===== dropdown list ===== */
-
-/* Outer box: positioned/sized/clip-path-grown/shadow-in animated. Holds two children (see markup):
-   a material div painted first, then the actual scrolling <ul> (.fluent-combo-box-dropdown-list)
-   painted after it — content sits above the acrylic material by DOM/paint order, not cross-sibling
-   z-index (a backdrop-filter element's compositing doesn't always honor z-index consistently
-   across engines the way same-context, no-filter siblings do). */
-.fluent-combo-box-dropdown {
-    z-index: 100;
-    position: absolute;
-    box-sizing: border-box;
-    margin: 0;
-    margin-block-start: -6px;
-    margin-inline-start: -1px;
-
-    border: 1px solid var(--flyout-border);
-    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
-    /* Clips the material's square corners/noise tile to the rounded box, and clips the inner <ul>'s
-       own scroll content the same way the old single-element version's implicit clip did. */
-    overflow: hidden;
-
-    animation:
-        fluent-combo-box-menu-in var(--duration-normal, 250ms) var(--easing-standard),
-        fluent-combo-box-shadow-in var(--duration-normal, 250ms) var(--easing-standard) var(--duration-normal, 250ms);
-
-    inline-size: 100%;
-    max-block-size: 504px;
-    inset-block-start: var(--fluent-combo-box-menu-offset, 0);
-    inset-inline-start: 0;
-
-    box-shadow: var(--flyout-shadow, 0 4px 16px rgba(0, 0, 0, 0.24));
-    /* no backdrop-filter support / reduced-transparency */
-    background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
-}
-
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-    .fluent-combo-box-dropdown {
-        background-color: transparent;
-        backdrop-filter: blur(var(--acrylic-thin-blur-amount));
-        -webkit-backdrop-filter: blur(var(--acrylic-thin-blur-amount));
-    }
-
-    .fluent-combo-box-dropdown::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        border-radius: inherit;
-        pointer-events: none;
-        background-color: var(--acrylic-tint-color-override, rgb(var(--acrylic-tint-color)));
-        opacity: var(--acrylic-tint-opacity-pct-override, var(--acrylic-thin-tint-opacity));
-    }
-}
-
-.fluent-combo-box-dropdown::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    pointer-events: none;
-    background-image: var(--noise-asset);
-    background-repeat: repeat;
-    background-size: 256px 256px;
-    opacity: 0.02;
-}
-
-@media (prefers-reduced-transparency: reduce) {
-    .fluent-combo-box-dropdown {
-        background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill)) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
-    .fluent-combo-box-dropdown::before {
-        background-color: transparent;
-        opacity: 0;
-    }
-}
-
-.fluent-combo-box-dropdown-material {
-    display: none;
-}
-
-/* Inner scrolling list — plain, no position/background/animation of its own, fills the outer box
-   exactly and scrolls independently of the material sibling painted behind it. */
+/* Rendered inside FluentOverlayHost. OverlaySurface supplies the acrylic/chrome so this list only
+   owns sizing and row layout. The negative margin consumes the shared surface padding, matching
+   the trigger width exactly while preserving the surface border. */
 .fluent-combo-box-dropdown-list {
-    position: relative;
     box-sizing: border-box;
-    margin: 0;
+    display: flex;
+    flex-direction: column;
+    margin: calc(var(--spacing-xs) * -1);
     padding: var(--spacing-xxs);
     list-style: none;
     overflow: auto;
     inline-size: 100%;
-    block-size: 100%;
-}
-
-.fluent-combo-box--editable .fluent-combo-box-dropdown {
-    margin: 0;
-    inset-inline-start: 0;
-    inset-block-start: 100%;
-    inline-size: 100%;
-    border-radius: var(--overlay-corner-radius, var(--control-corner-radius));
-    border-start-start-radius: 0;
-    border-start-end-radius: 0;
-}
-
-.fluent-combo-box-dropdown--top {
-    --fluent-combo-box-grow-clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%);
-}
-
-.fluent-combo-box-dropdown--center {
-    --fluent-combo-box-grow-clip-path: polygon(0 25%, 100% 24%, 100% 75%, 0 75%);
-}
-
-.fluent-combo-box-dropdown--bottom {
-    --fluent-combo-box-grow-clip-path: polygon(0 75%, 100% 75%, 100% 100%, 0 100%);
+    max-block-size: 504px;
 }
 
 /* ===== dropdown item ===== */
@@ -410,13 +289,4 @@
     white-space: nowrap;
     overflow: hidden;
     max-inline-size: 100%;
-}
-
-.fluent-combo-box-dismiss-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 99;
-    background: transparent;
-    pointer-events: auto;
-    cursor: default;
 }

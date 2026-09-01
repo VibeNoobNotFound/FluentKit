@@ -106,7 +106,7 @@ export function unwatchAnchorRemoved(overlayId) {
     }
 }
 
-export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth) {
+export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth, alignment = "Adjacent", mainAxisOffset = 0) {
     const anchorRect = anchorEl.getBoundingClientRect();
 
     // Width has to be applied BEFORE popupRect is measured below — changing width can reflow the
@@ -148,7 +148,11 @@ export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth) 
         return { top, left, placement: resolvedPlacement, width: matchAnchorWidth ? anchorRect.width : null };
     }
 
-    if (placement === "top") {
+    if (alignment === "AnchorStart") {
+        top = anchorRect.top + mainAxisOffset;
+        const maxTop = window.innerHeight - popupRect.height - viewportPadding;
+        top = Math.min(Math.max(top, viewportPadding), Math.max(maxTop, viewportPadding));
+    } else if (placement === "top") {
         top = anchorRect.top - popupRect.height - gap;
         if (top < viewportPadding) {
             top = anchorRect.bottom + gap;

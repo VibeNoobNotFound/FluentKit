@@ -32,6 +32,18 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Overlay-host regression" Description="Type “se” then choose a suggestion. The native label and filtered ancestor reproduce the Interactive Server conditions that require a root overlay host.">
+        <Example>
+            <div class="overlay-regression-surface">
+                <label class="overlay-regression-label">
+                    Server-rendered search
+                    <FluentAutoSuggestBox TValue="string" Items="@_suggestions" @bind-Text="_searchText" Placeholder="Search city..."
+                                          SuggestionChosen="@((AutoSuggestBoxItem<string> item) => _chosenVal = item.Value)" />
+                </label>
+            </div>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {

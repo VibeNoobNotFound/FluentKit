@@ -46,6 +46,17 @@
             </div>
         </Example>
     </ControlExample>
+
+    <ControlExample HeaderText="Overlay-host regression" Description="This deliberately places the trigger in a native label and below a filtered surface. In the Interactive Server gallery, choose an item repeatedly: it should select once and stay closed while retaining a blurred acrylic popup.">
+        <Example>
+            <div class="overlay-regression-surface">
+                <label class="overlay-regression-label">
+                    Server-rendered ComboBox
+                    <FluentComboBox TValue="string" Items="@_fruits" @bind-Value="_selectedFruit" Placeholder="Choose fruit" />
+                </label>
+            </div>
+        </Example>
+    </ControlExample>
 </div>
 
 @code {

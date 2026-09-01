@@ -1,2 +1,22 @@
 #nullable enable
 FluentKit.Composite.FluentNavigationView.DisposeAsync() -> System.Threading.Tasks.ValueTask
+override FluentKit.Composite.FluentAutoSuggestBox<TValue>.OnInitialized() -> void
+override FluentKit.Composite.FluentAutoSuggestBox<TValue>.OnParametersSet() -> void
+FluentKit.Composite.FluentComboBox<TValue>.Dispose() -> void
+override FluentKit.Composite.FluentComboBox<TValue>.OnAfterRenderAsync(bool firstRender) -> System.Threading.Tasks.Task!
+override FluentKit.Composite.FluentComboBox<TValue>.OnInitialized() -> void
+FluentKit.Overlay.IOverlayService.Show(Microsoft.AspNetCore.Components.RenderFragment! content, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth, bool scrollAnchorIntoView, bool watchAnchorRemoved) -> System.Guid
+FluentKit.Overlay.IOverlayService.Update(System.Guid id, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool matchAnchorWidth) -> bool
+FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayAnchorAlignment.Adjacent = 0 -> FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayAnchorAlignment.AnchorStart = 1 -> FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayPositioningOptions
+FluentKit.Overlay.OverlayPositioningOptions.Alignment.get -> FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayPositioningOptions.Alignment.init -> void
+FluentKit.Overlay.OverlayPositioningOptions.MainAxisOffset.get -> double
+FluentKit.Overlay.OverlayPositioningOptions.MainAxisOffset.init -> void
+FluentKit.Overlay.OverlayPositioningOptions.OverlayPositioningOptions() -> void
+FluentKit.Overlay.OverlayService.Show(Microsoft.AspNetCore.Components.RenderFragment! content, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth, bool scrollAnchorIntoView, bool watchAnchorRemoved) -> System.Guid
+FluentKit.Overlay.OverlayService.Update(System.Guid id, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool matchAnchorWidth) -> bool
+override FluentKit.Theming.ThemeProvider.OnAfterRenderAsync(bool firstRender) -> System.Threading.Tasks.Task!
+override FluentKit.Effects.FluentMicaPanel.OnAfterRenderAsync(bool firstRender) -> System.Threading.Tasks.Task!

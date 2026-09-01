@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace FluentKit.Overlay;
 
+#pragma warning disable RS0027 // IOverlayService preserves an established optional-parameter overload.
 public sealed class OverlayService : IOverlayService
 {
     private readonly List<OverlayEntry> _active = [];
@@ -13,6 +14,12 @@ public sealed class OverlayService : IOverlayService
     public Guid Show(RenderFragment content, ElementReference anchor,
         OverlayPlacement placement = OverlayPlacement.Bottom, bool lightDismiss = true, bool bare = false,
         bool matchAnchorWidth = false, bool scrollAnchorIntoView = false, bool watchAnchorRemoved = false)
+        => Show(content, anchor, new OverlayPositioningOptions(), placement, lightDismiss, bare,
+            matchAnchorWidth, scrollAnchorIntoView, watchAnchorRemoved);
+
+    public Guid Show(RenderFragment content, ElementReference anchor, OverlayPositioningOptions positioning,
+        OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth,
+        bool scrollAnchorIntoView, bool watchAnchorRemoved)
     {
         var entry = new OverlayEntry
         {
@@ -22,6 +29,7 @@ public sealed class OverlayService : IOverlayService
             LightDismiss = lightDismiss,
             Bare = bare,
             MatchAnchorWidth = matchAnchorWidth,
+            Positioning = positioning,
             ScrollAnchorIntoView = scrollAnchorIntoView,
             WatchAnchorRemoved = watchAnchorRemoved
         };
@@ -120,6 +128,10 @@ public sealed class OverlayService : IOverlayService
 
     public bool Update(Guid id, ElementReference anchor, OverlayPlacement placement, bool lightDismiss,
         bool matchAnchorWidth = false)
+        => Update(id, anchor, new OverlayPositioningOptions(), placement, lightDismiss, matchAnchorWidth);
+
+    public bool Update(Guid id, ElementReference anchor, OverlayPositioningOptions positioning,
+        OverlayPlacement placement, bool lightDismiss, bool matchAnchorWidth)
     {
         var entry = FindActive(id);
         if (entry is null || entry.IsClosing)
@@ -130,7 +142,8 @@ public sealed class OverlayService : IOverlayService
         var anchorChanged = entry.Anchor.Id != anchor.Id;
         var positionChanged = anchorChanged
             || entry.PreferredPlacement != placement
-            || entry.MatchAnchorWidth != matchAnchorWidth;
+            || entry.MatchAnchorWidth != matchAnchorWidth
+            || !entry.Positioning.IsEquivalentTo(positioning);
         var dismissRegistrationChanged = anchorChanged || entry.LightDismiss != lightDismiss;
 
         if (!positionChanged && !dismissRegistrationChanged)
@@ -142,11 +155,18 @@ public sealed class OverlayService : IOverlayService
         entry.PreferredPlacement = placement;
         entry.LightDismiss = lightDismiss;
         entry.MatchAnchorWidth = matchAnchorWidth;
+        entry.Positioning = positioning;
         entry.NeedsReposition |= positionChanged;
         entry.NeedsDismissRegistrationUpdate |= dismissRegistrationChanged;
         if (positionChanged)
         {
-            entry.ComputedStyle = "position: fixed; visibility: hidden;";
+            // An already visible overlay can remain at its prior position until the new browser
+            // measurement returns. Hiding it here produces a conspicuous Server-rendered flicker
+            // for controls (such as ComboBox) that update their anchor offset while open.
+            if (entry.ComputedStyle.Contains("visibility: hidden;", StringComparison.Ordinal))
+            {
+                entry.ComputedStyle = "position: fixed; visibility: hidden;";
+            }
         }
         Changed?.Invoke();
         return true;
@@ -181,3 +201,4 @@ public sealed class OverlayService : IOverlayService
     private OverlayEntry? FindActive(Guid id)
         => _active.FirstOrDefault(entry => entry.Id == id);
 }
+#pragma warning restore RS0027

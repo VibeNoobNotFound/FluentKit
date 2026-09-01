@@ -84,36 +84,42 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
     private int _disposed;
     private int _renderGeneration;
     private bool _themeHandlerSubscribed;
+    private bool _interactive;
 
     private JsModuleLifetime Interop => _interop ??= new(
         JS, "./_content/FluentKit/Effects/mica-interop.js");
 
     private string VariantClass => Variant == MicaVariant.BaseAlt ? "fluent-mica--alt" : "fluent-mica--base";
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         if (Volatile.Read(ref _disposed) != 0)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         ThemeService.ThemeChanged += OnThemeChanged;
         _themeHandlerSubscribed = true;
-        if (!await Interop.EnsureModuleAsync())
-        {
-            return;
-        }
-
-        await RenderAsync();
+        return Task.CompletedTask;
     }
 
-    protected override async Task OnParametersSetAsync()
+    protected override Task OnParametersSetAsync()
     {
-        if (Volatile.Read(ref _disposed) != 0)
+        return _interactive && Volatile.Read(ref _disposed) == 0
+            ? RenderAsync()
+            : Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || Volatile.Read(ref _disposed) != 0)
         {
             return;
         }
 
+        // Keep the normal fallback surface prerenderable in Interactive Server. The Mica raster
+        // requires a browser canvas, so defer that work until the circuit is interactive.
+        _interactive = true;
         await RenderAsync();
     }
 
@@ -121,7 +127,7 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
 
     private async Task OnThemeChangedAsync()
     {
-        if (Volatile.Read(ref _disposed) != 0)
+        if (!_interactive || Volatile.Read(ref _disposed) != 0)
         {
             return;
         }

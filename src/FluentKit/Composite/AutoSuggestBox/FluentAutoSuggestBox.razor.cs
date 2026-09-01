@@ -1,3 +1,4 @@
+using FluentKit.Overlay;
 using FluentKit.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -6,97 +7,74 @@ using Microsoft.JSInterop;
 namespace FluentKit.Composite;
 
 /// <summary>
-/// Mirrors WinUI's AutoSuggestBox / fluent-svelte's AutoSuggestBox.svelte — a free-typing TextBox
-/// with a live-filtered suggestion dropdown underneath, distinct from ComboBox's editable mode in
-/// that the typed text is NOT required to match any item: <see cref="Text"/> is always whatever
-/// the user typed, <see cref="QuerySubmitted"/> fires with that raw text on Enter with no
-/// suggestion highlighted, and picking a suggestion (click, or Enter while one IS highlighted)
-/// fires <see cref="SuggestionChosen"/> separately and just replaces Text with the suggestion's
-/// Name — there's no persistent "selected value" the way ComboBox has <c>Value</c>.
-///
-/// Composes FluentTextBox (same "don't reimplement input chrome" rule NumberBox follows) and,
-/// like ComboBox/ContentDialog/NumberBox's Expanded popout, stays self-contained/absolutely
-/// positioned rather than going through IOverlayService — the dropdown needs to be exactly the
-/// trigger's width, same reasoning as ComboBox's own dropdown.
+/// A free-typing text box with live suggestions. The suggestion list is rendered through
+/// <see cref="IOverlayService"/> so it is not constrained by labels or acrylic ancestors.
 /// </summary>
 public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposable
 {
+    [Inject] private IOverlayService OverlayService { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
-    /// <summary>The raw typed text. Two-way bindable — always reflects what's in the box, never
-    /// snapped back to a suggestion's Name unless the user actually picks one.</summary>
+    /// <summary>The raw typed text. Two-way bindable.</summary>
     [Parameter] public string? Text { get; set; }
-
     [Parameter] public EventCallback<string?> TextChanged { get; set; }
-
     [Parameter, EditorRequired] public IReadOnlyList<AutoSuggestBoxItem<TValue>> Items { get; set; } = [];
-
-    /// <summary>
-    /// Optional custom match predicate over (typed text, candidate item). Defaults to a
-    /// case-insensitive substring match against <see cref="AutoSuggestBoxItem{TValue}.Name"/> —
-    /// deliberately "contains" rather than ComboBox's "starts-with", since AutoSuggestBox is meant
-    /// for search-as-you-type against arbitrary positions in the name, not prefix completion.
-    /// </summary>
+    /// <summary>Optional predicate used to filter suggestions from the entered text.</summary>
     [Parameter] public Func<string, AutoSuggestBoxItem<TValue>, bool>? Filter { get; set; }
-
-    /// <summary>Upper bound on how many matches are shown at once.</summary>
+    /// <summary>Maximum number of matching suggestions displayed at once.</summary>
     [Parameter] public int MaxSuggestions { get; set; } = 8;
-
-    /// <summary>Fired when the user picks a suggestion — click, or Enter while one is highlighted
-    /// via arrow keys. Text is set to the suggestion's Name as part of the same interaction.</summary>
+    /// <summary>Raised after a suggestion is selected.</summary>
     [Parameter] public EventCallback<AutoSuggestBoxItem<TValue>> SuggestionChosen { get; set; }
-
-    /// <summary>Fired on Enter when no suggestion is highlighted — the raw typed text is the
-    /// query, same as WinUI's QuerySubmitted with a null ChosenSuggestion.</summary>
+    /// <summary>Raised when Enter submits text without a highlighted suggestion.</summary>
     [Parameter] public EventCallback<string?> QuerySubmitted { get; set; }
-
-    /// <summary>Optional custom row content for each suggestion. Falls back to a plain
-    /// <c>&lt;span&gt;@item.Name&lt;/span&gt;</c>, same default ComboBox's ItemTemplate uses.</summary>
+    /// <summary>Optional custom content for each suggestion row.</summary>
     [Parameter] public RenderFragment<AutoSuggestBoxItem<TValue>>? ItemTemplate { get; set; }
-
     [Parameter] public string? Header { get; set; }
-
-    /// <summary>
-    /// When true, shows a search icon on the right of the box (via TextBox's Buttons slot). Once
-    /// there's text in the box, that icon swaps to a "clear" icon that empties Text on click —
-    /// same idea as the search field on the demo TextBox above, just wired in as an opt-in here.
-    /// </summary>
+    /// <summary>Whether to display the search/clear affordance.</summary>
     [Parameter] public bool EnableSearchIcon { get; set; }
-
     [Parameter] public string? Placeholder { get; set; }
-
     [Parameter] public bool Disabled { get; set; }
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
+    private readonly string _dropdownId = $"fluent-autosuggest-{Guid.NewGuid():N}";
     private bool _open;
     private int _highlightedIndex = -1;
-
-    // Same enter/exit animation shape as OverlaySurface (see its own comments for the full
-    // rationale), just self-contained here instead of going through IOverlayService — the dropdown
-    // is a plain `@if`-conditional <ul>, not an overlay entry, since (like ComboBox) it needs to be
-    // exactly the trigger's width rather than independently positioned/measured.
-    private bool _closing;
-    // Bumped on every open/close request; a pending FinishClosingAsync only applies its own result if
-    // the generation it captured is still current, so a rapid close-then-reopen (e.g. arrow-key-close
-    // then immediately typing again) can't have a stale exit-animation wait clobber a state the user
-    // has already moved past.
-    private int _closeGeneration;
     private List<AutoSuggestBoxItem<TValue>> _lastMatches = [];
+    private ElementReference _rootElement;
     private ElementReference _dropdownElement;
+    private Guid? _overlayId;
     private JsModuleLifetime? _interop;
-
-    private List<AutoSuggestBoxItem<TValue>> DisplayMatches => _open ? Matches : _lastMatches;
-
-    // Guards observeAutoHeight from being (re)started on every keystroke re-render while already
-    // open — it only needs wiring up once per mount, right after the freshly-created <ul> actually
-    // lands in the DOM (OnAfterRenderAsync), same as OverlaySurface's own _positioned guard.
     private bool _heightObserved;
     private int _disposed;
 
-    private JsModuleLifetime Interop => _interop ??= new(
-        JS, "./_content/FluentKit/Overlay/overlay-interop.js");
+    private string DropdownId => _dropdownId;
+    private IReadOnlyDictionary<string, object> TextBoxAttributes
+    {
+        get
+        {
+            var attributes = new Dictionary<string, object>(StringComparer.Ordinal)
+            {
+                ["role"] = "combobox",
+                ["aria-autocomplete"] = "list",
+                ["aria-haspopup"] = "listbox",
+                ["aria-controls"] = DropdownId,
+                ["aria-expanded"] = _open.ToString().ToLowerInvariant()
+            };
+
+            if (AdditionalAttributes is not null)
+            {
+                foreach (var attribute in AdditionalAttributes)
+                {
+                    attributes[attribute.Key] = attribute.Value;
+                }
+            }
+
+            return attributes;
+        }
+    }
+    private List<AutoSuggestBoxItem<TValue>> DisplayMatches => _open ? Matches : _lastMatches;
 
     private List<AutoSuggestBoxItem<TValue>> Matches
     {
@@ -108,21 +86,33 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
             }
 
             var predicate = Filter ?? DefaultFilter;
-            return Items.Where(i => predicate(Text, i)).Take(MaxSuggestions).ToList();
+            return Items.Where(item => predicate(Text, item)).Take(MaxSuggestions).ToList();
         }
     }
 
     private static bool DefaultFilter(string text, AutoSuggestBoxItem<TValue> item) =>
         item.Name.Contains(text, StringComparison.OrdinalIgnoreCase);
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private JsModuleLifetime Interop => _interop ??= new(JS, "./_content/FluentKit/Overlay/overlay-interop.js");
+
+    protected override void OnInitialized() => OverlayService.Changed += OnOverlayServiceChanged;
+
+    protected override void OnParametersSet() => SynchronizeDropdown();
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Volatile.Read(ref _disposed) != 0 || !_open || _heightObserved)
+        if (_overlayId is { } id)
         {
-            return;
+            OverlayService.Update(id, _rootElement, OverlayPlacement.Bottom, lightDismiss: true,
+                matchAnchorWidth: true);
         }
 
-        if (!await Interop.EnsureModuleAsync())
+        return ObserveHeightAsync();
+    }
+
+    private async Task ObserveHeightAsync()
+    {
+        if (Volatile.Read(ref _disposed) != 0 || !_open || _heightObserved || !await Interop.EnsureModuleAsync())
         {
             return;
         }
@@ -133,52 +123,99 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
         }
     }
 
+    private void OnOverlayServiceChanged()
+    {
+        if (_overlayId is not { } id)
+        {
+            return;
+        }
+
+        var entry = OverlayService.Active.FirstOrDefault(candidate => candidate.Id == id);
+        if (entry is null || entry.IsClosing)
+        {
+            _lastMatches = Matches;
+            _overlayId = null;
+            if (_open)
+            {
+                _open = false;
+                _ = InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private void SynchronizeDropdown()
+    {
+        if (Disabled || Matches.Count == 0)
+        {
+            CloseDropdown();
+            return;
+        }
+
+        if (_open)
+        {
+            RefreshOpenDropdown();
+        }
+    }
+
     private void OpenDropdown()
     {
-        _closeGeneration++;
+        if (Disabled || _open || Matches.Count == 0)
+        {
+            return;
+        }
+
         _open = true;
-        _closing = false;
+        _overlayId = OverlayService.Show(RenderDropdown, _rootElement, OverlayPlacement.Bottom,
+            lightDismiss: true, matchAnchorWidth: true);
+        StateHasChanged();
     }
 
     private void CloseDropdown()
     {
-        if (!_open)
+        if (!_open && _overlayId is null)
         {
             return;
         }
 
-        // Snapshot now, before Text/Items can change further — e.g. ClearAsync blanks Text in the
-        // same call that closes the dropdown, which would make the live Matches property go empty
-        // immediately and the list would vanish instead of fading out with its last contents.
         _lastMatches = Matches;
+        StopHeightObservation();
+        var overlayId = _overlayId;
+        _overlayId = null;
         _open = false;
-        _closing = true;
-        var generation = ++_closeGeneration;
-        ObserveBackgroundTask(FinishClosingAsync(generation));
+        if (overlayId is { } id)
+        {
+            OverlayService.Close(id);
+        }
+
+        StateHasChanged();
     }
 
-    private async Task FinishClosingAsync(int generation)
+    private void RefreshOpenDropdown()
     {
-        if (Volatile.Read(ref _disposed) != 0)
+        if (_overlayId is not { } id)
         {
             return;
         }
 
-        if (!await Interop.EnsureModuleAsync())
+        OverlayService.RefreshContent(id);
+    }
+
+    private void StopHeightObservation()
+    {
+        if (!_heightObserved)
         {
             return;
         }
 
-        await Interop.InvokeVoidAsync("waitForExitAnimation", _dropdownElement);
-        await Interop.InvokeVoidAsync("unobserveAutoHeight", _dropdownElement);
+        _heightObserved = false;
+        ObserveBackgroundTask(StopHeightObservationAsync());
+    }
 
-        // Only the most recent close request gets to actually unmount the list — if the user reopened
-        // (or closed again) while this was waiting, that newer request already owns _closing/_open.
-        if (Volatile.Read(ref _disposed) == 0 && generation == _closeGeneration && _closing)
+    private async Task StopHeightObservationAsync()
+    {
+        if (_interop is not null && await _interop.EnsureModuleAsync())
         {
-            _closing = false;
-            _heightObserved = false;
-            StateHasChanged();
+            await _interop.InvokeVoidAsync("unobserveAutoHeight", _dropdownElement);
         }
     }
 
@@ -202,58 +239,24 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
             TaskScheduler.Default);
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        if (Interlocked.Exchange(ref _disposed, 1) != 0)
-        {
-            return;
-        }
-
-        _closeGeneration++;
-        _open = false;
-        _closing = false;
-
-        if (_interop is null)
-        {
-            return;
-        }
-
-        if (_heightObserved)
-        {
-            await _interop.DisposeAsync(("unobserveAutoHeight", new object?[] { _dropdownElement }));
-        }
-        else
-        {
-            await _interop.DisposeAsync();
-        }
-
-        _heightObserved = false;
-    }
-
     private async Task OnTextChangedAsync(string? text)
     {
         Text = text;
         _highlightedIndex = -1;
-        await TextChanged.InvokeAsync(Text);
-
         if (Matches.Count > 0)
         {
             OpenDropdown();
+            RefreshOpenDropdown();
         }
         else
         {
             CloseDropdown();
         }
+
+        await TextChanged.InvokeAsync(Text);
     }
 
-    private void OnFocusIn()
-    {
-        if (!Disabled && Matches.Count > 0)
-        {
-            OpenDropdown();
-        }
-    }
-
+    private void OnFocusIn() => OpenDropdown();
     private void OnFocusLost() => CloseDropdown();
 
     private async Task ClearAsync()
@@ -297,6 +300,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
 
                 OpenDropdown();
                 _highlightedIndex = _highlightedIndex + 1 >= matches.Count ? 0 : _highlightedIndex + 1;
+                RefreshOpenDropdown();
                 return;
 
             case "ArrowUp":
@@ -307,6 +311,7 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
 
                 OpenDropdown();
                 _highlightedIndex = _highlightedIndex - 1 < 0 ? matches.Count - 1 : _highlightedIndex - 1;
+                RefreshOpenDropdown();
                 return;
 
             case "Enter":
@@ -320,6 +325,35 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
                     await QuerySubmitted.InvokeAsync(Text);
                 }
                 return;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return;
+        }
+
+        if (OverlayService is not null)
+        {
+            OverlayService.Changed -= OnOverlayServiceChanged;
+            if (_overlayId is { } id)
+            {
+                OverlayService.Close(id);
+            }
+        }
+
+        if (_interop is not null)
+        {
+            if (_heightObserved)
+            {
+                await _interop.DisposeAsync(("unobserveAutoHeight", new object?[] { _dropdownElement }));
+            }
+            else
+            {
+                await _interop.DisposeAsync();
+            }
         }
     }
 }

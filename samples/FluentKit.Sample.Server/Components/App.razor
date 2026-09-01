@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FluentKit Gallery — Interactive Server</title>
+    <base href="/" />
+    <link rel="stylesheet" href="_content/FluentKit/Tokens/tokens.css" />
+    <link rel="stylesheet" href="_content/FluentKit/Icons/FluentSystemIcons-Regular.css" />
+    <link rel="stylesheet" href="FluentKit.Sample.Server.styles.css" />
+    <link rel="stylesheet" href="_content/FluentKit.Sample.Shared/gallery.css" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script>
+        window.galleryHighlight = function (elementId) { var el = document.getElementById(elementId); if (el && window.Prism) window.Prism.highlightElement(el); };
+        window.galleryHighlightAll = function () { if (window.Prism) window.Prism.highlightAll(); };
+        window.liveHighlight = function (elementId, code) { var el = document.getElementById(elementId); if (el) el.textContent = code; };
+        window.liveHighlightSyncScroll = function () { };
+        window.galleryStorageGet = function (key) { try { return localStorage.getItem(key); } catch { return null; } };
+        window.galleryStorageSet = function (key, value) { try { localStorage.setItem(key, value); return true; } catch { return false; } };
+        window.galleryStorageRemove = function (key) { try { localStorage.removeItem(key); } catch { } };
+    </script>
+    <script src="_framework/blazor.web.js"></script>
+</body>
+</html>
