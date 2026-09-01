@@ -14,6 +14,14 @@ public sealed class OverlaySurfaceOptions
     /// <summary>Entrance reveal origin. The default uses the standard fade/scale motion.</summary>
     public OverlayEntranceOrigin EntranceOrigin { get; init; } = OverlayEntranceOrigin.Default;
 
+    /// <summary>Optional timing and velocity controls for the surface motion.</summary>
+    public OverlayAnimationOptions Animation { get; init; } = new();
+
     internal bool IsEquivalentTo(OverlaySurfaceOptions other)
-        => ContentLayout == other.ContentLayout && EntranceOrigin == other.EntranceOrigin;
+        => ContentLayout == other.ContentLayout
+            && EntranceOrigin == other.EntranceOrigin
+            && Animation.EntranceDuration == other.Animation.EntranceDuration
+            && Animation.EntranceEasing == other.Animation.EntranceEasing
+            && Animation.ExitDuration == other.Animation.ExitDuration
+            && Animation.ExitEasing == other.Animation.ExitEasing;
 }

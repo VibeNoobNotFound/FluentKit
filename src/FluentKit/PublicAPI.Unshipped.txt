@@ -11,6 +11,21 @@ FluentKit.Overlay.IOverlayService.Update(System.Guid id, Microsoft.AspNetCore.Co
 FluentKit.Overlay.OverlayAnchorAlignment
 FluentKit.Overlay.OverlayAnchorAlignment.Adjacent = 0 -> FluentKit.Overlay.OverlayAnchorAlignment
 FluentKit.Overlay.OverlayAnchorAlignment.AnchorStart = 1 -> FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationEasing.Decelerate = 0 -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationEasing.Standard = 1 -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationEasing.Accelerate = 2 -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationEasing.Linear = 3 -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationOptions
+FluentKit.Overlay.OverlayAnimationOptions.OverlayAnimationOptions() -> void
+FluentKit.Overlay.OverlayAnimationOptions.EntranceDuration.get -> System.TimeSpan?
+FluentKit.Overlay.OverlayAnimationOptions.EntranceDuration.init -> void
+FluentKit.Overlay.OverlayAnimationOptions.EntranceEasing.get -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationOptions.EntranceEasing.init -> void
+FluentKit.Overlay.OverlayAnimationOptions.ExitDuration.get -> System.TimeSpan?
+FluentKit.Overlay.OverlayAnimationOptions.ExitDuration.init -> void
+FluentKit.Overlay.OverlayAnimationOptions.ExitEasing.get -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationOptions.ExitEasing.init -> void
 FluentKit.Overlay.OverlayContentLayout
 FluentKit.Overlay.OverlayContentLayout.Padded = 0 -> FluentKit.Overlay.OverlayContentLayout
 FluentKit.Overlay.OverlayContentLayout.EdgeToEdge = 1 -> FluentKit.Overlay.OverlayContentLayout
@@ -31,6 +46,8 @@ FluentKit.Overlay.OverlayService.Update(System.Guid id, Microsoft.AspNetCore.Com
 FluentKit.Overlay.OverlayEntry.SurfaceOptions.get -> FluentKit.Overlay.OverlaySurfaceOptions!
 FluentKit.Overlay.OverlaySurfaceOptions
 FluentKit.Overlay.OverlaySurfaceOptions.OverlaySurfaceOptions() -> void
+FluentKit.Overlay.OverlaySurfaceOptions.Animation.get -> FluentKit.Overlay.OverlayAnimationOptions!
+FluentKit.Overlay.OverlaySurfaceOptions.Animation.init -> void
 FluentKit.Overlay.OverlaySurfaceOptions.ContentLayout.get -> FluentKit.Overlay.OverlayContentLayout
 FluentKit.Overlay.OverlaySurfaceOptions.ContentLayout.init -> void
 FluentKit.Overlay.OverlaySurfaceOptions.EntranceOrigin.get -> FluentKit.Overlay.OverlayEntranceOrigin

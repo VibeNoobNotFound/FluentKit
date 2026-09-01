@@ -10,6 +10,37 @@ namespace FluentKit.Tests;
 public sealed class PortalledDropdownTests
 {
     [Fact]
+    public void OverlayAnimationOptionsUseDeceleratingEntrancesAndAllowCustomTiming()
+    {
+        using var context = CreateContext();
+        var host = context.Render<FluentOverlayHost>();
+        var overlays = context.Services.GetRequiredService<IOverlayService>();
+        var surface = new OverlaySurfaceOptions
+        {
+            Animation = new OverlayAnimationOptions
+            {
+                EntranceDuration = TimeSpan.FromMilliseconds(320),
+                EntranceEasing = OverlayAnimationEasing.Standard,
+                ExitDuration = TimeSpan.FromMilliseconds(180),
+                ExitEasing = OverlayAnimationEasing.Linear
+            }
+        };
+
+        Assert.Equal(OverlayAnimationEasing.Decelerate, new OverlaySurfaceOptions().Animation.EntranceEasing);
+
+        overlays.Show(builder => builder.AddContent(0, "animated"), default, new OverlayPositioningOptions(),
+            surface, OverlayPlacement.Bottom, lightDismiss: false, bare: false, matchAnchorWidth: false,
+            scrollAnchorIntoView: false, watchAnchorRemoved: false);
+
+        host.WaitForAssertion(() => Assert.Contains("animated", host.Markup));
+        var overlay = host.Find(".fluent-overlay-surface");
+        Assert.Contains("fluent-overlay-surface--entrance-easing-standard", overlay.GetAttribute("class"));
+        Assert.Contains("fluent-overlay-surface--exit-easing-linear", overlay.GetAttribute("class"));
+        Assert.Contains("--fluent-overlay-entrance-duration: 320ms", overlay.GetAttribute("style"));
+        Assert.Contains("--fluent-overlay-exit-duration: 180ms", overlay.GetAttribute("style"));
+    }
+
+    [Fact]
     public void AnchoredOverlaysWaitForPositioning_WhileDetachedOverlaysEnterImmediately()
     {
         using var context = CreateContext();

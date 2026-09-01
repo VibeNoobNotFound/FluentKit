@@ -4538,6 +4538,54 @@
       "members": []
     },
     {
+      "name": "OverlayAnimationEasing",
+      "fullName": "FluentKit.Overlay.OverlayAnimationEasing",
+      "kind": "enum",
+      "genericParameters": [],
+      "values": [
+        "Accelerate",
+        "Decelerate",
+        "Linear",
+        "Standard"
+      ],
+      "summary": "Controls how an overlay\u0027s velocity changes during its entrance or exit.",
+      "members": []
+    },
+    {
+      "name": "OverlayAnimationOptions",
+      "fullName": "FluentKit.Overlay.OverlayAnimationOptions",
+      "kind": "class",
+      "genericParameters": [],
+      "values": [],
+      "summary": "Optional timing controls for an overlay surface.",
+      "members": [
+        {
+          "name": "EntranceDuration",
+          "kind": "property",
+          "type": "Nullable\u003CTimeSpan\u003E",
+          "summary": "Overrides the entrance duration. When omitted, standard surfaces use the fast duration and selected-row reveals use the normal duration."
+        },
+        {
+          "name": "EntranceEasing",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayAnimationEasing",
+          "summary": "Controls the entrance velocity. The default is WinUI\u0027s fast-out, slow-in curve: maximum speed at the start that progressively decreases as the surface reaches rest."
+        },
+        {
+          "name": "ExitDuration",
+          "kind": "property",
+          "type": "Nullable\u003CTimeSpan\u003E",
+          "summary": "Overrides the exit duration. When omitted, the standard fast duration is used."
+        },
+        {
+          "name": "ExitEasing",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayAnimationEasing",
+          "summary": "Controls the exit velocity. The default accelerates out of the scene."
+        }
+      ]
+    },
+    {
       "name": "OverlayContentLayout",
       "fullName": "FluentKit.Overlay.OverlayContentLayout",
       "kind": "enum",
@@ -4770,6 +4818,12 @@
       "values": [],
       "summary": "Optional surface presentation refinements for an anchored overlay.",
       "members": [
+        {
+          "name": "Animation",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayAnimationOptions",
+          "summary": "Optional timing and velocity controls for the surface motion."
+        },
         {
           "name": "ContentLayout",
           "kind": "property",

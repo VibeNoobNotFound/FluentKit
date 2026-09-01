@@ -11,6 +11,10 @@
     position: relative;
     box-sizing: border-box;
     --fluent-overlay-surface-padding: var(--spacing-xs);
+    --fluent-overlay-entrance-duration: var(--duration-fast);
+    --fluent-overlay-entrance-easing: cubic-bezier(0, 0, 0, 1);
+    --fluent-overlay-exit-duration: var(--duration-fast);
+    --fluent-overlay-exit-easing: cubic-bezier(1, 0, 1, 1);
     /* TeachingTip's beak (FluentTeachingTip.razor.css) intentionally renders outside this box's own
        rect via negative offsets — don't clip it. */
     overflow: visible;
@@ -100,21 +104,56 @@
 }
 
 .fluent-overlay-surface--positioned {
-    animation: fluent-overlay-enter var(--duration-fast) var(--easing-decelerate) both;
+    animation: fluent-overlay-enter var(--fluent-overlay-entrance-duration) var(--fluent-overlay-entrance-easing) both;
 }
 
 /* ComboBox restores the WinUI/fluent-svelte reveal that grows from the selected-row region. The
    clip-path is applied to the complete surface so its acrylic, border, and content reveal together. */
 .fluent-overlay-surface--positioned.fluent-overlay-surface--entrance-top {
-    animation: fluent-overlay-reveal-top var(--duration-normal) var(--easing-standard) both;
+    --fluent-overlay-entrance-duration: var(--duration-normal);
+    animation: fluent-overlay-reveal-top var(--fluent-overlay-entrance-duration) var(--fluent-overlay-entrance-easing) both;
 }
 
 .fluent-overlay-surface--positioned.fluent-overlay-surface--entrance-center {
-    animation: fluent-overlay-reveal-center var(--duration-normal) var(--easing-standard) both;
+    --fluent-overlay-entrance-duration: var(--duration-normal);
+    animation: fluent-overlay-reveal-center var(--fluent-overlay-entrance-duration) var(--fluent-overlay-entrance-easing) both;
 }
 
 .fluent-overlay-surface--positioned.fluent-overlay-surface--entrance-bottom {
-    animation: fluent-overlay-reveal-bottom var(--duration-normal) var(--easing-standard) both;
+    --fluent-overlay-entrance-duration: var(--duration-normal);
+    animation: fluent-overlay-reveal-bottom var(--fluent-overlay-entrance-duration) var(--fluent-overlay-entrance-easing) both;
+}
+
+.fluent-overlay-surface--entrance-easing-decelerate {
+    --fluent-overlay-entrance-easing: cubic-bezier(0, 0, 0, 1);
+}
+
+.fluent-overlay-surface--entrance-easing-standard {
+    --fluent-overlay-entrance-easing: var(--easing-standard);
+}
+
+.fluent-overlay-surface--entrance-easing-accelerate {
+    --fluent-overlay-entrance-easing: var(--easing-accelerate);
+}
+
+.fluent-overlay-surface--entrance-easing-linear {
+    --fluent-overlay-entrance-easing: linear;
+}
+
+.fluent-overlay-surface--exit-easing-decelerate {
+    --fluent-overlay-exit-easing: cubic-bezier(0, 0, 0, 1);
+}
+
+.fluent-overlay-surface--exit-easing-standard {
+    --fluent-overlay-exit-easing: var(--easing-standard);
+}
+
+.fluent-overlay-surface--exit-easing-linear {
+    --fluent-overlay-exit-easing: linear;
+}
+
+.fluent-overlay-surface--exit-easing-accelerate {
+    --fluent-overlay-exit-easing: cubic-bezier(1, 0, 1, 1);
 }
 
 /* Applied by OverlaySurface.razor.cs the instant Entry.IsClosing flips true (see OverlaySurface.razor.cs
@@ -123,7 +162,7 @@
    and transform; the enter animation has already finished by the time this class can apply (it's only
    added post-open), so there's nothing to interrupt. */
 .fluent-overlay-surface.fluent-overlay-surface--closing {
-    animation: fluent-overlay-exit var(--duration-fast) var(--easing-accelerate) both;
+    animation: fluent-overlay-exit var(--fluent-overlay-exit-duration) var(--fluent-overlay-exit-easing) both;
 }
 
 @keyframes fluent-overlay-enter {
