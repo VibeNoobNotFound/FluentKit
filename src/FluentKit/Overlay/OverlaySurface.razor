@@ -1,7 +1,7 @@
 @namespace FluentKit.Overlay
 @implements IAsyncDisposable
 
-<div class="fluent-overlay-surface @(Entry.Bare ? "fluent-overlay-surface--bare" : "") @(Entry.IsClosing ? "fluent-overlay-surface--closing" : "")" style="@Entry.ComputedStyle" @ref="_surfaceElement">
+<div class="@SurfaceClass" style="@SurfaceStyle" @ref="_surfaceElement">
     @if (Entry.LightDismiss)
     {
         <div class="fluent-overlay-dismiss-backdrop" @onclick="() => OnLightDismiss(Entry.Id.ToString())"></div>

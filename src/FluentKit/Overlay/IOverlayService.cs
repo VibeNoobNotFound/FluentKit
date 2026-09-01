@@ -8,6 +8,7 @@ namespace FluentKit.Overlay;
 /// render the content at a fixed top-level position. This is the Blazor answer to
 /// React's createPortal: render-tree teleportation via a cascading service, not DOM manipulation.
 /// </summary>
+#pragma warning disable RS0027 // Existing optional-parameter overloads must remain source/binary compatible.
 public interface IOverlayService
 {
     IReadOnlyList<OverlayEntry> Active { get; }
@@ -17,6 +18,20 @@ public interface IOverlayService
     Guid Show(RenderFragment content, ElementReference anchor,
         OverlayPlacement placement = OverlayPlacement.Bottom, bool lightDismiss = true, bool bare = false,
         bool matchAnchorWidth = false, bool scrollAnchorIntoView = false, bool watchAnchorRemoved = false);
+
+    /// <summary>
+    /// Shows an overlay with optional anchor-alignment refinement. This overload preserves the
+    /// existing <see cref="Show(RenderFragment, ElementReference, OverlayPlacement, bool, bool, bool, bool, bool)"/>
+    /// contract for callers that need only ordinary adjacent placement.
+    /// </summary>
+    Guid Show(RenderFragment content, ElementReference anchor, OverlayPositioningOptions positioning,
+        OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth,
+        bool scrollAnchorIntoView, bool watchAnchorRemoved);
+
+    /// <summary>Shows an overlay with positioning and surface presentation refinements.</summary>
+    Guid Show(RenderFragment content, ElementReference anchor, OverlayPositioningOptions positioning,
+        OverlaySurfaceOptions surface, OverlayPlacement placement, bool lightDismiss, bool bare,
+        bool matchAnchorWidth, bool scrollAnchorIntoView, bool watchAnchorRemoved);
 
     /// <summary>Shows an overlay with no anchor element — positioned relative to the viewport (see
     /// <see cref="OverlayScreenPlacement"/>) instead of relative to a trigger control. For content
@@ -49,6 +64,10 @@ public interface IOverlayService
     bool Update(Guid id, ElementReference anchor, OverlayPlacement placement, bool lightDismiss,
         bool matchAnchorWidth = false);
 
+    /// <summary>Updates an existing overlay including its anchor-alignment refinement.</summary>
+    bool Update(Guid id, ElementReference anchor, OverlayPositioningOptions positioning,
+        OverlayPlacement placement, bool lightDismiss, bool matchAnchorWidth);
+
     /// <summary>Actually removes an entry from <see cref="Active"/>. Called by OverlaySurface once an
     /// entry's exit animation has finished (or immediately, for an entry that was never shown/never
     /// got as far as playing one). Not meant to be called by application code — call
@@ -57,3 +76,4 @@ public interface IOverlayService
 
     void CloseAll();
 }
+#pragma warning restore RS0027

@@ -23,6 +23,14 @@ public sealed class OverlayEntry
     /// it via <c>getBoundingClientRect</c>.</summary>
     public bool MatchAnchorWidth { get; internal set; }
 
+    /// <summary>Presentation options used by the shared overlay surface.</summary>
+    public OverlaySurfaceOptions SurfaceOptions { get; internal set; } = new();
+
+    /// <summary>True once the overlay has received its measured fixed position.</summary>
+    internal bool IsPositioned { get; set; }
+
+    internal OverlayPositioningOptions Positioning { get; set; } = new();
+
     /// <summary>True for overlays created via <see cref="IOverlayService.ShowDetached"/> — no anchor
     /// element, positioned relative to the viewport instead. OverlaySurface uses this to skip the
     /// anchor-measurement JS round-trip entirely (ComputedStyle is already filled in by

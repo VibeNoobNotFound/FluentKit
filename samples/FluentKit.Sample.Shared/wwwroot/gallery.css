@@ -650,3 +650,20 @@ html[data-theme="dark"] .fluent-nav-view-content {
     background: rgba(26, 26, 26, 0.3) !important;
 }
 
+/* Regression fixture for portalled dropdowns. The filtered ancestor matches the compositing
+   boundary that breaks an inline acrylic popup; native labels exercise browser label activation. */
+.overlay-regression-surface {
+    max-width: 320px;
+    padding: var(--spacing-l);
+    border: 1px solid var(--card-stroke-default);
+    border-radius: var(--overlay-corner-radius);
+    background: color-mix(in srgb, var(--card-background-fill) 75%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.overlay-regression-label {
+    display: grid;
+    gap: var(--spacing-xs);
+    color: var(--text-fill-color-secondary);
+}

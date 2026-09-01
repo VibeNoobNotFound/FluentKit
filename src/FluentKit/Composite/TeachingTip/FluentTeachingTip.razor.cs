@@ -27,8 +27,8 @@ namespace FluentKit.Composite;
 /// <item><b>Detached</b> (<see cref="ChildContent"/> omitted) — for a tip that is not pointing at any
 /// particular control (e.g. a general new-features announcement). No beak is drawn, and
 /// position is set by <see cref="ScreenPlacement"/> relative to the viewport (defaults to
-/// bottom-center) via <see cref="IOverlayService.ShowDetached"/> instead of the anchor-based
-/// <see cref="IOverlayService.Show"/> overload.</item>
+/// bottom-center) via <see cref="IOverlayService.ShowDetached"/> instead of an anchor-based
+/// overlay.</item>
 /// </list>
 /// </summary>
 public partial class FluentTeachingTip : ComponentBase, IDisposable

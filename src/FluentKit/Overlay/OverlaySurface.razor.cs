@@ -1,6 +1,7 @@
 using FluentKit.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Globalization;
 
 namespace FluentKit.Overlay;
 
@@ -27,13 +28,49 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
     private JsModuleLifetime Interop => _interop ??= new(
         JS, "./_content/FluentKit/Overlay/overlay-interop.js");
 
+    private string SurfaceClass => string.Join(' ',
+        new[]
+        {
+            "fluent-overlay-surface",
+            Entry.Bare ? "fluent-overlay-surface--bare" : null,
+            Entry.IsClosing ? "fluent-overlay-surface--closing" : null,
+            Entry.IsPositioned ? "fluent-overlay-surface--positioned" : null,
+            Entry.SurfaceOptions.ContentLayout == OverlayContentLayout.EdgeToEdge
+                ? "fluent-overlay-surface--edge-to-edge"
+                : null,
+            GetEntranceOriginClass(),
+            $"fluent-overlay-surface--entrance-easing-{Entry.SurfaceOptions.Animation.EntranceEasing.ToString().ToLowerInvariant()}",
+            $"fluent-overlay-surface--exit-easing-{Entry.SurfaceOptions.Animation.ExitEasing.ToString().ToLowerInvariant()}"
+        }.Where(static className => className is not null));
+
+    private string SurfaceStyle
+    {
+        get
+        {
+            var entranceDuration = FormatDuration(Entry.SurfaceOptions.Animation.EntranceDuration);
+            var exitDuration = FormatDuration(Entry.SurfaceOptions.Animation.ExitDuration);
+            return $"{Entry.ComputedStyle}{(entranceDuration is null ? null : $" --fluent-overlay-entrance-duration: {entranceDuration};")}{(exitDuration is null ? null : $" --fluent-overlay-exit-duration: {exitDuration};")}";
+        }
+    }
+
+    private string? GetEntranceOriginClass() => Entry.SurfaceOptions.EntranceOrigin switch
+    {
+        OverlayEntranceOrigin.Top => "fluent-overlay-surface--entrance-top",
+        OverlayEntranceOrigin.Center => "fluent-overlay-surface--entrance-center",
+        OverlayEntranceOrigin.Bottom => "fluent-overlay-surface--entrance-bottom",
+        _ => null
+    };
+
+    private static string? FormatDuration(TimeSpan? duration) => duration is { } value && value >= TimeSpan.Zero
+        ? $"{value.TotalMilliseconds.ToString("0.###", CultureInfo.InvariantCulture)}ms"
+        : null;
+
     protected override void OnParametersSet()
     {
         if (Entry.NeedsReposition)
         {
             Entry.NeedsReposition = false;
             _needsPositioning = true;
-            Entry.ComputedStyle = "position: fixed; visibility: hidden;";
         }
 
         if (Entry.NeedsDismissRegistrationUpdate)
@@ -103,6 +140,7 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             // here except mark positioning done and, if requested, wire up light-dismiss without an
             // anchor exclusion zone.
             _needsPositioning = false;
+            Entry.IsPositioned = true;
             if (firstRender)
             {
                 await RegisterDismissHandlersAsync();
@@ -129,7 +167,8 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
 
         var placementArg = Entry.PreferredPlacement.ToString().ToLowerInvariant();
         var positionResult = await Interop.InvokeAsync<OverlayPosition>(
-            "computePosition", Entry.Anchor, _surfaceElement, placementArg, Entry.MatchAnchorWidth);
+            "computePosition", Entry.Anchor, _surfaceElement, placementArg, Entry.MatchAnchorWidth,
+            Entry.Positioning.Alignment.ToString(), Entry.Positioning.MainAxisOffset);
         if (!positionResult.Succeeded || positionResult.Value is null)
         {
             return;
@@ -141,6 +180,7 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
         Entry.ComputedStyle =
             $"position: fixed; top: {position.Top}px; left: {position.Left}px; {widthStyle}z-index: 1000;";
         _needsPositioning = false;
+        Entry.IsPositioned = true;
         if (firstRender)
         {
             await RegisterDismissHandlersAsync();

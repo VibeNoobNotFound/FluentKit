@@ -1,2 +1,56 @@
 #nullable enable
 FluentKit.Composite.FluentNavigationView.DisposeAsync() -> System.Threading.Tasks.ValueTask
+override FluentKit.Composite.FluentAutoSuggestBox<TValue>.OnInitialized() -> void
+override FluentKit.Composite.FluentAutoSuggestBox<TValue>.OnParametersSet() -> void
+FluentKit.Composite.FluentComboBox<TValue>.Dispose() -> void
+override FluentKit.Composite.FluentComboBox<TValue>.OnAfterRenderAsync(bool firstRender) -> System.Threading.Tasks.Task!
+override FluentKit.Composite.FluentComboBox<TValue>.OnInitialized() -> void
+FluentKit.Overlay.IOverlayService.Show(Microsoft.AspNetCore.Components.RenderFragment! content, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth, bool scrollAnchorIntoView, bool watchAnchorRemoved) -> System.Guid
+FluentKit.Overlay.IOverlayService.Show(Microsoft.AspNetCore.Components.RenderFragment! content, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlaySurfaceOptions! surface, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth, bool scrollAnchorIntoView, bool watchAnchorRemoved) -> System.Guid
+FluentKit.Overlay.IOverlayService.Update(System.Guid id, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool matchAnchorWidth) -> bool
+FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayAnchorAlignment.Adjacent = 0 -> FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayAnchorAlignment.AnchorStart = 1 -> FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationEasing.Decelerate = 0 -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationEasing.Standard = 1 -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationEasing.Accelerate = 2 -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationEasing.Linear = 3 -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationOptions
+FluentKit.Overlay.OverlayAnimationOptions.OverlayAnimationOptions() -> void
+FluentKit.Overlay.OverlayAnimationOptions.EntranceDuration.get -> System.TimeSpan?
+FluentKit.Overlay.OverlayAnimationOptions.EntranceDuration.init -> void
+FluentKit.Overlay.OverlayAnimationOptions.EntranceEasing.get -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationOptions.EntranceEasing.init -> void
+FluentKit.Overlay.OverlayAnimationOptions.ExitDuration.get -> System.TimeSpan?
+FluentKit.Overlay.OverlayAnimationOptions.ExitDuration.init -> void
+FluentKit.Overlay.OverlayAnimationOptions.ExitEasing.get -> FluentKit.Overlay.OverlayAnimationEasing
+FluentKit.Overlay.OverlayAnimationOptions.ExitEasing.init -> void
+FluentKit.Overlay.OverlayContentLayout
+FluentKit.Overlay.OverlayContentLayout.Padded = 0 -> FluentKit.Overlay.OverlayContentLayout
+FluentKit.Overlay.OverlayContentLayout.EdgeToEdge = 1 -> FluentKit.Overlay.OverlayContentLayout
+FluentKit.Overlay.OverlayEntranceOrigin
+FluentKit.Overlay.OverlayEntranceOrigin.Default = 0 -> FluentKit.Overlay.OverlayEntranceOrigin
+FluentKit.Overlay.OverlayEntranceOrigin.Top = 1 -> FluentKit.Overlay.OverlayEntranceOrigin
+FluentKit.Overlay.OverlayEntranceOrigin.Center = 2 -> FluentKit.Overlay.OverlayEntranceOrigin
+FluentKit.Overlay.OverlayEntranceOrigin.Bottom = 3 -> FluentKit.Overlay.OverlayEntranceOrigin
+FluentKit.Overlay.OverlayPositioningOptions
+FluentKit.Overlay.OverlayPositioningOptions.Alignment.get -> FluentKit.Overlay.OverlayAnchorAlignment
+FluentKit.Overlay.OverlayPositioningOptions.Alignment.init -> void
+FluentKit.Overlay.OverlayPositioningOptions.MainAxisOffset.get -> double
+FluentKit.Overlay.OverlayPositioningOptions.MainAxisOffset.init -> void
+FluentKit.Overlay.OverlayPositioningOptions.OverlayPositioningOptions() -> void
+FluentKit.Overlay.OverlayService.Show(Microsoft.AspNetCore.Components.RenderFragment! content, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth, bool scrollAnchorIntoView, bool watchAnchorRemoved) -> System.Guid
+FluentKit.Overlay.OverlayService.Show(Microsoft.AspNetCore.Components.RenderFragment! content, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlaySurfaceOptions! surface, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth, bool scrollAnchorIntoView, bool watchAnchorRemoved) -> System.Guid
+FluentKit.Overlay.OverlayService.Update(System.Guid id, Microsoft.AspNetCore.Components.ElementReference anchor, FluentKit.Overlay.OverlayPositioningOptions! positioning, FluentKit.Overlay.OverlayPlacement placement, bool lightDismiss, bool matchAnchorWidth) -> bool
+FluentKit.Overlay.OverlayEntry.SurfaceOptions.get -> FluentKit.Overlay.OverlaySurfaceOptions!
+FluentKit.Overlay.OverlaySurfaceOptions
+FluentKit.Overlay.OverlaySurfaceOptions.OverlaySurfaceOptions() -> void
+FluentKit.Overlay.OverlaySurfaceOptions.Animation.get -> FluentKit.Overlay.OverlayAnimationOptions!
+FluentKit.Overlay.OverlaySurfaceOptions.Animation.init -> void
+FluentKit.Overlay.OverlaySurfaceOptions.ContentLayout.get -> FluentKit.Overlay.OverlayContentLayout
+FluentKit.Overlay.OverlaySurfaceOptions.ContentLayout.init -> void
+FluentKit.Overlay.OverlaySurfaceOptions.EntranceOrigin.get -> FluentKit.Overlay.OverlayEntranceOrigin
+FluentKit.Overlay.OverlaySurfaceOptions.EntranceOrigin.init -> void
+override FluentKit.Theming.ThemeProvider.OnAfterRenderAsync(bool firstRender) -> System.Threading.Tasks.Task!
+override FluentKit.Effects.FluentMicaPanel.OnAfterRenderAsync(bool firstRender) -> System.Threading.Tasks.Task!

@@ -106,7 +106,10 @@ public partial class FluentMenuFlyout : ComponentBase, IDisposable
         _context = new MenuFlyoutCloseContext { Closable = Closable, CloseOnSelect = CloseOnSelect };
         _context.RequestCloseAll += () => _ = CloseAsync();
 
-        _overlayId = OverlayService.Show(RenderMenuContent, _anchor, Placement, Closable, matchAnchorWidth: MatchAnchorWidth);
+        _overlayId = OverlayService.Show(RenderMenuContent, _anchor, new OverlayPositioningOptions(),
+            new OverlaySurfaceOptions { ContentLayout = OverlayContentLayout.EdgeToEdge }, Placement,
+            Closable, bare: false, matchAnchorWidth: MatchAnchorWidth, scrollAnchorIntoView: false,
+            watchAnchorRemoved: false);
     }
 
     private void HideInternal()

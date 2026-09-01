@@ -106,7 +106,7 @@ export function unwatchAnchorRemoved(overlayId) {
     }
 }
 
-export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth) {
+export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth, alignment = "Adjacent", mainAxisOffset = 0) {
     const anchorRect = anchorEl.getBoundingClientRect();
 
     // Width has to be applied BEFORE popupRect is measured below — changing width can reflow the
@@ -148,7 +148,11 @@ export function computePosition(anchorEl, popupEl, placement, matchAnchorWidth) 
         return { top, left, placement: resolvedPlacement, width: matchAnchorWidth ? anchorRect.width : null };
     }
 
-    if (placement === "top") {
+    if (alignment === "AnchorStart") {
+        top = anchorRect.top + mainAxisOffset;
+        const maxTop = window.innerHeight - popupRect.height - viewportPadding;
+        top = Math.min(Math.max(top, viewportPadding), Math.max(maxTop, viewportPadding));
+    } else if (placement === "top") {
         top = anchorRect.top - popupRect.height - gap;
         if (top < viewportPadding) {
             top = anchorRect.bottom + gap;
@@ -232,11 +236,21 @@ export function waitForExitAnimation(popupEl) {
         };
 
         popupEl.addEventListener("animationend", onAnimationEnd);
-        // Safety net: duration-fast is 150ms today but this reads the *class* being applied, not a
-        // hardcoded number, so it stays correct if that token ever changes — 400ms is just a
-        // generous ceiling above any realistic exit-animation duration, not a value that needs to
-        // track it.
-        setTimeout(finish, 400);
+        // Safety net based on the computed duration, so a caller that opts into a longer custom exit
+        // animation is not unmounted at the old 400ms ceiling before its motion can finish. Keep a
+        // 400ms minimum for malformed or unsupported computed values and a small event-time buffer.
+        const animationDuration = getComputedStyle(popupEl).animationDuration;
+        const longestDuration = Math.max(0, ...animationDuration.split(",").map((value) => {
+            const duration = value.trim();
+            if (duration.endsWith("ms")) {
+                return Number.parseFloat(duration);
+            }
+            if (duration.endsWith("s")) {
+                return Number.parseFloat(duration) * 1000;
+            }
+            return 0;
+        }).filter(Number.isFinite));
+        setTimeout(finish, Math.max(400, longestDuration + 100));
     });
 }
 

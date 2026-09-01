@@ -9,21 +9,22 @@
    renders (Flyout, MenuFlyout, Tooltip, TeachingTip). */
 .fluent-overlay-surface {
     position: relative;
+    box-sizing: border-box;
+    --fluent-overlay-surface-padding: var(--spacing-xs);
+    --fluent-overlay-entrance-duration: var(--duration-fast);
+    --fluent-overlay-entrance-easing: cubic-bezier(0, 0, 0, 1);
+    --fluent-overlay-exit-duration: var(--duration-fast);
+    --fluent-overlay-exit-easing: cubic-bezier(1, 0, 1, 1);
     /* TeachingTip's beak (FluentTeachingTip.razor.css) intentionally renders outside this box's own
        rect via negative offsets — don't clip it. */
     overflow: visible;
     border: var(--control-stroke-thickness) solid var(--flyout-border);
     border-radius: var(--overlay-corner-radius);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-    padding: var(--spacing-xs);
+    padding: var(--fluent-overlay-surface-padding);
 
-    /* `both` so the surface holds its from-state before the animation starts (no flash-in at full
-       opacity on the frame before this kicks off) and its to-state after it ends, rather than
-       snapping back to the un-animated CSS values. transform-origin biased toward the anchor edge
-       (top by default, since Bottom/top-flip are the overwhelmingly common placements) so the scale
-       reads as "growing out of the anchor" rather than growing from the surface's own center.
-
-       Animates the standalone `scale` property, NOT `transform: scale(...)`. Detached overlays
+    /* The standard motion animates the standalone `scale` property, NOT `transform: scale(...)`.
+       Detached overlays
        (OverlayService.ShowDetached, e.g. TeachingTip's screen-centered mode) position themselves
        with an inline `transform: translateX(-50%)`/`translate(-50%, -50%)` — a keyframe that writes
        to `transform` would replace that positioning transform outright for the animation's whole
@@ -32,7 +33,9 @@
        `scale`/`translate`/`rotate` are independent CSS properties precisely so an animation can
        drive one of them without touching whatever else already occupies `transform`. */
     transform-origin: top center;
-    animation: fluent-overlay-enter var(--duration-fast) var(--easing-decelerate) both;
+    /* The surface is rendered hidden for one frame while the browser measures its anchor. The
+       positioned modifier below deliberately owns the entrance animation so Server latency cannot
+       consume the animation while the surface is invisible. */
 
     /* no backdrop-filter support / reduced-transparency */
     background-color: var(--acrylic-fallback-color-override, var(--acrylic-fallback-fill));
@@ -93,13 +96,73 @@
     position: relative;
 }
 
+/* Dropdown/list overlays need their content to meet the surface border exactly. Keeping this on
+   the shared wrapper avoids each control having to compensate for the surface inset with a different
+   combination of width and negative margins (which was the source of the one-sided right gap). */
+.fluent-overlay-surface--edge-to-edge .fluent-overlay-surface-content {
+    margin: calc(-1 * var(--fluent-overlay-surface-padding));
+}
+
+.fluent-overlay-surface--positioned {
+    animation: fluent-overlay-enter var(--fluent-overlay-entrance-duration) var(--fluent-overlay-entrance-easing) both;
+}
+
+/* ComboBox restores the WinUI/fluent-svelte reveal that grows from the selected-row region. The
+   clip-path is applied to the complete surface so its acrylic, border, and content reveal together. */
+.fluent-overlay-surface--positioned.fluent-overlay-surface--entrance-top {
+    --fluent-overlay-entrance-duration: var(--duration-normal);
+    animation: fluent-overlay-reveal-top var(--fluent-overlay-entrance-duration) var(--fluent-overlay-entrance-easing) both;
+}
+
+.fluent-overlay-surface--positioned.fluent-overlay-surface--entrance-center {
+    --fluent-overlay-entrance-duration: var(--duration-normal);
+    animation: fluent-overlay-reveal-center var(--fluent-overlay-entrance-duration) var(--fluent-overlay-entrance-easing) both;
+}
+
+.fluent-overlay-surface--positioned.fluent-overlay-surface--entrance-bottom {
+    --fluent-overlay-entrance-duration: var(--duration-normal);
+    animation: fluent-overlay-reveal-bottom var(--fluent-overlay-entrance-duration) var(--fluent-overlay-entrance-easing) both;
+}
+
+.fluent-overlay-surface--entrance-easing-decelerate {
+    --fluent-overlay-entrance-easing: cubic-bezier(0, 0, 0, 1);
+}
+
+.fluent-overlay-surface--entrance-easing-standard {
+    --fluent-overlay-entrance-easing: var(--easing-standard);
+}
+
+.fluent-overlay-surface--entrance-easing-accelerate {
+    --fluent-overlay-entrance-easing: var(--easing-accelerate);
+}
+
+.fluent-overlay-surface--entrance-easing-linear {
+    --fluent-overlay-entrance-easing: linear;
+}
+
+.fluent-overlay-surface--exit-easing-decelerate {
+    --fluent-overlay-exit-easing: cubic-bezier(0, 0, 0, 1);
+}
+
+.fluent-overlay-surface--exit-easing-standard {
+    --fluent-overlay-exit-easing: var(--easing-standard);
+}
+
+.fluent-overlay-surface--exit-easing-linear {
+    --fluent-overlay-exit-easing: linear;
+}
+
+.fluent-overlay-surface--exit-easing-accelerate {
+    --fluent-overlay-exit-easing: cubic-bezier(1, 0, 1, 1);
+}
+
 /* Applied by OverlaySurface.razor.cs the instant Entry.IsClosing flips true (see OverlaySurface.razor.cs
    for the full close handoff). Overriding `animation` here — rather than adding a second
    animation-name — means there's no ambiguity about which keyframes are currently driving opacity
    and transform; the enter animation has already finished by the time this class can apply (it's only
    added post-open), so there's nothing to interrupt. */
-.fluent-overlay-surface--closing {
-    animation: fluent-overlay-exit var(--duration-fast) var(--easing-accelerate) both;
+.fluent-overlay-surface.fluent-overlay-surface--closing {
+    animation: fluent-overlay-exit var(--fluent-overlay-exit-duration) var(--fluent-overlay-exit-easing) both;
 }
 
 @keyframes fluent-overlay-enter {
@@ -124,6 +187,46 @@
     }
 }
 
+@keyframes fluent-overlay-reveal-top {
+    from {
+        opacity: 0;
+        clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%);
+    }
+    to {
+        opacity: 1;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+}
+
+@keyframes fluent-overlay-reveal-center {
+    from {
+        opacity: 0;
+        clip-path: polygon(0 25%, 100% 24%, 100% 75%, 0 75%);
+    }
+    to {
+        opacity: 1;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+}
+
+@keyframes fluent-overlay-reveal-bottom {
+    from {
+        opacity: 0;
+        clip-path: polygon(0 75%, 100% 75%, 100% 100%, 0 100%);
+    }
+    to {
+        opacity: 1;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fluent-overlay-surface--positioned,
+    .fluent-overlay-surface.fluent-overlay-surface--closing {
+        animation-duration: 1ms !important;
+    }
+}
+
 /* Bare variant: content supplies its own surface material (e.g. FluentAcrylicBrush wrapping
    NavigationView's Compact/Minimal overlay pane) — OverlaySurface.razor doesn't even render the
    .fluent-overlay-surface-material div for Bare entries, so there's no acrylic layer to strip here;
@@ -132,6 +235,7 @@
 .fluent-overlay-surface--bare {
     border: none;
     box-shadow: none;
+    --fluent-overlay-surface-padding: 0px;
     padding: 0;
 }
 

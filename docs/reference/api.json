@@ -79,7 +79,7 @@
       "genericParameters": [
         "TValue"
       ],
-      "summary": "Mirrors WinUI\u0027s AutoSuggestBox / fluent-svelte\u0027s AutoSuggestBox.svelte \u2014 a free-typing TextBox with a live-filtered suggestion dropdown underneath, distinct from ComboBox\u0027s editable mode in that the typed text is NOT required to match any item: is always whatever the user typed, fires with that raw text on Enter with no suggestion highlighted, and picking a suggestion (click, or Enter while one IS highlighted) fires separately and just replaces Text with the suggestion\u0027s Name \u2014 there\u0027s no persistent \u0022selected value\u0022 the way ComboBox has Value. Composes FluentTextBox (same \u0022don\u0027t reimplement input chrome\u0022 rule NumberBox follows) and, like ComboBox/ContentDialog/NumberBox\u0027s Expanded popout, stays self-contained/absolutely positioned rather than going through IOverlayService \u2014 the dropdown needs to be exactly the trigger\u0027s width, same reasoning as ComboBox\u0027s own dropdown.",
+      "summary": "A free-typing text box with live suggestions. The suggestion list is rendered through so it is not constrained by labels or acrylic ancestors.",
       "parameters": [
         {
           "name": "AdditionalAttributes",
@@ -103,7 +103,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "When true, shows a search icon on the right of the box (via TextBox\u0027s Buttons slot). Once there\u0027s text in the box, that icon swaps to a \u0022clear\u0022 icon that empties Text on click \u2014 same idea as the search field on the demo TextBox above, just wired in as an opt-in here.",
+          "summary": "Whether to display the search/clear affordance.",
           "settable": true
         },
         {
@@ -112,7 +112,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Optional custom match predicate over (typed text, candidate item). Defaults to a case-insensitive substring match against \u2014 deliberately \u0022contains\u0022 rather than ComboBox\u0027s \u0022starts-with\u0022, since AutoSuggestBox is meant for search-as-you-type against arbitrary positions in the name, not prefix completion.",
+          "summary": "Optional predicate used to filter suggestions from the entered text.",
           "settable": true
         },
         {
@@ -129,7 +129,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Optional custom row content for each suggestion. Falls back to a plain \u003Cspan\u003E@item.Name\u003C/span\u003E, same default ComboBox\u0027s ItemTemplate uses.",
+          "summary": "Optional custom content for each suggestion row.",
           "settable": true
         },
         {
@@ -146,7 +146,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Upper bound on how many matches are shown at once.",
+          "summary": "Maximum number of matching suggestions displayed at once.",
           "settable": true
         },
         {
@@ -163,7 +163,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Fired on Enter when no suggestion is highlighted \u2014 the raw typed text is the query, same as WinUI\u0027s QuerySubmitted with a null ChosenSuggestion.",
+          "summary": "Raised when Enter submits text without a highlighted suggestion.",
           "settable": true
         },
         {
@@ -172,7 +172,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Fired when the user picks a suggestion \u2014 click, or Enter while one is highlighted via arrow keys. Text is set to the suggestion\u0027s Name as part of the same interaction.",
+          "summary": "Raised after a suggestion is selected.",
           "settable": true
         },
         {
@@ -181,7 +181,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": true,
-          "summary": "The raw typed text. Two-way bindable \u2014 always reflects what\u0027s in the box, never snapped back to a suggestion\u0027s Name unless the user actually picks one.",
+          "summary": "The raw typed text. Two-way bindable.",
           "settable": true
         },
         {
@@ -836,7 +836,7 @@
       "genericParameters": [
         "TValue"
       ],
-      "summary": "Mirrors fluent-svelte\u0027s ComboBox.svelte (dropdown list with an optional editable/searchable text-box mode). Two render modes off : - false (default): a FluentButton-shaped trigger showing the selected item\u0027s Name, opens a positioned \u003Cul\u003E of ComboBoxItem-equivalent \u003Cli\u003E rows on click. - true: a FluentTextBox-shaped trigger the user can type into, filtering/matching items by Name prefix (case-insensitive), same as fluent-svelte\u0027s handleInput/searchValue flow. Unlike FluentMenuFlyout, this does NOT go through IOverlayService/FluentOverlayHost \u2014 the dropdown list needs to be exactly the trigger\u0027s width and grow from a specific list index (the menuOffset/menuGrowDirection choreography below), which is easiest to keep as a plain absolutely-positioned child of the component\u0027s own root (same as ComboBox.scss\u0027s own \u0060position: relative\u0060 \u002B \u0060.combo-box-dropdown { position: absolute }\u0060). A portal would only add indirection for zero benefit here since there\u0027s no anchor-to-elsewhere requirement.",
+      "summary": "A WinUI-style selectable list with optional editable search. Its dropdown is rendered through so it can escape labels, clipping ancestors, and backdrop-filter roots while retaining the trigger\u0027s width and selected-row alignment.",
       "parameters": [
         {
           "name": "AdditionalAttributes",
@@ -860,7 +860,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Whether the ComboBox can be searched/typed into (fluent-svelte\u0027s \u0060editable\u0060 prop).",
+          "summary": "Whether the ComboBox permits typing and prefix matching.",
           "settable": true
         },
         {
@@ -869,7 +869,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Optional custom row content for each dropdown item. Falls back to a plain \u003Cspan\u003E@item.Name\u003C/span\u003E when not supplied \u2014 same \u0022text unless you say otherwise\u0022 default as fluent-svelte\u0027s own ComboBoxItem (which likewise only exposes a default slot, no separate templating concept). Wraps in the same .fluent-combo-box-item \u003Cli\u003E (selection bar, hover/active states, focus ring) regardless of what you render inside \u2014 only the row\u0027s inner content is replaced, not its interaction chrome.",
+          "summary": "Optional custom content for each dropdown row.",
           "settable": true
         },
         {
@@ -894,7 +894,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": true,
-          "summary": "Current text in the search box. Only meaningful when is true.",
+          "summary": "Current editable search text.",
           "settable": true
         },
         {
@@ -911,7 +911,7 @@
           "cascading": false,
           "renderFragment": false,
           "bindable": false,
-          "summary": "Optional custom content for the closed/collapsed trigger label in non-editable ( = false) mode, e.g. to show an icon \u002B name instead of plain text once something is selected. Only used when there IS a selection \u2014 the placeholder text always renders plain regardless. Has no effect in Editable mode, since that trigger is a real \u003Cinput\u003E and can only ever hold plain text.",
+          "summary": "Optional custom content for the selected non-editable trigger label.",
           "settable": true
         },
         {
@@ -3385,7 +3385,7 @@
       "category": "Composite",
       "sample": "/Composite/TeachingTip",
       "genericParameters": [],
-      "summary": "Mirrors WinUI\u0027s TeachingTip \u2014 a persistent, anchor-relative callout (title/subtitle, an optional row of action buttons, and an explicit close button) used for contextual \u0022here\u0027s what this does\u0022 UI, as opposed to Flyout\u0027s generic content or ToolTip\u0027s hover-only hint. Structurally close to Flyout: built directly on IOverlayService/FluentOverlayHost with the same programmatic--binding shape as , and \u2014 like every other flyout/menu/tooltip \u2014 relies entirely on OverlaySurface\u0027s own default chrome (background, backdrop-filter: blur(60px), border, shadow) for its blur; it does NOT pass bare. One real difference from Flyout: it adds its own pointer/beak toward the anchor in targeted mode (WinUI teaching tips always draw one there \u2014 see the beak\u0027s own matching background/border in FluentTeachingTip.razor.css), and it defaults to false \u2014 a teaching tip is meant to stay up until the person reads it and dismisses it via the explicit close button, not disappear the moment they click elsewhere. Two placement modes, chosen automatically by whether is supplied: Targeted ( set) \u2014 is the anchor/target element the tip points its beak at, positioned via (top/bottom/left/right of the anchor), same anchor-measurement path as Flyout/MenuFlyout. Unlike Flyout/MenuFlyout it is NOT wrapped in a click handler \u2014 teaching tips are shown/hidden programmatically (e.g. after a first-run check), never by clicking their own target.Detached ( omitted) \u2014 for a tip that is not pointing at any particular control (e.g. a general new-features announcement). No beak is drawn, and position is set by relative to the viewport (defaults to bottom-center) via instead of the anchor-based overload.",
+      "summary": "Mirrors WinUI\u0027s TeachingTip \u2014 a persistent, anchor-relative callout (title/subtitle, an optional row of action buttons, and an explicit close button) used for contextual \u0022here\u0027s what this does\u0022 UI, as opposed to Flyout\u0027s generic content or ToolTip\u0027s hover-only hint. Structurally close to Flyout: built directly on IOverlayService/FluentOverlayHost with the same programmatic--binding shape as , and \u2014 like every other flyout/menu/tooltip \u2014 relies entirely on OverlaySurface\u0027s own default chrome (background, backdrop-filter: blur(60px), border, shadow) for its blur; it does NOT pass bare. One real difference from Flyout: it adds its own pointer/beak toward the anchor in targeted mode (WinUI teaching tips always draw one there \u2014 see the beak\u0027s own matching background/border in FluentTeachingTip.razor.css), and it defaults to false \u2014 a teaching tip is meant to stay up until the person reads it and dismisses it via the explicit close button, not disappear the moment they click elsewhere. Two placement modes, chosen automatically by whether is supplied: Targeted ( set) \u2014 is the anchor/target element the tip points its beak at, positioned via (top/bottom/left/right of the anchor), same anchor-measurement path as Flyout/MenuFlyout. Unlike Flyout/MenuFlyout it is NOT wrapped in a click handler \u2014 teaching tips are shown/hidden programmatically (e.g. after a first-run check), never by clicking their own target.Detached ( omitted) \u2014 for a tip that is not pointing at any particular control (e.g. a general new-features announcement). No beak is drawn, and position is set by relative to the viewport (defaults to bottom-center) via instead of an anchor-based overlay.",
       "parameters": [
         {
           "name": "ActionContent",
@@ -4499,6 +4499,16 @@
           "type": "Guid"
         },
         {
+          "name": "Show",
+          "kind": "method",
+          "type": "Guid"
+        },
+        {
+          "name": "Show",
+          "kind": "method",
+          "type": "Guid"
+        },
+        {
           "name": "ShowDetached",
           "kind": "method",
           "type": "Guid"
@@ -4507,8 +4517,99 @@
           "name": "Update",
           "kind": "method",
           "type": "Boolean"
+        },
+        {
+          "name": "Update",
+          "kind": "method",
+          "type": "Boolean"
         }
       ]
+    },
+    {
+      "name": "OverlayAnchorAlignment",
+      "fullName": "FluentKit.Overlay.OverlayAnchorAlignment",
+      "kind": "enum",
+      "genericParameters": [],
+      "values": [
+        "Adjacent",
+        "AnchorStart"
+      ],
+      "summary": "Determines where an anchored overlay starts on its placement axis.",
+      "members": []
+    },
+    {
+      "name": "OverlayAnimationEasing",
+      "fullName": "FluentKit.Overlay.OverlayAnimationEasing",
+      "kind": "enum",
+      "genericParameters": [],
+      "values": [
+        "Accelerate",
+        "Decelerate",
+        "Linear",
+        "Standard"
+      ],
+      "summary": "Controls how an overlay\u0027s velocity changes during its entrance or exit.",
+      "members": []
+    },
+    {
+      "name": "OverlayAnimationOptions",
+      "fullName": "FluentKit.Overlay.OverlayAnimationOptions",
+      "kind": "class",
+      "genericParameters": [],
+      "values": [],
+      "summary": "Optional timing controls for an overlay surface.",
+      "members": [
+        {
+          "name": "EntranceDuration",
+          "kind": "property",
+          "type": "Nullable\u003CTimeSpan\u003E",
+          "summary": "Overrides the entrance duration. When omitted, standard surfaces use the fast duration and selected-row reveals use the normal duration."
+        },
+        {
+          "name": "EntranceEasing",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayAnimationEasing",
+          "summary": "Controls the entrance velocity. The default is WinUI\u0027s fast-out, slow-in curve: maximum speed at the start that progressively decreases as the surface reaches rest."
+        },
+        {
+          "name": "ExitDuration",
+          "kind": "property",
+          "type": "Nullable\u003CTimeSpan\u003E",
+          "summary": "Overrides the exit duration. When omitted, the standard fast duration is used."
+        },
+        {
+          "name": "ExitEasing",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayAnimationEasing",
+          "summary": "Controls the exit velocity. The default accelerates out of the scene."
+        }
+      ]
+    },
+    {
+      "name": "OverlayContentLayout",
+      "fullName": "FluentKit.Overlay.OverlayContentLayout",
+      "kind": "enum",
+      "genericParameters": [],
+      "values": [
+        "EdgeToEdge",
+        "Padded"
+      ],
+      "summary": "Controls whether an overlay\u0027s content participates in the surface\u0027s standard inset.",
+      "members": []
+    },
+    {
+      "name": "OverlayEntranceOrigin",
+      "fullName": "FluentKit.Overlay.OverlayEntranceOrigin",
+      "kind": "enum",
+      "genericParameters": [],
+      "values": [
+        "Bottom",
+        "Center",
+        "Default",
+        "Top"
+      ],
+      "summary": "Chooses the reveal origin for an overlay entrance animation.",
+      "members": []
     },
     {
       "name": "OverlayEntry",
@@ -4579,6 +4680,12 @@
           "summary": "When true, the anchor is scrolled into view (centered, instant) before its position is measured \u2014 for overlays like TeachingTip where the anchor may not be the same element the person just clicked (see FluentTeachingTip\u0027s separate Target parameter), so there\u0027s no guarantee it\u0027s already on screen the way a Flyout/MenuFlyout\u0027s own trigger always is."
         },
         {
+          "name": "SurfaceOptions",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlaySurfaceOptions",
+          "summary": "Presentation options used by the shared overlay surface."
+        },
+        {
           "name": "WatchAnchorRemoved",
           "kind": "property",
           "type": "Boolean",
@@ -4599,6 +4706,28 @@
       ],
       "summary": "Preferred placement relative to the anchor element. The JS interop layer (overlay-interop.js) flips this to the opposite side when there isn\u0027t room in the viewport \u2014 callers get the flipped result back, they don\u0027t need to reason about collision themselves.",
       "members": []
+    },
+    {
+      "name": "OverlayPositioningOptions",
+      "fullName": "FluentKit.Overlay.OverlayPositioningOptions",
+      "kind": "class",
+      "genericParameters": [],
+      "values": [],
+      "summary": "Optional positioning refinements for an anchored overlay. Existing overlay calls use and a zero offset.",
+      "members": [
+        {
+          "name": "Alignment",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayAnchorAlignment",
+          "summary": "How the overlay aligns to its anchor before is applied."
+        },
+        {
+          "name": "MainAxisOffset",
+          "kind": "property",
+          "type": "Double",
+          "summary": "Additional pixel offset on the placement axis. For an overlay this is measured from the anchor\u0027s leading edge."
+        }
+      ]
     },
     {
       "name": "OverlayScreenPlacement",
@@ -4655,6 +4784,16 @@
           "type": "Guid"
         },
         {
+          "name": "Show",
+          "kind": "method",
+          "type": "Guid"
+        },
+        {
+          "name": "Show",
+          "kind": "method",
+          "type": "Guid"
+        },
+        {
           "name": "ShowDetached",
           "kind": "method",
           "type": "Guid"
@@ -4663,6 +4802,39 @@
           "name": "Update",
           "kind": "method",
           "type": "Boolean"
+        },
+        {
+          "name": "Update",
+          "kind": "method",
+          "type": "Boolean"
+        }
+      ]
+    },
+    {
+      "name": "OverlaySurfaceOptions",
+      "fullName": "FluentKit.Overlay.OverlaySurfaceOptions",
+      "kind": "class",
+      "genericParameters": [],
+      "values": [],
+      "summary": "Optional surface presentation refinements for an anchored overlay.",
+      "members": [
+        {
+          "name": "Animation",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayAnimationOptions",
+          "summary": "Optional timing and velocity controls for the surface motion."
+        },
+        {
+          "name": "ContentLayout",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayContentLayout",
+          "summary": "How the overlay content relates to the surface\u0027s standard padding."
+        },
+        {
+          "name": "EntranceOrigin",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayEntranceOrigin",
+          "summary": "Entrance reveal origin. The default uses the standard fade/scale motion."
         }
       ]
     },

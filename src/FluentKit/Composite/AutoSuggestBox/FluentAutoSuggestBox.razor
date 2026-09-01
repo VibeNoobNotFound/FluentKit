@@ -2,7 +2,8 @@
 @typeparam TValue
 @using FluentKit.Primitives
 
-<div class="fluent-autosuggest-root"
+<div @ref="_rootElement"
+     class="fluent-autosuggest-root"
      @onkeydown="OnKeyDownAsync"
      @onfocusin="OnFocusIn"
      @onfocusout="OnFocusLost">
@@ -12,7 +13,7 @@
                    Disabled="@Disabled"
                    Value="@Text"
                    ValueChanged="OnTextChangedAsync"
-                   @attributes="AdditionalAttributes"><Buttons>@if (EnableSearchIcon)
+                   @attributes="TextBoxAttributes"><Buttons>@if (EnableSearchIcon)
 {
     @if (!string.IsNullOrEmpty(Text))
     {
@@ -27,33 +28,34 @@
         </FluentTextBoxButton>
     }
 }</Buttons></FluentTextBox>
-
-    @if (!Disabled && (_open || _closing) && DisplayMatches.Count > 0)
-    {
-        <div class="fluent-autosuggest-dismiss-backdrop" @onclick="CloseDropdown"></div>
-        <div class="fluent-autosuggest-dropdown @(_closing ? "fluent-autosuggest-dropdown--closing" : "")" @ref="_dropdownElement">
-            <div class="fluent-autosuggest-dropdown-material" aria-hidden="true"></div>
-            <ul class="fluent-autosuggest-dropdown-list" role="listbox" tabindex="-1">
-                @for (var i = 0; i < DisplayMatches.Count; i++)
-                {
-                    var item = DisplayMatches[i];
-                    var isHighlighted = i == _highlightedIndex;
-                    <li class="fluent-autosuggest-item @(isHighlighted ? "fluent-autosuggest-item--highlighted" : null) @(item.Disabled ? "fluent-autosuggest-item--disabled" : null)"
-                        role="option"
-                        aria-selected="@isHighlighted"
-                        @onmousedown:preventDefault="true"
-                        @onclick="() => ChooseAsync(item)">
-                        @if (ItemTemplate is not null)
-                        {
-                            @ItemTemplate(item)
-                        }
-                        else
-                        {
-                            <span>@item.Name</span>
-                        }
-                    </li>
-                }
-            </ul>
-        </div>
-    }
 </div>
+
+@code {
+    // Rendered by FluentOverlayHost; keeping it as a Razor fragment preserves component-scoped CSS.
+    private RenderFragment RenderDropdown => @<ul @ref="_dropdownElement"
+                                                id="@DropdownId"
+                                                class="fluent-autosuggest-dropdown-list"
+                                                role="listbox"
+                                                tabindex="-1"
+                                                @onkeydown="OnKeyDownAsync">
+        @for (var i = 0; i < DisplayMatches.Count; i++)
+        {
+            var item = DisplayMatches[i];
+            var isHighlighted = i == _highlightedIndex;
+            <li class="fluent-autosuggest-item @(isHighlighted ? "fluent-autosuggest-item--highlighted" : null) @(item.Disabled ? "fluent-autosuggest-item--disabled" : null)"
+                role="option"
+                aria-selected="@isHighlighted"
+                @onmousedown:preventDefault="true"
+                @onclick="() => ChooseAsync(item)">
+                @if (ItemTemplate is not null)
+                {
+                    @ItemTemplate(item)
+                }
+                else
+                {
+                    <span>@item.Name</span>
+                }
+            </li>
+        }
+    </ul>;
+}
