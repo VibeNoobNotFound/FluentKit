@@ -439,3 +439,16 @@ export async function renderMica(cacheKey, imageUrl, isBase) {
     finalCache.set(cacheKey, dataUrl);
     return dataUrl;
 }
+
+// Server-safe entry point. The baked PNG can be hundreds of kilobytes, so never return it through
+// Blazor Server's SignalR circuit. Keep it in this browser-side cache and paint the already-mounted
+// wallpaper element directly instead.
+export async function renderMicaInto(element, cacheKey, imageUrl, isBase) {
+    if (!element) return false;
+
+    const dataUrl = await renderMica(cacheKey, imageUrl, isBase);
+    if (!dataUrl) return false;
+
+    element.style.backgroundImage = `url("${dataUrl}")`;
+    return true;
+}

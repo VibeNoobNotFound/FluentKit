@@ -20,6 +20,12 @@ public sealed class OverlayService : IOverlayService
     public Guid Show(RenderFragment content, ElementReference anchor, OverlayPositioningOptions positioning,
         OverlayPlacement placement, bool lightDismiss, bool bare, bool matchAnchorWidth,
         bool scrollAnchorIntoView, bool watchAnchorRemoved)
+        => Show(content, anchor, positioning, new OverlaySurfaceOptions(), placement, lightDismiss, bare,
+            matchAnchorWidth, scrollAnchorIntoView, watchAnchorRemoved);
+
+    public Guid Show(RenderFragment content, ElementReference anchor, OverlayPositioningOptions positioning,
+        OverlaySurfaceOptions surface, OverlayPlacement placement, bool lightDismiss, bool bare,
+        bool matchAnchorWidth, bool scrollAnchorIntoView, bool watchAnchorRemoved)
     {
         var entry = new OverlayEntry
         {
@@ -30,6 +36,7 @@ public sealed class OverlayService : IOverlayService
             Bare = bare,
             MatchAnchorWidth = matchAnchorWidth,
             Positioning = positioning,
+            SurfaceOptions = surface,
             ScrollAnchorIntoView = scrollAnchorIntoView,
             WatchAnchorRemoved = watchAnchorRemoved
         };
@@ -47,6 +54,7 @@ public sealed class OverlayService : IOverlayService
             Content = content,
             Anchor = default,
             IsDetached = true,
+            IsPositioned = true,
             LightDismiss = lightDismiss,
             // Computed synchronously here, not by overlay-interop.js's computePosition — there's no
             // anchor rect to measure against, just a fixed spot relative to the viewport, so

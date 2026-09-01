@@ -194,14 +194,13 @@
     cursor: not-allowed;
 }
 
-/* Rendered inside FluentOverlayHost. OverlaySurface supplies the acrylic/chrome so this list only
-   owns sizing and row layout. The negative margin consumes the shared surface padding, matching
-   the trigger width exactly while preserving the surface border. */
+/* Rendered inside FluentOverlayHost. OverlaySurface supplies the acrylic/chrome and its edge-to-edge
+   mode cancels the surface inset on the content wrapper, so this list only owns sizing and row layout. */
 .fluent-combo-box-dropdown-list {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    margin: calc(var(--spacing-xs) * -1);
+    margin: 0;
     padding: var(--spacing-xxs);
     list-style: none;
     overflow: auto;

@@ -102,6 +102,7 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
             // here except mark positioning done and, if requested, wire up light-dismiss without an
             // anchor exclusion zone.
             _needsPositioning = false;
+            Entry.IsPositioned = true;
             if (firstRender)
             {
                 await RegisterDismissHandlersAsync();
@@ -141,6 +142,7 @@ public partial class OverlaySurface : ComponentBase, IAsyncDisposable
         Entry.ComputedStyle =
             $"position: fixed; top: {position.Top}px; left: {position.Left}px; {widthStyle}z-index: 1000;";
         _needsPositioning = false;
+        Entry.IsPositioned = true;
         if (firstRender)
         {
             await RegisterDismissHandlersAsync();

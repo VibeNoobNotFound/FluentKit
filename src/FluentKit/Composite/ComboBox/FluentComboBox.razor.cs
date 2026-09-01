@@ -46,6 +46,26 @@ public partial class FluentComboBox<TValue> : ComponentBase, IDisposable
     private IEnumerable<ComboBoxItem<TValue>> SelectableItems => Items.Where(item => !item.Disabled);
     private ComboBoxItem<TValue>? Selection => Items.FirstOrDefault(item => EqualityComparer<TValue>.Default.Equals(item.Value, Value!));
 
+    private string GrowDirectionClass
+    {
+        get
+        {
+            if (Editable)
+            {
+                return "top";
+            }
+
+            var midpoint = Items.Count / 2;
+            var selectedIndex = Selection is null ? -1 : Items.ToList().IndexOf(Selection);
+            if (selectedIndex < 0 || selectedIndex == midpoint)
+            {
+                return "center";
+            }
+
+            return selectedIndex < midpoint ? "top" : "bottom";
+        }
+    }
+
     private int MenuOffsetPx
     {
         get
@@ -59,6 +79,17 @@ public partial class FluentComboBox<TValue> : ComponentBase, IDisposable
     private OverlayPositioningOptions Positioning => Editable
         ? new() { MainAxisOffset = -4 }
         : new() { Alignment = OverlayAnchorAlignment.AnchorStart, MainAxisOffset = MenuOffsetPx - 6 };
+
+    private OverlaySurfaceOptions SurfaceOptions => new()
+    {
+        ContentLayout = OverlayContentLayout.EdgeToEdge,
+        EntranceOrigin = Editable ? OverlayEntranceOrigin.Top : GrowDirectionClass switch
+        {
+            "top" => OverlayEntranceOrigin.Top,
+            "bottom" => OverlayEntranceOrigin.Bottom,
+            _ => OverlayEntranceOrigin.Center
+        }
+    };
 
     protected override void OnInitialized() => OverlayService.Changed += OnOverlayServiceChanged;
 
@@ -131,9 +162,9 @@ public partial class FluentComboBox<TValue> : ComponentBase, IDisposable
         }
 
         _open = true;
-        _overlayId = OverlayService.Show(RenderDropdown, _rootElement, Positioning, OverlayPlacement.Bottom,
-            lightDismiss: true, bare: false, matchAnchorWidth: true, scrollAnchorIntoView: false,
-            watchAnchorRemoved: false);
+        _overlayId = OverlayService.Show(RenderDropdown, _rootElement, Positioning, SurfaceOptions,
+            OverlayPlacement.Bottom, lightDismiss: true, bare: false, matchAnchorWidth: true,
+            scrollAnchorIntoView: false, watchAnchorRemoved: false);
         StateHasChanged();
     }
 

@@ -4504,6 +4504,11 @@
           "type": "Guid"
         },
         {
+          "name": "Show",
+          "kind": "method",
+          "type": "Guid"
+        },
+        {
           "name": "ShowDetached",
           "kind": "method",
           "type": "Guid"
@@ -4530,6 +4535,32 @@
         "AnchorStart"
       ],
       "summary": "Determines where an anchored overlay starts on its placement axis.",
+      "members": []
+    },
+    {
+      "name": "OverlayContentLayout",
+      "fullName": "FluentKit.Overlay.OverlayContentLayout",
+      "kind": "enum",
+      "genericParameters": [],
+      "values": [
+        "EdgeToEdge",
+        "Padded"
+      ],
+      "summary": "Controls whether an overlay\u0027s content participates in the surface\u0027s standard inset.",
+      "members": []
+    },
+    {
+      "name": "OverlayEntranceOrigin",
+      "fullName": "FluentKit.Overlay.OverlayEntranceOrigin",
+      "kind": "enum",
+      "genericParameters": [],
+      "values": [
+        "Bottom",
+        "Center",
+        "Default",
+        "Top"
+      ],
+      "summary": "Chooses the reveal origin for an overlay entrance animation.",
       "members": []
     },
     {
@@ -4599,6 +4630,12 @@
           "kind": "property",
           "type": "Boolean",
           "summary": "When true, the anchor is scrolled into view (centered, instant) before its position is measured \u2014 for overlays like TeachingTip where the anchor may not be the same element the person just clicked (see FluentTeachingTip\u0027s separate Target parameter), so there\u0027s no guarantee it\u0027s already on screen the way a Flyout/MenuFlyout\u0027s own trigger always is."
+        },
+        {
+          "name": "SurfaceOptions",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlaySurfaceOptions",
+          "summary": "Presentation options used by the shared overlay surface."
         },
         {
           "name": "WatchAnchorRemoved",
@@ -4704,6 +4741,11 @@
           "type": "Guid"
         },
         {
+          "name": "Show",
+          "kind": "method",
+          "type": "Guid"
+        },
+        {
           "name": "ShowDetached",
           "kind": "method",
           "type": "Guid"
@@ -4717,6 +4759,28 @@
           "name": "Update",
           "kind": "method",
           "type": "Boolean"
+        }
+      ]
+    },
+    {
+      "name": "OverlaySurfaceOptions",
+      "fullName": "FluentKit.Overlay.OverlaySurfaceOptions",
+      "kind": "class",
+      "genericParameters": [],
+      "values": [],
+      "summary": "Optional surface presentation refinements for an anchored overlay.",
+      "members": [
+        {
+          "name": "ContentLayout",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayContentLayout",
+          "summary": "How the overlay content relates to the surface\u0027s standard padding."
+        },
+        {
+          "name": "EntranceOrigin",
+          "kind": "property",
+          "type": "FluentKit.Overlay.OverlayEntranceOrigin",
+          "summary": "Entrance reveal origin. The default uses the standard fade/scale motion."
         }
       ]
     },

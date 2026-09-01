@@ -72,19 +72,15 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    // Shared across every FluentMicaPanel instance in the app — two panels showing the same image
-    // + variant + theme (e.g. the fixed background plus a demo panel) reuse the same baked raster
-    // instead of each paying the render cost separately.
-    private static readonly Dictionary<string, string> _cache = new();
-
     private JsModuleLifetime? _interop;
-    private string? _renderedImageUrl;
     private string? _lastKey;
     private string? _pendingKey;
+    private ElementReference _wallpaperElement;
     private int _disposed;
     private int _renderGeneration;
     private bool _themeHandlerSubscribed;
     private bool _interactive;
+    private bool _needsRender = true;
 
     private JsModuleLifetime Interop => _interop ??= new(
         JS, "./_content/FluentKit/Effects/mica-interop.js");
@@ -105,22 +101,43 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
 
     protected override Task OnParametersSetAsync()
     {
-        return _interactive && Volatile.Read(ref _disposed) == 0
-            ? RenderAsync()
-            : Task.CompletedTask;
+        if (_interactive && Volatile.Read(ref _disposed) == 0)
+        {
+            // The new parameters are not in the DOM until this lifecycle pass completes. Defer
+            // the browser-side paint to OnAfterRenderAsync so a newly-created wallpaper element is
+            // a valid target, especially when a Server app changes its image at runtime.
+            _needsRender = true;
+        }
+
+        return Task.CompletedTask;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || Volatile.Read(ref _disposed) != 0)
+        if (Volatile.Read(ref _disposed) != 0)
         {
             return;
         }
 
         // Keep the normal fallback surface prerenderable in Interactive Server. The Mica raster
         // requires a browser canvas, so defer that work until the circuit is interactive.
-        _interactive = true;
-        await RenderAsync();
+        if (firstRender)
+        {
+            _interactive = true;
+        }
+
+        if (!_interactive)
+        {
+            return;
+        }
+
+        if (await PaintPendingRasterAsync() && Volatile.Read(ref _disposed) == 0)
+        {
+            // OnAfterRenderAsync does not schedule a render after its awaited work completes.
+            // The raster paint is performed by JavaScript, but scheduling the follow-up render keeps
+            // the component lifecycle synchronized with the completed browser-side work.
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private void OnThemeChanged() => ObserveBackgroundTask(OnThemeChangedAsync());
@@ -170,33 +187,34 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
             TaskScheduler.Default);
     }
 
-    private async Task RenderAsync()
+    private async Task<bool> RenderAsync()
     {
         if (Volatile.Read(ref _disposed) != 0)
         {
-            return;
+            return false;
         }
 
         if (string.IsNullOrEmpty(BackgroundImageUrl))
         {
+            var changed = _lastKey is not null;
             Interlocked.Increment(ref _renderGeneration);
             _pendingKey = null;
-            _renderedImageUrl = null;
             _lastKey = null;
-            return;
+            return changed;
         }
 
         if (!await Interop.EnsureModuleAsync())
         {
             if (Volatile.Read(ref _disposed) == 0)
             {
+                var changed = _lastKey is not null;
                 Interlocked.Increment(ref _renderGeneration);
                 _pendingKey = null;
-                _renderedImageUrl = null;
                 _lastKey = null;
+                return changed;
             }
 
-            return;
+            return false;
         }
 
         var isBase = Variant == MicaVariant.Base;
@@ -206,23 +224,15 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
         // what's on screen. This is what stops a resize/re-render from re-baking Mica every time.
         if (key == _lastKey)
         {
-            return;
+            return false;
         }
         if (key == _pendingKey)
         {
-            return;
+            return false;
         }
 
         _pendingKey = key;
         var generation = Interlocked.Increment(ref _renderGeneration);
-
-        if (_cache.TryGetValue(key, out var cached))
-        {
-            _renderedImageUrl = cached;
-            _lastKey = key;
-            _pendingKey = null;
-            return;
-        }
 
         // If I didnt do, Mica doesnt get properly rendered on first load.
         try
@@ -231,27 +241,33 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
 
             if (Volatile.Read(ref _disposed) != 0 || generation != Volatile.Read(ref _renderGeneration))
             {
-                return;
+                return false;
             }
 
-            var result = await Interop.InvokeAsync<string>("renderMica", key, BackgroundImageUrl, isBase);
-            if (!result.Succeeded || string.IsNullOrEmpty(result.Value))
+            // Keep the potentially-large PNG data URL inside the browser. Returning it through
+            // IJSRuntime would send the whole raster over the Server circuit and can exceed the
+            // SignalR message budget; renderMicaInto only returns success after applying it to the
+            // already-rendered wallpaper element.
+            var result = await Interop.InvokeVoidAsync("renderMicaInto", _wallpaperElement, key,
+                BackgroundImageUrl, isBase);
+            if (!result)
             {
-                return;
+                return false;
             }
-
-            _cache[key] = result.Value;
 
             // Guard against a stale response landing after a newer request already changed things.
             if (Volatile.Read(ref _disposed) == 0 && generation == Volatile.Read(ref _renderGeneration))
             {
                 _lastKey = key;
-                _renderedImageUrl = result.Value;
+                return true;
             }
+
+            return false;
         }
         catch (OperationCanceledException) when (Volatile.Read(ref _disposed) != 0)
         {
             // The delayed render or JS call was canceled by component disposal.
+            return false;
         }
         finally
         {
@@ -260,6 +276,17 @@ public partial class FluentMicaPanel : ComponentBase, IAsyncDisposable
                 _pendingKey = null;
             }
         }
+    }
+
+    private async Task<bool> PaintPendingRasterAsync()
+    {
+        if (!_needsRender)
+        {
+            return false;
+        }
+
+        _needsRender = false;
+        return await RenderAsync();
     }
 
     public async ValueTask DisposeAsync()

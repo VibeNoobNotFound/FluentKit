@@ -6,9 +6,9 @@
 
 .fluent-autosuggest-dropdown-list {
     box-sizing: border-box;
-    width: calc(100% + (var(--spacing-xs) * 2));
-    max-height: 320px;
-    margin: calc(var(--spacing-xs) * -1);
+    inline-size: 100%;
+    max-block-size: 320px;
+    margin: 0;
     padding: var(--spacing-xxs);
     list-style: none;
     overflow: auto;

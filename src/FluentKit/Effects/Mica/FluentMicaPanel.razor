@@ -1,9 +1,9 @@
 @namespace FluentKit.Effects
 
 <div class="fluent-mica @VariantClass" @attributes="AdditionalAttributes">
-    @if (_renderedImageUrl is not null)
+    @if (!string.IsNullOrEmpty(BackgroundImageUrl))
     {
-        <div class="fluent-mica__wallpaper" style="background-image:url('@_renderedImageUrl')" aria-hidden="true"></div>
+        <div class="fluent-mica__wallpaper" @ref="_wallpaperElement" aria-hidden="true"></div>
     }
     <div class="fluent-mica__content">
         @ChildContent

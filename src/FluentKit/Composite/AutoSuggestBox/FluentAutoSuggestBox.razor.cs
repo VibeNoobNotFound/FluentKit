@@ -165,8 +165,10 @@ public partial class FluentAutoSuggestBox<TValue> : ComponentBase, IAsyncDisposa
         }
 
         _open = true;
-        _overlayId = OverlayService.Show(RenderDropdown, _rootElement, OverlayPlacement.Bottom,
-            lightDismiss: true, matchAnchorWidth: true);
+        _overlayId = OverlayService.Show(RenderDropdown, _rootElement, new OverlayPositioningOptions(),
+            new OverlaySurfaceOptions { ContentLayout = OverlayContentLayout.EdgeToEdge },
+            OverlayPlacement.Bottom, lightDismiss: true, bare: false, matchAnchorWidth: true,
+            scrollAnchorIntoView: false, watchAnchorRemoved: false);
         StateHasChanged();
     }
 

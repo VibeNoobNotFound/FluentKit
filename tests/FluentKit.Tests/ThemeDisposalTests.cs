@@ -47,6 +47,24 @@ public sealed class ThemeDisposalTests : Bunit.BunitContext
     }
 
     [Fact]
+    public void MicaPanelAddsTheInitialInteractiveRasterToTheMarkup()
+    {
+        var theme = new TestThemeService();
+        var module = new TestJsObjectReference();
+        Services.AddSingleton<IThemeService>(theme);
+        Services.AddSingleton<IJSRuntime>(new TestJsRuntime(module));
+
+        var cut = Render<FluentKit.Effects.FluentMicaPanel>(parameters => parameters
+            .Add(panel => panel.BackgroundImageUrl, "wallpaper.png"));
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Contains("fluent-mica__wallpaper", cut.Markup);
+            Assert.Contains("renderMicaInto", module.Calls);
+        });
+    }
+
+    [Fact]
     public async Task MicaThemeRenderCancellationDoesNotCompleteTheRenderKey()
     {
         var theme = new TestThemeService();
@@ -62,7 +80,7 @@ public sealed class ThemeDisposalTests : Bunit.BunitContext
         cut.Instance.BackgroundImageUrl = "wallpaper.png";
         theme.RaiseChanged();
 
-        await WaitUntilAsync(() => module.Calls.Contains("renderMica"));
+        await WaitUntilAsync(() => module.Calls.Contains("renderMicaInto"));
         await cut.Instance.DisposeAsync();
 
         var lastKey = typeof(FluentKit.Effects.FluentMicaPanel)
@@ -78,23 +96,22 @@ public sealed class ThemeDisposalTests : Bunit.BunitContext
     {
         var theme = new TestThemeService();
         var module = new TestJsObjectReference();
-        module.ThrowOnInvoke("renderMica", new JSDisconnectedException("circuit disconnected"));
+        module.ThrowOnInvoke("renderMicaInto", new JSDisconnectedException("circuit disconnected"));
         Services.AddSingleton<IThemeService>(theme);
         Services.AddSingleton<IJSRuntime>(new TestJsRuntime(module));
 
         var cut = Render<FluentKit.Effects.FluentMicaPanel>();
         cut.Instance.BackgroundImageUrl = "retry-wallpaper.png";
         theme.RaiseChanged();
-        await WaitUntilAsync(() => module.Calls.Count(call => call == "renderMica") == 1);
+        await WaitUntilAsync(() => module.Calls.Count(call => call == "renderMicaInto") == 1);
 
         var lastKey = typeof(FluentKit.Effects.FluentMicaPanel)
             .GetField("_lastKey", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
         Assert.Null(lastKey.GetValue(cut.Instance));
 
-        module.ClearInvokeException("renderMica");
-        module.Results["renderMica"] = "data:image/png;base64,retry";
+        module.ClearInvokeException("renderMicaInto");
         theme.RaiseChanged();
-        await WaitUntilAsync(() => module.Calls.Count(call => call == "renderMica") == 2);
+        await WaitUntilAsync(() => module.Calls.Count(call => call == "renderMicaInto") == 2);
 
         Assert.Equal("retry-wallpaper.png|True|dark", lastKey.GetValue(cut.Instance));
         await cut.Instance.DisposeAsync();

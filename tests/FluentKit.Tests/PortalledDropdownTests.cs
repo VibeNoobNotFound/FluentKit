@@ -10,6 +10,64 @@ namespace FluentKit.Tests;
 public sealed class PortalledDropdownTests
 {
     [Fact]
+    public void AnchoredOverlaysWaitForPositioning_WhileDetachedOverlaysEnterImmediately()
+    {
+        using var context = CreateContext();
+        var host = context.Render<FluentOverlayHost>();
+        var overlays = context.Services.GetRequiredService<IOverlayService>();
+
+        overlays.Show(builder => builder.AddContent(0, "anchored"), default, OverlayPlacement.Bottom,
+            lightDismiss: false);
+        host.WaitForAssertion(() => Assert.Contains("anchored", host.Markup));
+        Assert.DoesNotContain("fluent-overlay-surface--positioned", host.Markup);
+
+        overlays.ShowDetached(builder => builder.AddContent(0, "detached"), OverlayScreenPlacement.Center,
+            lightDismiss: false);
+        host.WaitForAssertion(() => Assert.Contains("detached", host.Markup));
+        var surfaces = host.FindAll(".fluent-overlay-surface");
+        Assert.Equal(2, surfaces.Count);
+        Assert.DoesNotContain("fluent-overlay-surface--positioned", surfaces[0].GetAttribute("class"));
+        Assert.Contains("fluent-overlay-surface--positioned", surfaces[1].GetAttribute("class"));
+    }
+
+    [Theory]
+    [InlineData(1, OverlayEntranceOrigin.Top)]
+    [InlineData(3, OverlayEntranceOrigin.Center)]
+    [InlineData(5, OverlayEntranceOrigin.Bottom)]
+    public void ComboBoxUsesSelectedRowRevealOrigin(int value, OverlayEntranceOrigin expectedOrigin)
+    {
+        using var context = CreateContext();
+        var host = context.Render<FluentOverlayHost>();
+        var cut = context.Render<FluentComboBox<int>>(parameters => parameters
+            .Add(combo => combo.Items, Enumerable.Range(1, 5)
+                .Select(number => new ComboBoxItem<int>($"Item {number}", number))
+                .ToArray())
+            .Add(combo => combo.Value, value));
+
+        cut.Find("button").Click();
+        host.WaitForAssertion(() => Assert.Single(host.FindAll("ul.fluent-combo-box-dropdown-list")));
+
+        Assert.Equal(expectedOrigin, context.Services.GetRequiredService<IOverlayService>()
+            .Active.Single().SurfaceOptions.EntranceOrigin);
+    }
+
+    [Fact]
+    public void EditableComboBoxUsesTopRevealOrigin()
+    {
+        using var context = CreateContext();
+        var host = context.Render<FluentOverlayHost>();
+        var cut = context.Render<FluentComboBox<int>>(parameters => parameters
+            .Add(combo => combo.Items, ComboItems)
+            .Add(combo => combo.Editable, true));
+
+        cut.Find("input").Focus();
+        host.WaitForAssertion(() => Assert.Single(host.FindAll("ul.fluent-combo-box-dropdown-list")));
+
+        Assert.Equal(OverlayEntranceOrigin.Top, context.Services.GetRequiredService<IOverlayService>()
+            .Active.Single().SurfaceOptions.EntranceOrigin);
+    }
+
+    [Fact]
     public void ComboBox_PortalsListboxOutsideNativeLabel_AndClosesBeforeCallbackReturns()
     {
         using var context = CreateContext();
@@ -39,6 +97,10 @@ public sealed class PortalledDropdownTests
         label.Find("button").Click();
         host.WaitForAssertion(() => Assert.Single(host.FindAll("ul.fluent-combo-box-dropdown-list")));
         Assert.Empty(label.FindAll("ul.fluent-combo-box-dropdown-list"));
+        Assert.Equal(OverlayContentLayout.EdgeToEdge,
+            GetOverlays(context).Active.Single().SurfaceOptions.ContentLayout);
+        Assert.Equal(OverlayEntranceOrigin.Center,
+            GetOverlays(context).Active.Single().SurfaceOptions.EntranceOrigin);
 
         host.FindAll("li.fluent-combo-box-item")[1].Click();
 
@@ -72,6 +134,7 @@ public sealed class PortalledDropdownTests
         host.WaitForAssertion(() => Assert.Single(host.FindAll("ul.fluent-autosuggest-dropdown-list")));
         Assert.Empty(label.FindAll("ul.fluent-autosuggest-dropdown-list"));
         Assert.Equal("true", label.Find("input").GetAttribute("aria-expanded"), ignoreCase: true);
+        Assert.Equal(OverlayContentLayout.EdgeToEdge, overlays.Active.Single().SurfaceOptions.ContentLayout);
 
         overlays.Close(overlays.Active.Single().Id);
 
@@ -86,6 +149,9 @@ public sealed class PortalledDropdownTests
         context.Services.AddScoped<IOverlayService, OverlayService>();
         return context;
     }
+
+    private static IOverlayService GetOverlays(BunitContext context)
+        => context.Services.GetRequiredService<IOverlayService>();
 
     private static readonly IReadOnlyList<ComboBoxItem<int>> ComboItems =
     [
